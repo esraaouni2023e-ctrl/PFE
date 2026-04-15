@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapAvenir - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Sora', 'sans-serif'] },
+                    colors: {
+                        navy: { 900: '#0A1428', 800: '#001122' },
+                        cyan: { 400: '#00D4FF', 500: '#0099FF' },
+                        gold: { 400: '#FFCC00' }
+                    },
+                    animation: { 'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: #0A1428;
+            overflow: hidden;
+        }
+
+        .neural-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: flow 20s linear infinite;
+        }
+
+        @keyframes flow {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 0 1000px;
+            }
+        }
+
+        .glass-login {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-glow:focus {
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+            border-color: #00D4FF;
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen flex items-center justify-center relative">
+    <div class="neural-particles"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-[#0A1428] via-transparent to-transparent z-0"></div>
+
+    <div class="relative z-10 w-full max-w-md p-6">
+        <div class="text-center mb-8">
+            <div
+                class="w-16 h-16 bg-white rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-[0_0_30px_rgba(0,212,255,0.3)] animate-pulse-slow">
+                <img src="../im1.jpg" class="w-10 h-10 object-contain" alt="Logo">
+            </div>
+            <h1 class="text-4xl font-display font-bold text-white mb-2">Cap<span class="text-cyan-400">Avenir</span>
+            </h1>
+            <p class="text-cyan-200/60 font-medium tracking-wide">Connectez votre avenir intelligent</p>
+        </div>
+
+        <div class="glass-login rounded-3xl p-8 border-t border-white/10">
+            <form class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Email
+                        Académique</label>
+                    <input type="email"
+                        class="w-full bg-[#050A14]/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-all input-glow"
+                        placeholder="etudiant@ecole.fr">
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex justify-between">
+                        Mot de passe
+                        <a href="#"
+                            class="text-cyan-400 hover:text-white transition-colors lowercase font-medium">Oublié ?</a>
+                    </label>
+                    <input type="password"
+                        class="w-full bg-[#050A14]/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-all input-glow"
+                        placeholder="••••••••">
+                </div>
+
+                <button type="button"
+                    class="w-full py-4 rounded-xl font-bold text-black bg-gradient-to-r from-cyan-400 to-cyan-500 shadow-[0_0_20px_rgba(0,212,255,0.3)] hover:shadow-[0_0_30px_rgba(0,212,255,0.5)] transform hover:-translate-y-0.5 transition-all text-sm uppercase tracking-wider">
+                    Se Connecter
+                </button>
+
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-white/10"></div>
+                    <span class="flex-shrink-0 mx-4 text-gray-500 text-xs">Ou continuer avec</span>
+                    <div class="flex-grow border-t border-white/10"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button"
+                        class="py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
+                        </svg>
+                        Google
+                    </button>
+                    <button type="button"
+                        class="py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M17.05,20.28c-0.98,0.97-2.76,1.54-4.5,1.54c-1.81,0-3.65-0.56-4.59-1.57c-1.06-1.14-1.59-2.85-1.59-4.8c0-4.08,2.71-7.55,6.59-7.55c1.42,0,2.83,0.56,3.93,1.47l-2.09,2.88c-0.45-0.4-1.04-0.66-1.66-0.66c-1.63,0-2.92,1.38-2.92,3.16c0,1.75,1.26,3.15,2.94,3.15c0.86,0,1.51-0.28,1.96-0.6L17.05,20.28z M12.03,0L12.03,0c2.82,0,5.19,1.92,5.78,4.53l-3.66,1.01c-0.34-0.96-1.22-1.66-2.27-1.66c-1.41,0-2.54,1.21-2.54,2.78c0,1.54,1.11,2.78,2.53,2.78c0.77,0,1.44-0.38,1.88-0.94l2.96,2.15c-1.2,1.67-3.08,2.67-5.18,2.67c-3.58,0-6.49-2.89-6.49-6.47S7.92,0,12.03,0z" />
+                        </svg>
+                        Apple
+                    </button>
+                </div>
+            </form>
+        </div>
+        <p class="text-center mt-6 text-gray-500 text-xs">
+            Pas encore de compte ? <a href="register.html"
+                class="text-cyan-400 font-bold hover:text-white transition-colors">S'inscrire</a>
+        </p>
+    </div>
+</body>
+
+</html>

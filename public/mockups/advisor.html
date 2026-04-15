@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapAvenir - Advisor Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Sora', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: { 900: '#0A1428', 800: '#001122' },
+                        cyan: { 400: '#00D4FF', 500: '#0099FF' },
+                        gold: { 400: '#FFCC00', 500: '#FFD700' },
+                        violet: { 900: '#3F1A7A' }
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 10px rgba(0, 212, 255, 0.3), 0 0 20px rgba(0, 212, 255, 0.1)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at center, #1a2c4e 0%, #0A1428 100%);
+            color: #E5F0FF;
+            overflow: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(10, 20, 40, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .neural-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: radial-gradient(circle at 80% 20%, rgba(0, 212, 255, 0.05) 0%, transparent 25%);
+        }
+
+        /* Chart Styles */
+        canvas {
+            filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.2));
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen flex text-sm antialiased">
+    <div class="neural-bg"></div>
+
+    <!-- Sidebar (Simplified) -->
+    <aside class="w-20 glass border-r border-white/5 flex flex-col items-center py-6 gap-8 z-20">
+        <div
+            class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/10 shadow-neon-cyan">
+            <img src="../im1.jpg" class="w-6 h-6 object-contain" alt="Logo">
+        </div>
+        <nav class="flex flex-col gap-6 w-full px-2">
+            <a href="#"
+                class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mx-auto">
+                <span class="text-xl">📊</span>
+            </a>
+            <a href="#"
+                class="w-12 h-12 rounded-xl hover:bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors mx-auto">
+                <span class="text-xl">👥</span>
+            </a>
+            <a href="#"
+                class="w-12 h-12 rounded-xl hover:bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors mx-auto">
+                <span class="text-xl">💬</span>
+            </a>
+        </nav>
+        <div class="mt-auto flex flex-col items-center gap-3">
+            <div
+                class="w-10 h-10 rounded-full bg-gradient-to-br from-gold-400 to-orange-500 flex items-center justify-center font-bold text-black border-2 border-white/10">
+                A</div>
+            <a href="/logout" title="Déconnexion"
+                style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;padding:0.5rem;border-radius:10px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);color:#f87171;text-decoration:none;transition:0.2s;width:44px;"
+                onmouseover="this.style.background='rgba(248,113,113,0.18)'"
+                onmouseout="this.style.background='rgba(248,113,113,0.08)'">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-hidden flex flex-col relative z-10">
+        <!-- Top Stats Row -->
+        <div class="p-8 pb-0">
+            <header class="flex justify-between items-end mb-8">
+                <div>
+                    <h2 class="text-3xl font-display font-bold text-white mb-1">Advisor Dashboard</h2>
+                    <p class="text-gray-400">Monitoring 42 active students</p>
+                </div>
+                <div class="flex gap-4">
+                    <div class="glass-card px-4 py-2 rounded-lg flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_lime]"></span>
+                        <span class="text-xs font-bold text-white">System Optimal</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-4 gap-6 mb-8">
+                <!-- Stat Card 1 -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-gray-400 text-xs uppercase font-bold tracking-wider">Active Students</h3>
+                        <span class="text-cyan-400 text-lg">👥</span>
+                    </div>
+                    <div class="text-3xl font-display font-bold text-white mb-2">1,248</div>
+                    <div class="w-full bg-white/5 rounded-full h-1">
+                        <div class="bg-cyan-400 h-1 rounded-full shadow-neon-cyan" style="width: 75%"></div>
+                    </div>
+                </div>
+                <!-- Stat Card 2 -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-gray-400 text-xs uppercase font-bold tracking-wider">Pending Reviews</h3>
+                        <span class="text-gold-400 text-lg">⚠️</span>
+                    </div>
+                    <div class="text-3xl font-display font-bold text-white mb-2">14</div>
+                    <p class="text-xs text-gold-400 font-bold">+3 since yesterday</p>
+                </div>
+                <!-- Radar Chart Mini -->
+                <div class="glass-card rounded-2xl p-4 col-span-2 flex items-center gap-6">
+                    <div class="h-24 w-24 relative">
+                        <canvas id="miniRadar"></canvas>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold mb-1">Global Performance</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed">Science tracks are trending up by 12% this
+                            semester.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="flex-1 flex overflow-hidden border-t border-white/5">
+            <!-- Student List -->
+            <div class="flex-1 p-8 overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="relative w-64">
+                        <input type="text" placeholder="Search students..."
+                            class="w-full bg-white/5 border border-white/10 rounded-xl py-2 px-10 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-colors">
+                        <span class="absolute left-3 top-2.5 text-gray-500">🔍</span>
+                    </div>
+                    <button
+                        class="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-white text-xs font-bold border border-white/10 transition-colors">Filters</button>
+                </div>
+
+                <div class="space-y-3">
+                    <!-- Student Row 1 -->
+                    <div
+                        class="glass-card p-4 rounded-xl flex items-center justify-between group hover:bg-white/5 transition-colors cursor-pointer">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 p-[1px]">
+                                <img src="https://i.pravatar.cc/150?u=1"
+                                    class="w-full h-full rounded-full border border-[#0A1428]" alt="">
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold group-hover:text-cyan-400 transition-colors">Sarah
+                                    Connor</h4>
+                                <p class="text-xs text-gray-400">Bac Pro • Last active 2m ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-8">
+                            <div class="text-right">
+                                <p class="text-[10px] text-gray-500 uppercase font-bold">Progress</p>
+                                <div class="w-24 bg-white/5 h-1.5 rounded-full mt-1">
+                                    <div class="bg-green-400 h-1.5 rounded-full shadow-[0_0_8px_lime]"
+                                        style="width: 90%"></div>
+                                </div>
+                            </div>
+                            <span
+                                class="px-3 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-bold border border-green-500/20">On
+                                Track</span>
+                        </div>
+                    </div>
+
+                    <!-- Student Row 2 -->
+                    <div
+                        class="glass-card p-4 rounded-xl flex items-center justify-between group hover:bg-white/5 transition-colors cursor-pointer border-l-2 border-l-gold-400">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-600 p-[1px]">
+                                <img src="https://i.pravatar.cc/150?u=2"
+                                    class="w-full h-full rounded-full border border-[#0A1428]" alt="">
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold group-hover:text-gold-400 transition-colors">John Doe
+                                </h4>
+                                <p class="text-xs text-gray-400">Terminale • Last active 1d ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-8">
+                            <div class="text-right">
+                                <p class="text-[10px] text-gray-500 uppercase font-bold">Progress</p>
+                                <div class="w-24 bg-white/5 h-1.5 rounded-full mt-1">
+                                    <div class="bg-gold-400 h-1.5 rounded-full shadow-[0_0_8px_gold]"
+                                        style="width: 45%"></div>
+                                </div>
+                            </div>
+                            <span
+                                class="px-3 py-1 rounded-full bg-gold-400/10 text-gold-400 text-xs font-bold border border-gold-400/20">Review
+                                Needed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Chat & Alerts -->
+            <aside class="w-80 glass border-l border-white/5 p-6 flex flex-col">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Priority Alerts</h3>
+                <div class="space-y-4 mb-8">
+                    <div
+                        class="p-3 rounded-xl bg-gradient-to-r from-red-500/10 to-transparent border border-red-500/20 relative overflow-hidden">
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500 shadow-[0_0_10px_red]"></div>
+                        <h4 class="text-white text-xs font-bold mb-1">Dropout Risk</h4>
+                        <p class="text-[10px] text-gray-400">Student #4289 hasn't logged in for 7 days.</p>
+                    </div>
+                </div>
+
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Live Chat</h3>
+                <div class="flex-1 glass-card rounded-xl p-4 flex flex-col">
+                    <div class="flex-1 space-y-4 overflow-y-auto mb-4 custom-scrollbar">
+                        <div class="flex gap-2">
+                            <div class="w-6 h-6 rounded-full bg-gray-600"></div>
+                            <div class="bg-white/5 p-2 rounded-lg text-xs text-gray-300">Hello, I have a question about
+                                the engineering path.</div>
+                        </div>
+                        <div class="flex gap-2 flex-row-reverse">
+                            <div class="bg-cyan-500/20 p-2 rounded-lg text-xs text-cyan-200">Sure, what would you like
+                                to know?</div>
+                        </div>
+                    </div>
+                    <input type="text" placeholder="Reply..."
+                        class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white">
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        // Init Chart
+        const ctx = document.getElementById('miniRadar').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Math', 'Logic', 'Art', 'Tech', 'Social'],
+                datasets: [{
+                    label: 'Avg',
+                    data: [80, 90, 60, 85, 70],
+                    backgroundColor: 'rgba(0, 212, 255, 0.2)',
+                    borderColor: '#00D4FF',
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#fff',
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255,255,255,0.1)' },
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        pointLabels: { display: false },
+                        ticks: { display: false }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+</body>
+
+</html>

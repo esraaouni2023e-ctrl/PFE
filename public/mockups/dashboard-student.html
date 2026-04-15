@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Espace Orientation | CapAvenir 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #0F172A;
+            --bg-dark-end: #020617;
+            --glass-bg: rgba(30, 41, 59, 0.35);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --primary-teal: #0D9488;
+            --accent-violet: #8B5CF6;
+            --success-lime: #10B981;
+            --urgent-coral: #F472B6;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --sidebar-width: 280px;
+            --header-height: 80px;
+            --card-radius: 32px;
+            --transition: cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter Tight', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-dark), var(--bg-dark-end));
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(180%);
+            border-right: 1px solid var(--glass-border);
+            z-index: 1000;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .logo-box {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-teal), var(--accent-violet));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(13, 148, 136, 0.3);
+        }
+
+        .logo-text {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 16px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            border-left: 3px solid var(--primary-teal);
+            background: rgba(13, 148, 136, 0.1);
+        }
+
+        /* --- Main Content --- */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2rem;
+            padding-top: calc(var(--header-height) + 2rem);
+        }
+
+        /* --- Header --- */
+        header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            height: var(--header-height);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 900;
+            transition: var(--transition);
+        }
+
+        .search-container {
+            position: relative;
+            width: 400px;
+        }
+
+        .search-bar {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-teal);
+            box-shadow: 0 0 15px rgba(13, 148, 136, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            background: var(--urgent-coral);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--urgent-coral);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.7;
+            }
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #8B5CF6, #D946EF);
+            border: 2px solid var(--glass-border);
+            object-fit: cover;
+        }
+
+        /* --- Grid System --- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2rem;
+        }
+
+        /* --- Cards --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(200%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 2rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+            transition: var(--transition);
+            perspective: 1000px;
+        }
+
+        .glass-card:hover {
+            transform: scale(1.02) translateZ(15px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        /* --- Hero --- */
+        .hero-card {
+            grid-column: span 12;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(105deg, rgba(13, 148, 136, 0.15), rgba(139, 92, 246, 0.1));
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(13, 148, 136, 0.2) 0%, transparent 70%);
+            filter: blur(40px);
+            z-index: 0;
+        }
+
+        .hero-content {
+            z-index: 1;
+            max-width: 60%;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, #fff, #94A3B8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, var(--primary-teal), var(--accent-violet));
+            padding: 1rem 2rem;
+            border-radius: 18px;
+            color: white;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .cta-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .cta-button:hover::after {
+            left: 100%;
+        }
+
+        .score-circle {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .score-value {
+            position: absolute;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-teal);
+        }
+
+        .score-label {
+            position: absolute;
+            bottom: -30px;
+            white-space: nowrap;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        /* --- Compatibility Radar --- */
+        .chart-card {
+            grid-column: span 7;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        /* --- Checklist --- */
+        .checklist-card {
+            grid-column: span 5;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .checklist-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--glass-border);
+            transform: translateX(8px);
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--primary-teal);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item.done .checkbox {
+            background: var(--primary-teal);
+        }
+
+        .checklist-item.done .task-text {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        /* --- Recomended Carousel --- */
+        .carousel-section {
+            grid-column: span 12;
+            margin-top: 1rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .carousel-container {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 1.5rem;
+            scrollbar-width: none;
+        }
+
+        .carousel-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .career-card {
+            min-width: 320px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 1.8rem;
+            transition: var(--transition);
+        }
+
+        .career-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-10px) rotateX(5deg);
+        }
+
+        .career-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(13, 148, 136, 0.1);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-teal);
+        }
+
+        .career-tag {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(139, 92, 246, 0.15);
+            border-radius: 100px;
+            color: var(--accent-violet);
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        /* --- Widgets Bottom --- */
+        .widget-mini {
+            grid-column: span 3;
+            padding: 1.5rem;
+        }
+
+        .widget-mini h4 {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .badge-item {
+            width: 100%;
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-violet);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- AI Suggestion --- */
+        .ai-banner {
+            grid-column: span 12;
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.2), transparent);
+            border-radius: 24px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .ai-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-violet);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+
+            .chart-card,
+            .checklist-card {
+                grid-column: span 12;
+            }
+
+            .widget-mini {
+                grid-column: span 6;
+            }
+        }
+
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 0;
+                padding: 0;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            header {
+                left: 0;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .hero-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 2rem;
+            }
+
+            .hero-content {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <div class="logo-box">
+                <i data-lucide="compass" style="color: white; width: 24px;"></i>
+            </div>
+            <span class="logo-text">CapAvenir <span style="color: var(--primary-teal);">2026</span></span>
+        </div>
+
+        <nav class="nav-links">
+            <li class="nav-item">
+                <a href="#" class="nav-link active">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i data-lucide="user-round"></i>
+                    <span>Mon Profil IA</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i data-lucide="graduation-cap"></i>
+                    <span>Filières</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i data-lucide="message-square"></i>
+                    <span>Conseiller</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i data-lucide="calendar"></i>
+                    <span>Événements</span>
+                </a>
+            </li>
+        </nav>
+
+        <div class="nav-item" style="margin-top: auto;">
+            <a href="#" class="nav-link">
+                <i data-lucide="settings"></i>
+                <span>Paramètres</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <header>
+            <div class="search-container">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" class="search-bar" placeholder="Rechercher une filière, un métier...">
+            </div>
+
+            <div class="header-actions">
+                <div class="icon-btn">
+                    <i data-lucide="sun"></i>
+                </div>
+                <div class="icon-btn">
+                    <i data-lucide="bell"></i>
+                    <div class="notification-dot"></div>
+                </div>
+                <div class="user-profile">
+                    <div style="text-align: right; display: none; display: md-block;">
+                        <p style="font-weight: 700; font-size: 0.9rem;">Esraa Ouni</p>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Étudiante Bac 2026</p>
+                    </div>
+                    <div class="avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Esraa" alt="Avatar"
+                            style="width: 100%; height: 100%; border-radius: 12px;">
+                    </div>
+                </div>
+                <a href="/logout" title="Déconnexion"
+                    style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:12px;background:rgba(244,114,182,0.08);border:1px solid rgba(244,114,182,0.25);color:#F472B6;font-size:0.8rem;font-weight:700;text-decoration:none;transition:0.2s;"
+                    onmouseover="this.style.background='rgba(244,114,182,0.18)'"
+                    onmouseout="this.style.background='rgba(244,114,182,0.08)'">
+                    <i data-lucide="log-out" style="width:15px"></i> Déconnexion
+                </a>
+            </div>
+        </header>
+
+        <main class="content-grid">
+            <!-- Hero Section -->
+            <section class="glass-card hero-card">
+                <div class="hero-content">
+                    <h1 class="hero-title">Salut Esraa, ton orientation avance bien !</h1>
+                    <p class="hero-subtitle">Tu es à 68% de ton plan idéal. Tes récents résultats en biologie boostent
+                        ta compatibilité avec les filières médicales.</p>
+                    <button class="cta-button">
+                        <span>Voir mes recommandations</span>
+                        <i data-lucide="sparkles" style="width: 18px;"></i>
+                    </button>
+                </div>
+                <div class="score-circle">
+                    <canvas id="scoreChart"></canvas>
+                    <div class="score-value">82%</div>
+                    <div class="score-label">Score Médical</div>
+                </div>
+            </section>
+
+            <!-- AI Suggestion -->
+            <div class="ai-banner">
+                <div class="ai-icon">
+                    <i data-lucide="brain-circuit"></i>
+                </div>
+                <div>
+                    <p style="font-weight: 700;">Suggestion IA : Essaie le test d'intérêts Holland</p>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">Pour affiner tes résultats en "Génie
+                        Logiciel", une analyse de tes intérêts RIASEC serait idéale.</p>
+                </div>
+                <a href="#"
+                    style="margin-left: auto; color: var(--accent-violet); font-weight: 700; text-decoration: none;">Démarrer
+                    →</a>
+            </div>
+
+            <!-- Radar Chart -->
+            <section class="glass-card chart-card">
+                <div class="chart-header">
+                    <h3>Compatibilité Filières</h3>
+                    <div class="icon-btn" style="width: 35px; height: 35px;">
+                        <i data-lucide="maximize-2" style="width: 16px;"></i>
+                    </div>
+                </div>
+                <div style="height: 350px; width: 100%;">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Checklist -->
+            <section class="glass-card checklist-card">
+                <div class="chart-header">
+                    <h3>Prochaines Étapes</h3>
+                    <div style="font-size: 0.8rem; color: var(--primary-teal); font-weight: 700;">4/6 Complété</div>
+                </div>
+                <div class="checklist">
+                    <div class="checklist-item done">
+                        <div class="checkbox"><i data-lucide="check" style="color: white; width: 14px;"></i></div>
+                        <span class="task-text">Compléter ton quiz personnalité</span>
+                    </div>
+                    <div class="checklist-item done">
+                        <div class="checkbox"><i data-lucide="check" style="color: white; width: 14px;"></i></div>
+                        <span class="task-text">Vérifier les pré-requis Bac Science</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="checkbox"></div>
+                        <span class="task-text">Consulter 3 fiches filières</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="checkbox"></div>
+                        <span class="task-text">Prendre RDV conseiller</span>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem;">
+                        <span>Progression globale</span>
+                        <span>68%</span>
+                    </div>
+                    <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;">
+                        <div
+                            style="width: 68%; height: 100%; background: linear-gradient(90deg, var(--primary-teal), var(--success-lime)); border-radius: 4px;">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recommendations -->
+            <section class="carousel-section">
+                <div class="section-header">
+                    <h2 style="font-size: 1.8rem; font-weight: 800;">Recommandations pour toi</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <div class="icon-btn"><i data-lucide="chevron-left"></i></div>
+                        <div class="icon-btn"><i data-lucide="chevron-right"></i></div>
+                    </div>
+                </div>
+                <div class="carousel-container">
+                    <!-- Career Card 1 -->
+                    <div class="career-card" style="border-top: 4px solid var(--primary-teal);">
+                        <div class="career-icon">
+                            <i data-lucide="stethoscop"></i>
+                        </div>
+                        <div class="career-tag">92% Match</div>
+                        <h4 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Doctorat en Médecine</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Idéal pour
+                            ton profil analytique et tes excellentes notes en SVT.</p>
+                        <ul
+                            style="list-style: none; font-size: 0.85rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <li style="display: flex; gap: 0.5rem; align-items: center;"><i data-lucide="star"
+                                    style="width: 14px; color: var(--primary-teal);"></i> Très forte employabilité</li>
+                            <li style="display: flex; gap: 0.5rem; align-items: center;"><i data-lucide="star"
+                                    style="width: 14px; color: var(--primary-teal);"></i> Facultés : Tunis, Sousse</li>
+                        </ul>
+                        <button class="cta-button"
+                            style="width: 100%; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">Découvrir</button>
+                    </div>
+
+                    <!-- Career Card 2 -->
+                    <div class="career-card" style="border-top: 4px solid var(--accent-violet);">
+                        <div class="career-icon">
+                            <i data-lucide="code-2" style="color: var(--accent-violet);"></i>
+                        </div>
+                        <div class="career-tag"
+                            style="background: rgba(139, 92, 246, 0.1); color: var(--accent-violet);">85% Match</div>
+                        <h4 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Ingénierie Logicielle</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Pour ton
+                            esprit logique et ta passion pour les nouvelles technologies.</p>
+                        <ul
+                            style="list-style: none; font-size: 0.85rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <li style="display: flex; gap: 0.5rem; align-items: center;"><i data-lucide="star"
+                                    style="width: 14px; color: var(--accent-violet);"></i> Salaire attractif</li>
+                            <li style="display: flex; gap: 0.5rem; align-items: center;"><i data-lucide="star"
+                                    style="width: 14px; color: var(--accent-violet);"></i> Mobile & Flexible</li>
+                        </ul>
+                        <button class="cta-button"
+                            style="width: 100%; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">Découvrir</button>
+                    </div>
+
+                    <!-- Career Card 3 -->
+                    <div class="career-card" style="border-top: 4px solid var(--success-lime);">
+                        <div class="career-icon">
+                            <i data-lucide="pill" style="color: var(--success-lime);"></i>
+                        </div>
+                        <div class="career-tag"
+                            style="background: rgba(16, 185, 129, 0.1); color: var(--success-lime);">78% Match</div>
+                        <h4 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Pharmacie</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Un bon
+                            équilibre entre science, commerce et contact humain.</p>
+                        <ul
+                            style="list-style: none; font-size: 0.85rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <li style="display: flex; gap: 0.5rem; align-items: center;"><i data-lucide="star"
+                                    style="width: 14px; color: var(--success-lime);"></i> Travail en laboratoire</li>
+                            <li style="display: flex; gap: 0.5rem; align-items: center;"><i data-lucide="star"
+                                    style="width: 14px; color: var(--success-lime);"></i> Forte demande locale</li>
+                        </ul>
+                        <button class="cta-button"
+                            style="width: 100%; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">Découvrir</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mini Widgets -->
+            <section class="glass-card widget-mini">
+                <h4>Mon Progrès</h4>
+                <div style="height: 120px;">
+                    <canvas id="progresChart"></canvas>
+                </div>
+                <div style="margin-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">Dernier test</span>
+                    <span style="font-weight: 700; color: var(--success-lime);">+12%</span>
+                </div>
+            </section>
+
+            <section class="glass-card widget-mini">
+                <h4>Badges Orientés</h4>
+                <div class="badge-grid">
+                    <div class="badge-item"><i data-lucide="award"></i></div>
+                    <div class="badge-item" style="color: var(--primary-teal); opacity: 0.5;"><i data-lucide="zap"></i>
+                    </div>
+                    <div class="badge-item" style="color: var(--urgent-coral);"><i data-lucide="target"></i></div>
+                    <div class="badge-item"><i data-lucide="search"></i></div>
+                    <div class="badge-item"><i data-lucide="users"></i></div>
+                    <div class="badge-item" style="opacity: 0.2;"><i data-lucide="lock"></i></div>
+                </div>
+            </section>
+
+            <section class="glass-card widget-mini">
+                <h4>Événements à venir</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div
+                            style="padding: 0.5rem; border-radius: 10px; background: rgba(244, 114, 182, 0.1); color: var(--urgent-coral); text-align: center; min-width: 45px;">
+                            <p style="font-weight: 800; font-size: 0.9rem;">18</p>
+                            <p style="font-size: 0.6rem; font-weight: 700;">FEV</p>
+                        </div>
+                        <div>
+                            <p style="font-weight: 700; font-size: 0.85rem;">Portes Ouvertes FMS</p>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary);">Faculté Médecine Sousse</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div
+                            style="padding: 0.5rem; border-radius: 10px; background: rgba(13, 148, 136, 0.1); color: var(--primary-teal); text-align: center; min-width: 45px;">
+                            <p style="font-weight: 800; font-size: 0.9rem;">24</p>
+                            <p style="font-size: 0.6rem; font-weight: 700;">FEV</p>
+                        </div>
+                        <div>
+                            <p style="font-weight: 700; font-size: 0.85rem;">Webinaire Ingénieur</p>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary);">En ligne 18:00</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="glass-card widget-mini">
+                <h4>Calendrier Mini</h4>
+                <div
+                    style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.2rem; text-align: center; font-size: 0.7rem; color: var(--text-secondary);">
+                    <div>L</div>
+                    <div>M</div>
+                    <div>M</div>
+                    <div>J</div>
+                    <div>V</div>
+                    <div>S</div>
+                    <div>D</div>
+                    <div style="padding: 5px;">1</div>
+                    <div style="padding: 5px;">2</div>
+                    <div style="padding: 5px;">3</div>
+                    <div style="padding: 5px;">4</div>
+                    <div style="padding: 5px; color: white;">5</div>
+                    <div style="padding: 5px;">6</div>
+                    <div style="padding: 5px;">7</div>
+                    <div style="padding: 5px;">8</div>
+                    <div style="padding: 5px;">9</div>
+                    <div style="padding: 5px;">10</div>
+                    <div style="padding: 5px; position:relative;">11 <div
+                            style="position:absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: var(--primary-teal); border-radius: 50%;">
+                        </div>
+                    </div>
+                    <div style="padding: 5px;">12</div>
+                    <div style="padding: 5px;">13</div>
+                    <div style="padding: 5px;">14</div>
+                    <div style="padding: 5px;">15</div>
+                    <div style="padding: 5px;">16</div>
+                    <div style="padding: 5px; background: var(--primary-teal); border-radius: 6px; color: white;">17
+                    </div>
+                    <div style="padding: 5px; position:relative;">18 <div
+                            style="position:absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: var(--urgent-coral); border-radius: 50%;">
+                        </div>
+                    </div>
+                    <div style="padding: 5px;">19</div>
+                    <div style="padding: 5px;">20</div>
+                    <div style="padding: 5px;">21</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Init Lucide Icons
+        lucide.createIcons();
+
+        // Data Viz - Score Hero
+        const scoreCtx = document.getElementById('scoreChart').getContext('2d');
+        new Chart(scoreCtx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [82, 18],
+                    backgroundColor: [
+                        '#0D9488',
+                        'rgba(255, 255, 255, 0.05)'
+                    ],
+                    borderWidth: 0,
+                    circumference: 270,
+                    rotation: 225,
+                    borderRadius: 10
+                }]
+            },
+            options: {
+                cutout: '85%',
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                animation: { duration: 2000, easing: 'easeOutQuart' }
+            }
+        });
+
+        // Radar Chart - Compatibilité
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Médecine', 'Ingénierie', 'Architecture', 'Gestion', 'Lettres', 'Sciences'],
+                datasets: [{
+                    label: 'Esraa Profile',
+                    data: [92, 85, 60, 45, 30, 75],
+                    backgroundColor: 'rgba(13, 148, 136, 0.2)',
+                    borderColor: '#0D9488',
+                    pointBackgroundColor: '#0D9488',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#0D9488'
+                }, {
+                    label: 'Profil Moyen',
+                    data: [65, 59, 70, 81, 56, 40],
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderColor: 'rgba(139, 92, 246, 0.4)',
+                    borderDash: [5, 5],
+                    pointBackgroundColor: 'transparent',
+                    pointBorderColor: 'transparent',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: { color: '#94A3B8', font: { size: 12, weight: 'bold' } },
+                        ticks: { display: false },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Progres Line Chart
+        const lineCtx = document.getElementById('progresChart').getContext('2d');
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai'],
+                datasets: [{
+                    data: [30, 45, 52, 60, 68],
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                },
+                plugins: { legend: { display: false } },
+                maintainAspectRatio: false
+            }
+        });
+
+        // Interactivity
+        document.querySelectorAll('.checklist-item').forEach(item => {
+            item.addEventListener('click', () => {
+                item.classList.toggle('done');
+                const icon = item.querySelector('i') || document.createElement('i');
+                if (item.classList.contains('done')) {
+                    icon.setAttribute('data-lucide', 'check');
+                    icon.style.color = 'white';
+                    icon.style.width = '14px';
+                    item.querySelector('.checkbox').appendChild(icon);
+                    lucide.createIcons();
+                } else {
+                    const existingIcon = item.querySelector('.checkbox i');
+                    if (existingIcon) existingIcon.remove();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

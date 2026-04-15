@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapAvenir — Espace Conseiller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0a0a12;
+            --indigo: #6366f1;
+            --violet: #a78bfa;
+            --cyan: #22d3ee;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --glass: rgba(20, 25, 40, 0.42);
+            --glass-border: rgba(100, 120, 255, 0.13);
+            --sidebar-w: 260px;
+            --radius: 18px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background:
+                radial-gradient(ellipse 70% 50% at 10% 0%, rgba(167, 139, 250, 0.1) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 90% 100%, rgba(34, 211, 238, 0.07) 0%, transparent 55%),
+                var(--bg);
+            background-attachment: fixed;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ═══ SIDEBAR ═══ */
+        .sidebar {
+            width: var(--sidebar-w);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: rgba(12, 14, 26, 0.75);
+            backdrop-filter: blur(28px) saturate(160%);
+            border-right: 1px solid var(--glass-border);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            padding: 1.75rem 1.1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.4rem 0.6rem 1.75rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--violet), var(--indigo));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 18px rgba(167, 139, 250, 0.35);
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .logo-text span {
+            color: var(--violet);
+        }
+
+        .nav-section {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.75rem 0.6rem 0.35rem;
+            margin-top: 0.35rem;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.65rem 0.8rem;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item a:hover {
+            background: rgba(167, 139, 250, 0.08);
+            color: var(--text);
+            transform: translateX(4px);
+        }
+
+        .nav-item a.active {
+            background: rgba(167, 139, 250, 0.14);
+            color: var(--violet);
+            font-weight: 700;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+        }
+
+        .nav-item a i {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .counselor-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 0.8rem;
+            background: rgba(167, 139, 250, 0.07);
+            border: 1px solid rgba(167, 139, 250, 0.15);
+            border-radius: 14px;
+            margin-bottom: 0.75rem;
+        }
+
+        .c-ava-sm {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--violet);
+        }
+
+        .c-name-sm {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .c-role-sm {
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        .online-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 6px #34d399;
+            margin-right: 4px;
+        }
+
+        /* ═══ MAIN ═══ */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 18, 0.75);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0 2.25rem;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-wrap {
+            position: relative;
+            width: 340px;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 11px;
+            padding: 0.6rem 1rem 0.6rem 2.6rem;
+            color: var(--text);
+            font-size: 0.85rem;
+            outline: none;
+            transition: 0.25s;
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--violet);
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            width: 15px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: rgba(167, 139, 250, 0.12);
+            color: var(--violet);
+        }
+
+        .badge-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 7px;
+            height: 7px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 5px var(--cyan);
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            padding: 0.28rem 0.9rem 0.28rem 0.28rem;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--violet), var(--indigo));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        /* ═══ CONTENT ═══ */
+        .content {
+            padding: 2.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+        }
+
+        /* ═══ GLASS CARD ═══ */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(24px) saturate(175%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .glass:hover {
+            transform: translateY(-2px) scale(1.012);
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+            border-color: rgba(167, 139, 250, 0.22);
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            padding: 2.25rem 2.5rem;
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(99, 102, 241, 0.07), rgba(34, 211, 238, 0.04));
+            border: 1px solid rgba(167, 139, 250, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .hero-left h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-left h1 span {
+            background: linear-gradient(135deg, var(--violet), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-left p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .hero-right {
+            display: flex;
+            gap: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .kpi-mini {
+            text-align: center;
+            padding: 1.1rem 1.4rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            min-width: 110px;
+        }
+
+        .kpi-mini-val {
+            font-size: 1.7rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+        }
+
+        .kpi-mini-label {
+            font-size: 0.72rem;
+            color: var(--muted);
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        /* ═══ STUDENTS GRID ═══ */
+        .students-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+        }
+
+        .student-card {
+            padding: 1.5rem;
+            cursor: pointer;
+        }
+
+        .student-card:hover {
+            transform: translateY(-4px) scale(1.02) !important;
+        }
+
+        .sc-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1.1rem;
+        }
+
+        .sc-info {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .sc-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            object-fit: cover;
+            border: 2px solid rgba(167, 139, 250, 0.25);
+        }
+
+        .sc-name {
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .sc-level {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        .status-pill {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.25rem 0.65rem;
+            border-radius: 100px;
+        }
+
+        .sp-ok {
+            background: rgba(52, 211, 153, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .sp-warn {
+            background: rgba(251, 146, 60, 0.1);
+            color: #fb923c;
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+
+        .sp-alert {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .match-bar {
+            margin: 0.85rem 0;
+        }
+
+        .match-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .match-score {
+            font-weight: 800;
+            color: var(--violet);
+        }
+
+        .bar-track {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--indigo), var(--violet));
+            border-radius: 100px;
+        }
+
+        .formations-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            margin-bottom: 1rem;
+        }
+
+        .f-tag {
+            font-size: 0.72rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .f-tag strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .ai-badges {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .ai-badge {
+            font-size: 0.67rem;
+            font-weight: 700;
+            padding: 0.22rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        .ab-indigo {
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--indigo);
+        }
+
+        .ab-violet {
+            background: rgba(167, 139, 250, 0.1);
+            color: var(--violet);
+        }
+
+        .ab-cyan {
+            background: rgba(34, 211, 238, 0.1);
+            color: var(--cyan);
+        }
+
+        .ab-orange {
+            background: rgba(251, 146, 60, 0.1);
+            color: #fb923c;
+        }
+
+        .sc-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .act-btn {
+            padding: 0.5rem;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .act-btn:hover {
+            background: rgba(167, 139, 250, 0.12);
+            border-color: var(--violet);
+            color: var(--violet);
+        }
+
+        .act-btn.primary {
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            border: none;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .act-btn.primary:hover {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+        }
+
+        /* ═══ BOTTOM SECTION ═══ */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* ═══ DETAIL PANEL ═══ */
+        .panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            z-index: 300;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+
+        .panel-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: -560px;
+            width: 540px;
+            height: 100vh;
+            background: rgba(13, 14, 26, 0.95);
+            backdrop-filter: blur(36px) saturate(180%);
+            border-left: 1px solid var(--glass-border);
+            z-index: 400;
+            padding: 2.25rem;
+            overflow-y: auto;
+            transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .detail-panel.open {
+            right: 0;
+        }
+
+        .panel-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            cursor: pointer;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 8px;
+            padding: 0.4rem;
+            transition: 0.2s;
+        }
+
+        .panel-close:hover {
+            color: var(--text);
+        }
+
+        .panel-student-top {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .panel-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            object-fit: cover;
+            border: 3px solid var(--violet);
+        }
+
+        .panel-name {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .panel-meta {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .panel-chart-wrap {
+            height: 200px;
+            position: relative;
+        }
+
+        .panel-section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 0.75rem;
+        }
+
+        .note-area {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--text);
+            font-size: 0.85rem;
+            resize: vertical;
+            min-height: 100px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .note-area:focus {
+            border-color: var(--violet);
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12);
+        }
+
+        .note-history {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .note-card {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            border-left: 3px solid var(--violet);
+        }
+
+        .note-card-date {
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .note-card-text {
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+
+        .panel-btn {
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+        }
+
+        .panel-btn.primary {
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            border: none;
+            color: white;
+        }
+
+        .panel-btn.primary:hover {
+            box-shadow: 0 0 24px rgba(99, 102, 241, 0.4);
+        }
+
+        /* ═══ AGENDA CARD ═══ */
+        .agenda-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .agenda-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 1.1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 13px;
+            transition: 0.2s;
+        }
+
+        .agenda-item:hover {
+            background: rgba(167, 139, 250, 0.07);
+            border-color: rgba(167, 139, 250, 0.2);
+        }
+
+        .agenda-time {
+            text-align: center;
+            min-width: 48px;
+            background: rgba(99, 102, 241, 0.12);
+            border-radius: 9px;
+            padding: 0.5rem 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--indigo);
+            line-height: 1.3;
+        }
+
+        .agenda-info {
+            flex: 1;
+        }
+
+        .agenda-student {
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .agenda-type {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .agenda-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .ab-coaching {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--indigo);
+        }
+
+        .ab-rdv {
+            background: rgba(34, 211, 238, 0.1);
+            color: var(--cyan);
+        }
+
+        .ab-urgent {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+        }
+
+        /* ═══ FOOTER ═══ */
+        footer {
+            border-top: 1px solid var(--glass-border);
+            background: rgba(10, 10, 18, 0.6);
+            backdrop-filter: blur(16px);
+            padding: 1.1rem 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.77rem;
+            color: var(--muted);
+        }
+
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--violet);
+        }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media(max-width:1300px) {
+            .students-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width:900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .students-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                flex-direction: column;
+            }
+
+            .hero-right {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"><i data-lucide="user-check" style="width:19px;color:white"></i></div>
+            <span class="logo-text">Cap<span>Avenir</span> <span
+                    style="font-size:0.68em;color:var(--muted);font-weight:500">Expert</span></span>
+        </div>
+
+        <div class="nav-item"><a href="#" class="active"><i data-lucide="layout-dashboard"></i><span>Accueil
+                    Conseiller</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="users"></i><span>Mes Étudiants</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="calendar-check"></i><span>Agenda Coachings</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="notebook-pen"></i><span>Remarques & Notes</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="library"></i><span>Ressources</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="message-circle"></i><span>Chat Interne</span></a></div>
+
+        <div class="sidebar-bottom">
+            <div class="counselor-chip">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=DrAmine" class="c-ava-sm">
+                <div>
+                    <div class="c-name-sm">Dr. Amine Ben Ali</div>
+                    <div class="c-role-sm"><span class="online-dot"></span>En ligne · Conseiller Senior</div>
+                </div>
+            </div>
+            <div class="nav-item"><a href="#"><i data-lucide="settings"></i><span>Paramètres</span></a></div>
+            <div class="nav-item"><a href="#"><i data-lucide="log-out"></i><span>Déconnexion</span></a></div>
+        </div>
+    </aside>
+
+    <!-- ═══ MAIN ═══ -->
+    <div class="main">
+
+        <!-- TOP BAR -->
+        <div class="topbar">
+            <div class="search-wrap">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" placeholder="Rechercher un étudiant par nom, score, intérêt…">
+            </div>
+            <div class="topbar-right">
+                <button class="icon-btn"><i data-lucide="bell" style="width:15px"></i><span
+                        class="badge-dot"></span></button>
+                <button class="icon-btn"><i data-lucide="calendar" style="width:15px"></i></button>
+                <button class="icon-btn"><i data-lucide="message-circle" style="width:15px"></i></button>
+                <div class="user-chip">
+                    <div class="user-avatar">AB</div>
+                    <span style="font-size:0.83rem;font-weight:600">Dr. Amine</span>
+                    <i data-lucide="chevron-down" style="width:13px;color:var(--muted)"></i>
+                </div>
+                <a href="/logout" title="Déconnexion"
+                    style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:10px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);color:#f87171;font-size:0.8rem;font-weight:700;text-decoration:none;transition:0.2s;"
+                    onmouseover="this.style.background='rgba(248,113,113,0.18)'"
+                    onmouseout="this.style.background='rgba(248,113,113,0.08)'">
+                    <i data-lucide="log-out" style="width:15px"></i> Déconnexion
+                </a>
+            </div>
+        </div>
+
+        <div class="content">
+
+            <!-- HERO -->
+            <div class="glass hero">
+                <div class="hero-left">
+                    <h1>Bonjour, <span>Dr. Amine</span> 👋</h1>
+                    <p>Vous avez <strong style="color:var(--text)">28 étudiants</strong> à accompagner cette semaine · 3
+                        en attente urgente · Prochain RDV dans <strong style="color:var(--violet)">45 min</strong></p>
+                    <div style="display:flex;gap:0.65rem;margin-top:1.1rem">
+                        <button
+                            style="padding:0.6rem 1.2rem;border-radius:11px;background:linear-gradient(135deg,var(--indigo),var(--violet));border:none;color:white;font-size:0.82rem;font-weight:700;cursor:pointer;box-shadow:0 0 18px rgba(99,102,241,0.3)">📅
+                            Voir Agenda</button>
+                        <button
+                            style="padding:0.6rem 1.2rem;border-radius:11px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.04);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer">+
+                            Nouveau Coaching</button>
+                    </div>
+                </div>
+                <div class="hero-right">
+                    <div class="kpi-mini">
+                        <div class="kpi-mini-val" style="color:var(--violet)">28</div>
+                        <div class="kpi-mini-label">Étudiants Suivis</div>
+                    </div>
+                    <div class="kpi-mini">
+                        <div class="kpi-mini-val" style="color:var(--cyan)">5</div>
+                        <div class="kpi-mini-label">RDV Aujourd'hui</div>
+                    </div>
+                    <div class="kpi-mini">
+                        <div class="kpi-mini-val" style="color:#34d399">87%</div>
+                        <div class="kpi-mini-label">Taux de Suivi</div>
+                    </div>
+                    <div class="kpi-mini" style="border-color:rgba(248,113,113,0.2);background:rgba(248,113,113,0.04)">
+                        <div class="kpi-mini-val" style="color:#f87171">3</div>
+                        <div class="kpi-mini-label">En Attente Urgente</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILTER BAR -->
+            <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
+                <span style="font-size:0.82rem;color:var(--muted);font-weight:600">Filtrer :</span>
+                <button
+                    style="padding:0.45rem 1rem;border-radius:100px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.25);color:var(--indigo);font-size:0.78rem;font-weight:700;cursor:pointer">Tous</button>
+                <button
+                    style="padding:0.45rem 1rem;border-radius:100px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--muted);font-size:0.78rem;cursor:pointer">En
+                    attente</button>
+                <button
+                    style="padding:0.45rem 1rem;border-radius:100px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--muted);font-size:0.78rem;cursor:pointer">Score
+                    > 80%</button>
+                <button
+                    style="padding:0.45rem 1rem;border-radius:100px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--muted);font-size:0.78rem;cursor:pointer">Non
+                    contactés</button>
+                <button
+                    style="padding:0.45rem 1rem;border-radius:100px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--muted);font-size:0.78rem;cursor:pointer">Tech
+                    / Informatique</button>
+                <div style="margin-left:auto;display:flex;gap:0.5rem">
+                    <button
+                        style="padding:0.45rem 0.9rem;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--muted);font-size:0.78rem;cursor:pointer">⊞
+                        Grille</button>
+                    <button
+                        style="padding:0.45rem 0.9rem;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--muted);font-size:0.78rem;cursor:pointer">☰
+                        Liste</button>
+                </div>
+            </div>
+
+            <!-- STUDENT CARDS GRID -->
+            <div class="students-grid">
+
+                <!-- Card 1 -->
+                <div class="glass student-card"
+                    onclick="openPanel('Esraa Ouni','Bac Sciences · Tunis','Esraa',[92,88,40,95,65,72],'Médecine – FMS','85%')">
+                    <div class="sc-top">
+                        <div class="sc-info">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Esraa" class="sc-avatar">
+                            <div>
+                                <div class="sc-name">Esraa Ouni</div>
+                                <div class="sc-level">Bac Sciences · Tunis</div>
+                            </div>
+                        </div>
+                        <span class="status-pill sp-warn">RDV 28 Fév</span>
+                    </div>
+                    <div class="match-bar">
+                        <div class="match-top"><span>Matching Global</span><span class="match-score">92%</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:92%"></div>
+                        </div>
+                    </div>
+                    <div class="formations-row">
+                        <div class="f-tag"><span style="color:var(--indigo);font-weight:700">1.</span><strong>Médecine –
+                                FMS</strong><span
+                                style="margin-left:auto;color:var(--indigo);font-weight:700">92%</span></div>
+                        <div class="f-tag"><span style="color:var(--muted)">2.</span><strong>Pharmacie – FP
+                                Monastir</strong><span style="margin-left:auto;color:var(--muted)">78%</span></div>
+                        <div class="f-tag"><span style="color:var(--muted)">3.</span><strong>Info. Santé –
+                                ISAMM</strong><span style="margin-left:auto;color:var(--muted)">71%</span></div>
+                    </div>
+                    <div class="ai-badges">
+                        <span class="ai-badge ab-indigo">⚡ Logique forte</span>
+                        <span class="ai-badge ab-violet">🎯 SVT >88%</span>
+                        <span class="ai-badge ab-orange">⚠ Langues faibles</span>
+                    </div>
+                    <div class="sc-actions">
+                        <button class="act-btn" onclick="event.stopPropagation()">💬 Message</button>
+                        <button class="act-btn" onclick="event.stopPropagation()">📝 Note</button>
+                        <button class="act-btn primary" onclick="event.stopPropagation()">Ouvrir Profil Complet
+                            →</button>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass student-card"
+                    onclick="openPanel('Mohamed Aziz','Bac Math · Sfax','Aziz',[85,62,78,90,70,55],'Génie Logiciel – ENSI','89%')">
+                    <div class="sc-top">
+                        <div class="sc-info">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aziz" class="sc-avatar">
+                            <div>
+                                <div class="sc-name">Mohamed Aziz</div>
+                                <div class="sc-level">Bac Math · Sfax</div>
+                            </div>
+                        </div>
+                        <span class="status-pill sp-ok">Actif</span>
+                    </div>
+                    <div class="match-bar">
+                        <div class="match-top"><span>Matching Global</span><span class="match-score">85%</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill"
+                                style="width:85%;background:linear-gradient(90deg,var(--violet),var(--indigo))"></div>
+                        </div>
+                    </div>
+                    <div class="formations-row">
+                        <div class="f-tag"><span style="color:var(--violet);font-weight:700">1.</span><strong>Génie
+                                Logiciel – ENSI</strong><span
+                                style="margin-left:auto;color:var(--violet);font-weight:700">89%</span></div>
+                        <div class="f-tag"><span style="color:var(--muted)">2.</span><strong>IA & Data –
+                                ESPRIT</strong><span style="margin-left:auto;color:var(--muted)">83%</span></div>
+                        <div class="f-tag"><span style="color:var(--muted)">3.</span><strong>Cybersécurité –
+                                ISI</strong><span style="margin-left:auto;color:var(--muted)">74%</span></div>
+                    </div>
+                    <div class="ai-badges">
+                        <span class="ai-badge ab-cyan">💻 Profil Tech</span>
+                        <span class="ai-badge ab-violet">📊 Analyse >90%</span>
+                        <span class="ai-badge ab-indigo">🚀 Potentiel IA</span>
+                    </div>
+                    <div class="sc-actions">
+                        <button class="act-btn" onclick="event.stopPropagation()">💬 Message</button>
+                        <button class="act-btn" onclick="event.stopPropagation()">📅 Planifier</button>
+                        <button class="act-btn primary" onclick="event.stopPropagation()">Ouvrir Profil Complet
+                            →</button>
+                    </div>
+                </div>
+
+                <!-- Card 3 – URGENT -->
+                <div class="glass student-card" style="border-color:rgba(248,113,113,0.2)"
+                    onclick="openPanel('Inès Chaabane','Bac Lettres · Sousse','Ines',[45,55,82,60,78,90],'Droit – Fac. Sousse','67%')">
+                    <div class="sc-top">
+                        <div class="sc-info">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ines" class="sc-avatar">
+                            <div>
+                                <div class="sc-name">Inès Chaabane</div>
+                                <div class="sc-level">Bac Lettres · Sousse</div>
+                            </div>
+                        </div>
+                        <span class="status-pill sp-alert">Pas contactée 12j</span>
+                    </div>
+                    <div class="match-bar">
+                        <div class="match-top"><span>Matching Global</span><span class="match-score"
+                                style="color:var(--cyan)">67%</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill"
+                                style="width:67%;background:linear-gradient(90deg,var(--cyan),var(--indigo))"></div>
+                        </div>
+                    </div>
+                    <div class="formations-row">
+                        <div class="f-tag"><span style="color:var(--cyan);font-weight:700">1.</span><strong>Droit – Fac.
+                                Sousse</strong><span
+                                style="margin-left:auto;color:var(--cyan);font-weight:700">67%</span></div>
+                        <div class="f-tag"><span style="color:var(--muted)">2.</span><strong>Sc. Po –
+                                FSJPS</strong><span style="margin-left:auto;color:var(--muted)">59%</span></div>
+                        <div class="f-tag"><span style="color:var(--muted)">3.</span><strong>Journalisme –
+                                IPSI</strong><span style="margin-left:auto;color:var(--muted)">54%</span></div>
+                    </div>
+                    <div class="ai-badges">
+                        <span class="ai-badge ab-cyan">🗣 Social fort</span>
+                        <span class="ai-badge ab-orange">⚠ Logique faible</span>
+                        <span class="ai-badge ab-violet">✍ Langues >80%</span>
+                    </div>
+                    <div class="sc-actions">
+                        <button class="act-btn" style="color:#f87171;border-color:rgba(248,113,113,0.25)"
+                            onclick="event.stopPropagation()">🚨 Contacter</button>
+                        <button class="act-btn" onclick="event.stopPropagation()">📝 Note</button>
+                        <button class="act-btn primary" onclick="event.stopPropagation()">Ouvrir Profil Complet
+                            →</button>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="glass student-card"
+                    onclick="openPanel('Yassine Trabelsi','Bac Tech · Monastir','Yassine',[70,65,55,72,90,60],'Architecture – ENAU','74%')">
+                    <div class="sc-top">
+                        <div class="sc-info">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Yassine" class="sc-avatar">
+                            <div>
+                                <div class="sc-name">Yassine Trabelsi</div>
+                                <div class="sc-level">Bac Tech · Monastir</div>
+                            </div>
+                        </div>
+                        <span class="status-pill sp-warn">RDV Demain 10h</span>
+                    </div>
+                    <div class="match-bar">
+                        <div class="match-top"><span>Matching Global</span><span class="match-score"
+                                style="color:#34d399">74%</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill"
+                                style="width:74%;background:linear-gradient(90deg,#34d399,var(--indigo))"></div>
+                        </div>
+                    </div>
+                    <div class="formations-row">
+                        <div class="f-tag"><span style="color:#34d399;font-weight:700">1.</span><strong>Architecture –
+                                ENAU</strong><span style="margin-left:auto;color:#34d399;font-weight:700">74%</span>
+                        </div>
+                        <div class="f-tag"><span style="color:var(--muted)">2.</span><strong>Design Industriel –
+                                ISET</strong><span style="margin-left:auto;color:var(--muted)">68%</span></div>
+                        <div class="f-tag"><span style="color:var(--muted)">3.</span><strong>Génie Civil –
+                                EST</strong><span style="margin-left:auto;color:var(--muted)">61%</span></div>
+                    </div>
+                    <div class="ai-badges">
+                        <span class="ai-badge ab-indigo">🎨 Créativité >90%</span>
+                        <span class="ai-badge ab-violet">📐 Tech manuel</span>
+                    </div>
+                    <div class="sc-actions">
+                        <button class="act-btn" onclick="event.stopPropagation()">💬 Message</button>
+                        <button class="act-btn" onclick="event.stopPropagation()">📅 Confirmer RDV</button>
+                        <button class="act-btn primary" onclick="event.stopPropagation()">Ouvrir Profil Complet
+                            →</button>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="glass student-card"
+                    onclick="openPanel('Leïla Hadj Salem','Bac Sciences · Sfax','Leila',[88,90,62,85,55,68],'Pharmacie – FP Monastir','88%')">
+                    <div class="sc-top">
+                        <div class="sc-info">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Leila" class="sc-avatar">
+                            <div>
+                                <div class="sc-name">Leïla Hadj Salem</div>
+                                <div class="sc-level">Bac Sciences · Sfax</div>
+                            </div>
+                        </div>
+                        <span class="status-pill sp-ok">Actif</span>
+                    </div>
+                    <div class="match-bar">
+                        <div class="match-top"><span>Matching Global</span><span class="match-score">88%</span></div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width:88%"></div>
+                        </div>
+                    </div>
+                    <div class="formations-row">
+                        <div class="f-tag"><span style="color:var(--indigo);font-weight:700">1.</span><strong>Pharmacie
+                                – FP Monastir</strong><span
+                                style="margin-left:auto;color:var(--indigo);font-weight:700">88%</span></div>
+                        <div class="f-tag"><span style="color:var(--muted)">2.</span><strong>Médecine –
+                                FMS</strong><span style="margin-left:auto;color:var(--muted)">80%</span></div>
+                        <div class="f-tag"><span style="color:var(--muted)">3.</span><strong>Biologie –
+                                FSS</strong><span style="margin-left:auto;color:var(--muted)">73%</span></div>
+                    </div>
+                    <div class="ai-badges">
+                        <span class="ai-badge ab-violet">🔬 SVT >90%</span>
+                        <span class="ai-badge ab-indigo">💊 Profil Santé</span>
+                        <span class="ai-badge ab-cyan">📈 En progression</span>
+                    </div>
+                    <div class="sc-actions">
+                        <button class="act-btn" onclick="event.stopPropagation()">💬 Message</button>
+                        <button class="act-btn" onclick="event.stopPropagation()">📝 Note</button>
+                        <button class="act-btn primary" onclick="event.stopPropagation()">Ouvrir Profil Complet
+                            →</button>
+                    </div>
+                </div>
+
+                <!-- Card 6 – Voir tous -->
+                <div class="glass student-card"
+                    style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1rem;min-height:300px;border-style:dashed;border-color:rgba(100,120,255,0.2);cursor:pointer;background:rgba(20,25,40,0.25)"
+                    onclick="">
+                    <div
+                        style="width:52px;height:52px;border-radius:16px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;">
+                        <i data-lucide="plus" style="width:24px;color:var(--indigo)"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:1rem;font-weight:700;margin-bottom:0.3rem">Voir les 23 autres</div>
+                        <div style="font-size:0.78rem;color:var(--muted)">étudiants de votre portefeuille</div>
+                    </div>
+                    <button
+                        style="padding:0.6rem 1.4rem;border-radius:11px;background:linear-gradient(135deg,var(--indigo),var(--violet));border:none;color:white;font-size:0.82rem;font-weight:700;cursor:pointer">Voir
+                        Tous →</button>
+                </div>
+
+            </div><!-- /students-grid -->
+
+            <!-- BOTTOM GRID: Agenda + Resources -->
+            <div class="bottom-grid">
+
+                <!-- Agenda -->
+                <div class="glass" style="padding:1.75rem">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+                        <div>
+                            <div style="font-size:1rem;font-weight:700">Agenda du Jour</div>
+                            <div style="font-size:0.78rem;color:var(--muted)">Mardi 25 Février 2026</div>
+                        </div>
+                        <button
+                            style="padding:0.5rem 1rem;border-radius:10px;background:linear-gradient(135deg,var(--indigo),var(--violet));border:none;color:white;font-size:0.78rem;font-weight:700;cursor:pointer">+
+                            Ajouter RDV</button>
+                    </div>
+                    <div class="agenda-list">
+                        <div class="agenda-item">
+                            <div class="agenda-time">09<br>00</div>
+                            <div class="agenda-info">
+                                <div class="agenda-student">Mohamed Aziz</div>
+                                <div class="agenda-type">Session de coaching · 45 min · Choix formations tech</div>
+                            </div>
+                            <span class="agenda-badge ab-coaching">Coaching</span>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-time" style="color:var(--cyan);background:rgba(34,211,238,0.08)">11<br>30
+                            </div>
+                            <div class="agenda-info">
+                                <div class="agenda-student">Esraa Ouni</div>
+                                <div class="agenda-type">Révision profil IA · 30 min · Médecine vs Pharmacie</div>
+                            </div>
+                            <span class="agenda-badge ab-rdv">RDV</span>
+                        </div>
+                        <div class="agenda-item" style="border-color:rgba(248,113,113,0.2)">
+                            <div class="agenda-time" style="color:#f87171;background:rgba(248,113,113,0.08)">14<br>00
+                            </div>
+                            <div class="agenda-info">
+                                <div class="agenda-student">Inès Chaabane</div>
+                                <div class="agenda-type">⚠ Urgence — Profil en attente depuis 12j</div>
+                            </div>
+                            <span class="agenda-badge ab-urgent">Urgent</span>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-time">16<br>00</div>
+                            <div class="agenda-info">
+                                <div class="agenda-student">Leïla Hadj Salem</div>
+                                <div class="agenda-type">Suivi parcours · 20 min · Validation orientation</div>
+                            </div>
+                            <span class="agenda-badge ab-coaching">Suivi</span>
+                        </div>
+                        <div class="agenda-item">
+                            <div class="agenda-time">17<br>30</div>
+                            <div class="agenda-info">
+                                <div class="agenda-student">Yassine Trabelsi</div>
+                                <div class="agenda-type">Coaching Architecture · Préparation dossier ENAU</div>
+                            </div>
+                            <span class="agenda-badge ab-rdv">Coaching</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ressources & Stats -->
+                <div style="display:flex;flex-direction:column;gap:1.25rem">
+                    <div class="glass" style="padding:1.5rem">
+                        <div style="font-size:1rem;font-weight:700;margin-bottom:0.4rem">Mes Stats</div>
+                        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:1.25rem">Semaine en cours</div>
+                        <div style="display:flex;flex-direction:column;gap:0.85rem">
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <span style="font-size:0.82rem">Sessions complétées</span>
+                                <span style="font-weight:800;color:var(--indigo)">14 / 20</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:70%"></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <span style="font-size:0.82rem">Étudiants orientés</span>
+                                <span style="font-weight:800;color:var(--violet)">7 ce mois</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill"
+                                    style="width:58%;background:linear-gradient(90deg,var(--violet),var(--indigo))">
+                                </div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <span style="font-size:0.82rem">Note moyenne (feedback)</span>
+                                <span style="font-weight:800;color:#34d399">4.8 / 5 ⭐</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill"
+                                    style="width:96%;background:linear-gradient(90deg,#34d399,var(--indigo))"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass" style="padding:1.5rem">
+                        <div style="font-size:1rem;font-weight:700;margin-bottom:1rem">Ressources Rapides</div>
+                        <div style="display:flex;flex-direction:column;gap:0.5rem">
+                            <a href="#"
+                                style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.85rem;border-radius:11px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);text-decoration:none;color:var(--text);font-size:0.82rem;font-weight:600;transition:0.2s"
+                                onmouseover="this.style.borderColor='var(--indigo)'"
+                                onmouseout="this.style.borderColor='var(--glass-border)'">
+                                <i data-lucide="book" style="width:15px;color:var(--indigo)"></i> Guide Orientation Bac
+                                2026
+                            </a>
+                            <a href="#"
+                                style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.85rem;border-radius:11px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);text-decoration:none;color:var(--text);font-size:0.82rem;font-weight:600;transition:0.2s"
+                                onmouseover="this.style.borderColor='var(--violet)'"
+                                onmouseout="this.style.borderColor='var(--glass-border)'">
+                                <i data-lucide="file-text" style="width:15px;color:var(--violet)"></i> Modèles de Notes
+                                Coaching
+                            </a>
+                            <a href="#"
+                                style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.85rem;border-radius:11px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);text-decoration:none;color:var(--text);font-size:0.82rem;font-weight:600;transition:0.2s"
+                                onmouseover="this.style.borderColor='var(--cyan)'"
+                                onmouseout="this.style.borderColor='var(--glass-border)'">
+                                <i data-lucide="sparkles" style="width:15px;color:var(--cyan)"></i> Rapport IA
+                                Hebdomadaire
+                            </a>
+                            <a href="#"
+                                style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.85rem;border-radius:11px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);text-decoration:none;color:var(--text);font-size:0.82rem;font-weight:600;transition:0.2s"
+                                onmouseover="this.style.borderColor='#34d399'"
+                                onmouseout="this.style.borderColor='var(--glass-border)'">
+                                <i data-lucide="download" style="width:15px;color:#34d399"></i> Exporter mes dossiers
+                                PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /bottom-grid -->
+
+        </div><!-- /content -->
+
+        <!-- FOOTER -->
+        <footer>
+            <span>© 2026 CapAvenir Platform · Espace Conseiller · v3.1.0</span>
+            <div style="display:flex;gap:1.5rem">
+                <a href="#">Support</a>
+                <a href="#">Documentation</a>
+                <a href="#">Confidentialité</a>
+            </div>
+            <span>Données synchro. il y a <strong style="color:var(--violet)">1 min</strong></span>
+        </footer>
+
+    </div><!-- /main -->
+
+    <!-- ═══ DETAIL PANEL ═══ -->
+    <div class="panel-overlay" id="overlay" onclick="closePanel()"></div>
+    <div class="detail-panel" id="detailPanel">
+        <button class="panel-close" onclick="closePanel()"><i data-lucide="x" style="width:16px"></i></button>
+
+        <div class="panel-student-top">
+            <img src="" class="panel-avatar" id="pAvatar">
+            <div>
+                <div class="panel-name" id="pName"></div>
+                <div class="panel-meta" id="pMeta"></div>
+            </div>
+        </div>
+
+        <div>
+            <div class="panel-section-title">Profil Aptitudes IA</div>
+            <div class="panel-chart-wrap"><canvas id="panelRadar"></canvas></div>
+        </div>
+
+        <div>
+            <div class="panel-section-title">Top Formation Suggérée</div>
+            <div
+                style="display:flex;justify-content:space-between;align-items:center;padding:0.85rem 1rem;background:rgba(99,102,241,0.09);border:1px solid rgba(99,102,241,0.18);border-radius:12px;">
+                <div>
+                    <div id="pFormation" style="font-weight:700;font-size:0.9rem"></div>
+                    <div style="font-size:0.75rem;color:var(--muted)">Recommandation IA primaire</div>
+                </div>
+                <span id="pScore" style="font-size:1.3rem;font-weight:900;color:var(--indigo)"></span>
+            </div>
+            <div
+                style="margin-top:0.75rem;padding:0.85rem 1rem;background:rgba(34,211,238,0.05);border:1px solid rgba(34,211,238,0.15);border-radius:12px;">
+                <div style="font-size:0.72rem;font-weight:700;color:var(--cyan);margin-bottom:0.35rem">💡 CONSEIL IA
+                </div>
+                <div style="font-size:0.82rem;color:var(--muted);line-height:1.55" id="pAiTip">Ce profil présente une
+                    excellente cohérence entre aptitudes et filière cible. Recommandez de consolider les lacunes en
+                    langues pour assurer la réussite à long terme.</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="panel-section-title">Ajouter une Note</div>
+            <textarea class="note-area"
+                placeholder="Saisissez vos remarques, observations, plan de coaching… (Markdown supporté)&#10;&#10;@25-02-2026 — Session de suivi…"></textarea>
+            <div style="display:flex;gap:0.65rem;margin-top:0.75rem">
+                <button class="panel-btn primary" style="flex:2">💾 Enregistrer Note</button>
+                <button class="panel-btn" style="flex:1">🏷 Ajouter Tag</button>
+            </div>
+        </div>
+
+        <div>
+            <div class="panel-section-title">Historique Notes</div>
+            <div class="note-history">
+                <div class="note-card">
+                    <div class="note-card-date">📅 14 Février 2026 · Session Coaching #3</div>
+                    <div class="note-card-text">Profil très motivé par la médecine. A clarté sur les voeux 1 et 2.
+                        Recommandé de renforcer la biologie et les langues. Prochain RDV fixé au 28 fév pour validation
+                        finale.</div>
+                </div>
+                <div class="note-card" style="border-left-color:var(--cyan)">
+                    <div class="note-card-date">📅 02 Février 2026 · Session Coaching #2</div>
+                    <div class="note-card-text">Test de personnalité complété. Score logique : 95%. Orientation
+                        principale confirmée vers le médical. Travail à faire sur la gestion du stress.</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem">
+            <button class="panel-btn">📅 Planifier Coaching</button>
+            <button class="panel-btn">💬 Envoyer Message</button>
+            <button class="panel-btn primary" style="grid-column:span 2">🚀 Proposer Nouveau Parcours</button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let radarChart = null;
+
+        function openPanel(name, meta, seed, data, formation, score) {
+            document.getElementById('overlay').classList.add('open');
+            document.getElementById('detailPanel').classList.add('open');
+            document.getElementById('pName').textContent = name;
+            document.getElementById('pMeta').textContent = meta;
+            document.getElementById('pAvatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+            document.getElementById('pFormation').textContent = formation;
+            document.getElementById('pScore').textContent = score;
+
+            const ctx = document.getElementById('panelRadar').getContext('2d');
+            if (radarChart) radarChart.destroy();
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Logique', 'SVT', 'Langues', 'Analyse', 'Créativité', 'Social'],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: 'rgba(167,139,250,0.15)',
+                        borderColor: '#a78bfa',
+                        pointBackgroundColor: '#a78bfa',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255,255,255,0.06)' },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            pointLabels: { color: '#94a3b8', font: { size: 10, weight: 'bold' } },
+                            ticks: { display: false }, suggestedMin: 0, suggestedMax: 100
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function closePanel() {
+            document.getElementById('overlay').classList.remove('open');
+            document.getElementById('detailPanel').classList.remove('open');
+        }
+    </script>
+</body>
+
+</html>
