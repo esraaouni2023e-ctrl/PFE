@@ -680,30 +680,19 @@
             </div>
 
             <div class="ad-tl">
+                @forelse($recentLogs as $log)
                 <div class="ad-tl-item tl-sage">
-                    <div class="ad-tl-text"><strong>Nouvel inscrit</strong> — Un étudiant a rejoint la plateforme via l'inscription publique</div>
-                    <div class="ad-tl-time">Il y a 45 minutes</div>
+                    <div class="ad-tl-text">
+                        <strong>{{ $log->user->name ?? 'Système' }}</strong> — {{ $log->action }}
+                        @if($log->details) <br><span style="font-size: 0.7rem; color:var(--ink30);">{{ Str::limit($log->details, 50) }}</span> @endif
+                    </div>
+                    <div class="ad-tl-time">{{ $log->created_at->diffForHumans() }}</div>
                 </div>
-                <div class="ad-tl-item tl-accent">
-                    <div class="ad-tl-text"><strong>Mise à jour IA</strong> — Le modèle de matching a été recalibré (v2.4.1)</div>
-                    <div class="ad-tl-time">Il y a 2 heures</div>
-                </div>
-                <div class="ad-tl-item tl-gold">
-                    <div class="ad-tl-text"><strong>Audit sécurité</strong> — Scan journalier : 0 vulnérabilités détectées</div>
-                    <div class="ad-tl-time">Il y a 6 heures</div>
-                </div>
-                <div class="ad-tl-item tl-red">
-                    <div class="ad-tl-text"><strong>Alerte système</strong> — Pic de charge base de données (résolu automatiquement)</div>
-                    <div class="ad-tl-time">Hier à 23:15</div>
-                </div>
+                @empty
                 <div class="ad-tl-item">
-                    <div class="ad-tl-text"><strong>Sauvegarde</strong> — Backup automatique complété avec succès (12.4 GB)</div>
-                    <div class="ad-tl-time">Hier à 03:00</div>
+                    <div class="ad-tl-text">Aucune activité récente.</div>
                 </div>
-                <div class="ad-tl-item tl-sage">
-                    <div class="ad-tl-text"><strong>Conseiller ajouté</strong> — Un nouveau conseiller a été certifié et activé</div>
-                    <div class="ad-tl-time">Il y a 2 jours</div>
-                </div>
+                @endforelse
             </div>
         </div>
 
@@ -722,25 +711,18 @@
                         <div class="ad-qa-desc">Activer, modifier ou supprimer des comptes</div>
                     </div>
                 </a>
-                <a href="#" class="ad-qa-btn">
-                    <div class="ad-qa-icon">📊</div>
+                <a href="{{ route('admin.references.index') }}" class="ad-qa-btn">
+                    <div class="ad-qa-icon">📚</div>
                     <div>
-                        <div>Rapport analytique</div>
-                        <div class="ad-qa-desc">Exporter les statistiques en PDF</div>
+                        <div>Référentiel Universitaire</div>
+                        <div class="ad-qa-desc">Gérer les filières et coefficients d'admission</div>
                     </div>
                 </a>
-                <a href="#" class="ad-qa-btn">
-                    <div class="ad-qa-icon">🧠</div>
-                    <div>
-                        <div>Recalibrer IA</div>
-                        <div class="ad-qa-desc">Relancer les algorithmes de matching</div>
-                    </div>
-                </a>
-                <a href="#" class="ad-qa-btn">
+                <a href="{{ route('admin.audit.index') }}" class="ad-qa-btn">
                     <div class="ad-qa-icon">🔐</div>
                     <div>
-                        <div>Audit de sécurité</div>
-                        <div class="ad-qa-desc">Scanner les vulnérabilités</div>
+                        <div>Audit et Sécurité</div>
+                        <div class="ad-qa-desc">Consulter les logs et performances</div>
                     </div>
                 </a>
                 <a href="#" class="ad-qa-btn">

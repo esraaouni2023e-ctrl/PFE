@@ -37,6 +37,8 @@ class DashboardController extends Controller
             ];
         }
 
+        $recentLogs = \App\Models\AuditLog::with('user')->orderBy('created_at', 'desc')->take(6)->get();
+
         return view('admin.dashboard', compact(
             'totalUsers',
             'newUsersToday',
@@ -45,7 +47,8 @@ class DashboardController extends Controller
             'counselorCount',
             'adminCount',
             'recentUsers',
-            'monthlyData'
+            'monthlyData',
+            'recentLogs'
         ));
     }
 }

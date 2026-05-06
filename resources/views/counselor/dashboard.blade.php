@@ -351,15 +351,15 @@
             <div class="cd-focus-list">
                 <div class="cd-focus-row">
                     <span class="cd-focus-label">Tests à valider</span>
-                    <span class="cd-focus-val" style="color:var(--accent3);">08</span>
+                    <span class="cd-focus-val" style="color:var(--accent3);">{{ $students->where('profile.status', 'pending')->count() }}</span>
                 </div>
                 <div class="cd-focus-row">
-                    <span class="cd-focus-label">Alertes Match bas</span>
-                    <span class="cd-focus-val" style="color:#ef4444;">03</span>
+                    <span class="cd-focus-label">Étudiants à risque</span>
+                    <span class="cd-focus-val" style="color:#ef4444;">{{ $students->filter(fn($s) => ($s->profile->ai_score ?? 100) < 65)->count() }}</span>
                 </div>
                 <div class="cd-focus-row">
-                    <span class="cd-focus-label">Rendez-vous IA</span>
-                    <span class="cd-focus-val" style="color:var(--accent);">05</span>
+                    <span class="cd-focus-label">Rendez-vous prévus</span>
+                    <span class="cd-focus-val" style="color:var(--accent);">{{ $appointments->where('status', 'scheduled')->count() }}</span>
                 </div>
             </div>
         </div>
@@ -377,12 +377,12 @@
             </div>
         </div>
 
-        {{-- Performance over time --}}
+        {{-- Cohort analysis --}}
         <div class="card cd-analytics-card">
-            <p class="cd-stag">Tendance</p>
-            <h3 class="cd-sh">Performance <em>mensuelle</em></h3>
+            <p class="cd-stag">Analyse de Cohorte</p>
+            <h3 class="cd-sh">Tendances <em>d'orientation</em></h3>
             <div class="cd-chart-lg">
-                <canvas id="perfChart"></canvas>
+                <canvas id="cohortChart"></canvas>
             </div>
         </div>
     </div>
@@ -444,7 +444,13 @@
                 </div>
 
                 <div class="cd-scard-foot">
-                    <span class="cd-scard-date">Dernière activité : aujourd'hui</span>
+                    <span class="cd-scard-date">
+                        @if($score < 65)
+                            <span style="color:#ef4444; font-weight:bold;">⚠️ Risque de décrochage</span>
+                        @else
+                            Inscrit le {{ $student->created_at->format('d/m/Y') }}
+                        @endif
+                    </span>
                     <a href="{{ route('counselor.student.show', $student) }}" class="cd-scard-link">→</a>
                 </div>
             </div>
@@ -496,47 +502,26 @@
             </div>
         </div>
 
-        {{-- Quick Actions --}}
+        {{-- Appointments --}}
         <div class="card cd-actions">
-            <p class="cd-stag">Raccourcis</p>
-            <h3 class="cd-sh" style="margin-bottom:1.25rem;">Actions <em>rapides</em></h3>
+            <p class="cd-stag">Planning</p>
+            <h3 class="cd-sh" style="margin-bottom:1.25rem;">Mes <em>Rendez-vous</em></h3>
 
             <div style="display:flex;flex-direction:column;gap:.75rem;">
-                <a href="#" class="cd-action-btn">
-                    <div class="cd-action-icon">📊</div>
-                    <div>
-                        <div>Générer un rapport</div>
-                        <div class="cd-action-desc">Export PDF du portefeuille</div>
-                    </div>
-                </a>
-                <a href="#" class="cd-action-btn">
+                @forelse($appointments->where('status', 'scheduled') as $apt)
+                <div class="cd-action-btn" style="cursor: default;">
                     <div class="cd-action-icon">📅</div>
-                    <div>
-                        <div>Planifier un rendez-vous</div>
-                        <div class="cd-action-desc">Créer une session de conseil</div>
+                    <div style="flex:1;">
+                        <div>{{ $apt->student->name }}</div>
+                        <div class="cd-action-desc">{{ $apt->scheduled_at->format('d/m/Y à H:i') }}</div>
                     </div>
-                </a>
-                <a href="#" class="cd-action-btn">
-                    <div class="cd-action-icon">🧠</div>
-                    <div>
-                        <div>Analyse IA groupée</div>
-                        <div class="cd-action-desc">Diagnostic auto de tous les dossiers</div>
-                    </div>
-                </a>
-                <a href="#" class="cd-action-btn">
-                    <div class="cd-action-icon">✉️</div>
-                    <div>
-                        <div>Email groupé</div>
-                        <div class="cd-action-desc">Contacter vos étudiants</div>
-                    </div>
-                </a>
-                <a href="#" class="cd-action-btn">
-                    <div class="cd-action-icon">⚙️</div>
-                    <div>
-                        <div>Paramètres du profil</div>
-                        <div class="cd-action-desc">Préférences & notifications</div>
-                    </div>
-                </a>
+                    <a href="{{ route('counselor.student.show', $apt->student) }}" class="btn-ghost" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;">Dossier</a>
+                </div>
+                @empty
+                <div style="text-align:center; padding: 2rem 0; color: var(--ink30);">
+                    <p>Aucun rendez-vous planifié.</p>
+                </div>
+                @endforelse
             </div>
         </div>
     </div>
@@ -611,60 +596,40 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /* ── Performance line chart ── */
-    const pCtx = document.getElementById('perfChart')?.getContext('2d');
-    if (pCtx && typeof Chart !== 'undefined') {
-        new Chart(pCtx, {
-            type: 'line',
+    /* ── Cohort Analysis Chart ── */
+    const cCtx = document.getElementById('cohortChart')?.getContext('2d');
+    if (cCtx && typeof Chart !== 'undefined') {
+        const cohortLabels = {!! json_encode(array_keys($cohortStats)) !!};
+        const cohortData = {!! json_encode(array_values($cohortStats)) !!};
+        
+        new Chart(cCtx, {
+            type: 'bar',
             data: {
-                labels: ['Jan','Fév','Mar','Avr','Mai','Jun'],
-                datasets: [
-                    {
-                        label: 'Score IA moyen',
-                        data: [68, 74, 71, 82, 86, 92],
-                        borderColor: '#1a4f6e', borderWidth: 2.5,
-                        tension: .4, pointRadius: 3, pointBackgroundColor: '#1a4f6e',
-                        fill: true,
-                        backgroundColor: isDark ? 'rgba(26,79,110,.12)' : 'rgba(26,79,110,.06)'
-                    },
-                    {
-                        label: 'Tests complétés',
-                        data: [12, 18, 15, 24, 28, 32],
-                        borderColor: '#d4622a', borderWidth: 2,
-                        tension: .4, pointRadius: 3, pointBackgroundColor: '#d4622a',
-                        fill: false, borderDash: [4, 4],
-                        yAxisID: 'y1'
-                    }
-                ]
+                labels: cohortLabels,
+                datasets: [{
+                    label: 'Pourcentage d\'étudiants (%)',
+                    data: cohortData,
+                    backgroundColor: [
+                        '#1a4f6e', '#4a7c59', '#c8973a', '#d4622a', isDark ? 'rgba(240,237,230,.2)' : 'rgba(11,12,16,.2)'
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 4
+                }]
             },
             options: {
                 maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: tickCol,
-                            font: { family: "'DM Sans', sans-serif", size: 11, weight: 600 },
-                            padding: 14,
-                            usePointStyle: true, pointStyleWidth: 8
-                        }
-                    }
+                    legend: { display: false }
                 },
                 scales: {
                     x: {
-                        grid: { color: gridCol },
-                        ticks: { color: tickCol, font: { family: "'DM Sans'", size: 11, weight: 600 } }
+                        grid: { display: false },
+                        ticks: { color: tickCol, font: { family: "'DM Sans'", size: 10, weight: 600 } }
                     },
                     y: {
-                        position: 'left', min: 0, max: 100,
+                        beginAtZero: true, max: 100,
                         grid: { color: gridCol },
                         ticks: { color: tickCol, font: { family: "'DM Sans'", size: 11 }, callback: v => v + '%' }
-                    },
-                    y1: {
-                        position: 'right', min: 0,
-                        grid: { drawOnChartArea: false },
-                        ticks: { color: tickCol, font: { family: "'DM Sans'", size: 11 } }
                     }
                 }
             }

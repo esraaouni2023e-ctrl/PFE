@@ -387,9 +387,21 @@
 
         {{-- ── LEFT COLUMN ── --}}
         <div>
-            {{-- AI Summary --}}
+            {{-- AI Summary & Manual Matching --}}
             <div class="sp-ai-box rev rev-d1">
-                <div class="sp-ai-badge">✦ Synthèse IA</div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div class="sp-ai-badge">✦ Synthèse Profil</div>
+                    @if($student->profile && !$student->profile->manual_match_approved)
+                        <form action="{{ route('counselor.student.match', $student) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn-ghost" style="border-color:rgba(255,255,255,.3); color:rgba(255,255,255,.9); padding: 0.4rem 0.8rem; font-size:0.7rem;">
+                                ✓ Valider le Matching
+                            </button>
+                        </form>
+                    @elseif($student->profile && $student->profile->manual_match_approved)
+                        <span class="sp-ai-badge" style="background:var(--accent3); border-color:var(--accent3); color:#fff;">✅ Matching Validé</span>
+                    @endif
+                </div>
                 <p class="sp-ai-text">
                     "{{ $student->profile->summary ?? 'Le système structure actuellement les données pour générer une synthèse prédictive optimale.' }}"
                 </p>
@@ -508,9 +520,35 @@
                 </div>
             </div>
 
-            {{-- Quick Actions --}}
-            <div class="card sp-side-card rev rev-d3" style="text-align:center;">
-                <p class="stag" style="justify-content:center;margin-bottom:1rem;">Actions rapides</p>
+            {{-- Appointments & Quick Actions --}}
+            <div class="card sp-side-card rev rev-d3">
+                <p class="stag" style="margin-bottom:1rem;">Rendez-vous</p>
+                <form action="{{ route('counselor.appointments.store', $student) }}" method="POST" style="margin-bottom:1.5rem;">
+                    @csrf
+                    <div style="margin-bottom:.8rem;">
+                        <input type="datetime-local" name="scheduled_at" required
+                               style="width:100%; padding:.6rem; border:1px solid var(--ink10); border-radius:var(--r); font-family:inherit; font-size:.8rem; background:var(--paper);">
+                    </div>
+                    <div style="margin-bottom:.8rem;">
+                        <input type="text" name="notes" placeholder="Motif (optionnel)" 
+                               style="width:100%; padding:.6rem; border:1px solid var(--ink10); border-radius:var(--r); font-family:inherit; font-size:.8rem; background:var(--paper);">
+                    </div>
+                    <button type="submit" class="btn-fill" style="width:100%; justify-content:center; padding:.6rem;">Planifier</button>
+                </form>
+
+                @if($appointments->count() > 0)
+                    <div style="margin-bottom:1.5rem;">
+                        <p class="sp-info-row-label" style="margin-bottom:.5rem;">Historique</p>
+                        @foreach($appointments as $apt)
+                            <div style="font-size:.75rem; padding:.5rem; background:var(--ink06); border-radius:var(--r); margin-bottom:.4rem;">
+                                <strong>{{ $apt->scheduled_at->format('d/m/Y H:i') }}</strong>
+                                @if($apt->notes)<br><span style="color:var(--ink60);">{{ $apt->notes }}</span>@endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <p class="stag" style="margin-bottom:1rem;">Actions rapides</p>
                 <div style="display:flex;flex-direction:column;gap:.6rem;">
                     <a href="mailto:{{ $student->email }}" class="btn-ghost" style="justify-content:center;">
                         ✉️ Envoyer un email

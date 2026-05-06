@@ -54,6 +54,26 @@ class User extends Authenticatable
         return $this->hasOne(Profile::class);
     }
 
+    public function portfolioItems(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PortfolioItem::class);
+    }
+
+    public function careerRoadmaps(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CareerRoadmap::class);
+    }
+
+    public function orientationVoeux(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(OrientationVoeu::class);
+    }
+
+    public function simulationHistory(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SimulationHistory::class);
+    }
+
     /**
      * Check if the user is an admin (separate from role).
      */

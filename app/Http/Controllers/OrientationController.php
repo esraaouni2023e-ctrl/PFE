@@ -40,8 +40,10 @@ class OrientationController extends Controller
         $domaines = ['Toutes', 'Technologie', 'Santé', 'Sciences', 'Gestion', 'Arts', 'Droit', 'Éducation'];
         $niveaux  = ['Licence', 'Master', 'Ingénierie', 'Doctorat'];
 
+        $userVoeuxIds = auth()->check() ? auth()->user()->orientationVoeux()->pluck('formation_id')->toArray() : [];
+
         return view('student.orientation', compact(
-            'specialites', 'formations', 'domaine', 'search', 'niveau', 'domaines', 'niveaux'
+            'specialites', 'formations', 'domaine', 'search', 'niveau', 'domaines', 'niveaux', 'userVoeuxIds'
         ));
     }
 

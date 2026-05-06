@@ -634,57 +634,121 @@
 </section>
 
 {{-- ════════════════════════════════
-     § 3 · PARCOURS SUR MESURE
+     § 2.5 · PORTFOLIO DE COMPÉTENCES
+════════════════════════════════ --}}
+<section class="db-section rev" id="portfolio-section">
+    <div class="db-section-header">
+        <div>
+            <p class="stag">Mes Réalisations</p>
+            <h2 class="sh">Portfolio & <em>Certifications</em></h2>
+        </div>
+    </div>
+
+    <div class="db-portfolio-container" style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-bottom: 3rem;">
+        {{-- Upload Zone --}}
+        <div class="card" style="padding: 2rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-style: dashed; border-width: 2px;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📁</div>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 1.2rem; margin-bottom: 0.5rem;">Ajouter un document</h3>
+            <p style="font-size: 0.85rem; color: var(--ink60); margin-bottom: 1.5rem;">L'IA analysera votre certificat ou projet pour extraire vos compétences réelles.</p>
+            
+            <form action="{{ route('student.portfolio.store') }}" method="POST" enctype="multipart/form-data" style="width: 100%;">
+                @csrf
+                <input type="text" name="title" placeholder="Titre (ex: Certificat Python)" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: var(--r); border: 1px solid var(--ink10); background: var(--paper);">
+                <select name="type" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: var(--r); border: 1px solid var(--ink10); background: var(--paper);">
+                    <option value="certificate">Certificat</option>
+                    <option value="project">Projet</option>
+                    <option value="document">Autre Document</option>
+                </select>
+                <input type="file" name="file" accept=".pdf,.jpg,.png" required style="margin-bottom: 1rem; width: 100%; font-size: 0.85rem;">
+                <button type="submit" class="btn-fill" style="width: 100%; justify-content: center;">🚀 Uploader & Analyser</button>
+            </form>
+        </div>
+
+        {{-- Uploaded Items --}}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            @forelse($portfolios as $item)
+            <div class="card" style="padding: 1.5rem; display: flex; gap: 1.5rem; align-items: flex-start;">
+                <div style="width: 50px; height: 50px; border-radius: var(--r); background: var(--ink10); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                    {{ $item->type === 'certificate' ? '🎓' : '📄' }}
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="font-family: 'Fraunces', serif; font-size: 1.1rem; margin-bottom: 0.25rem;">{{ $item->title }}</h4>
+                    <p style="font-size: 0.85rem; color: var(--ink60); margin-bottom: 0.75rem;">{{ $item->ai_analysis_summary ?? 'Analyse en cours...' }}</p>
+                    
+                    @if($item->extracted_skills)
+                    <div class="db-tags">
+                        @foreach($item->extracted_skills as $skill)
+                        <span class="db-tag" style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">{{ is_array($skill) ? json_encode($skill) : $skill }}</span>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+                <form action="{{ route('student.portfolio.destroy', $item) }}" method="POST">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn-ghost" style="padding: 0.5rem; color: #d93838; border-color: transparent;">🗑️</button>
+                </form>
+            </div>
+            @empty
+            <div class="card" style="padding: 3rem 2rem; text-align: center; color: var(--ink30);">
+                <p>Aucun document dans votre portfolio pour le moment.</p>
+            </div>
+            @endforelse
+        </div>
+    </div>
+</section>
+
+{{-- ════════════════════════════════
+     § 3 · ROADMAP DE CARRIÈRE (TIMELINE)
 ════════════════════════════════ --}}
 <section class="db-section rev" id="parcours-section">
     <div class="db-section-header">
         <div>
             <p class="stag">Sur mesure</p>
-            <h2 class="sh">Tes parcours <em>personnalisés</em></h2>
+            <h2 class="sh">Ta Roadmap de <em>Carrière</em></h2>
         </div>
-        <a href="#" class="btn-ghost">Explorer tous →</a>
     </div>
 
-    @php
-    $parcours = [
-        ['icon'=>'💻','title'=>'Génie Informatique & IA',  'score'=>94,'desc'=>"Algorithmes, machine learning, développement full-stack. Le parcours le plus demandé de 2026.",'duration'=>'5 ans','salary'=>'3 200–5 800 DT/mois','tag'=>'IA Recommandé','featured'=>true],
-        ['icon'=>'🧬','title'=>'Bio-Informatique',          'score'=>88,'desc'=>'Alliance parfaite entre biologie et data science.','duration'=>'5 ans','salary'=>'2 800–4 500 DT/mois','tag'=>'Avenir radieux'],
-        ['icon'=>'🌍','title'=>'Green IT & ESG Tech',       'score'=>82,'desc'=>'Infrastructures durables et transformation digitale écologique.','duration'=>'3 ans','salary'=>'2 400–3 800 DT/mois','tag'=>'Impact social'],
-        ['icon'=>'🎨','title'=>'Design UX / Product',       'score'=>79,'desc'=>'Conception centrée utilisateur, recherche et prototypage.','duration'=>'3 ans','salary'=>'2 000–3 500 DT/mois','tag'=>'Créatif'],
-        ['icon'=>'📊','title'=>'Data Science & Analytics',  'score'=>86,'desc'=>'Analyse prédictive, visualisation et prise de décision data-driven.','duration'=>'4 ans','salary'=>'2 800–5 000 DT/mois','tag'=>'IA Recommandé'],
-    ];
-    @endphp
-
-    <div class="db-parcours-grid">
-        @foreach($parcours as $p)
-        <div class="db-pc {{ isset($p['featured']) && $p['featured'] ? 'featured' : '' }} rev rev-d{{ $loop->index + 1 }}">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
-                <div class="db-pc-icon">{{ $p['icon'] }}</div>
-                <div style="text-align:right;">
-                    <div class="db-pc-score-num">{{ $p['score'] }}%</div>
-                    <div class="db-pc-score-label">matching</div>
-                </div>
+    @if($roadmaps->count() > 0)
+        @foreach($roadmaps as $roadmap)
+        <div class="card" style="padding: 2.5rem; margin-bottom: 1.5rem; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h3 style="font-family: 'Fraunces', serif; font-size: 1.5rem; color: var(--accent);">Objectif : {{ $roadmap->target_job }}</h3>
+                <span class="pill pill-sage">Généré par IA</span>
             </div>
 
-            <h3 class="db-pc-title">{{ $p['title'] }}</h3>
-            <p class="db-pc-desc">{{ $p['desc'] }}</p>
-
-            <div>
-                <span class="db-pc-meta">⏱ {{ $p['duration'] }}</span>
-                <span class="db-pc-meta">💰 {{ $p['salary'] }}</span>
-            </div>
-
-            <div class="db-pc-bottom">
-                @if(isset($p['featured']) && $p['featured'])
-                    <span class="pill pill-gold">✦ {{ $p['tag'] }}</span>
-                @else
-                    <span class="pill pill-accent">✦ {{ $p['tag'] }}</span>
+            <div style="position: relative; padding-left: 2rem; border-left: 2px solid var(--ink10); display: flex; flex-direction: column; gap: 2rem;">
+                @if(is_array($roadmap->steps))
+                    @foreach($roadmap->steps as $step)
+                    <div style="position: relative;">
+                        {{-- Timeline Dot --}}
+                        <div style="position: absolute; left: -2.65rem; top: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); border: 4px solid var(--paper);"></div>
+                        
+                        <div style="background: var(--paper); border: 1px solid var(--ink10); border-radius: var(--rl); padding: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <h4 style="font-weight: 600; font-size: 1.1rem;">{{ $step['title'] ?? 'Étape' }}</h4>
+                                <span class="pill pill-gold">{{ $step['duration'] ?? '' }}</span>
+                            </div>
+                            <p style="font-size: 0.9rem; color: var(--ink60); line-height: 1.6;">{{ $step['description'] ?? '' }}</p>
+                        </div>
+                    </div>
+                    @endforeach
                 @endif
-                <button class="db-pc-arrow">→</button>
             </div>
         </div>
         @endforeach
-    </div>
+    @else
+        <div class="card" style="padding: 3rem 2rem; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 1.5rem; margin-bottom: 1rem;">Créez votre chemin vers le succès</h3>
+            <p style="color: var(--ink60); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">Entrez le métier de vos rêves et laissez l'IA tracer le chemin universitaire exact étape par étape pour y arriver.</p>
+            
+            <form action="{{ route('student.roadmap.generate') }}" method="POST" style="display: flex; gap: 1rem; max-width: 500px; margin: 0 auto;">
+                @csrf
+                <input type="text" name="target_job" placeholder="Ex: Data Scientist, Ingénieur IA..." required style="flex: 1; padding: 0.8rem 1.2rem; border-radius: var(--rx); border: 1px solid var(--ink30); background: transparent;">
+                <button type="submit" class="btn-fill" style="border-radius: var(--rx);">✨ Générer</button>
+            </form>
+        </div>
+    @endif
 </section>
 
 {{-- ════════════════════════════════
@@ -698,19 +762,8 @@
         </div>
     </div>
 
-    @php
-    $formations = [
-        ['icon'=>'🖥️','name'=>'Licence Informatique',  'univ'=>'ESPRIT – Tunis',       'score'=>95],
-        ['icon'=>'📊','name'=>'Master Data Science',   'univ'=>'ENSI – La Manouba',     'score'=>91],
-        ['icon'=>'🤖','name'=>'Ingénierie IA',          'univ'=>'SUP\'COM – Tunis',      'score'=>88],
-        ['icon'=>'🔒','name'=>'Cybersécurité',          'univ'=>'ISI – Tunis',           'score'=>84],
-        ['icon'=>'🌐','name'=>'Développement Web',      'univ'=>'ISET – Sfax',           'score'=>80],
-        ['icon'=>'📱','name'=>'Développement Mobile',   'univ'=>'ISIM – Monastir',       'score'=>76],
-    ];
-    @endphp
-
     <div class="db-matching-grid">
-        @foreach($formations as $f)
+        @foreach($predictions as $f)
         <div class="db-mcard rev rev-d{{ ($loop->index % 3) + 1 }}">
             <div class="db-mcard-head">
                 <div class="db-mcard-icon">{{ $f['icon'] }}</div>
@@ -722,16 +775,16 @@
 
             <div>
                 <div class="db-bar-row">
-                    <span class="db-bar-label">Compatibilité</span>
-                    <span class="db-bar-score">{{ $f['score'] }}%</span>
+                    <span class="db-bar-label">Chances d'Admission</span>
+                    <span class="db-bar-score" style="color: {{ $f['score'] > 80 ? 'var(--accent3)' : ($f['score'] > 60 ? 'var(--gold)' : 'var(--accent)') }};">{{ $f['score'] }}%</span>
                 </div>
                 <div class="db-bar-track">
-                    <div class="db-bar-fill match-bar-fill" style="width:{{ $f['score'] }}%;"></div>
+                    <div class="db-bar-fill match-bar-fill" style="width:{{ $f['score'] }}%; background: {{ $f['score'] > 80 ? 'var(--accent3)' : ($f['score'] > 60 ? 'var(--gold)' : 'var(--accent)') }};"></div>
                 </div>
             </div>
 
             <div class="db-mcard-foot">
-                <span class="pill pill-sage" style="font-size:.7rem;">+{{ $f['score'] }}% compat.</span>
+                <span class="pill pill-sage" style="font-size:.7rem; background: {{ $f['score'] > 80 ? 'color-mix(in srgb,var(--accent3) 10%,transparent)' : ($f['score'] > 60 ? 'color-mix(in srgb,var(--gold) 10%,transparent)' : 'color-mix(in srgb,var(--accent) 10%,transparent)') }}; color: {{ $f['score'] > 80 ? 'var(--accent3)' : ($f['score'] > 60 ? 'var(--gold)' : 'var(--accent)') }}; border-color: currentColor;">Score IA</span>
                 <button class="btn-ghost" style="padding:.4rem .9rem;font-size:.78rem;">Détails →</button>
             </div>
         </div>

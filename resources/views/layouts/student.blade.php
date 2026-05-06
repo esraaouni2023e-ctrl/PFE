@@ -413,21 +413,15 @@
         <ul class="navbar-nav">
             <li><a href="{{ route('student.dashboard') }}"    class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Accueil</a></li>
             <li><a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">🧭 Orientation</a></li>
-            <li><a href="#test-section">Test Intelligent</a></li>
-            <li><a href="#profile-section">Profil IA</a></li>
-            <li><a href="#parcours-section">Parcours</a></li>
-            <li><a href="#matching-section">Matching</a></li>
-            <li><a href="#simulator-section">Simulateur</a></li>
+            <li><a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">🧪 What-If</a></li>
+            <li><a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">📊 Comparateur</a></li>
+            <li><a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">❤️ Vœux</a></li>
+            <li><a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">🎓 Profil Académique</a></li>
         </ul>
 
         <!-- Right controls -->
         <div class="navbar-right">
             <button class="theme-toggle" id="themeToggle" title="Basculer le thème">🌙</button>
-
-            <button class="chat-bubble-nav" id="openChatBtn" title="Assistant IA">
-                💬
-                <span class="chat-online-dot"></span>
-            </button>
 
             <div class="avatar-nav" title="{{ auth()->user()->name }}">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
@@ -456,11 +450,10 @@
         <div class="mobile-nav-drawer">
             <a href="{{ route('student.dashboard') }}"   class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">🏠 Accueil</a>
             <a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">🧭 Orientation</a>
-            <a href="#test-section">🧠 Test Intelligent</a>
-            <a href="#profile-section">⚡ Profil IA</a>
-            <a href="#parcours-section">🛤️ Parcours</a>
-            <a href="#matching-section">🎯 Matching</a>
-            <a href="#simulator-section">🔮 Simulateur</a>
+            <a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">🧪 What-If</a>
+            <a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">📊 Comparateur</a>
+            <a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">❤️ Vœux</a>
+            <a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">🎓 Profil Académique</a>
             <a href="{{ route('profile.edit') }}">👤 Mon Profil</a>
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto">
                 @csrf
@@ -514,7 +507,7 @@
     <style>
         /* ─── Floating chat bubble ─── */
         .floating-chat-bubble {
-            display: none;
+            display: flex;
             position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 990;
             width: 54px; height: 54px; border-radius: 50%;
             background: var(--accent);
@@ -529,7 +522,6 @@
             width: 11px; height: 11px; border-radius: 50%;
             background: var(--accent3); border: 2px solid var(--paper);
         }
-        @media (max-width: 1024px) { .floating-chat-bubble { display: flex; } }
 
         /* ─── Chat panel ─── */
         .chat-panel {
@@ -676,7 +668,6 @@
 
         /* ── Chat panel ── */
         const chatPanel   = document.getElementById('chatPanel');
-        const openChatBtn = document.getElementById('openChatBtn');
         const closeChatBtn= document.getElementById('closeChatBtn');
         const floatingChat= document.getElementById('floatingChat');
         const chatInput   = document.getElementById('chatInput');
@@ -689,7 +680,6 @@
         const openChat  = () => { chatPanel.classList.add('open'); chatInput?.focus(); };
         const closeChat = () => chatPanel.classList.remove('open');
 
-        openChatBtn?.addEventListener('click', openChat);
         floatingChat?.addEventListener('click', openChat);
         closeChatBtn?.addEventListener('click', closeChat);
 

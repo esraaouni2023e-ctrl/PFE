@@ -19,4 +19,9 @@ class Formation extends Model
     {
         return $this->belongsTo(Specialite::class);
     }
+
+    public function orientationVoeux(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(OrientationVoeu::class);
+    }
 }
