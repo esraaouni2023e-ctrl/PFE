@@ -64,7 +64,8 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'role' => \App\Http\Middleware\EnsureUserHasRole::class,
-        'admin' => \App\Http\Middleware\EnsureIsAdmin::class,
+        'role'        => \App\Http\Middleware\EnsureUserHasRole::class,
+        'admin'       => \App\Http\Middleware\EnsureIsAdmin::class,
+        'riasec.test' => \App\Http\Middleware\EnsureTestInProgress::class,
     ];
 }

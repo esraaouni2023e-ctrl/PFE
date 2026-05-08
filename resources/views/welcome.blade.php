@@ -108,8 +108,180 @@ nav.scrolled{
 /* ── HERO ── */
 .hero{
   min-height:100vh;position:relative;overflow:hidden;
-  display:grid;place-items:center;
+  display:flex;align-items:center;
   padding:8rem 3rem 5rem;
+}
+.hero-inner{
+  max-width:1200px;width:100%;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:5rem;align-items:center;
+  position:relative;z-index:10;
+}
+
+/* Subtle radial glow BG */
+.hero::before{
+  content:'';position:absolute;
+  width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,
+    color-mix(in srgb,var(--accent) 10%,transparent),
+    transparent 65%);
+  right:-10%;top:50%;transform:translateY(-50%);
+  pointer-events:none;z-index:0;
+}
+.hero::after{
+  content:'';position:absolute;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,
+    color-mix(in srgb,var(--accent2) 12%,transparent),
+    transparent 65%);
+  left:-5%;bottom:10%;
+  pointer-events:none;z-index:0;
+}
+
+.hero-left{position:relative;z-index:10;}
+.hero-right{
+  position:relative;z-index:10;
+  display:flex;justify-content:center;align-items:center;
+  animation:fadeUp .9s var(--ease) .35s both;
+}
+
+/* ── HERO MOCKUP CARD ── */
+.hero-mockup{
+  width:100%;max-width:480px;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);
+  border:1px solid var(--ink10);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.14),0 8px 24px rgba(0,0,0,.08);
+  backdrop-filter:blur(20px);
+}
+.hero-mockup-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.85rem 1.25rem;
+  border-bottom:1px solid var(--ink10);
+  background:var(--cream);
+}
+.hmb-dots{display:flex;gap:.4rem;}
+.hmb-dot{
+  width:10px;height:10px;border-radius:50%;
+}
+.hmb-dot:nth-child(1){background:#ff5f57;}
+.hmb-dot:nth-child(2){background:#ffbd2e;}
+.hmb-dot:nth-child(3){background:#28ca41;}
+.hmb-title{
+  font-size:.78rem;font-weight:600;color:var(--ink60);
+  letter-spacing:.04em;
+}
+.hmb-badge{
+  display:flex;align-items:center;gap:.35rem;
+  font-size:.7rem;font-weight:600;color:var(--accent3);
+  background:color-mix(in srgb,var(--accent3) 12%,transparent);
+  padding:.25rem .65rem;border-radius:99px;
+}
+.hmb-badge-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent3);
+  animation:dotPulse 2s ease-in-out infinite;
+}
+.hero-mockup-body{padding:1.5rem;}
+
+/* Profile score row */
+.hm-profile{
+  display:flex;align-items:center;gap:1rem;
+  padding:1rem 1.25rem;
+  background:var(--cream);
+  border-radius:12px;
+  margin-bottom:1.25rem;
+}
+.hm-avatar{
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces',serif;font-size:1.1rem;font-weight:600;color:#fff;
+  flex-shrink:0;
+}
+.hm-profile-info{flex:1;min-width:0;}
+.hm-name{font-size:.88rem;font-weight:600;color:var(--ink);}
+.hm-sub{font-size:.75rem;color:var(--ink60);margin-top:.1rem;}
+.hm-score{
+  font-family:'Fraunces',serif;font-size:1.5rem;font-weight:600;
+  color:var(--accent);letter-spacing:-.04em;line-height:1;
+}
+.hm-score-label{font-size:.65rem;color:var(--ink60);text-align:right;}
+
+/* Match cards */
+.hm-label{
+  font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink60);margin-bottom:.75rem;
+}
+.hm-match{
+  display:flex;flex-direction:column;gap:.6rem;
+  margin-bottom:1.25rem;
+}
+.hm-match-row{
+  display:flex;align-items:center;gap:.75rem;
+}
+.hm-match-icon{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;
+}
+.hm-match-icon.c1{background:color-mix(in srgb,var(--accent) 12%,transparent);}
+.hm-match-icon.c2{background:color-mix(in srgb,var(--accent2) 12%,transparent);}
+.hm-match-icon.c3{background:color-mix(in srgb,var(--accent3) 12%,transparent);}
+.hm-match-info{flex:1;min-width:0;}
+.hm-match-name{font-size:.82rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hm-bar-wrap{
+  height:5px;background:var(--ink10);border-radius:99px;margin-top:.3rem;
+  overflow:hidden;
+}
+.hm-bar-fill{
+  height:100%;border-radius:99px;
+  animation:barGrow 1.4s var(--ease) both;
+}
+.hm-bar-fill.f1{background:var(--accent);width:92%;animation-delay:.5s;}
+.hm-bar-fill.f2{background:var(--accent2);width:79%;animation-delay:.65s;}
+.hm-bar-fill.f3{background:var(--accent3);width:67%;animation-delay:.8s;}
+@keyframes barGrow{from{width:0;}}
+.hm-pct{font-size:.78rem;font-weight:700;color:var(--ink);min-width:32px;text-align:right;}
+
+/* Action chip at bottom */
+.hm-action{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 1.1rem;
+  border-radius:10px;
+  border:1px solid var(--ink10);
+  background:var(--warm);
+  cursor:default;
+}
+.hm-action-text{font-size:.82rem;font-weight:500;color:var(--ink);}
+.hm-action-badge{
+  font-size:.72rem;font-weight:700;
+  color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);
+  padding:.25rem .65rem;border-radius:99px;
+}
+
+/* Floating stat chips outside card */
+.hm-float{
+  position:absolute;
+  display:flex;align-items:center;gap:.5rem;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);
+  backdrop-filter:blur(16px);
+  border:1px solid var(--ink10);
+  border-radius:12px;
+  padding:.55rem 1rem;
+  font-size:.78rem;font-weight:600;color:var(--ink);
+  box-shadow:0 8px 24px rgba(0,0,0,.1);
+  white-space:nowrap;
+  animation:pillFloat ease-in-out infinite;
+}
+.hm-float-dot{
+  width:8px;height:8px;border-radius:50%;
+}
+.hm-float-1{top:-18px;right:12%;animation-duration:4.5s;animation-delay:0s;}
+.hm-float-2{bottom:-18px;left:8%;animation-duration:5.2s;animation-delay:-.9s;}
+@keyframes pillFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-8px);}
 }
 
 /* Large editorial BG text */
@@ -257,6 +429,82 @@ nav.scrolled{
   animation:fadeUp .9s var(--ease) .4s both;
 }
 .trust-stat{}
+/* ── (old orb / ring / pill styles removed — replaced by hero-mockup above) ── */
+
+.hero-content{position:relative;z-index:10;max-width:700px;}
+
+/* Status tag */
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:.5rem;
+  margin-bottom:2rem;
+  padding:.4rem 1rem;border-radius:var(--rx);
+  border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);
+  background:color-mix(in srgb,var(--accent) 8%,transparent);
+  font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--accent);
+  animation:fadeUp .7s var(--ease) both;
+  width:fit-content;
+}
+.eyebrow-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--accent3);
+  animation:dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 color-mix(in srgb,var(--accent3) 50%,transparent);}50%{opacity:.6;box-shadow:0 0 0 6px transparent;}}
+
+/* Giant title */
+.hero-title{
+  font-family:'Fraunces',serif;
+  font-size:clamp(2.8rem,5.5vw,5.5rem);
+  font-weight:300;line-height:1.06;letter-spacing:-.04em;
+  margin-bottom:1.5rem;
+  animation:fadeUp .9s var(--ease) .1s both;
+}
+.hero-title em{font-style:italic;color:var(--accent);}
+.hero-title strong{font-weight:600;}
+
+.hero-sub{
+  font-size:1rem;color:var(--ink60);line-height:1.8;
+  max-width:480px;margin-bottom:2.5rem;
+  animation:fadeUp .9s var(--ease) .2s both;
+}
+
+.hero-ctas{
+  display:flex;gap:1rem;flex-wrap:wrap;
+  animation:fadeUp .9s var(--ease) .3s both;
+}
+.btn-main{
+  display:inline-flex;align-items:center;gap:.65rem;
+  padding:.9rem 1.85rem;border-radius:var(--r);
+  background:var(--accent);color:#fff;
+  font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:500;
+  border:none;cursor:pointer;
+  box-shadow:0 8px 32px color-mix(in srgb,var(--accent) 40%,transparent),0 2px 8px rgba(0,0,0,.15);
+  transition:all .3s var(--ease);
+  position:relative;overflow:hidden;
+}
+.btn-main::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+  opacity:0;transition:.3s;
+}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 16px 48px color-mix(in srgb,var(--accent) 45%,transparent);}
+.btn-main:hover::after{opacity:1;}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.9rem 1.85rem;border-radius:var(--r);
+  background:transparent;border:1px solid var(--ink30);
+  color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:500;
+  cursor:pointer;transition:all .3s;
+}
+.btn-ghost:hover{background:var(--ink10);border-color:var(--ink60);}
+
+/* Trust bar */
+.hero-trust{
+  display:flex;align-items:center;gap:2rem;flex-wrap:wrap;
+  margin-top:3rem;padding-top:2rem;
+  border-top:1px solid var(--ink10);
+  animation:fadeUp .9s var(--ease) .4s both;
+}
 .trust-num{
   font-family:'Fraunces',serif;font-size:2rem;font-weight:600;
   letter-spacing:-.04em;color:var(--ink);
@@ -618,6 +866,9 @@ footer{
 
 /* ── RESPONSIVE ── */
 @media(max-width:1100px){
+  .hero-inner{grid-template-columns:1fr;gap:3rem;}
+  .hero-right{order:-1;} /* mockup above text on tablet */
+  .hero-mockup{max-width:460px;}
   .features-layout{grid-template-columns:1fr;}
   .features-intro{max-width:600px;}
   .process-grid{grid-template-columns:1fr 1fr;}
@@ -632,8 +883,10 @@ footer{
   nav{padding:1rem 1.5rem;}
   nav.scrolled{padding:.75rem 1.5rem;}
   .nav-links,.nav-right .btn-nav:first-child{display:none;}
-  .hero{padding:7rem 1.5rem 4rem;}
-  .hero-bg-word,.hero-circle,.hero-ring,.ring-pill{display:none;}
+  .hero{padding:6rem 1.5rem 4rem;}
+  .hero-inner{gap:2.5rem;}
+  .hero-right{display:none;} /* hide mockup on small phones */
+  .hero-title{font-size:clamp(2.4rem,9vw,3.5rem);}
   .container{padding:0 1.5rem;}
   .section-pad{padding:5rem 0;}
   .stats-inner{grid-template-columns:1fr 1fr;gap:1.5rem;}
@@ -641,7 +894,7 @@ footer{
   .footer-top{grid-template-columns:1fr 1fr;}
   .process-grid{grid-template-columns:1fr;border-radius:0;}
   .process-step{border-right:none;border-bottom:1px solid var(--ink10);}
-  .hero-trust{gap:1.5rem;}
+  .hero-trust{gap:1.25rem;}
   .trust-divider{display:none;}
 }
 </style>
@@ -669,67 +922,137 @@ footer{
 
 <!-- ═══ HERO ═══ -->
 <section class="hero">
-  <!-- Large BG editorial text -->
-  <div class="hero-bg-word">Avenir</div>
+  <div class="hero-inner">
 
-  <!-- Decorative orb -->
-  <div class="hero-circle"></div>
-  <div class="hero-ring hero-ring-1"></div>
-  <div class="hero-ring hero-ring-2"></div>
-
-  <!-- Floating career pills -->
-  <div class="ring-pill rp1">🎨 Design UX</div>
-  <div class="ring-pill rp2">💻 Génie logiciel</div>
-  <div class="ring-pill rp3">🔬 Data Science</div>
-  <div class="ring-pill rp4">⚕️ Médecine</div>
-  <div class="ring-pill rp5">🏛️ Architecture</div>
-
-  <div class="hero-content">
-    <div class="hero-eyebrow">
-      <span class="eyebrow-dot"></span>
-      Orientation IA · Tunisie 2026
-    </div>
-
-    <h1 class="hero-title">
-      Trouve la voie<br>
-      qui te <em>ressemble</em><br>
-      <strong>vraiment.</strong>
-    </h1>
-
-    <p class="hero-sub">
-      CapAvenir analyse tes aptitudes, valeurs et ambitions grâce à l'IA pour te proposer un parcours universitaire sur mesure — adapté au système éducatif tunisien.
-    </p>
-
-    <div class="hero-ctas">
-      <a href="/register" class="btn-main">
-        Découvrir mon orientation <span>→</span>
-      </a>
-      <a href="#process" class="btn-ghost">
-        Voir comment ça marche
-      </a>
-    </div>
-
-    <div class="hero-trust">
-      <div class="trust-stat">
-        <span class="trust-num" data-count="15000">0</span>
-        <div class="trust-label">Jeunes orientés</div>
+    <!-- ── LEFT: Copy ── -->
+    <div class="hero-left">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        Orientation IA · Tunisie 2026
       </div>
-      <div class="trust-divider"></div>
-      <div class="trust-stat">
-        <span class="trust-num" data-count="94">0</span>
-        <div class="trust-label">% de satisfaction</div>
+
+      <h1 class="hero-title">
+        Trouve la voie<br>
+        qui te <em>ressemble</em><br>
+        <strong>vraiment.</strong>
+      </h1>
+
+      <p class="hero-sub">
+        CapAvenir analyse tes aptitudes, valeurs et ambitions grâce à l'IA pour te proposer un parcours universitaire sur mesure — adapté au système éducatif tunisien.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="/register" class="btn-main">
+          Découvrir mon orientation <span>→</span>
+        </a>
+        <a href="#process" class="btn-ghost">
+          Comment ça marche
+        </a>
       </div>
-      <div class="trust-divider"></div>
-      <div class="trust-stat">
-        <span class="trust-num">12 min</span>
-        <div class="trust-label">Pour ton profil complet</div>
-      </div>
-      <div class="trust-divider"></div>
-      <div class="trust-stat">
-        <span class="trust-num">100%</span>
-        <div class="trust-label">Gratuit pour commencer</div>
+
+      <div class="hero-trust">
+        <div class="trust-stat">
+          <span class="trust-num" data-count="15000">0</span>
+          <div class="trust-label">Jeunes orientés</div>
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-stat">
+          <span class="trust-num" data-count="94">0</span>
+          <div class="trust-label">% satisfaction</div>
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-stat">
+          <span class="trust-num">12 min</span>
+          <div class="trust-label">Profil complet</div>
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-stat">
+          <span class="trust-num">100%</span>
+          <div class="trust-label">Gratuit</div>
+        </div>
       </div>
     </div>
+
+    <!-- ── RIGHT: Dashboard Mockup ── -->
+    <div class="hero-right">
+      <!-- Floating chips -->
+      <div class="hm-float hm-float-1">
+        <div class="hm-float-dot" style="background:var(--accent3);"></div>
+        IA active · Analyse en cours
+      </div>
+      <div class="hm-float hm-float-2">
+        <div class="hm-float-dot" style="background:var(--gold);"></div>
+        3 nouvelles recommandations
+      </div>
+
+      <div class="hero-mockup">
+        <!-- Window bar -->
+        <div class="hero-mockup-bar">
+          <div class="hmb-dots">
+            <div class="hmb-dot"></div>
+            <div class="hmb-dot"></div>
+            <div class="hmb-dot"></div>
+          </div>
+          <span class="hmb-title">Mon profil CapAvenir</span>
+          <div class="hmb-badge">
+            <div class="hmb-badge-dot"></div>
+            En ligne
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="hero-mockup-body">
+          <!-- Student profile row -->
+          <div class="hm-profile">
+            <div class="hm-avatar">A</div>
+            <div class="hm-profile-info">
+              <div class="hm-name">Amira Khediri</div>
+              <div class="hm-sub">Bac Sciences · 16.4/20</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="hm-score">92<small style="font-size:.9rem;font-weight:300;">%</small></div>
+              <div class="hm-score-label">Score profil</div>
+            </div>
+          </div>
+
+          <!-- Match bars -->
+          <p class="hm-label">Top formations recommandées</p>
+          <div class="hm-match">
+            <div class="hm-match-row">
+              <div class="hm-match-icon c1">💻</div>
+              <div class="hm-match-info">
+                <div class="hm-match-name">Génie Informatique · INSAT</div>
+                <div class="hm-bar-wrap"><div class="hm-bar-fill f1"></div></div>
+              </div>
+              <div class="hm-pct">92%</div>
+            </div>
+            <div class="hm-match-row">
+              <div class="hm-match-icon c2">📊</div>
+              <div class="hm-match-info">
+                <div class="hm-match-name">Data Science · ENIT</div>
+                <div class="hm-bar-wrap"><div class="hm-bar-fill f2"></div></div>
+              </div>
+              <div class="hm-pct">79%</div>
+            </div>
+            <div class="hm-match-row">
+              <div class="hm-match-icon c3">🔬</div>
+              <div class="hm-match-info">
+                <div class="hm-match-name">Biologie · Fac. Sciences Tunis</div>
+                <div class="hm-bar-wrap"><div class="hm-bar-fill f3"></div></div>
+              </div>
+              <div class="hm-pct">67%</div>
+            </div>
+          </div>
+
+          <!-- Bottom action -->
+          <div class="hm-action">
+            <span class="hm-action-text">Voir le rapport complet →</span>
+            <span class="hm-action-badge">Nouveau</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 

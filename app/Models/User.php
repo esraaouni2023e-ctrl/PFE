@@ -74,6 +74,34 @@ class User extends Authenticatable
         return $this->hasMany(SimulationHistory::class);
     }
 
+    // ── Relations RIASEC ──────────────────────────────────────────────────
+
+    /**
+     * Tous les profils RIASEC de cet utilisateur (historique de tests).
+     */
+    public function profilsRiasec(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProfileRiasec::class);
+    }
+
+    /**
+     * Dernier profil RIASEC complété.
+     */
+    public function dernierProfilRiasec(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ProfileRiasec::class)
+                    ->where('statut', ProfileRiasec::STATUT_COMPLET)
+                    ->latestOfMany('complete_at');
+    }
+
+    /**
+     * Toutes les réponses RIASEC de cet utilisateur.
+     */
+    public function reponsesRiasec(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AnswerRiasec::class);
+    }
+
     /**
      * Check if the user is an admin (separate from role).
      */

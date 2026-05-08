@@ -1,0 +1,232 @@
+@extends('layouts.student')
+@section('title', 'Test RIASEC — Découvre ton profil')
+
+@section('content')
+<style>
+/* ── Page wrapper ── */
+.riasec-page { padding: 2.5rem 2.5rem 4rem; max-width: 900px; margin: 0 auto; }
+
+/* ── Eyebrow + Hero ── */
+.riasec-eyebrow {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1rem;
+}
+.riasec-eyebrow::before { content:''; width:14px; height:1px; background:var(--accent); }
+
+.riasec-hero-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem,4vw,3rem);
+    font-weight: 300; letter-spacing: -.04em;
+    font-style: italic; color: var(--ink); line-height: 1.1;
+    margin-bottom: .85rem;
+}
+.riasec-hero-title em { color: var(--accent); font-style: italic; }
+
+.riasec-hero-sub {
+    font-size: .92rem; color: var(--ink60); max-width: 560px;
+    line-height: 1.7; margin-bottom: 2rem;
+}
+
+/* ── Stats ── */
+.riasec-stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+.stat-chip {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .45rem .9rem; border-radius: var(--rx);
+    background: var(--ink06); border: 1px solid var(--glass-border);
+    font-size: .78rem; font-weight: 600; color: var(--ink60);
+}
+.stat-chip strong { color: var(--ink); }
+
+/* ── Resume banner ── */
+.resume-banner {
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    border-radius: var(--rl); padding: 1.1rem 1.4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;
+}
+.resume-banner-text { font-size: .85rem; color: var(--ink60); }
+.resume-banner-text strong { color: var(--ink); }
+.resume-banner-actions { display: flex; gap: .6rem; }
+
+/* ── Dimensions grid ── */
+.dim-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .85rem; margin-bottom: 2.5rem; }
+@media(max-width:640px){ .dim-grid{ grid-template-columns:repeat(2,1fr); } }
+
+.dim-card {
+    background: var(--ink06); border: 1px solid var(--glass-border);
+    border-radius: var(--rl); padding: 1.1rem 1.2rem;
+    transition: border-color .25s var(--ease), transform .25s var(--ease);
+    cursor: default;
+}
+.dim-card:hover { border-color: var(--glass-border-vivid); transform: translateY(-3px); }
+.dim-card-top { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+.dim-letter {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: .9rem; color: #fff; flex-shrink: 0;
+}
+.dim-name  { font-size: .82rem; font-weight: 700; color: var(--ink); }
+.dim-trait { font-size: .72rem; color: var(--ink30); margin-top: .15rem; }
+
+/* ── Instructions card ── */
+.instr-card {
+    background: var(--ink06); border: 1px solid var(--glass-border);
+    border-radius: var(--rl); padding: 1.5rem 1.8rem; margin-bottom: 2.5rem;
+}
+.instr-title {
+    font-family: var(--font-serif); font-size: 1rem; font-style: italic;
+    color: var(--ink); font-weight: 400; margin-bottom: 1rem;
+}
+.instr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+@media(max-width:540px){ .instr-grid{ grid-template-columns:1fr; } }
+.instr-item { display: flex; align-items: flex-start; gap: .6rem; }
+.instr-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+.instr-text { font-size: .82rem; color: var(--ink60); line-height: 1.6; }
+.instr-text strong { color: var(--ink); }
+
+/* ── CTA ── */
+.riasec-cta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+
+.btn-fill {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .8rem 1.8rem; font-family: var(--font-main);
+    font-size: .88rem; font-weight: 600; color: #fff;
+    background: var(--accent); border: none; border-radius: var(--r);
+    cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 18px color-mix(in srgb,var(--accent) 30%,transparent);
+    transition: var(--transition);
+}
+.btn-fill:hover { transform: translateY(-2px); box-shadow: 0 8px 28px color-mix(in srgb,var(--accent) 42%,transparent); }
+
+.btn-ghost {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .75rem 1.4rem; font-family: var(--font-main);
+    font-size: .84rem; font-weight: 600; color: var(--ink60);
+    background: transparent; border: 1px solid var(--glass-border);
+    border-radius: var(--r); cursor: pointer; text-decoration: none;
+    transition: var(--transition);
+}
+.btn-ghost:hover { color: var(--ink); border-color: var(--ink30); background: var(--ink06); }
+
+.cta-note { font-size: .72rem; color: var(--ink30); margin-top: .5rem; }
+</style>
+
+<div class="riasec-page">
+
+    {{-- ── Eyebrow ── --}}
+    <p class="riasec-eyebrow">🧠 Test RIASEC · Théorie Holland</p>
+
+    {{-- ── Titre hero ── --}}
+    <h1 class="riasec-hero-title">
+        Découvre ton <em>profil</em><br>d'orientation
+    </h1>
+    <p class="riasec-hero-sub">
+        {{ $totalQuestions }} questions soigneusement sélectionnées pour identifier tes centres d'intérêt
+        dominants et te guider vers les formations qui te correspondent vraiment.
+    </p>
+
+    {{-- ── Statistiques ── --}}
+    <div class="riasec-stats">
+        <div class="stat-chip">📝 <strong>{{ $totalQuestions }}</strong> questions</div>
+        <div class="stat-chip">⏱ <strong>~8</strong> minutes</div>
+        <div class="stat-chip">🎯 <strong>6</strong> dimensions Holland</div>
+        <div class="stat-chip">🔒 <strong>100%</strong> anonyme</div>
+    </div>
+
+    {{-- ── Bannière test en cours ── --}}
+    @if($hasOngoingTest ?? false)
+    <div class="resume-banner">
+        <div class="resume-banner-text">
+            <strong>⏱ Test en cours</strong> —
+            {{ $progress->answered }} / {{ $progress->total }} questions répondues
+            ({{ round($progress->percentage) }}%)
+        </div>
+        <div class="resume-banner-actions">
+            <a href="{{ route('riasec.question', ['step' => $progress->answered + 1]) }}" class="btn-fill">
+                Continuer →
+            </a>
+            <form action="{{ route('riasec.initialize') }}" method="POST">
+                @csrf <input type="hidden" name="restart" value="1">
+                <button type="submit" class="btn-ghost"
+                        onclick="return confirm('Effacer le test en cours ?')">
+                    Recommencer
+                </button>
+            </form>
+        </div>
+    </div>
+    @endif
+
+    {{-- ── Flash ── --}}
+    @if(session('info'))
+    <div style="background:color-mix(in srgb,var(--accent2) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 22%,transparent);color:var(--accent2);border-radius:var(--r);padding:.65rem 1rem;margin-bottom:1.5rem;font-size:.83rem;">
+        ℹ️ {{ session('info') }}
+    </div>
+    @endif
+
+    {{-- ── Grille des 6 dimensions ── --}}
+    @php
+    $dims = [
+        ['L'=>'R','name'=>'Réaliste',       'trait'=>'Concret · Manuel',     'color'=>'#d4622a','emoji'=>'🔧'],
+        ['L'=>'I','name'=>'Investigateur',   'trait'=>'Analytique · Curieux', 'color'=>'#1a4f6e','emoji'=>'🔬'],
+        ['L'=>'A','name'=>'Artistique',      'trait'=>'Créatif · Expressif',  'color'=>'#c8973a','emoji'=>'🎨'],
+        ['L'=>'S','name'=>'Social',          'trait'=>'Humain · Altruiste',   'color'=>'#4a7c59','emoji'=>'🤝'],
+        ['L'=>'E','name'=>'Entreprenant',    'trait'=>'Leader · Ambitieux',   'color'=>'#7c4a7c','emoji'=>'🚀'],
+        ['L'=>'C','name'=>'Conventionnel',   'trait'=>'Organisé · Rigoureux', 'color'=>'#4a6e6e','emoji'=>'📋'],
+    ];
+    @endphp
+    <div class="dim-grid">
+        @foreach($dims as $d)
+        <div class="dim-card">
+            <div class="dim-card-top">
+                <div class="dim-letter" style="background:{{ $d['color'] }}">{{ $d['L'] }}</div>
+                <span style="font-size:1.3rem;">{{ $d['emoji'] }}</span>
+            </div>
+            <div class="dim-name">{{ $d['name'] }}</div>
+            <div class="dim-trait">{{ $d['trait'] }}</div>
+        </div>
+        @endforeach
+    </div>
+
+    {{-- ── Instructions ── --}}
+    <div class="instr-card">
+        <p class="instr-title">📌 Comment bien répondre ?</p>
+        <div class="instr-grid">
+            <div class="instr-item">
+                <span class="instr-icon">🎯</span>
+                <p class="instr-text">Réponds selon ce que tu <strong>ressens vraiment</strong>, pas selon la «bonne» réponse.</p>
+            </div>
+            <div class="instr-item">
+                <span class="instr-icon">⚡</span>
+                <p class="instr-text">Va vite : ta <strong>première réaction</strong> est souvent la plus honnête.</p>
+            </div>
+            <div class="instr-item">
+                <span class="instr-icon">📊</span>
+                <p class="instr-text">Échelle de <strong>1</strong> (Pas du tout) à <strong>5</strong> (Tout à fait) pour chaque question.</p>
+            </div>
+            <div class="instr-item">
+                <span class="instr-icon">💾</span>
+                <p class="instr-text">Tes réponses sont <strong>sauvegardées automatiquement</strong> à chaque étape.</p>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── CTA ── --}}
+    @if(!($hasOngoingTest ?? false))
+    <form action="{{ route('riasec.initialize') }}" method="POST">
+        @csrf
+        <div class="riasec-cta">
+            <button type="submit" class="btn-fill" style="font-size:.95rem;padding:.9rem 2.2rem;">
+                🚀 Démarrer le test
+            </button>
+            <a href="{{ route('student.orientation') }}" class="btn-ghost">
+                ← Retour à l'orientation
+            </a>
+        </div>
+        <p class="cta-note">Sans inscription requise · Résultats immédiats · Gratuit</p>
+    </form>
+    @endif
+
+</div>
+@endsection

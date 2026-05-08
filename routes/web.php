@@ -125,4 +125,67 @@ Route::delete('/admin/references/criteria/{criterion}', [\App\Http\Controllers\A
 // Audit & Security
 Route::get('/admin/audit', [\App\Http\Controllers\Admin\AuditController::class, 'index'])->name('admin.audit.index');
 
+// ── RIASEC Admin ──────────────────────────────────────────────────────────
+Route::prefix('admin/riasec')->name('admin.riasec.')->group(function () {
+    // Dashboard
+    Route::get('/',        [\App\Http\Controllers\Admin\RiasecAdminController::class, 'dashboard'])->name('dashboard');
+    // Export CSV
+    Route::get('/export',  [\App\Http\Controllers\Admin\RiasecAdminController::class, 'exportCsv'])->name('export');
+
+    // CRUD Questions
+    Route::prefix('questions')->name('questions.')->group(function () {
+        Route::get('/',             [\App\Http\Controllers\Admin\RiasecAdminController::class, 'index'])  ->name('index');
+        Route::get('/create',       [\App\Http\Controllers\Admin\RiasecAdminController::class, 'create']) ->name('create');
+        Route::post('/',            [\App\Http\Controllers\Admin\RiasecAdminController::class, 'store'])  ->name('store');
+        Route::get('/{question}',   [\App\Http\Controllers\Admin\RiasecAdminController::class, 'edit'])   ->name('edit');
+        Route::put('/{question}',   [\App\Http\Controllers\Admin\RiasecAdminController::class, 'update']) ->name('update');
+        Route::delete('/{question}',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'destroy'])->name('destroy');
+        Route::post('/{question}/toggle',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'toggle'])->name('toggle');
+    });
+});
+
+// ── Filières : import Excel ──────────────────────────────────────────────
+Route::get('/admin/filieres/import',              [\App\Http\Controllers\Admin\FiliereImportController::class, 'index']) ->name('admin.filieres.import');
+Route::post('/admin/filieres/import',             [\App\Http\Controllers\Admin\FiliereImportController::class, 'store']) ->name('admin.filieres.import.store');
+Route::delete('/admin/filieres/import/{categorie}',[\App\Http\Controllers\Admin\FiliereImportController::class, 'destroy'])->name('admin.filieres.import.destroy');
+
+// ── Test RIASEC ──────────────────────────────────────────────────────────
+// Accessible aux utilisateurs authentifiés ET aux invités (pas de middleware auth).
+// Le middleware riasec.test protège uniquement les étapes après démarrage.
+Route::prefix('riasec')
+    ->name('riasec.')
+    ->middleware('web')
+    ->group(function () {
+        // ── Démarrage (accessible sans session de test) ─────────────────
+        Route::get('/demarrer',  [\App\Http\Controllers\RiasecTestController::class, 'start'])
+             ->name('start');
+        Route::post('/demarrer', [\App\Http\Controllers\RiasecTestController::class, 'initialize'])
+             ->name('initialize');
+
+        // ── Réinitialisation ────────────────────────────────────────────
+        Route::delete('/reinitialiser', [\App\Http\Controllers\RiasecTestController::class, 'reset'])
+             ->name('reset');
+
+        // ── Résultats (accessible sans session active, via profile_id) ──
+        Route::get('/resultats', [\App\Http\Controllers\RiasecTestController::class, 'results'])
+             ->name('results');
+
+        // ── Étapes protégées : nécessitent une session de test active ───
+        Route::middleware('riasec.test')->group(function () {
+            Route::get('/question/{step}',[\App\Http\Controllers\RiasecTestController::class, 'showQuestion'])
+                 ->name('question')
+                 ->where('step', '[0-9]+');
+
+            Route::post('/repondre',  [\App\Http\Controllers\RiasecTestController::class, 'storeAnswer'])
+                 ->name('answer');
+
+            Route::get('/terminer',   [\App\Http\Controllers\RiasecTestController::class, 'complete'])
+                 ->name('complete');
+
+            Route::get('/progression',[\App\Http\Controllers\RiasecTestController::class, 'progressJson'])
+                 ->name('progress');
+        });
+    });
+
 require __DIR__.'/auth.php';
+

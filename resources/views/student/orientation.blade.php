@@ -32,10 +32,24 @@
                         <span class="pill pill-sage">🎓 {{ $formations->total() }} formations</span>
                         <span class="pill pill-marine">🇹🇳 Tunisie 2026</span>
                     </div>
-                    <a href="{{ route('student.orientation.nova') }}" class="btn-fill or-cta-btn">
-                        ✨ Calculer mon Score FG
-                    </a>
+                    <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+                        <a href="{{ route('student.orientation.nova') }}" class="btn-fill or-cta-btn">
+                            ✨ Calculer mon Score FG
+                        </a>
+                        <a href="{{ route('riasec.start') }}"
+                           style="display:inline-flex;align-items:center;gap:.5rem;
+                                  padding:.7rem 1.4rem;border-radius:8px;font-weight:600;font-size:.85rem;
+                                  background:linear-gradient(135deg,#6366f1,#a855f7);
+                                  color:#fff;text-decoration:none;
+                                  box-shadow:0 4px 18px rgba(99,102,241,0.35);
+                                  transition:all .25s ease;"
+                           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(99,102,241,0.5)'"
+                           onmouseout="this.style.transform='';this.style.boxShadow='0 4px 18px rgba(99,102,241,0.35)'">
+                            🧠 Test RIASEC
+                        </a>
+                    </div>
                 </div>
+
             </div>
         </section>
 
