@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapAvenir — Admin Control Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0a0a12;
+            --bg2: #0d0d1a;
+            --indigo: #6366f1;
+            --violet: #a78bfa;
+            --cyan: #22d3ee;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --glass: rgba(20, 25, 40, 0.45);
+            --glass-border: rgba(100, 120, 255, 0.12);
+            --sidebar-w: 270px;
+            --radius: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 100%, rgba(167, 139, 250, 0.08) 0%, transparent 60%),
+                var(--bg);
+            background-attachment: fixed;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ── SIDEBAR ────────────────────────────────────── */
+        .sidebar {
+            width: var(--sidebar-w);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: rgba(14, 16, 28, 0.72);
+            backdrop-filter: blur(28px) saturate(160%);
+            border-right: 1px solid var(--glass-border);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.25rem;
+            gap: 0.5rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.5rem 0.75rem 1.75rem;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .logo-text span {
+            color: var(--indigo);
+        }
+
+        .nav-section {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.75rem 0.75rem 0.4rem;
+            margin-top: 0.5rem;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.7rem 0.85rem;
+            border-radius: 13px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.22s ease;
+        }
+
+        .nav-item a:hover {
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--text);
+            transform: translateX(4px);
+        }
+
+        .nav-item a.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--indigo);
+            font-weight: 700;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .nav-item a i {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .upgrade-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(167, 139, 250, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 14px;
+            padding: 1rem;
+            margin: 0.75rem 0;
+        }
+
+        .upgrade-card p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .upgrade-card button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        /* ── MAIN LAYOUT ────────────────────────────────── */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 18, 0.75);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0 2.5rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-wrap {
+            position: relative;
+            width: 380px;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.65rem 1rem 0.65rem 2.75rem;
+            color: var(--text);
+            font-size: 0.875rem;
+            outline: none;
+            transition: 0.25s;
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--indigo);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            width: 16px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .icon-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--muted);
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--indigo);
+        }
+
+        .badge-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 7px;
+            height: 7px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--cyan);
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            padding: 0.3rem 1rem 0.3rem 0.3rem;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        .user-chip span {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* ── CONTENT ────────────────────────────────────── */
+        .content {
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.25rem;
+        }
+
+        .section-sub {
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        /* ── GLASS CARD ──────────────────────────────────── */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .glass:hover {
+            transform: translateY(-3px) scale(1.015);
+            box-shadow: 0 20px 52px rgba(0, 0, 0, 0.38);
+            border-color: rgba(100, 120, 255, 0.22);
+        }
+
+        /* ── KPI GRID ────────────────────────────────────── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1.25rem;
+        }
+
+        .kpi-card {
+            padding: 1.5rem;
+        }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .kpi-val {
+            font-size: 1.9rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+
+        .kpi-trend {
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .up {
+            color: #34d399;
+        }
+
+        .down {
+            color: #f87171;
+        }
+
+        .warn {
+            color: var(--cyan);
+        }
+
+        .kpi-alert {
+            background: rgba(34, 211, 238, 0.06);
+            border: 1px solid rgba(34, 211, 238, 0.18);
+        }
+
+        /* ── CHARTS ROW ─────────────────────────────────── */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-sub {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-wrap {
+            height: 220px;
+            position: relative;
+        }
+
+        /* ── BENTO ROW (stats + table) ───────────────────── */
+        .bento-row {
+            display: grid;
+            grid-template-columns: 1fr 2.2fr;
+            gap: 1.5rem;
+        }
+
+        /* ── TABLE ───────────────────────────────────────── */
+        .table-card {
+            padding: 1.75rem;
+        }
+
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .search-mini {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 0.5rem 0.85rem;
+            color: var(--text);
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .btn {
+            padding: 0.5rem 1.1rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid var(--glass-border);
+            transition: 0.2s;
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: var(--indigo);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            border: none;
+            color: white;
+            box-shadow: 0 0 18px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 26px rgba(99, 102, 241, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-cyan {
+            background: rgba(34, 211, 238, 0.1);
+            border-color: rgba(34, 211, 238, 0.25);
+            color: var(--cyan);
+        }
+
+        data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        td {
+            padding: 1rem;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        tr:hover td {
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .s-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .s-name {
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .s-meta {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.28rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .pill-green {
+            background: rgba(52, 211, 153, 0.1);
+            color: #34d399;
+        }
+
+        .pill-orange {
+            background: rgba(251, 146, 60, 0.1);
+            color: #fb923c;
+        }
+
+        .pill-red {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+        }
+
+        .pill-indigo {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--indigo);
+        }
+
+        .score-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--indigo), var(--violet));
+            border-radius: 100px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .act {
+            padding: 0.35rem 0.7rem;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .act:hover {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: var(--indigo);
+            color: var(--indigo);
+        }
+
+        /* ── AI RECO SECTION ─────────────────────────────── */
+        .ai-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .ai-card {
+            padding: 1.75rem;
+        }
+
+        .ai-banner {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(167, 139, 250, 0.08), rgba(34, 211, 238, 0.06));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .ai-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--indigo), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 14px rgba(34, 211, 238, 0.3);
+        }
+
+        .ai-banner h4 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .ai-banner p {
+            font-size: 0.8rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .ai-banner-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .ai-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            background: rgba(34, 211, 238, 0.1);
+            color: var(--cyan);
+            border: 1px solid rgba(34, 211, 238, 0.2);
+        }
+
+        /* ── COUNSELOR STATS ─────────────────────────────── */
+        .counsl-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .counsl-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .c-ava {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .c-info {
+            flex: 1;
+        }
+
+        .c-name {
+            font-size: 0.83rem;
+            font-weight: 700;
+        }
+
+        .c-role {
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        .c-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .dot-on {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 6px #34d399;
+        }
+
+        .dot-off {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--muted);
+        }
+
+        /* ── FOOTER ──────────────────────────────────────── */
+        footer {
+            border-top: 1px solid var(--glass-border);
+            background: rgba(10, 10, 18, 0.6);
+            backdrop-filter: blur(16px);
+            padding: 1.25rem 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--indigo);
+        }
+
+        /* ── RESPONSIVE ──────────────────────────────────── */
+        @media(max-width:1400px) {
+            .kpi-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media(max-width:1100px) {
+            .charts-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .bento-row {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width:800px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════════ SIDEBAR ═══════════════ -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"><i data-lucide="shield-check" style="width:20px;color:white"></i></div>
+            <span class="logo-text">Cap<span>Avenir</span> <span
+                    style="font-size:0.7em;color:var(--muted);font-weight:500">Admin</span></span>
+        </div>
+
+        <div class="nav-section">Principal</div>
+        <div class="nav-item"><a href="#" class="active"><i data-lucide="layout-dashboard"></i><span>Dashboard
+                    Overview</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="bar-chart-3"></i><span>Statistiques Globales</span></a></div>
+
+        <div class="nav-section">Gestion</div>
+        <div class="nav-item"><a href="#"><i data-lucide="graduation-cap"></i><span>Étudiants & Profils</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="book-open"></i><span>Formations & Matching</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="sparkles"></i><span>Recommandations IA</span></a></div>
+
+        <div class="nav-section">Administration</div>
+        <div class="nav-item"><a href="#"><i data-lucide="users"></i><span>Gestion Utilisateurs</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="settings-2"></i><span>Paramètres Plateforme</span></a></div>
+        <div class="nav-item"><a href="#"><i data-lucide="shield-alert"></i><span>Logs & Sécurité</span></a></div>
+
+        <div class="sidebar-bottom">
+            <div class="upgrade-card">
+                <p>🚀 Nouveau : Rapport IA mensuel disponible</p>
+                <button>Générer le Rapport</button>
+            </div>
+            <div class="nav-item"><a href="#"><i data-lucide="sun"></i><span>Mode Clair</span></a></div>
+            <div class="nav-item"><a href="#"><i data-lucide="life-buoy"></i><span>Support</span></a></div>
+        </div>
+    </aside>
+
+    <!-- ═══════════════ MAIN ═══════════════ -->
+    <div class="main">
+
+        <!-- TOP BAR -->
+        <div class="topbar">
+            <div class="search-wrap">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" placeholder="Rechercher étudiant, conseiller, formation…">
+            </div>
+            <div class="topbar-right">
+                <button class="icon-btn"><i data-lucide="refresh-cw" style="width:16px"></i></button>
+                <button class="icon-btn"><i data-lucide="download" style="width:16px"></i></button>
+                <button class="icon-btn">
+                    <i data-lucide="bell" style="width:16px"></i>
+                    <span class="badge-dot"></span>
+                </button>
+                <div class="user-chip">
+                    <div class="user-avatar">AD</div>
+                    <span>Admin</span>
+                    <i data-lucide="chevron-down" style="width:14px;color:var(--muted)"></i>
+                </div>
+                <a href="/logout" title="Déconnexion"
+                    style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:10px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);color:#f87171;font-size:0.8rem;font-weight:700;text-decoration:none;transition:0.2s;"
+                    onmouseover="this.style.background='rgba(248,113,113,0.18)'"
+                    onmouseout="this.style.background='rgba(248,113,113,0.08)'">
+                    <i data-lucide="log-out" style="width:15px"></i> Déconnexion
+                </a>
+            </div>
+        </div>
+
+        <div class="content">
+
+            <!-- HEADER -->
+            <div>
+                <div class="section-title">Tableau de Bord Admin <span
+                        style="font-size:1rem;color:var(--indigo);font-weight:600">2026</span></div>
+                <div class="section-sub">Vue d'ensemble de la plateforme · Mise à jour en temps réel · <span
+                        style="color:var(--cyan)">●</span> Système opérationnel</div>
+            </div>
+
+            <!-- KPI GRID -->
+            <div class="kpi-grid">
+                <!-- KPI 1 -->
+                <div class="glass kpi-card">
+                    <div class="kpi-icon" style="background:rgba(99,102,241,0.12)"><i data-lucide="users"
+                            style="width:18px;color:var(--indigo)"></i></div>
+                    <div class="kpi-label">Étudiants Actifs</div>
+                    <div class="kpi-val" style="color:var(--indigo)">12 847</div>
+                    <div class="kpi-trend up"><i data-lucide="trending-up" style="width:13px"></i>+18% ce mois</div>
+                </div>
+                <!-- KPI 2 -->
+                <div class="glass kpi-card">
+                    <div class="kpi-icon" style="background:rgba(167,139,250,0.12)"><i data-lucide="brain"
+                            style="width:18px;color:var(--violet)"></i></div>
+                    <div class="kpi-label">Tests Complétés</div>
+                    <div class="kpi-val" style="color:var(--violet)">8 942</div>
+                    <div class="kpi-trend up"><i data-lucide="trending-up" style="width:13px"></i>+24% vs mois dernier
+                    </div>
+                </div>
+                <!-- KPI 3 -->
+                <div class="glass kpi-card">
+                    <div class="kpi-icon" style="background:rgba(34,211,238,0.1)"><i data-lucide="target"
+                            style="width:18px;color:var(--cyan)"></i></div>
+                    <div class="kpi-label">Matching Moyen</div>
+                    <div class="kpi-val" style="color:var(--cyan)">84.2%</div>
+                    <div class="kpi-trend up"><i data-lucide="trending-up" style="width:13px"></i>+2.1 pts</div>
+                </div>
+                <!-- KPI 4 -->
+                <div class="glass kpi-card">
+                    <div class="kpi-icon" style="background:rgba(52,211,153,0.1)"><i data-lucide="star"
+                            style="width:18px;color:#34d399"></i></div>
+                    <div class="kpi-label">Satisfaction</div>
+                    <div class="kpi-val" style="color:#34d399">92%</div>
+                    <div class="kpi-trend up"><i data-lucide="trending-up" style="width:13px"></i>+3% ce trimestre</div>
+                </div>
+                <!-- KPI 5 -->
+                <div class="glass kpi-card">
+                    <div class="kpi-icon" style="background:rgba(251,191,36,0.1)"><i data-lucide="credit-card"
+                            style="width:18px;color:#fbbf24"></i></div>
+                    <div class="kpi-label">Abonnements Actifs</div>
+                    <div class="kpi-val" style="color:#fbbf24">3 210</div>
+                    <div class="kpi-trend up"><i data-lucide="trending-up" style="width:13px"></i>+8.4% MoM</div>
+                </div>
+                <!-- KPI 6 ALERT -->
+                <div class="glass kpi-card kpi-alert">
+                    <div class="kpi-icon" style="background:rgba(34,211,238,0.12)"><i data-lucide="alert-triangle"
+                            style="width:18px;color:var(--cyan)"></i></div>
+                    <div class="kpi-label" style="color:var(--cyan)">Alertes Système</div>
+                    <div class="kpi-val" style="color:var(--cyan)">3</div>
+                    <div class="kpi-trend warn"><i data-lucide="eye" style="width:13px"></i>Conseillers inactifs</div>
+                </div>
+            </div>
+
+            <!-- CHARTS ROW -->
+            <div class="charts-row">
+                <!-- Line Chart -->
+                <div class="glass" style="padding:1.75rem">
+                    <div class="card-title">Évolution des Inscriptions</div>
+                    <div class="card-sub">Nouveaux étudiants par mois · 2025–2026</div>
+                    <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+                </div>
+                <!-- Radar -->
+                <div class="glass" style="padding:1.75rem">
+                    <div class="card-title">Scores Aptitudes</div>
+                    <div class="card-sub">Moyenne globale plateforme</div>
+                    <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+                </div>
+                <!-- Doughnut -->
+                <div class="glass" style="padding:1.75rem">
+                    <div class="card-title">Top Formations</div>
+                    <div class="card-sub">Répartition des matches IA</div>
+                    <div class="chart-wrap"><canvas id="doughnutChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- BENTO: Stats bars + Table -->
+            <div class="bento-row">
+                <!-- Left: Mini Stats -->
+                <div class="glass" style="padding:1.75rem">
+                    <div class="card-title">Performance IA</div>
+                    <div class="card-sub" style="margin-bottom:1.5rem">Précision algorithme matching</div>
+                    <div style="display:flex;flex-direction:column;gap:1.25rem">
+                        <div>
+                            <div
+                                style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.5rem">
+                                <span>Médecine & Santé</span><span
+                                    style="font-weight:700;color:var(--indigo)">91%</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:91%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div
+                                style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.5rem">
+                                <span>Informatique / IA</span><span
+                                    style="font-weight:700;color:var(--violet)">87%</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill"
+                                    style="width:87%;background:linear-gradient(90deg,var(--violet),var(--indigo))">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div
+                                style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.5rem">
+                                <span>Droit & Sciences Po</span><span
+                                    style="font-weight:700;color:var(--cyan)">78%</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill"
+                                    style="width:78%;background:linear-gradient(90deg,var(--cyan),var(--indigo))"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div
+                                style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.5rem">
+                                <span>Commerce & Finance</span><span style="font-weight:700;color:#34d399">74%</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill"
+                                    style="width:74%;background:linear-gradient(90deg,#34d399,var(--indigo))"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div
+                                style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.5rem">
+                                <span>Architecture & Design</span><span style="font-weight:700;color:#fbbf24">68%</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill"
+                                    style="width:68%;background:linear-gradient(90deg,#fbbf24,var(--indigo))"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--glass-border)">
+                        <div class="card-title" style="margin-bottom:0.75rem">Conseillers Actifs</div>
+                        <ul class="counsl-list">
+                            <li class="counsl-item">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Amina" class="c-ava">
+                                <div class="c-info">
+                                    <div class="c-name">Dr. Amina Ben Ali</div>
+                                    <div class="c-role">Spécialiste Médical</div>
+                                </div>
+                                <div class="c-status"><span class="dot-on"></span>En ligne</div>
+                            </li>
+                            <li class="counsl-item">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Karim" class="c-ava">
+                                <div class="c-info">
+                                    <div class="c-name">Prof. Karim Slim</div>
+                                    <div class="c-role">Tech & IA</div>
+                                </div>
+                                <div class="c-status"><span class="dot-on"></span>En ligne</div>
+                            </li>
+                            <li class="counsl-item">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sara" class="c-ava">
+                                <div class="c-info">
+                                    <div class="c-name">Mme Sara Mansouri</div>
+                                    <div class="c-role">Droit & Sc. Po</div>
+                                </div>
+                                <div class="c-status" style="color:var(--muted)"><span class="dot-off"></span>Hors ligne
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Right: Table -->
+                <div class="glass table-card">
+                    <div class="table-header">
+                        <div>
+                            <div class="card-title">Gestion Étudiants</div>
+                            <div style="font-size:0.78rem;color:var(--muted)">12 847 profils · triés par score</div>
+                        </div>
+                        <div class="table-actions">
+                            <input class="search-mini" placeholder="🔍 Rechercher…">
+                            <button class="btn btn-ghost">Filtres</button>
+                            <button class="btn btn-primary">⬇ Exporter CSV</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Étudiant</th>
+                                <th>Score Global</th>
+                                <th>Top Formation</th>
+                                <th>Dernier Login</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="student-cell"><img
+                                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Esraa"
+                                            class="s-avatar">
+                                        <div>
+                                            <div class="s-name">Esraa Ouni</div>
+                                            <div class="s-meta">Bac Sc. · Tunis</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="score-bar"><span style="font-weight:800;color:var(--indigo)">92%</span>
+                                        <div class="bar-track" style="width:60px">
+                                            <div class="bar-fill" style="width:92%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-size:0.82rem">Médecine – FMS</td>
+                                <td style="font-size:0.78rem;color:var(--muted)">Aujourd'hui 14:22</td>
+                                <td><span class="pill pill-green">Actif</span></td>
+                                <td>
+                                    <div class="action-btns"><button class="act">Profil</button><button
+                                            class="act">Bloquer</button></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="student-cell"><img
+                                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aziz" class="s-avatar">
+                                        <div>
+                                            <div class="s-name">Mohamed Aziz</div>
+                                            <div class="s-meta">Bac Math · Sfax</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="score-bar"><span style="font-weight:800;color:var(--violet)">85%</span>
+                                        <div class="bar-track" style="width:60px">
+                                            <div class="bar-fill"
+                                                style="width:85%;background:linear-gradient(90deg,var(--violet),var(--indigo))">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-size:0.82rem">Génie Logiciel – ENSI</td>
+                                <td style="font-size:0.78rem;color:var(--muted)">Hier 20:10</td>
+                                <td><span class="pill pill-green">Actif</span></td>
+                                <td>
+                                    <div class="action-btns"><button class="act">Profil</button><button
+                                            class="act">Bloquer</button></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="student-cell"><img
+                                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ines" class="s-avatar">
+                                        <div>
+                                            <div class="s-name">Inès Chaabane</div>
+                                            <div class="s-meta">Bac Lett. · Sousse</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="score-bar"><span style="font-weight:800;color:var(--cyan)">73%</span>
+                                        <div class="bar-track" style="width:60px">
+                                            <div class="bar-fill"
+                                                style="width:73%;background:linear-gradient(90deg,var(--cyan),var(--indigo))">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-size:0.82rem">Droit – Faculté Sousse</td>
+                                <td style="font-size:0.78rem;color:var(--muted)">Il y a 3j</td>
+                                <td><span class="pill pill-orange">Inactif</span></td>
+                                <td>
+                                    <div class="action-btns"><button class="act">Profil</button><button
+                                            class="act">Relancer</button></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="student-cell"><img
+                                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Yassine"
+                                            class="s-avatar">
+                                        <div>
+                                            <div class="s-name">Yassine Trabelsi</div>
+                                            <div class="s-meta">Bac Tech · Monastir</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="score-bar"><span style="font-weight:800;color:#34d399">67%</span>
+                                        <div class="bar-track" style="width:60px">
+                                            <div class="bar-fill"
+                                                style="width:67%;background:linear-gradient(90deg,#34d399,var(--indigo))">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-size:0.82rem">Architecture – ENAU</td>
+                                <td style="font-size:0.78rem;color:var(--muted)">Il y a 5j</td>
+                                <td><span class="pill pill-red">Bloqué</span></td>
+                                <td>
+                                    <div class="action-btns"><button class="act">Profil</button><button class="act"
+                                            style="color:var(--cyan);border-color:rgba(34,211,238,0.25)">Débloquer</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="student-cell"><img
+                                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Leila"
+                                            class="s-avatar">
+                                        <div>
+                                            <div class="s-name">Leïla Hadj Salem</div>
+                                            <div class="s-meta">Bac Sc. · Sfax</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="score-bar"><span style="font-weight:800;color:var(--indigo)">88%</span>
+                                        <div class="bar-track" style="width:60px">
+                                            <div class="bar-fill" style="width:88%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-size:0.82rem">Pharmacie – FP Monastir</td>
+                                <td style="font-size:0.78sym;color:var(--muted)">Aujourd'hui 10:05</td>
+                                <td><span class="pill pill-green">Actif</span></td>
+                                <td>
+                                    <div class="action-btns"><button class="act">Profil</button><button
+                                            class="act">Bloquer</button></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding-top:1.25rem;border-top:1px solid var(--glass-border);margin-top:1rem">
+                        <span style="font-size:0.78rem;color:var(--muted)">Affichage 1–5 sur 12 847</span>
+                        <div style="display:flex;gap:0.4rem">
+                            <button class="btn btn-ghost" style="padding:0.4rem 0.8rem">‹</button>
+                            <button class="btn btn-primary" style="padding:0.4rem 0.8rem">1</button>
+                            <button class="btn btn-ghost" style="padding:0.4rem 0.8rem">2</button>
+                            <button class="btn btn-ghost" style="padding:0.4rem 0.8rem">3</button>
+                            <button class="btn btn-ghost" style="padding:0.4rem 0.8rem">›</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI RECOMMENDATIONS -->
+            <div>
+                <div class="section-title" style="font-size:1.2rem;margin-bottom:1rem">
+                    <i data-lucide="sparkles" style="width:20px;vertical-align:middle;color:var(--cyan)"></i>
+                    Recommandations IA Système
+                </div>
+                <div class="ai-section">
+                    <div class="glass ai-card">
+                        <div class="card-title" style="margin-bottom:0.5rem">Suggestions Système</div>
+                        <div class="card-sub">Générées par l'algorithme IA · Mise à jour 09:00 ce matin</div>
+
+                        <div class="ai-banner">
+                            <div class="ai-dot"><i data-lucide="zap" style="width:16px;color:white"></i></div>
+                            <div>
+                                <h4>15 étudiants logique >90% non-orientés Tech</h4>
+                                <p>Ces profils présentent une affinité forte avec l'informatique et l'IA. Un coaching
+                                    collectif augmenterait le taux d'orientation de ~18%.</p>
+                                <div class="ai-banner-actions">
+                                    <button class="btn btn-primary"
+                                        style="font-size:0.75rem;padding:0.4rem 0.9rem">Lancer Batch Coaching</button>
+                                    <span class="ai-tag">15 étudiants ciblés</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-banner">
+                            <div class="ai-dot" style="background:linear-gradient(135deg,var(--violet),var(--indigo))">
+                                <i data-lucide="alert-triangle" style="width:16px;color:white"></i>
+                            </div>
+                            <div>
+                                <h4>3 conseillers inactifs depuis >7 jours</h4>
+                                <p>Dr. Ben Amara, M. Khalil, Mme Dridi n'ont pas eu de sessions. Risque d'abandon de 23
+                                    dossiers étudiants en attente.</p>
+                                <div class="ai-banner-actions">
+                                    <button class="btn btn-ghost"
+                                        style="font-size:0.75rem;padding:0.4rem 0.9rem">Envoyer Rappel</button>
+                                    <button class="btn btn-cyan" style="font-size:0.75rem;padding:0.4rem 0.9rem">Voir
+                                        Dossiers</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-banner">
+                            <div class="ai-dot" style="background:linear-gradient(135deg,#34d399,var(--indigo))"><i
+                                    data-lucide="trending-up" style="width:16px;color:white"></i></div>
+                            <div>
+                                <h4>Pic d'inscriptions prévu la semaine prochaine</h4>
+                                <p>Le modèle prédit +320 nouvelles inscriptions (±12%) suite aux résultats du bac.
+                                    Capacité serveur recommandée : +40%.</p>
+                                <div class="ai-banner-actions">
+                                    <button class="btn btn-ghost"
+                                        style="font-size:0.75rem;padding:0.4rem 0.9rem">Préparer Infrastructure</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary"
+                            style="width:100%;margin-top:0.5rem;justify-content:center;display:flex;align-items:center;gap:0.5rem">
+                            <i data-lucide="wand-2" style="width:15px"></i> Générer Rapport IA Complet
+                        </button>
+                    </div>
+
+                    <!-- Right: Quick Tools -->
+                    <div style="display:flex;flex-direction:column;gap:1.25rem">
+                        <div class="glass" style="padding:1.5rem">
+                            <div class="card-title" style="margin-bottom:1rem">Outils Rapides</div>
+                            <div style="display:flex;flex-direction:column;gap:0.75rem">
+                                <button class="btn btn-ghost"
+                                    style="width:100%;justify-content:flex-start;display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem">
+                                    <i data-lucide="file-spreadsheet" style="width:16px;color:var(--indigo)"></i> Export
+                                    CSV Global
+                                </button>
+                                <button class="btn btn-ghost"
+                                    style="width:100%;justify-content:flex-start;display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem">
+                                    <i data-lucide="database" style="width:16px;color:var(--violet)"></i> Sauvegarder DB
+                                </button>
+                                <button class="btn btn-ghost"
+                                    style="width:100%;justify-content:flex-start;display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem">
+                                    <i data-lucide="refresh-cw" style="width:16px;color:var(--cyan)"></i> Rafraîchir
+                                    Live Data
+                                </button>
+                                <button class="btn btn-ghost"
+                                    style="width:100%;justify-content:flex-start;display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem">
+                                    <i data-lucide="sliders-horizontal" style="width:16px;color:#fbbf24"></i> Optimiser
+                                    Algorithme IA
+                                </button>
+                                <button class="btn btn-ghost"
+                                    style="width:100%;justify-content:flex-start;display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem">
+                                    <i data-lucide="mail" style="width:16px;color:#34d399"></i> Notification Globale
+                                </button>
+                            </div>
+                        </div>
+                        <div class="glass" style="padding:1.5rem">
+                            <div class="card-title" style="margin-bottom:0.5rem">Santé Système</div>
+                            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem">Tous les services
+                                opérationnels</div>
+                            <div style="display:flex;flex-direction:column;gap:0.6rem">
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem">
+                                    <span>API IA</span><span style="color:#34d399;font-weight:700">● 99.8%</span>
+                                </div>
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem">
+                                    <span>Base de Données</span><span style="color:#34d399;font-weight:700">●
+                                        100%</span>
+                                </div>
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem">
+                                    <span>Serveur Mail</span><span style="color:#fbbf24;font-weight:700">● 97.2%</span>
+                                </div>
+                                <div
+                                    style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem">
+                                    <span>CDN / Assets</span><span style="color:#34d399;font-weight:700">● 100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /content -->
+
+        <!-- FOOTER -->
+        <footer>
+            <span>© 2026 CapAvenir Platform · v3.1.0</span>
+            <div style="display:flex;gap:1.5rem">
+                <a href="#">Support</a>
+                <a href="#">Documentation</a>
+                <a href="#">Confidentialité</a>
+                <a href="#">CGU</a>
+            </div>
+            <span>Données rafraîchies il y a <strong style="color:var(--indigo)">2 min</strong></span>
+        </footer>
+
+    </div><!-- /main -->
+
+    <script>
+        lucide.createIcons();
+
+        // Line Chart
+        const lCtx = document.getElementById('lineChart').getContext('2d');
+        const lGrad = lCtx.createLinearGradient(0, 0, 0, 220);
+        lGrad.addColorStop(0, 'rgba(99,102,241,0.3)');
+        lGrad.addColorStop(1, 'rgba(99,102,241,0)');
+        new Chart(lCtx, {
+            type: 'line',
+            data: {
+                labels: ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+                datasets: [{
+                    data: [820, 940, 1100, 980, 1350, 1620, 1890, 2100, 2480, 2847],
+                    borderColor: '#6366f1', backgroundColor: lGrad, fill: true, tension: 0.45,
+                    pointBackgroundColor: '#0a0a12', pointBorderColor: '#6366f1', pointBorderWidth: 2, pointRadius: 4
+                }, {
+                    data: [300, 420, 510, 390, 680, 790, 910, 1020, 1180, 1340],
+                    borderColor: '#a78bfa', backgroundColor: 'transparent', fill: false, tension: 0.45,
+                    pointBackgroundColor: '#0a0a12', pointBorderColor: '#a78bfa', pointBorderWidth: 2, pointRadius: 3,
+                    borderDash: [4, 3]
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                }
+            }
+        });
+
+        // Radar
+        const rCtx = document.getElementById('radarChart').getContext('2d');
+        new Chart(rCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Logique', 'SVT', 'Langues', 'Analyse', 'Créativité', 'Social'],
+                datasets: [{
+                    data: [88, 75, 62, 91, 58, 70],
+                    backgroundColor: 'rgba(99,102,241,0.18)',
+                    borderColor: '#6366f1', pointBackgroundColor: '#6366f1', pointRadius: 3
+                }, {
+                    data: [72, 68, 80, 65, 75, 82],
+                    backgroundColor: 'rgba(167,139,250,0.1)',
+                    borderColor: '#a78bfa', pointBackgroundColor: '#a78bfa', pointRadius: 3,
+                    borderDash: [4, 3]
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255,255,255,0.06)' }, grid: { color: 'rgba(255,255,255,0.06)' },
+                        pointLabels: { color: '#94a3b8', font: { size: 9, weight: 'bold' } }, ticks: { display: false }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Doughnut
+        const dCtx = document.getElementById('doughnutChart').getContext('2d');
+        new Chart(dCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Médecine', 'Informatique', 'Droit', 'Commerce', 'Architecture', 'Autres'],
+                datasets: [{
+                    data: [28, 24, 18, 14, 9, 7],
+                    backgroundColor: ['#6366f1', '#a78bfa', '#22d3ee', '#34d399', '#fbbf24', 'rgba(255,255,255,0.1)'],
+                    borderWidth: 0, hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '68%',
+                plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 9 }, boxWidth: 10, padding: 8 } } }
+            }
+        });
+    </script>
+</body>
+
+</html>

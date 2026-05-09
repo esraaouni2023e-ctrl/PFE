@@ -1,0 +1,36 @@
+﻿array:8 [
+  "name" => "Prof. Evans Roberts"
+  "email" => "twila97@example.com"
+  "email_verified_at" => "2026-02-12T20:09:07.000000Z"
+  "role" => "admin"
+  "is_admin" => true
+  "updated_at" => "2026-02-12T20:09:07.000000Z"
+  "created_at" => "2026-02-12T20:09:07.000000Z"
+  "id" => 2
+] // tests\Feature\AdminSeesNewRegisteredUserTest.php:31
+"Is Admin: YES" // tests\Feature\AdminSeesNewRegisteredUserTest.php:32
+
+   FAIL  Tests\Feature\AdminSeesNewRegisteredUserTest
+  Γ¿» admin seeΓÇª 0.67s  
+  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   FAILED  Tests\Feature\AdminSeesNewRegisteredUserTest > admin sees new user after registration  RouteNotFoundException   
+  Route [admin.users.index] not defined.
+
+  at vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:477
+    473Γûò             ! is_null($url = call_user_func($this->missingNamedRouteResolver, $name, $parameters, $absolute))) {
+    474Γûò             return $url;
+    475Γûò         }
+    476Γûò 
+  Γ₧£ 477Γûò         throw new RouteNotFoundException("Route [{$name}] not defined.");
+    478Γûò     }
+    479Γûò 
+    480Γûò     /**
+    481Γûò      * Get the URL for a given route instance.
+
+  1   vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:477
+  2   vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:811
+
+
+  Tests:    1 failed (0 assertions)
+  Duration: 0.89s
+
