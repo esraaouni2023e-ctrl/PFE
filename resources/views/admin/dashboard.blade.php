@@ -725,6 +725,13 @@
                         <div class="ad-qa-desc">Consulter les logs et performances</div>
                     </div>
                 </a>
+                <a href="{{ route('profile.edit') }}" class="ad-qa-btn">
+                    <div class="ad-qa-icon">👤</div>
+                    <div>
+                        <div>Mon Profil</div>
+                        <div class="ad-qa-desc">Modifier mes informations personnelles</div>
+                    </div>
+                </a>
                 <a href="#" class="ad-qa-btn">
                     <div class="ad-qa-icon">💾</div>
                     <div>

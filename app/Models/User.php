@@ -16,6 +16,7 @@ class User extends Authenticatable
     public const ROLE_STUDENT = 'student';
     public const ROLE_COUNSELOR = 'counselor';
     public const ROLE_ADMIN = 'admin';
+    public const ROLE_SUPER_ADMIN = 'super_admin';
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +29,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_admin',
+        'avatar',
     ];
 
     /**
@@ -44,6 +46,14 @@ class User extends Authenticatable
     public function isCounselor(): bool
     {
         return $this->role === self::ROLE_COUNSELOR;
+    }
+
+    /**
+     * Check if the user is the Super Admin.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_SUPER_ADMIN;
     }
 
     /**
@@ -103,11 +113,33 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is an admin (separate from role).
+     * Check if the user is an admin (Super Admin only).
      */
     public function isAdmin(): bool
     {
-        return (bool) $this->is_admin;
+        return $this->isSuperAdmin();
+    }
+
+    /**
+     * Enforce unique Super Admin.
+     */
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if ($user->role === self::ROLE_SUPER_ADMIN) {
+                if (static::where('role', self::ROLE_SUPER_ADMIN)->exists()) {
+                    throw new \Exception('Il ne peut exister qu\'un seul Super Admin.');
+                }
+            }
+        });
+
+        static::updating(function ($user) {
+            if ($user->isDirty('role') && $user->role === self::ROLE_SUPER_ADMIN) {
+                if (static::where('role', self::ROLE_SUPER_ADMIN)->where('id', '!=', $user->id)->exists()) {
+                    throw new \Exception('Il ne peut exister qu\'un seul Super Admin.');
+                }
+            }
+        });
     }
 
     /**

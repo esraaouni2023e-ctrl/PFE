@@ -77,7 +77,7 @@ class OrientationPipelineController extends Controller
 
         if (!$riasecProfil) {
             return redirect()
-                ->route('riasec.start')
+                ->route('riasec.question.entry')
                 ->with('info', '🧠 Étape 2/3 — Passez le test RIASEC pour identifier votre profil psychologique.');
         }
 
@@ -156,7 +156,7 @@ class OrientationPipelineController extends Controller
             ]);
 
             // Démarre automatiquement le test RIASEC
-            return redirect()->route('riasec.initialize')
+            return redirect()->route('riasec.question.entry')
                              ->with('info', '✅ Score calculé avec succès. Voici les questions du test psychologique.');
 
         } catch (\Exception $e) {

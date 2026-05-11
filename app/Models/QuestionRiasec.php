@@ -58,6 +58,7 @@ class QuestionRiasec extends Model
 
     protected $fillable = [
         'dimension',
+        'categorie',
         'texte_fr',
         'texte_ar',
         'type_reponse',
@@ -66,14 +67,25 @@ class QuestionRiasec extends Model
         'ordre',
         'actif',
         'source',
+        'difficulty',
+        'discrimination',
+        'is_reverse',
+        'calibration_version',
+        'is_seed',
         'version',
+        'bacs_cibles',
     ];
 
     protected $casts = [
-        'options' => 'array',
-        'actif'   => 'boolean',
-        'poids'   => 'integer',
-        'ordre'   => 'integer',
+        'options'             => 'array',
+        'bacs_cibles'         => 'array',
+        'actif'               => 'boolean',
+        'is_reverse'          => 'boolean',
+        'is_seed'             => 'boolean',
+        'poids'               => 'integer',
+        'ordre'               => 'integer',
+        'difficulty'          => 'float',
+        'discrimination'      => 'float',
     ];
 
     protected $hidden = [];

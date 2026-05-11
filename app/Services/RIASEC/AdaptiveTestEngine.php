@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
  * ┌─────────────────────────────────────────────────────────────────┐
  * │  ALGORITHME GLOBAL                                              │
  * │                                                                 │
- * │  Phase 1 — SEED (12 questions, 2/dimension)                    │
+ * │  Phase 1 — SEED (18 questions, 3/dimension)                    │
  * │    Difficulté médiane (≈3.0) pour initialiser θ                │
  * │                                                                 │
  * │  Phase 2 — ADAPTIVE (IRT 2-PL simplifié)                       │
@@ -29,7 +29,7 @@ use Illuminate\Support\Str;
  * │      4. Sélectionner argmax(score)                              │
  * │                                                                 │
  * │  Critère d'arrêt (shouldTerminate) :                           │
- * │    Hard  : total ≥ MAX_QUESTIONS (55)                           │
+ * │    Hard  : total ≥ MAX_QUESTIONS (90)                           │
  * │    Soft  : total ≥ MIN_QUESTIONS (30)                           │
  * │          + chaque dim ≥ MIN_PER_DIM (5)                        │
  * │          + variance(scores[-6:]) < PRECISION_THR               │
@@ -40,11 +40,11 @@ use Illuminate\Support\Str;
 class AdaptiveTestEngine
 {
     // ── Paramètres du moteur ───────────────────────────────────────────────
-    const SEED_PER_DIM       = 2;   // Questions seed par dimension
-    const MIN_QUESTIONS      = 30;  // Seuil minimal avant arrêt anticipé
+    const SEED_PER_DIM       = 3;   // Questions seed par dimension (Total Vague 1 = 18)
+    const MIN_QUESTIONS      = 25;  // Seuil minimal avant arrêt anticipé
     const MAX_QUESTIONS      = 55;  // Plafond absolu
-    const MIN_PER_DIM        = 5;   // Minimum par dimension en fin de test
-    const MAX_PER_DIM        = 12;  // Maximum par dimension (évite la sur-représentation)
+    const MIN_PER_DIM        = 3;   // Minimum par dimension en fin de test (garanti par le seed)
+    const MAX_PER_DIM        = 9;   // Maximum par dimension (évite la sur-représentation)
     const PRECISION_THR      = 3.5; // Variance max acceptable pour arrêt (%)
     const SEPARATION_GAP     = 25.0;// Gap top3/bottom3 pour arrêt précoce (%)
     const RECALC_EVERY       = 4;   // Recalcul scores tous les N réponses
@@ -112,7 +112,7 @@ class AdaptiveTestEngine
      * │   Pour chaque dimension d dans [R,I,A,S,E,C] :              │
      * │     si seedCount[d] < SEED_PER_DIM :                        │
      * │       → sélectionner la question de d la + proche de diff=3  │
-     * │   Quand seedCount[d]=2 pour tous → passer en PHASE ADAPTIVE  │
+     * │   Quand seedCount[d]=3 pour tous → passer en PHASE ADAPTIVE  │
      * │                                                              │
      * │ PHASE ADAPTIVE (IRT Maximum Information) :                   │
      * │   1. Charger scores courants θ = {R:60,I:45,...}            │
@@ -143,7 +143,8 @@ class AdaptiveTestEngine
         }
 
         // ── Phase ADAPTIVE ────────────────────────────────────────────────
-        return $this->selectAdaptiveQuestion($session, $administered, $dimCounts);
+        $currentScores = $session->current_scores ?? [];
+        return $this->selectAdaptiveQuestion($session, $administered, $dimCounts, $currentScores);
     }
 
     // ── Phase 1 : Seed ────────────────────────────────────────────────────
@@ -173,7 +174,8 @@ class AdaptiveTestEngine
             'seed_phase_complete' => true,
         ]);
 
-        return $this->selectAdaptiveQuestion($session, $administered, $dimCounts);
+        $currentScores = $session->current_scores ?? [];
+        return $this->selectAdaptiveQuestion($session, $administered, $dimCounts, $currentScores);
     }
 
     // ── Phase 2 : Adaptive (IRT 2PL Maximum Information) ─────────────────
@@ -181,19 +183,25 @@ class AdaptiveTestEngine
     private function selectAdaptiveQuestion(
         RiasecTestSession $session,
         array $administered,
-        array $dimCounts
+        array $dimCounts,
+        array $currentScores
     ): ?QuestionRiasec {
-        $currentScores = $session->current_scores ?? array_fill_keys(self::DIMS, 50.0);
         $priorities    = $this->calculatePriorities($currentScores, $dimCounts);
 
-        // Charger toutes les questions éligibles (actives, non posées, dim non saturée)
+        // Charger toutes les questions éligibles (actives, non posées, dim non saturée et pertinente)
         $candidates = QuestionRiasec::where('actif', true)
             ->whereNotIn('id', $administered ?: [0])
-            ->whereIn('dimension', $this->getEligibleDims($dimCounts))
-            ->select(['id', 'dimension', 'difficulty', 'discrimination', 'is_reverse', 'poids'])
+            ->whereIn('dimension', $this->getEligibleDims($dimCounts, $currentScores))
+            ->select(['id', 'dimension', 'difficulty', 'discrimination', 'is_reverse', 'poids', 'bacs_cibles'])
             ->get();
 
         if ($candidates->isEmpty()) return null;
+
+        // Récupérer le bac de l'étudiant via la session
+        $studentBac = null;
+        if ($session->user_id) {
+            $studentBac = \App\Models\Profile::where('user_id', $session->user_id)->value('section_bac');
+        }
 
         // Calculer le score IRT pour chaque candidat
         $best      = null;
@@ -207,8 +215,23 @@ class AdaptiveTestEngine
             // Bonus couverture : booster dimensions pas encore à MIN_PER_DIM
             $coverageBonus = ($dimCounts[$dim] ?? 0) < self::MIN_PER_DIM ? 1.4 : 1.0;
 
+            // Bonus contextuel : Le bac de l'étudiant correspond-il aux bacs cibles de la question ?
+            $bacBonus = 1.0;
+            if ($studentBac && !empty($q->bacs_cibles)) {
+                $bacsCibles = is_string($q->bacs_cibles) ? json_decode($q->bacs_cibles, true) : $q->bacs_cibles;
+                if (is_array($bacsCibles)) {
+                    // On cherche une correspondance partielle (ex: 'Math' dans 'Mathématiques')
+                    foreach ($bacsCibles as $bc) {
+                        if (stripos($studentBac, $bc) !== false || stripos($bc, $studentBac) !== false) {
+                            $bacBonus = 1.5; // Fort bonus pour les questions adaptées au cursus
+                            break;
+                        }
+                    }
+                }
+            }
+
             // Score pondéré final
-            $score = $irtInfo * ($priorities[$dim] ?? self::W_MED) * $coverageBonus * $q->poids;
+            $score = $irtInfo * ($priorities[$dim] ?? self::W_MED) * $coverageBonus * $bacBonus * $q->poids;
 
             // Léger bruit aléatoire pour éviter les répétitions déterministes
             $score += mt_rand(0, 100) / 10000.0;
@@ -288,7 +311,7 @@ class AdaptiveTestEngine
         $session->refresh();
 
         $terminate     = $this->shouldTerminateTest($session);
-        $nextQuestion  = $terminate['should_stop'] ? null : $this->getNextQuestion($sessionToken);
+        $next_question = $terminate['should_stop'] ? null : $this->getNextQuestion($sessionToken);
 
         return compact('session', 'terminate', 'next_question');
     }
@@ -521,14 +544,31 @@ class AdaptiveTestEngine
 
     /**
      * Retourne les dimensions éligibles (non saturées, pas encore à MAX_PER_DIM).
+     * Exclut également les dimensions non pertinentes (score < 56%) après la vague initiale.
      *
      * @return string[]
      */
-    private function getEligibleDims(array $dimCounts): array
+    private function getEligibleDims(array $dimCounts, array $currentScores = []): array
     {
         return array_filter(
             self::DIMS,
-            fn ($d) => ($dimCounts[$d] ?? 0) < self::MAX_PER_DIM
+            function ($d) use ($dimCounts, $currentScores) {
+                // Règle 1: saturation absolue
+                if (($dimCounts[$d] ?? 0) >= self::MAX_PER_DIM) {
+                    return false;
+                }
+                
+                // Règle 2: Après la vague initiale, on écarte les dimensions non pertinentes
+                // 56% sur 100 correspond à 2.8 sur 5
+                if (($dimCounts[$d] ?? 0) >= self::SEED_PER_DIM) {
+                    $scoreNormalise = $currentScores[$d] ?? 50.0;
+                    if ($scoreNormalise < 56.0) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
         );
     }
 

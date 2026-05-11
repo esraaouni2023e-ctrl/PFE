@@ -25,12 +25,12 @@ class EnsureTestInProgress
                 return response()->json([
                     'success' => false,
                     'message' => $message,
-                    'redirect' => route('riasec.start'),
+                    'redirect' => route('riasec.question.entry'),
                 ], 422);
             }
 
             return redirect()
-                ->route('riasec.start')
+                ->route('riasec.question.entry')
                 ->with('warning', $message);
         }
 

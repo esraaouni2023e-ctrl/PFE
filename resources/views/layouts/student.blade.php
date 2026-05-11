@@ -470,7 +470,7 @@
     </div>
 
     <!-- ═══ FLOATING CHAT BUBBLE (mobile) ═══ -->
-    <button class="floating-chat-bubble" id="floatingChat" title="Assistant IA">
+    <button class="floating-chat-bubble" id="floatingChat" title="ORIENTIA">
         <span>💬</span>
         <div class="chat-ping"></div>
     </button>
@@ -481,7 +481,7 @@
             <div style="display:flex;align-items:center;gap:.65rem;">
                 <div class="chat-ai-avatar">🤖</div>
                 <div>
-                    <div style="font-weight:700;font-size:.87rem;">Assistant IA</div>
+                    <div style="font-weight:700;font-size:.87rem;">ORIENTIA</div>
                     <div style="font-size:.7rem;color:var(--accent3);font-weight:600;">● En ligne</div>
                 </div>
             </div>
@@ -490,7 +490,7 @@
         <div class="chat-messages" id="chatMessages">
             <div class="chat-msg ai">
                 <div class="chat-msg-content">
-                    👋 Salut <strong>{{ explode(' ', auth()->user()->name)[0] }}</strong> ! Je vois que ton score en logique est très élevé… Tu veux qu'on regarde les filières tech ensemble ?
+                    Bonjour <strong>{{ explode(' ', auth()->user()->name)[0] }}</strong>. Je suis ORIENTIA, ton conseiller RIASEC. Pour commencer, indique-moi ton age, ton niveau d'etudes, les filieres que tu envisages, puis les matieres que tu aimes et celles que tu aimes moins.
                 </div>
             </div>
         </div>

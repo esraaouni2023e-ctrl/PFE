@@ -26,7 +26,7 @@ class AdminSeesNewRegisteredUserTest extends TestCase
         ]);
 
         // Create an admin and check admin users list
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->superAdmin()->create();
 
         // Refresh to ensure is_admin is loaded
         $admin->refresh();

@@ -53,5 +53,16 @@ class UserFactory extends Factory
             'is_admin' => true,
         ]);
     }
+
+    /**
+     * Indicate a super admin user.
+     */
+    public function superAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => \App\Models\User::ROLE_SUPER_ADMIN,
+            'is_admin' => true,
+        ]);
+    }
 }
 

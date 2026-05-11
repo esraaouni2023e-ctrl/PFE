@@ -88,6 +88,29 @@
 
 /* ── CTA ── */
 .riasec-cta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.phase-form {
+    background: var(--ink06); border: 1px solid var(--glass-border);
+    border-radius: var(--rl); padding: 1.5rem 1.8rem; margin-bottom: 2rem;
+}
+.phase-form-title {
+    font-family: var(--font-serif); font-size: 1rem; font-style: italic;
+    color: var(--ink); font-weight: 400; margin-bottom: .45rem;
+}
+.phase-form-note { font-size: .8rem; color: var(--ink60); line-height: 1.6; margin-bottom: 1.1rem; }
+.phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media(max-width:680px){ .phase-grid{ grid-template-columns:1fr; } }
+.phase-field { display: flex; flex-direction: column; gap: .4rem; }
+.phase-field label { font-size: .76rem; font-weight: 700; color: var(--ink); }
+.phase-field input,
+.phase-field select,
+.phase-field textarea {
+    width: 100%; border: 1px solid var(--glass-border); border-radius: var(--r);
+    background: color-mix(in srgb, var(--paper) 88%, #fff 12%);
+    color: var(--ink); padding: .75rem .85rem; font: inherit; font-size: .84rem;
+}
+.phase-field textarea { min-height: 92px; resize: vertical; }
+.phase-field.full { grid-column: 1 / -1; }
+.phase-error { margin-top: .3rem; font-size: .72rem; color: #b42318; }
 
 .btn-fill {
     display: inline-flex; align-items: center; gap: .5rem;
@@ -123,14 +146,14 @@
         Découvre ton <em>profil</em><br>d'orientation
     </h1>
     <p class="riasec-hero-sub">
-        {{ $totalQuestions }} questions soigneusement sélectionnées pour identifier tes centres d'intérêt
-        dominants et te guider vers les formations qui te correspondent vraiment.
+        Le test commence par quelques informations generales, puis 18 questions initiales
+        (3 par dimension RIASEC). Le moteur adapte ensuite la suite selon tes reponses.
     </p>
 
     {{-- ── Statistiques ── --}}
     <div class="riasec-stats">
-        <div class="stat-chip">📝 <strong>{{ $totalQuestions }}</strong> questions</div>
-        <div class="stat-chip">⏱ <strong>~8</strong> minutes</div>
+        <div class="stat-chip">📝 <strong>30-{{ $totalQuestions }}</strong> questions</div>
+        <div class="stat-chip">⏱ <strong>~8-15</strong> minutes</div>
         <div class="stat-chip">🎯 <strong>6</strong> dimensions Holland</div>
         <div class="stat-chip">🔒 <strong>100%</strong> anonyme</div>
     </div>
@@ -212,10 +235,54 @@
         </div>
     </div>
 
-    {{-- ── CTA ── --}}
+    {{-- ── Phase initiale ── --}}
     @if(!($hasOngoingTest ?? false))
     <form action="{{ route('riasec.initialize') }}" method="POST">
         @csrf
+        <div class="phase-form">
+            <p class="phase-form-title">Avant de commencer</p>
+            <p class="phase-form-note">
+                Ces informations restent confidentielles et servent uniquement a contextualiser tes resultats
+                d'orientation.
+            </p>
+            <div class="phase-grid">
+                <div class="phase-field">
+                    <label for="age">Age</label>
+                    <input id="age" name="age" type="number" min="12" max="80" value="{{ old('age') }}" required>
+                    @error('age') <span class="phase-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="phase-field">
+                    <label for="niveau_etudes">Niveau d'etudes actuel</label>
+                    <select id="niveau_etudes" name="niveau_etudes" required>
+                        <option value="">Choisir...</option>
+                        @foreach(['Lycee', 'Prepa', 'Universite', 'Formation professionnelle', 'Autre'] as $level)
+                            <option value="{{ $level }}" @selected(old('niveau_etudes') === $level)>{{ $level }}</option>
+                        @endforeach
+                    </select>
+                    @error('niveau_etudes') <span class="phase-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="phase-field full">
+                    <label for="filieres_envisagees">Idees de filieres ou domaines deja envisages</label>
+                    <textarea id="filieres_envisagees" name="filieres_envisagees" placeholder="Ex: informatique, medecine, design, commerce...">{{ old('filieres_envisagees') }}</textarea>
+                    @error('filieres_envisagees') <span class="phase-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="phase-field">
+                    <label for="matieres_aimees">Matieres que tu aimes</label>
+                    <textarea id="matieres_aimees" name="matieres_aimees" placeholder="Ex: maths, SVT, francais, economie...">{{ old('matieres_aimees') }}</textarea>
+                    @error('matieres_aimees') <span class="phase-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="phase-field">
+                    <label for="matieres_detestees">Matieres que tu aimes moins</label>
+                    <textarea id="matieres_detestees" name="matieres_detestees" placeholder="Ex: physique, histoire, langues...">{{ old('matieres_detestees') }}</textarea>
+                    @error('matieres_detestees') <span class="phase-error">{{ $message }}</span> @enderror
+                </div>
+            </div>
+        </div>
+
         <div class="riasec-cta">
             <button type="submit" class="btn-fill" style="font-size:.95rem;padding:.9rem 2.2rem;">
                 🚀 Démarrer le test

@@ -52,6 +52,10 @@ Route::middleware('auth')->group(function () {
              ->name('orientation.formation');
         Route::get('/orientation/nova', [\App\Http\Controllers\NovaOrientationController::class, 'index'])
              ->name('orientation.nova');
+        Route::post('/orientation/nova/analyser', [\App\Http\Controllers\NovaOrientationController::class, 'analyze'])
+             ->name('orientation.nova.analyze');
+        Route::get('/orientation/nova/resultat', [\App\Http\Controllers\NovaOrientationController::class, 'result'])
+             ->name('orientation.nova.result');
 
         // ── Simulateur What-If ──
         Route::prefix('whatif')->name('whatif.')->group(function () {
@@ -112,48 +116,50 @@ Route::middleware('auth')->group(function () {
 
 });
 
-// Admin Routes (Public - No Condition)
-Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+// Admin Routes (Secured)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-// Users
-Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
-Route::post('/admin/users/delete/{user}', [UserController::class, 'destroy'])->name('admin.users.delete');
-Route::post('/admin/users/promote/{user}', [UserController::class, 'promote'])->name('admin.users.promote');
-Route::post('/admin/users/demote/{user}', [UserController::class, 'demote'])->name('admin.users.demote');
+    // Users
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users/delete/{user}', [UserController::class, 'destroy'])->name('users.delete');
+    Route::post('/users/promote/{user}', [UserController::class, 'promote'])->name('users.promote');
+    Route::post('/users/demote/{user}', [UserController::class, 'demote'])->name('users.demote');
 
-// References
-Route::get('/admin/references', [\App\Http\Controllers\Admin\ReferenceController::class, 'index'])->name('admin.references.index');
-Route::post('/admin/references', [\App\Http\Controllers\Admin\ReferenceController::class, 'storeSection'])->name('admin.references.store');
-Route::delete('/admin/references/{section}', [\App\Http\Controllers\Admin\ReferenceController::class, 'destroySection'])->name('admin.references.destroy');
-Route::post('/admin/references/criteria', [\App\Http\Controllers\Admin\ReferenceController::class, 'storeCriterion'])->name('admin.references.criteria.store');
-Route::delete('/admin/references/criteria/{criterion}', [\App\Http\Controllers\Admin\ReferenceController::class, 'destroyCriterion'])->name('admin.references.criteria.destroy');
+    // References
+    Route::get('/references', [\App\Http\Controllers\Admin\ReferenceController::class, 'index'])->name('references.index');
+    Route::post('/references', [\App\Http\Controllers\Admin\ReferenceController::class, 'storeSection'])->name('references.store');
+    Route::delete('/references/{section}', [\App\Http\Controllers\Admin\ReferenceController::class, 'destroySection'])->name('references.destroy');
+    Route::post('/references/criteria', [\App\Http\Controllers\Admin\ReferenceController::class, 'storeCriterion'])->name('references.criteria.store');
+    Route::delete('/references/criteria/{criterion}', [\App\Http\Controllers\Admin\ReferenceController::class, 'destroyCriterion'])->name('references.criteria.destroy');
 
-// Audit & Security
-Route::get('/admin/audit', [\App\Http\Controllers\Admin\AuditController::class, 'index'])->name('admin.audit.index');
+    // Audit & Security
+    Route::get('/audit', [\App\Http\Controllers\Admin\AuditController::class, 'index'])->name('audit.index');
 
-// ── RIASEC Admin ──────────────────────────────────────────────────────────
-Route::prefix('admin/riasec')->name('admin.riasec.')->group(function () {
-    // Dashboard
-    Route::get('/',        [\App\Http\Controllers\Admin\RiasecAdminController::class, 'dashboard'])->name('dashboard');
-    // Export CSV
-    Route::get('/export',  [\App\Http\Controllers\Admin\RiasecAdminController::class, 'exportCsv'])->name('export');
+    // ── RIASEC Admin ──────────────────────────────────────────────────────────
+    Route::prefix('riasec')->name('riasec.')->group(function () {
+        // Dashboard
+        Route::get('/',        [\App\Http\Controllers\Admin\RiasecAdminController::class, 'dashboard'])->name('dashboard');
+        // Export CSV
+        Route::get('/export',  [\App\Http\Controllers\Admin\RiasecAdminController::class, 'exportCsv'])->name('export');
 
-    // CRUD Questions
-    Route::prefix('questions')->name('questions.')->group(function () {
-        Route::get('/',             [\App\Http\Controllers\Admin\RiasecAdminController::class, 'index'])  ->name('index');
-        Route::get('/create',       [\App\Http\Controllers\Admin\RiasecAdminController::class, 'create']) ->name('create');
-        Route::post('/',            [\App\Http\Controllers\Admin\RiasecAdminController::class, 'store'])  ->name('store');
-        Route::get('/{question}',   [\App\Http\Controllers\Admin\RiasecAdminController::class, 'edit'])   ->name('edit');
-        Route::put('/{question}',   [\App\Http\Controllers\Admin\RiasecAdminController::class, 'update']) ->name('update');
-        Route::delete('/{question}',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'destroy'])->name('destroy');
-        Route::post('/{question}/toggle',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'toggle'])->name('toggle');
+        // CRUD Questions
+        Route::prefix('questions')->name('questions.')->group(function () {
+            Route::get('/',             [\App\Http\Controllers\Admin\RiasecAdminController::class, 'index'])  ->name('index');
+            Route::get('/create',       [\App\Http\Controllers\Admin\RiasecAdminController::class, 'create']) ->name('create');
+            Route::post('/',            [\App\Http\Controllers\Admin\RiasecAdminController::class, 'store'])  ->name('store');
+            Route::get('/{question}',   [\App\Http\Controllers\Admin\RiasecAdminController::class, 'edit'])   ->name('edit');
+            Route::put('/{question}',   [\App\Http\Controllers\Admin\RiasecAdminController::class, 'update']) ->name('update');
+            Route::delete('/{question}',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'destroy'])->name('destroy');
+            Route::post('/{question}/toggle',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'toggle'])->name('toggle');
+        });
     });
-});
 
-// ── Filières : import Excel ──────────────────────────────────────────────
-Route::get('/admin/filieres/import',              [\App\Http\Controllers\Admin\FiliereImportController::class, 'index']) ->name('admin.filieres.import');
-Route::post('/admin/filieres/import',             [\App\Http\Controllers\Admin\FiliereImportController::class, 'store']) ->name('admin.filieres.import.store');
-Route::delete('/admin/filieres/import/{categorie}',[\App\Http\Controllers\Admin\FiliereImportController::class, 'destroy'])->name('admin.filieres.import.destroy');
+    // ── Filières : import Excel ──────────────────────────────────────────────
+    Route::get('/filieres/import',              [\App\Http\Controllers\Admin\FiliereImportController::class, 'index']) ->name('filieres.import');
+    Route::post('/filieres/import',             [\App\Http\Controllers\Admin\FiliereImportController::class, 'store']) ->name('filieres.import.store');
+    Route::delete('/filieres/import/{categorie}',[\App\Http\Controllers\Admin\FiliereImportController::class, 'destroy'])->name('filieres.import.destroy');
+});
 
 // ── Test RIASEC ──────────────────────────────────────────────────────────
 // Accessible aux utilisateurs authentifiés ET aux invités (pas de middleware auth).
@@ -162,10 +168,11 @@ Route::prefix('riasec')
     ->name('riasec.')
     ->middleware('web')
     ->group(function () {
-        // ── Démarrage (accessible sans session de test) ─────────────────
-        Route::get('/demarrer',  [\App\Http\Controllers\RiasecTestController::class, 'start'])
-             ->name('start');
-        Route::post('/demarrer', [\App\Http\Controllers\RiasecTestController::class, 'initialize'])
+        // ── Démarrage / phase initiale (accessible sans session de test) ─
+        Route::redirect('/demarrer', '/riasec/question')->name('start');
+        Route::get('/question',  [\App\Http\Controllers\RiasecTestController::class, 'start'])
+             ->name('question.entry');
+        Route::post('/question', [\App\Http\Controllers\RiasecTestController::class, 'initialize'])
              ->name('initialize');
 
         // ── Réinitialisation ────────────────────────────────────────────
@@ -206,4 +213,3 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
-

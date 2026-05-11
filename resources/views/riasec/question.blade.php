@@ -147,7 +147,7 @@
 
 {{-- ── Progress header ── --}}
 <div class="q-progress-bar">
-    <a href="{{ route('riasec.start') }}"
+    <a href="{{ route('riasec.question.entry') }}"
        style="font-size:.75rem;color:var(--ink30);text-decoration:none;display:flex;align-items:center;gap:.3rem;white-space:nowrap;">
         ← Accueil
     </a>
@@ -160,6 +160,18 @@
 
 {{-- ── Main ── --}}
 <div class="q-page" x-data="riasecQ()" x-init="init()">
+
+    {{-- Feedback anti-ennui (Changement de vague) --}}
+    @if(!empty($feedback))
+    <div class="q-card" style="background: color-mix(in srgb, var(--accent) 8%, transparent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); padding: 1.5rem;">
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <div style="font-size: 1.5rem;">📣</div>
+            <p style="margin: 0; font-family: var(--font-main); font-weight: 600; color: var(--ink); line-height: 1.5;">
+                {{ $feedback }}
+            </p>
+        </div>
+    </div>
+    @endif
 
     {{-- Question card --}}
     <div class="q-card">
@@ -194,6 +206,9 @@
 
         {{-- Texte --}}
         <p class="q-text">{{ $question->texte_fr }}</p>
+        <p style="font-size:.82rem;color:var(--ink60);line-height:1.55;margin-top:-1rem;margin-bottom:1.4rem;">
+            Sur une echelle de 1 a 5 (1 = Pas du tout, 5 = Tout a fait), a quel point cette activite vous attire-t-elle ?
+        </p>
 
         {{-- Likert --}}
         <form id="qForm">
@@ -227,7 +242,7 @@
 
         {{-- Navigation --}}
         <div class="q-nav">
-            @if($step > 1)
+            @if($step > 1 && empty($isAdaptive))
             <a href="{{ route('riasec.question', ['step' => $step - 1]) }}" class="btn-ghost">
                 ← Précédent
             </a>

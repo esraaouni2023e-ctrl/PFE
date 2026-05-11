@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRiasecAnswerRequest;
+use App\Models\AnswerRiasec;
 use App\Models\Profile;
 use App\Models\ProfileRiasec;
 use App\Models\QuestionRiasec;
-use App\Services\RecommendationService;
+use App\Models\RiasecTestSession;
+use App\Services\RIASEC\RecommendationService;
+use App\Services\RIASEC\AdaptiveTestEngine;
 use App\Services\RIASEC\TestManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -15,200 +18,201 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
-/**
- * RiasecTestController — Contrôleur du test Holland RIASEC.
- *
- * Cycle complet :
- *   start()        → initialise la session + redirige vers la 1re question
- *   showQuestion() → affiche la question courante (avec progression)
- *   storeAnswer()  → enregistre la réponse (AJAX) et retourne la suivante
- *   complete()     → finalise le test, sauvegarde le profil, redirige résultats
- *   results()      → affiche les résultats du profil RIASEC
- *
- * Compatibilité : utilisateurs authentifiés ET invités (session PHP).
- */
 class RiasecTestController extends Controller
 {
     public function __construct(
-        private readonly TestManager           $testManager,
+        private readonly AdaptiveTestEngine $engine,
+        private readonly TestManager $testManager,
         private readonly RecommendationService $recommendationService,
     ) {}
 
-    // ══════════════════════════════════════════════════════════════════════
-    // 1. DÉMARRAGE DU TEST
-    // ══════════════════════════════════════════════════════════════════════
-
-    /**
-     * GET /riasec/demarrer
-     *
-     * Initialise une nouvelle session de test RIASEC.
-     * Si un test est déjà en cours, propose de continuer ou recommencer.
-     */
     public function start(Request $request): View|RedirectResponse
     {
-        $existingSession = session('riasec_session_id');
+        $sessionId = session('riasec_session_id');
+        $adaptiveSession = $sessionId
+            ? RiasecTestSession::where('session_token', $sessionId)->first()
+            : null;
 
-        // Si un test est déjà en cours, on propose de continuer
-        if ($existingSession) {
-            $progress = $this->testManager->getProgress(
-                Auth::id(),
-                $existingSession
-            );
+        if ($adaptiveSession && ! $adaptiveSession->isTerminated()) {
+            $progress = $this->testManager->getProgress(Auth::id(), $sessionId);
 
-            if (! $progress->isCompleted && $progress->answered > 0) {
+            if ($progress->answered === 0) {
+                return redirect()->route('riasec.question', ['step' => 1]);
+            }
+
+            if ($progress->answered > 0) {
                 return view('riasec.start', [
                     'hasOngoingTest' => true,
-                    'progress'       => $progress,
-                    'totalQuestions' => $progress->total,
+                    'progress' => $progress,
+                    'totalQuestions' => min($adaptiveSession->max_questions, QuestionRiasec::actives()->count()),
                 ]);
             }
         }
 
         return view('riasec.start', [
             'hasOngoingTest' => false,
-            'totalQuestions' => QuestionRiasec::actives()->count(),
+            'totalQuestions' => min(AdaptiveTestEngine::MAX_QUESTIONS, QuestionRiasec::actives()->count()),
         ]);
     }
 
-    /**
-     * POST /riasec/demarrer
-     *
-     * Crée une nouvelle session et redirige vers la première question.
-     * Le paramètre `restart` force la réinitialisation.
-     */
     public function initialize(Request $request): RedirectResponse
     {
+        $validated = $request->validate([
+            'age' => ['nullable', 'integer', 'min:12', 'max:80'],
+            'niveau_etudes' => ['nullable', 'string', 'max:80'],
+            'filieres_envisagees' => ['nullable', 'string', 'max:1000'],
+            'matieres_aimees' => ['nullable', 'string', 'max:1000'],
+            'matieres_detestees' => ['nullable', 'string', 'max:1000'],
+        ]);
+
         $forceRestart = $request->boolean('restart', false);
-
         $existingSession = session('riasec_session_id');
+        $existingAdaptiveSession = $existingSession
+            ? RiasecTestSession::where('session_token', $existingSession)->first()
+            : null;
 
-        // On ne recrée la session que si demandé ou inexistante
-        if ($forceRestart || ! $existingSession) {
-            $sessionId = $this->testManager->generateSessionId();
+        if ($forceRestart || ! $existingAdaptiveSession || $existingAdaptiveSession->isTerminated()) {
+            $result = $this->engine->startTest(
+                Auth::id(),
+                array_filter($validated, fn ($value) => filled($value))
+            );
+
+            /** @var RiasecTestSession $session */
+            $session = $result['session'];
+
             session([
-                'riasec_session_id'    => $sessionId,
-                'riasec_started_at'    => now()->toIso8601String(),
-                'riasec_current_step'  => 1,
+                'riasec_session_id' => $session->session_token,
+                'riasec_session_db_id' => $session->id,
+                'riasec_started_at' => now()->toIso8601String(),
+                'riasec_current_step' => 1,
             ]);
         }
 
         return redirect()->route('riasec.question', ['step' => 1])
-            ->with('info', 'Votre test RIASEC a démarré. Répondez honnêtement à chaque question.');
+            ->with('info', 'Votre test RIASEC a demarre. Repondez honnetement a chaque question.');
     }
 
-    // ══════════════════════════════════════════════════════════════════════
-    // 2. AFFICHAGE D'UNE QUESTION
-    // ══════════════════════════════════════════════════════════════════════
-
-    /**
-     * GET /riasec/question/{step}
-     *
-     * Affiche la question à l'étape $step.
-     * Redirige vers results() si le test est terminé.
-     */
     public function showQuestion(Request $request, int $step = 1): View|RedirectResponse
     {
         $sessionId = session('riasec_session_id');
-        $userId    = Auth::id();
 
-        // Test terminé → résultats
-        if ($this->testManager->isTestCompleted($userId, $sessionId)) {
-            return redirect()->route('riasec.results')
-                ->with('success', 'Vous avez déjà complété ce test. Voici vos résultats.');
+        if (! $sessionId) {
+            return redirect()->route('riasec.question.entry')
+                ->with('warning', 'Aucun test en cours. Veuillez d abord demarrer le test.');
         }
 
-        // Toutes les questions dans l'ordre
-        $allQuestions = $this->testManager->getAllQuestions();
-        $totalSteps   = $allQuestions->count();
+        $userId = Auth::id();
+        $adaptiveSession = RiasecTestSession::where('session_token', $sessionId)->first();
 
-        // Validation de l'étape
-        $step = max(1, min($step, $totalSteps));
+        if ($adaptiveSession?->isTerminated()) {
+            if (! session('riasec_profile_id')) {
+                return redirect()->route('riasec.complete');
+            }
 
-        /** @var QuestionRiasec|null $question */
-        $question = $allQuestions->values()->get($step - 1);
+            return redirect()->route('riasec.results')
+                ->with('success', 'Vous avez deja complete ce test. Voici vos resultats.');
+        }
+
+        $question = $adaptiveSession
+            ? $this->engine->getNextQuestion($sessionId)
+            : $this->testManager->getNextQuestion($userId, $sessionId);
 
         if (! $question) {
-            return redirect()->route('riasec.results');
+            return redirect()->route('riasec.complete');
         }
 
-        // Progression courante
         $progress = $this->testManager->getProgress($userId, $sessionId);
+        $step = max(1, $progress->answered + 1);
+        $totalSteps = $adaptiveSession
+            ? min($adaptiveSession->max_questions, QuestionRiasec::actives()->count())
+            : QuestionRiasec::actives()->count();
 
-        // Réponse existante pour cette question (pour pré-sélectionner)
-        $existingAnswer = \App\Models\AnswerRiasec::session($sessionId)
+        $existingAnswer = AnswerRiasec::session($sessionId)
             ->where('question_id', $question->id)
             ->value('valeur');
 
-        // Mise à jour de l'étape courante en session
         session(['riasec_current_step' => $step]);
+        $isAdaptive = (bool) $adaptiveSession;
+
+        // Feedback anti-ennui : Messages d'encouragement aux passages de vagues
+        $feedback = null;
+        if ($step == 19) {
+            $feedback = "✨ Super ! La première phase de découverte est terminée. Continuons pour affiner ton profil.";
+        } elseif ($step == 31) {
+            $feedback = "🎯 Excellent ! Ton profil se dessine de plus en plus clairement. Encore un petit effort !";
+        } elseif ($step == 43) {
+            $feedback = "🚀 On y est presque ! Merci pour ta persévérance, tes réponses sont très précieuses.";
+        }
 
         return view('riasec.question', [
-            'question'       => $question,
-            'step'           => $step,
-            'totalSteps'     => $totalSteps,
-            'progress'       => $progress,
+            'question' => $question,
+            'step' => $step,
+            'totalSteps' => $totalSteps,
+            'progress' => $progress,
             'existingAnswer' => $existingAnswer,
-            'labels'         => QuestionRiasec::LIKERT_LABELS,
-            'isLast'         => $step === $totalSteps,
-            'sessionId'      => $sessionId,
+            'labels' => QuestionRiasec::LIKERT_LABELS,
+            'isLast' => $step >= $totalSteps,
+            'sessionId' => $sessionId,
+            'isAdaptive' => $isAdaptive,
+            'feedback' => $feedback,
         ]);
     }
 
-    // ══════════════════════════════════════════════════════════════════════
-    // 3. ENREGISTREMENT D'UNE RÉPONSE (AJAX)
-    // ══════════════════════════════════════════════════════════════════════
-
-    /**
-     * POST /riasec/repondre  [AJAX]
-     *
-     * Enregistre la réponse, calcule la progression et retourne la prochaine question.
-     * Retourne du JSON pour la navigation dynamique côté client.
-     */
     public function storeAnswer(StoreRiasecAnswerRequest $request): JsonResponse
     {
-        $sessionId  = $request->riasecSessionId();
-        $userId     = Auth::id();
-        $guestId    = Auth::check() ? null : session()->getId();
+        $sessionId = $request->riasecSessionId();
+        $userId = Auth::id();
+        $guestId = Auth::check() ? null : session()->getId();
 
         try {
-            // Enregistrement de la réponse
-            $this->testManager->saveAnswer(
-                userId:     $userId,
-                questionId: $request->integer('question_id'),
-                score:      $request->integer('valeur'),
-                sessionId:  $sessionId,
-                guestId:    $guestId,
-                tempsMs:    $request->integer('temps_ms') ?: null,
-            );
+            $adaptiveSession = RiasecTestSession::where('session_token', $sessionId)->first();
+            $result = null;
+
+            if ($adaptiveSession) {
+                $result = $this->engine->submitAnswer(
+                    sessionToken: $sessionId,
+                    questionId: $request->integer('question_id'),
+                    score: $request->integer('valeur'),
+                    tempsMs: $request->integer('temps_ms') ?: null,
+                );
+            } else {
+                $this->testManager->saveAnswer(
+                    userId: $userId,
+                    questionId: $request->integer('question_id'),
+                    score: $request->integer('valeur'),
+                    sessionId: $sessionId,
+                    guestId: $guestId,
+                    tempsMs: $request->integer('temps_ms') ?: null,
+                );
+            }
 
             $progress = $this->testManager->getProgress($userId, $sessionId);
+            $terminate = $result['terminate'] ?? null;
 
-            // Test terminé ?
-            if ($progress->isCompleted) {
+            if (($terminate['should_stop'] ?? false) || $progress->isCompleted) {
                 return response()->json([
-                    'success'    => true,
-                    'completed'  => true,
-                    'progress'   => $progress->toArray(),
-                    'redirect'   => route('riasec.complete'),
-                    'message'    => 'Test terminé ! Calcul de votre profil en cours…',
+                    'success' => true,
+                    'completed' => true,
+                    'progress' => $progress->toArray(),
+                    'precision' => isset($terminate['precision']) ? round($terminate['precision']) : null,
+                    'reason' => $terminate['reason'] ?? null,
+                    'redirect' => route('riasec.complete'),
+                    'message' => 'Test termine. Calcul de votre profil en cours...',
                 ]);
             }
 
-            // Calcule l'étape suivante
-            $currentStep = session('riasec_current_step', 1);
-            $nextStep    = $currentStep + 1;
-
+            $nextStep = $progress->answered + 1;
             session(['riasec_current_step' => $nextStep]);
 
             return response()->json([
-                'success'    => true,
-                'completed'  => false,
-                'next_step'  => $nextStep,
-                'next_url'   => route('riasec.question', ['step' => $nextStep]),
-                'progress'   => $progress->toArray(),
-                'message'    => "Réponse enregistrée ({$progress->answered}/{$progress->total}).",
+                'success' => true,
+                'completed' => false,
+                'next_step' => $nextStep,
+                'next_url' => route('riasec.question', ['step' => $nextStep]),
+                'progress' => $progress->toArray(),
+                'current_code' => $result['session']->code_holland_provis ?? null,
+                'message' => "Reponse enregistree ({$progress->answered}/{$progress->total}).",
             ]);
-
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
@@ -216,247 +220,178 @@ class RiasecTestController extends Controller
             ], 422);
         } catch (\Throwable $e) {
             report($e);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue. Veuillez réessayer.',
+                'message' => 'Une erreur est survenue. Veuillez reessayer.',
             ], 500);
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════════
-    // 4. FINALISATION DU TEST
-    // ══════════════════════════════════════════════════════════════════════
-
-    /**
-     * GET /riasec/terminer
-     *
-     * Calcule les scores définitifs, sauvegarde le ProfileRiasec,
-     * nettoie la session et redirige vers les résultats.
-     */
     public function complete(Request $request): RedirectResponse
     {
         $sessionId = session('riasec_session_id');
-        $userId    = Auth::id();
-        $guestId   = Auth::check() ? null : session()->getId();
 
-        // Vérification que le test est bien complété
-        if (! $this->testManager->isTestCompleted($userId, $sessionId)) {
-            $progress = $this->testManager->getProgress($userId, $sessionId);
-            $step     = $progress->answered + 1;
-
-            return redirect()
-                ->route('riasec.question', ['step' => $step])
-                ->with('warning', 'Vous n\'avez pas encore répondu à toutes les questions.');
+        if (! $sessionId) {
+            return redirect()->route('riasec.question.entry')
+                ->with('warning', 'Aucun test en cours. Veuillez passer le test.');
         }
 
-        // Sauvegarde du profil en base
-        $profil = $this->testManager->saveProfile($userId, $sessionId, $guestId);
+        $userId = Auth::id();
+        $guestId = Auth::check() ? null : session()->getId();
+        $adaptiveSession = RiasecTestSession::where('session_token', $sessionId)->first();
 
-        // Stocke l'ID du profil en session pour la page résultats
-        session(['riasec_profile_id' => $profil->id]);
-
-        // ── Appel automatique à l'API de recommandations ──────────────────
-        if ($userId) {
-            $academicProfile = Profile::where('user_id', $userId)->first();
-            $scoreFg         = $academicProfile?->score_fg;
-            $codeHolland     = $profil->code_holland;
-
-            if ($scoreFg && $codeHolland) {
-                $result = $this->recommendationService->getRecommendations(
-                    (float) $scoreFg,
-                    $codeHolland
-                );
-
-                if ($result['success'] && !empty($result['data']['recommendations'])) {
-                    session(['riasec_recommendations' => $result['data']]);
-                } else {
-                    Log::info('RiasecTestController@complete – recommandations indisponibles', [
-                        'user_id' => $userId,
-                        'reason'  => $result['error'] ?? 'aucune recommandation retournée',
-                    ]);
-                }
+        // Si la session est déjà marquée comme complète en base
+        if ($adaptiveSession && $adaptiveSession->isTerminated()) {
+            if (!session('riasec_profile_id')) {
+                $profil = ProfileRiasec::where('test_session_id', $sessionId)->first();
+                if ($profil) session(['riasec_profile_id' => $profil->id]);
             }
+            return redirect()->route('riasec.results');
         }
-        // ─────────────────────────────────────────────────────────────────
 
-        // Nettoyage partiel de session (on garde profile_id et recommendations)
+        $terminate = $adaptiveSession ? $this->engine->shouldTerminateTest($adaptiveSession) : null;
+        $isCompleted = ($terminate['should_stop'] ?? false) || $this->testManager->isTestCompleted($userId, $sessionId);
+
+        if (! $isCompleted) {
+            // Vérifier s'il reste au moins une question disponible
+            $nextQuestion = $adaptiveSession
+                ? $this->engine->getNextQuestion($sessionId)
+                : $this->testManager->getNextQuestion($userId, $sessionId);
+
+            if ($nextQuestion) {
+                $progress = $this->testManager->getProgress($userId, $sessionId);
+                return redirect()
+                    ->route('riasec.question', ['step' => max(1, $progress->answered + 1)])
+                    ->with('warning', 'Vous n avez pas encore repondu a assez de questions.');
+            }
+            // S'il n'y a plus de questions, on force la complétion du test.
+        }
+
+        $profil = $adaptiveSession
+            ? $this->engine->generateFinalProfile($sessionId)
+            : $this->testManager->saveProfile($userId, $sessionId, $guestId);
+
+        session(['riasec_profile_id' => $profil->id]);
+        $this->storeRecommendationsInSession($userId, $profil);
+
         session()->forget(['riasec_current_step', 'riasec_started_at']);
         $this->testManager->invalidateSessionCache($sessionId);
 
         return redirect()
             ->route('riasec.results')
-            ->with('success', 'Votre profil RIASEC a été calculé avec succès !');
+            ->with('success', 'Votre profil RIASEC a ete calcule avec succes.');
     }
 
-    // ══════════════════════════════════════════════════════════════════════
-    // 5. AFFICHAGE DES RÉSULTATS
-    // ══════════════════════════════════════════════════════════════════════
-
-    /**
-     * GET /riasec/resultats
-     *
-     * Affiche la page de résultats du profil RIASEC.
-     * Cherche le profil via session, ou le dernier profil complété de l'utilisateur.
-     */
     public function results(Request $request): View|RedirectResponse
     {
         $profileId = session('riasec_profile_id');
-        $userId    = Auth::id();
+        $userId = Auth::id();
+        $profil = $profileId ? ProfileRiasec::find($profileId) : null;
 
-        // Récupération du profil
-        $profil = null;
-
-        if ($profileId) {
-            $profil = ProfileRiasec::find($profileId);
-        }
-
-        // Fallback : dernier profil complété de l'utilisateur authentifié
         if (! $profil && $userId) {
             $profil = ProfileRiasec::pourUser($userId)->complets()->recents()->first();
         }
 
         if (! $profil) {
             return redirect()
-                ->route('riasec.start')
-                ->with('warning', 'Aucun résultat disponible. Veuillez passer le test.');
+                ->route('riasec.question.entry')
+                ->with('warning', 'Aucun resultat disponible. Veuillez passer le test.');
         }
 
-        // Calcul des scores si pas encore fait (sécurité)
         $sessionId = session('riasec_session_id');
-        $scores    = null;
+        $scores = null;
+
         if ($sessionId) {
             try {
                 $scores = $this->testManager->calculateScores($userId, $sessionId);
             } catch (\Throwable) {
-                // Silencieux : on utilise les données du profil en base
+                $scores = null;
             }
         }
 
-        // Profil des 3 dimensions dominantes pour l'affichage
-        $trigramDims = str_split($profil->code_holland);
         $dimProfiles = array_map(
             fn ($dim) => $this->testManager->getDimensionProfile($dim),
-            $trigramDims
+            str_split($profil->code_holland)
         );
 
-        // Récupère les recommandations depuis la session (si générées)
         $recommendationsData = session('riasec_recommendations');
 
         return view('riasec.results', [
-            'profil'           => $profil,
-            'scores'           => $scores,
-            'dimProfiles'      => $dimProfiles,
-            'trigram'          => $profil->code_holland,
-            'interp'           => $profil->interpretation ?? [],
-            'scoresSorted'     => $profil->scores_par_dimension,
-            'recommendations'  => $recommendationsData['recommendations']  ?? [],
-            'totalFilieres'    => $recommendationsData['total_filieres_accessibles'] ?? null,
+            'profil' => $profil,
+            'scores' => $scores,
+            'dimProfiles' => $dimProfiles,
+            'trigram' => $profil->code_holland,
+            'interp' => $profil->interpretation ?? [],
+            'scoresSorted' => $profil->scores_par_dimension,
+            'recommendations' => $recommendationsData['recommendations'] ?? [],
+            'totalFilieres' => $recommendationsData['total_filieres_accessibles'] ?? null,
         ]);
     }
 
-    // ══════════════════════════════════════════════════════════════════════
-    // 6. ACTIONS UTILITAIRES
-    // ══════════════════════════════════════════════════════════════════════
-
-    /**
-     * DELETE /riasec/reinitialiser
-     *
-     * Réinitialise la session de test (pour recommencer depuis le début).
-     */
     public function reset(Request $request): RedirectResponse
     {
         session()->forget([
             'riasec_session_id',
+            'riasec_session_db_id',
             'riasec_started_at',
             'riasec_current_step',
             'riasec_profile_id',
+            'riasec_recommendations',
         ]);
 
         return redirect()
-            ->route('riasec.start')
-            ->with('info', 'Votre session de test a été réinitialisée.');
+            ->route('riasec.question.entry')
+            ->with('info', 'Votre session de test a ete reinitialisee.');
     }
 
-    /**
-     * POST /riasec/auto  [Mode simulation express]
-     *
-     * Exécute tout le pipeline en un seul clic :
-     *   1. Crée une session de test
-     *   2. Répond automatiquement à toutes les questions (valeur 3 – neutre/réaliste)
-     *   3. Finalise et calcule le profil RIASEC
-     *   4. Appelle l'API de recommandations Python
-     *   5. Redirige vers la page de résultats
-     */
     public function autoRun(Request $request): RedirectResponse
     {
-        $userId  = Auth::id();
+        $userId = Auth::id();
         $guestId = Auth::check() ? null : session()->getId();
-
-        // 1. Crée une nouvelle session (force restart)
         $sessionId = $this->testManager->generateSessionId();
+
         session([
-            'riasec_session_id'   => $sessionId,
-            'riasec_started_at'   => now()->toIso8601String(),
+            'riasec_session_id' => $sessionId,
+            'riasec_started_at' => now()->toIso8601String(),
             'riasec_current_step' => 1,
         ]);
 
-        // 2. Récupère toutes les questions actives
         $questions = $this->testManager->getAllQuestions();
 
         if ($questions->isEmpty()) {
-            return redirect()->route('riasec.start')
-                ->with('error', 'Aucune question disponible. Vérifiez que les données sont bien importées.');
+            return redirect()->route('riasec.question.entry')
+                ->with('error', 'Aucune question disponible. Verifiez que les donnees sont bien importees.');
         }
 
-        // 3. Auto-répond à toutes les questions
-        //    Valeurs réparties pour simuler un profil réaliste (pas toutes à 3)
-        $defaultValues = [3, 4, 3, 2, 4, 3, 5, 3]; // Rotation cyclique
+        $defaultValues = [3, 4, 3, 2, 4, 3, 5, 3];
+
         foreach ($questions as $i => $question) {
-            $valeur = $defaultValues[$i % count($defaultValues)];
-            // Borné par les contraintes de la question
-            $valeur = max(1, min(5, $valeur));
+            $valeur = max(1, min(5, $defaultValues[$i % count($defaultValues)]));
+
             try {
                 $this->testManager->saveAnswer(
-                    userId:     $userId,
+                    userId: $userId,
                     questionId: $question->id,
-                    score:      $valeur,
-                    sessionId:  $sessionId,
-                    guestId:    $guestId,
+                    score: $valeur,
+                    sessionId: $sessionId,
+                    guestId: $guestId,
                 );
             } catch (\Throwable) {
-                // Continue même si une réponse échoue
+                // La simulation express continue meme si un item isole echoue.
             }
         }
 
-        // 4. Sauvegarde le profil RIASEC
         $profil = $this->testManager->saveProfile($userId, $sessionId, $guestId);
         session(['riasec_profile_id' => $profil->id]);
+        $this->storeRecommendationsInSession($userId, $profil);
 
-        // 5. Appelle l'API de recommandations (si étudiant connecté avec score_fg)
-        if ($userId) {
-            $academicProfile = \App\Models\Profile::where('user_id', $userId)->first();
-            $scoreFg         = $academicProfile?->score_fg;
-            $codeHolland     = $profil->code_holland;
-
-            if ($scoreFg && $codeHolland) {
-                $result = $this->recommendationService->getRecommendations(
-                    (float) $scoreFg,
-                    $codeHolland
-                );
-                if ($result['success'] && !empty($result['data']['recommendations'])) {
-                    session(['riasec_recommendations' => $result['data']]);
-                }
-            }
-        }
-
-        // 6. Nettoyage session + redirection résultats
         session()->forget(['riasec_current_step', 'riasec_started_at']);
         $this->testManager->invalidateSessionCache($sessionId);
 
         return redirect()->route('riasec.results')
-            ->with('success', '⚡ Simulation express terminée ! Voici votre profil RIASEC et vos recommandations.');
+            ->with('success', 'Simulation express terminee. Voici votre profil RIASEC et vos recommandations.');
     }
-
 
     public function progressJson(Request $request): JsonResponse
     {
@@ -466,8 +401,41 @@ class RiasecTestController extends Controller
             return response()->json(['error' => 'Aucun test en cours.'], 404);
         }
 
-        $progress = $this->testManager->getProgress(Auth::id(), $sessionId);
+        return response()->json(
+            $this->testManager->getProgress(Auth::id(), $sessionId)->toArray()
+        );
+    }
 
-        return response()->json($progress->toArray());
+    private function storeRecommendationsInSession(?int $userId, ProfileRiasec $profil): void
+    {
+        if (! $userId) {
+            return;
+        }
+
+        $academicProfile = Profile::where('user_id', $userId)->first();
+        $scoreFg = $academicProfile?->score_fg;
+        $codeHolland = $profil->code_holland;
+
+        if (! $codeHolland) {
+            return;
+        }
+
+        $recommendations = $this->recommendationService->getTopRecommendations(
+            $codeHolland,
+            $scoreFg ? (float) $scoreFg : null
+        );
+
+        if (!empty($recommendations)) {
+            session(['riasec_recommendations' => [
+                'recommendations' => $recommendations,
+                'total_filieres_accessibles' => \App\Models\Filiere::count(),
+            ]]);
+            return;
+        }
+
+        Log::info('RiasecTestController recommendations unavailable', [
+            'user_id' => $userId,
+            'reason' => $result['error'] ?? 'aucune recommandation retournee',
+        ]);
     }
 }

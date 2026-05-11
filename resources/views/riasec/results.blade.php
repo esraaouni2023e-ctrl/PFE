@@ -233,12 +233,12 @@
             </div>
         </div>
         <div class="res-card">
-            <p class="res-card-title">🎓 Filières suggérées</p>
+            <p class="res-card-title">🎓 Filières recommandées</p>
             <div class="pills-row">
-                @forelse($interp['filieres_suggerees'] ?? [] as $f)
-                <span class="pill-filiere">{{ $f }}</span>
+                @forelse($recommendations ?? [] as $rec)
+                <span class="pill-filiere">{{ $rec['Nom_Filiere'] ?? '—' }}</span>
                 @empty
-                <p style="font-size:.8rem;color:var(--ink30);">Données en cours de calcul.</p>
+                <p style="font-size:.8rem;color:var(--ink30);">Calcul algorithmique en cours...</p>
                 @endforelse
             </div>
         </div>
@@ -252,14 +252,14 @@
     </div>
     @endif
 
-    {{-- ── Recommandations IA (API Python) ── --}}
+    {{-- ── Recommandations Algorithmiques (SRF) ── --}}
     @if(!empty($recommendations))
     <div style="margin-bottom:2rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem;">
             <div>
-                <p class="res-eyebrow">🤖 Recommandations personnalisées</p>
+                <p class="res-eyebrow">🤖 Recommandations algorithmiques (SRF)</p>
                 <h2 style="font-family:var(--font-serif);font-size:1.35rem;font-weight:600;color:var(--ink);margin:0;">
-                    Filières recommandées par l'IA
+                    Top 3 des filières recommandées
                 </h2>
             </div>
             @if($totalFilieres)
