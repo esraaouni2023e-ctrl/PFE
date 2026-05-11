@@ -149,20 +149,12 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-<<<<<<< HEAD
     // Users
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users/delete/{user}', [UserController::class, 'destroy'])->name('users.delete');
     Route::post('/users/promote/{user}', [UserController::class, 'promote'])->name('users.promote');
     Route::post('/users/demote/{user}', [UserController::class, 'demote'])->name('users.demote');
-=======
-// Users
-Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
-Route::post('/admin/users/delete/{user}', [UserController::class, 'destroy'])->name('admin.users.delete');
-Route::post('/admin/users/promote/{user}', [UserController::class, 'promote'])->name('admin.users.promote');
-Route::post('/admin/users/demote/{user}', [UserController::class, 'demote'])->name('admin.users.demote');
-Route::post('/admin/users/block/{user}', [UserController::class, 'toggleBlock'])->name('admin.users.block');
->>>>>>> 646df39f1daeb9ee776a9a2e848fba4a46920ef2
+    Route::post('/users/block/{user}', [UserController::class, 'toggleBlock'])->name('users.block');
 
     // References
     Route::get('/references', [\App\Http\Controllers\Admin\ReferenceController::class, 'index'])->name('references.index');
@@ -174,7 +166,6 @@ Route::post('/admin/users/block/{user}', [UserController::class, 'toggleBlock'])
     // Audit & Security
     Route::get('/audit', [\App\Http\Controllers\Admin\AuditController::class, 'index'])->name('audit.index');
 
-<<<<<<< HEAD
     // ── RIASEC Admin ──────────────────────────────────────────────────────────
     Route::prefix('riasec')->name('riasec.')->group(function () {
         // Dashboard
@@ -192,51 +183,20 @@ Route::post('/admin/users/block/{user}', [UserController::class, 'toggleBlock'])
             Route::delete('/{question}',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'destroy'])->name('destroy');
             Route::post('/{question}/toggle',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'toggle'])->name('toggle');
         });
-=======
-// ── Contacts & Notifications ──────────────────────────────────────────────
+    // ── Contacts & Notifications ──────────────────────────────────────────────
+    Route::get('/contacts', [\App\Http\Controllers\ContactController::class, 'getContacts'])->name('contacts.index');
+    Route::get('/contacts/{id}', [\App\Http\Controllers\ContactController::class, 'show'])->name('contacts.show');
+    Route::delete('/contacts/{id}', [\App\Http\Controllers\ContactController::class, 'destroy'])->name('contacts.destroy');
+    Route::get('/notifications/count', [\App\Http\Controllers\ContactController::class, 'notificationCount'])->name('contacts.count');
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/contacts', [ContactController::class, 'getContacts'])->name('contacts.index');
-    Route::get('/contacts/{id}', [ContactController::class, 'show'])->name('contacts.show');
-    Route::delete('/contacts/{id}', [ContactController::class, 'destroy'])->name('contacts.destroy');
-    Route::get('/notifications/count', [ContactController::class, 'notificationCount'])->name('contacts.count');
-});
-
-
-// Route publique (landing page)
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
-
-// ── RIASEC Admin ──────────────────────────────────────────────────────────
-Route::prefix('admin/riasec')->name('admin.riasec.')->group(function () {
-    // Dashboard
-    Route::get('/', [\App\Http\Controllers\Admin\RiasecAdminController::class, 'dashboard'])->name('dashboard');
-    // Export CSV
-    Route::get('/export', [\App\Http\Controllers\Admin\RiasecAdminController::class, 'exportCsv'])->name('export');
-
-    // CRUD Questions
-    Route::prefix('questions')->name('questions.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\RiasecAdminController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\Admin\RiasecAdminController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\Admin\RiasecAdminController::class, 'store'])->name('store');
-        Route::get('/{question}', [\App\Http\Controllers\Admin\RiasecAdminController::class, 'edit'])->name('edit');
-        Route::put('/{question}', [\App\Http\Controllers\Admin\RiasecAdminController::class, 'update'])->name('update');
-        Route::delete('/{question}', [\App\Http\Controllers\Admin\RiasecAdminController::class, 'destroy'])->name('destroy');
-        Route::post('/{question}/toggle', [\App\Http\Controllers\Admin\RiasecAdminController::class, 'toggle'])->name('toggle');
->>>>>>> 646df39f1daeb9ee776a9a2e848fba4a46920ef2
-    });
-
-<<<<<<< HEAD
     // ── Filières : import Excel ──────────────────────────────────────────────
     Route::get('/filieres/import',              [\App\Http\Controllers\Admin\FiliereImportController::class, 'index']) ->name('filieres.import');
     Route::post('/filieres/import',             [\App\Http\Controllers\Admin\FiliereImportController::class, 'store']) ->name('filieres.import.store');
     Route::delete('/filieres/import/{categorie}',[\App\Http\Controllers\Admin\FiliereImportController::class, 'destroy'])->name('filieres.import.destroy');
 });
-=======
-// ── Filières : import Excel ──────────────────────────────────────────────
-Route::get('/admin/filieres/import', [\App\Http\Controllers\Admin\FiliereImportController::class, 'index'])->name('admin.filieres.import');
-Route::post('/admin/filieres/import', [\App\Http\Controllers\Admin\FiliereImportController::class, 'store'])->name('admin.filieres.import.store');
-Route::delete('/admin/filieres/import/{categorie}', [\App\Http\Controllers\Admin\FiliereImportController::class, 'destroy'])->name('admin.filieres.import.destroy');
->>>>>>> 646df39f1daeb9ee776a9a2e848fba4a46920ef2
+
+// Route publique (landing page)
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
 
 // ── Test RIASEC ──────────────────────────────────────────────────────────
 // Accessible aux utilisateurs authentifiés ET aux invités (pas de middleware auth).
@@ -245,20 +205,12 @@ Route::prefix('riasec')
     ->name('riasec.')
     ->middleware('web')
     ->group(function () {
-<<<<<<< HEAD
         // ── Démarrage / phase initiale (accessible sans session de test) ─
         Route::redirect('/demarrer', '/riasec/question')->name('start');
         Route::get('/question',  [\App\Http\Controllers\RiasecTestController::class, 'start'])
              ->name('question.entry');
         Route::post('/question', [\App\Http\Controllers\RiasecTestController::class, 'initialize'])
              ->name('initialize');
-=======
-        // ── Démarrage (accessible sans session de test) ─────────────────
-        Route::get('/demarrer', [\App\Http\Controllers\RiasecTestController::class, 'start'])
-            ->name('start');
-        Route::post('/demarrer', [\App\Http\Controllers\RiasecTestController::class, 'initialize'])
-            ->name('initialize');
->>>>>>> 646df39f1daeb9ee776a9a2e848fba4a46920ef2
 
         // ── Réinitialisation ────────────────────────────────────────────
         Route::delete('/reinitialiser', [\App\Http\Controllers\RiasecTestController::class, 'reset'])
@@ -297,9 +249,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('recommendations.get');
 });
 
-<<<<<<< HEAD
-require __DIR__.'/auth.php';
-=======
 require __DIR__ . '/auth.php';
 
 // Surcharge des routes d'authentification pour intégrer le 2FA
@@ -315,4 +264,3 @@ Route::middleware('auth')->group(function () {
     Route::post('/two-factor', [TwoFactorController::class, 'store'])->name('two-factor.store');
     Route::post('/two-factor/resend', [TwoFactorController::class, 'resend'])->name('two-factor.resend');
 });
->>>>>>> 646df39f1daeb9ee776a9a2e848fba4a46920ef2
