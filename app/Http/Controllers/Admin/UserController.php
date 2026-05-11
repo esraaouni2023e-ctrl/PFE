@@ -20,7 +20,7 @@ class UserController extends Controller
     {
         $current = auth()->user();
 
-        if ($current->id === $user->id) {
+        if ($current && $current->id === $user->id) {
             return redirect()->route('admin.users.index')->with('error', 'Vous ne pouvez pas vous supprimer.');
         }
 
@@ -53,7 +53,7 @@ class UserController extends Controller
     {
         $current = auth()->user();
 
-        if ($current->id === $user->id) {
+        if ($current && $current->id === $user->id) {
             return redirect()->route('admin.users.index')->with('error', 'Vous ne pouvez pas vous rétrograder.');
         }
 
@@ -67,5 +67,20 @@ class UserController extends Controller
         ]);
 
         return redirect()->route('admin.users.index')->with('status', 'Utilisateur rétrogradé.');
+    }
+    public function toggleBlock(User $user)
+    {
+        $current = auth()->user();
+
+        if ($current && $current->id === $user->id) {
+            return redirect()->route('admin.users.index')->with('error', 'Vous ne pouvez pas vous bloquer.');
+        }
+
+        $user->update([
+            'is_blocked' => ! $user->is_blocked
+        ]);
+
+        $status = $user->is_blocked ? 'Utilisateur bloqué.' : 'Utilisateur débloqué.';
+        return redirect()->route('admin.users.index')->with('status', $status);
     }
 }

@@ -387,6 +387,7 @@
         <ul class="navbar-nav">
             <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Vue Générale</a></li>
             <li><a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Utilisateurs</a></li>
+            <li><a href="{{ route('admin.contacts.index') }}" class="{{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">Messages</a></li>
             <li><a href="#">Étudiants & Profils</a></li>
             <li><a href="#">Statistiques IA</a></li>
             <li><a href="#">Paramètres</a></li>
@@ -394,10 +395,13 @@
 
         <!-- Right controls -->
         <div class="navbar-right">
+            @php $notifCount = \App\Models\Contact::nonLus()->count(); @endphp
             <button class="theme-toggle" id="themeToggle" title="Basculer le thème">🌙</button>
-            <button class="notif-btn">
-                🔔 <span class="notif-dot"></span>
-            </button>
+            <a href="{{ route('admin.contacts.index') }}" class="notif-btn" title="Voir les messages">
+                🔔 <span id="notif-badge" class="badge-red" style="position:absolute; top:-5px; right:-5px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:10px; border:2px solid var(--paper); {{ $notifCount > 0 ? '' : 'display:none;' }}">
+                    {{ $notifCount }}
+                </span>
+            </a>
             <div class="role-badge-admin">
                 <span class="admin-dot"></span>
                 Super Admin
@@ -406,6 +410,7 @@
             <div class="avatar-nav" title="{{ auth()->user()->name }}">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
+
             <form method="POST" action="{{ route('logout') }}" style="margin:0">
                 @csrf
                 <button type="submit" class="btn-logout">
@@ -434,6 +439,7 @@
 
             <span class="mobile-section-label">👥 Gestion</span>
             <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Utilisateurs</a>
+            <a href="{{ route('admin.contacts.index') }}" class="{{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">Messages</a>
             <a href="#">Étudiants & Profils</a>
             <a href="#">Conseillers</a>
 
@@ -526,6 +532,27 @@
         document.querySelectorAll('.mobile-nav-drawer a').forEach(link => {
             link.addEventListener('click', () => mobileNav.classList.remove('open'));
         });
+        /* ── Notifications Polling ── */
+        function checkNotifications() {
+            fetch('{{ route('admin.contacts.count') }}')
+            .then(r => r.json())
+            .then(data => {
+                const badge = document.getElementById('notif-badge');
+                if (badge) {
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'flex'; // Use flex for centering
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            })
+            .catch(err => console.error('Erreur polling:', err));
+        }
+
+        // Poll every 30 seconds
+        setInterval(checkNotifications, 30000);
+        // Initial check is done by PHP but we could re-verify after 30s
     </script>
 </body>
 </html>

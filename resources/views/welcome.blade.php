@@ -897,6 +897,26 @@ footer{
   .hero-trust{gap:1.25rem;}
   .trust-divider{display:none;}
 }
+
+/* ── CONTACT ── */
+.contact-section { background: var(--paper); position: relative; overflow: hidden; }
+.contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 5rem; align-items: start; margin-top: 4rem; }
+.contact-info-card { background: var(--cream); padding: 3rem; border-radius: var(--rl); border: 1px solid var(--ink10); }
+.contact-method { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+.cm-icon { width: 44px; height: 44px; border-radius: var(--r); background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.cm-text h4 { font-family: var(--font-serif); font-size: 1.1rem; margin-bottom: .25rem; }
+.cm-text p { font-size: .9rem; color: var(--ink60); }
+.contact-form { display: grid; gap: 1.5rem; }
+.form-group { display: flex; flex-direction: column; gap: .5rem; }
+.form-group label { font-size: .85rem; font-weight: 600; color: var(--ink60); }
+.form-control { background: var(--cream); border: 1px solid var(--ink10); border-radius: var(--r); padding: .85rem 1rem; font-family: inherit; font-size: .95rem; color: var(--ink); transition: .3s; }
+.form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent); }
+.error-msg { font-size: .75rem; color: #ef4444; margin-top: .25rem; font-weight: 500; }
+.success-banner { background: var(--accent3); color: #fff; padding: 1.25rem; border-radius: var(--r); margin-bottom: 2rem; display: flex; align-items: center; gap: .75rem; font-weight: 500; animation: fadeUp .5s var(--ease); }
+
+@media(max-width: 1024px) {
+    .contact-grid { grid-template-columns: 1fr; gap: 3rem; }
+}
 </style>
 </head>
 <body>
@@ -912,6 +932,7 @@ footer{
     <li><a href="#process">Comment ça marche</a></li>
     <li><a href="#testimonials">Témoignages</a></li>
     <li><a href="#pricing">Tarifs</a></li>
+    <li><a href="#contact">Contact</a></li>
   </ul>
   <div class="nav-right">
     <button id="themeBtn" title="Changer de thème">🌙</button>
@@ -1344,6 +1365,81 @@ footer{
       <div class="cta-trust-item">✓ <span>Sans carte bancaire</span></div>
       <div class="cta-trust-item">✓ <span>Sans engagement</span></div>
       <div class="cta-trust-item">✓ <span>Résultats en 12 minutes</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section id="contact" class="section contact-section section-pad">
+  <div class="container">
+    <div class="reveal">
+      <p class="section-tag">Contact</p>
+      <h2 class="section-heading">Une question ?<br><em>Parlons-en.</em></h2>
+    </div>
+
+    @if(session('success'))
+      <div class="success-banner reveal">
+        <span>✓</span> {{ session('success') }}
+      </div>
+    @endif
+
+    <div class="contact-grid">
+      <div class="reveal reveal-d1">
+        <div class="contact-info-card">
+          <div class="contact-method">
+            <div class="cm-icon">✉</div>
+            <div class="cm-text">
+              <h4>Email</h4>
+              <p>contact@capavenir.tn</p>
+            </div>
+          </div>
+          <div class="contact-method">
+            <div class="cm-icon">📍</div>
+            <div class="cm-text">
+              <h4>Bureau</h4>
+              <p>Tunis, Tunisie · Digital Nomad Hub</p>
+            </div>
+          </div>
+          <div class="contact-method">
+            <div class="cm-icon">📞</div>
+            <div class="cm-text">
+              <h4>Téléphone</h4>
+              <p>+216 71 000 000</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal reveal-d2">
+        <form action="{{ route('contact.store') }}" method="POST" class="contact-form">
+          @csrf
+          <div class="form-group">
+            <label for="name">Nom complet</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Ex: Ahmed Ben Salah" required value="{{ old('name') }}">
+            @error('name') <span class="error-msg">{{ $message }}</span> @enderror
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="ahmed@example.com" required value="{{ old('email') }}">
+            @error('email') <span class="error-msg">{{ $message }}</span> @enderror
+          </div>
+
+          <div class="form-group">
+            <label for="sujet">Sujet</label>
+            <input type="text" id="sujet" name="sujet" class="form-control" placeholder="Demande d'information" required value="{{ old('sujet') }}">
+            @error('sujet') <span class="error-msg">{{ $message }}</span> @enderror
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" class="form-control" rows="5" placeholder="Comment pouvons-nous vous aider ?" required>{{ old('message') }}</textarea>
+            @error('message') <span class="error-msg">{{ $message }}</span> @enderror
+          </div>
+
+          <button type="submit" class="btn-main" style="width: 100%; justify-content: center;">Envoyer le message <span>→</span></button>
+        </form>
+      </div>
     </div>
   </div>
 </section>

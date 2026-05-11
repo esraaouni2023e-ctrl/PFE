@@ -26,6 +26,13 @@ class LoginController extends Controller
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $user = Auth::user();
             
+            if ($user->is_blocked) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => "Votre compte a été suspendu. Veuillez contacter l'administrateur.",
+                ])->onlyInput('email');
+            }
+            
             // Générer le code 2FA
             $user->generateTwoFactorCode();
 
