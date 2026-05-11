@@ -417,15 +417,18 @@
             <li><a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">📊 Comparateur</a></li>
             <li><a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">❤️ Vœux</a></li>
             <li><a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">🎓 Profil Académique</a></li>
+            <li><a href="{{ route('messages.index') }}"       class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">📬 Messagerie</a></li>
         </ul>
 
         <!-- Right controls -->
         <div class="navbar-right">
             <button class="theme-toggle" id="themeToggle" title="Basculer le thème">🌙</button>
+            @include('partials.notifications')
 
             <div class="avatar-nav" title="{{ auth()->user()->name }}">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
+
 
             <form method="POST" action="{{ route('logout') }}" style="margin:0">
                 @csrf
@@ -454,6 +457,7 @@
             <a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">📊 Comparateur</a>
             <a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">❤️ Vœux</a>
             <a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">🎓 Profil Académique</a>
+            <a href="{{ route('messages.index') }}"       class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">📬 Messagerie</a>
             <a href="{{ route('profile.edit') }}">👤 Mon Profil</a>
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto">
                 @csrf

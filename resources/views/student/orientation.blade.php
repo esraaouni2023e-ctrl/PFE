@@ -28,8 +28,8 @@
 
                 <div class="or-hero-actions">
                     <div class="or-hero-meta">
-                        <span class="pill pill-accent">📚 {{ $specialites->count() }} spécialités</span>
-                        <span class="pill pill-sage">🎓 {{ $formations->total() }} formations</span>
+                        <span class="pill pill-accent">📚 {{ count($domaines) }} domaines</span>
+                        <span class="pill pill-sage">🎓 {{ \App\Models\Filiere::count() }} filières</span>
                         <span class="pill pill-marine">🇹🇳 Tunisie 2026</span>
                     </div>
                     @php
@@ -63,52 +63,74 @@
             {{-- ════ SIDEBAR ════ --}}
             <aside class="or-sidebar" id="orSidebar">
 
-                {{-- Search --}}
+                {{-- Section RECHERCHE --}}
                 <div class="or-sidebar-block">
                     <div class="or-sidebar-label">🔍 Recherche</div>
                     <form method="GET" action="{{ route('student.orientation') }}" id="searchForm">
-                        <input type="hidden" name="domaine" value="{{ $domaine }}">
-                        <input type="hidden" name="niveau" value="{{ $niveau }}">
+                        <input type="hidden" name="domaine" value="{{ request('domaine') }}">
+                        <input type="hidden" name="etablissement" value="{{ request('etablissement') }}">
+                        <input type="hidden" name="niveau" value="{{ request('niveau') }}">
                         <div class="or-search-inner">
                             <span class="or-search-icon">🔍</span>
-                            <input type="text" name="search" class="or-search-input" id="searchInput"
-                                value="{{ $search }}" placeholder="Formation, établissement…"
+                            <input type="text" name="recherche" class="or-search-input" id="searchInput"
+                                value="{{ request('recherche') }}" placeholder="Formation, établissement…"
                                 autocomplete="off">
                         </div>
                         <div style="display:flex;gap:.5rem;margin-top:.625rem;">
                             <button type="submit" class="btn-fill" style="flex:1;justify-content:center;">Chercher</button>
-                            @if($search || $domaine !== 'Toutes' || $niveau)
-                                <a href="{{ route('student.orientation') }}" class="btn-danger" title="Réinitialiser">✕</a>
-                            @endif
                         </div>
                     </form>
                 </div>
 
-                {{-- Domaines --}}
+                {{-- Section DOMAINE (Select Dropdown) --}}
                 <div class="or-sidebar-block">
                     <div class="or-sidebar-label">🎯 Domaine</div>
-                    <div class="or-sidebar-tabs">
-                        @foreach($domaines as $d)
-                            <a href="{{ route('student.orientation', ['domaine' => $d, 'search' => $search, 'niveau' => $niveau]) }}"
-                                class="or-sidebar-tab {{ $domaine === $d ? 'active' : '' }}">
-                                {{ $d }}
-                            </a>
-                        @endforeach
-                    </div>
+                    <form method="GET" action="{{ route('student.orientation') }}">
+                        <input type="hidden" name="recherche" value="{{ request('recherche') }}">
+                        <input type="hidden" name="etablissement" value="{{ request('etablissement') }}">
+                        <input type="hidden" name="niveau" value="{{ request('niveau') }}">
+                        <select name="domaine" class="or-search-input" style="padding-left: 0.9rem;" onchange="this.form.submit()">
+                            <option value="">Tous les domaines</option>
+                            @foreach($domaines as $d)
+                                <option value="{{ $d }}" {{ request('domaine') == $d ? 'selected' : '' }}>
+                                    {{ $d }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
                 </div>
 
-                {{-- Niveau --}}
+                {{-- Section ÉTABLISSEMENT (Select Dropdown) --}}
+                <div class="or-sidebar-block">
+                    <div class="or-sidebar-label">🏛️ Établissement</div>
+                    <form method="GET" action="{{ route('student.orientation') }}">
+                        <input type="hidden" name="recherche" value="{{ request('recherche') }}">
+                        <input type="hidden" name="domaine" value="{{ request('domaine') }}">
+                        <input type="hidden" name="niveau" value="{{ request('niveau') }}">
+                        <select name="etablissement" class="or-search-input" style="padding-left: 0.9rem;" onchange="this.form.submit()">
+                            <option value="">Tous les établissements</option>
+                            @foreach($etablissements as $etab)
+                                <option value="{{ $etab }}" {{ request('etablissement') == $etab ? 'selected' : '' }}>
+                                    {{ $etab }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+
+                {{-- Section NIVEAU D'ÉTUDES --}}
                 <div class="or-sidebar-block">
                     <div class="or-sidebar-label">📐 Niveau d'études</div>
                     <form method="GET" action="{{ route('student.orientation') }}" id="niveauForm">
-                        <input type="hidden" name="domaine" value="{{ $domaine }}">
-                        <input type="hidden" name="search" value="{{ $search }}">
+                        <input type="hidden" name="domaine" value="{{ request('domaine') }}">
+                        <input type="hidden" name="recherche" value="{{ request('recherche') }}">
+                        <input type="hidden" name="etablissement" value="{{ request('etablissement') }}">
                         <div class="or-nivel-grid">
-                            <button type="submit" name="niveau" value="" class="or-nivel-btn {{ !$niveau ? 'active' : '' }}">
+                            <button type="submit" name="niveau" value="" class="or-nivel-btn {{ !request('niveau') ? 'active' : '' }}">
                                 Tous
                             </button>
                             @foreach($niveaux as $n)
-                                <button type="submit" name="niveau" value="{{ $n }}" class="or-nivel-btn {{ $niveau === $n ? 'active' : '' }}">
+                                <button type="submit" name="niveau" value="{{ $n }}" class="or-nivel-btn {{ request('niveau') == $n ? 'active' : '' }}">
                                     {{ $n }}
                                 </button>
                             @endforeach
@@ -116,13 +138,14 @@
                     </form>
                 </div>
 
-                {{-- Spécialités --}}
+                {{-- Section SPÉCIALITÉS --}}
+                @if(isset($specialites) && $specialites->count() > 0)
                 <div class="or-sidebar-block">
                     <div class="or-sidebar-label">🏷️ Spécialités</div>
                     <div class="or-spec-list">
-                        @foreach($specialites as $spec)
-                            <a href="{{ route('student.orientation', ['domaine' => $spec->domaine, 'search' => $search, 'niveau' => $niveau]) }}"
-                                class="or-spec-pill {{ $domaine === $spec->domaine ? 'active' : '' }}">
+                        @foreach($specialites->take(5) as $spec)
+                            <a href="{{ route('student.orientation', array_merge(request()->all(), ['domaine' => $spec->domaine, 'page' => 1])) }}"
+                                class="or-spec-pill {{ request('domaine') == $spec->domaine ? 'active' : '' }}">
                                 <span class="or-spec-pill-icon">{{ $spec->icon }}</span>
                                 <span class="or-spec-pill-name">{{ $spec->nom }}</span>
                                 <span class="or-spec-pill-count">{{ $spec->nb_formations }}</span>
@@ -130,154 +153,151 @@
                         @endforeach
                     </div>
                 </div>
+                @endif
+
+                {{-- RESET FILTRES --}}
+                @if(request()->hasAny(['domaine', 'etablissement', 'recherche', 'niveau']))
+                <div class="or-sidebar-block" style="background: var(--paper); border-top: 1px solid var(--ink10);">
+                    <a href="{{ route('student.orientation') }}" class="btn-ghost" style="width: 100%; justify-content: center; font-size: 0.75rem; border-style: dashed;">
+                        ✕ Réinitialiser les filtres
+                    </a>
+                </div>
+                @endif
 
             </aside>
 
             {{-- ════ MAIN CONTENT ════ --}}
             <main class="or-main">
 
-                {{-- Results header --}}
                 <div class="or-results-header rev">
                     <div class="or-results-info">
-                        <span class="or-results-count-big">{{ $formations->total() }}</span>
+                        <span class="or-results-count-big">{{ $filieres->total() }}</span>
                         <span class="or-results-count-label">
-                            formation{{ $formations->total() > 1 ? 's' : '' }}
-                            @if($domaine !== 'Toutes') · <strong>{{ $domaine }}</strong>@endif
+                            formation{{ $filieres->total() > 1 ? 's' : '' }} trouvée{{ $filieres->total() > 1 ? 's' : '' }}
+                            @if($domaine) · <strong>{{ $domaine }}</strong>@endif
                             @if($niveau) · <strong>{{ $niveau }}</strong>@endif
-                            @if($search) · "<em>{{ $search }}</em>"@endif
+                            @if($recherche) · "<em>{{ $recherche }}</em>"@endif
                         </span>
                     </div>
 
-                    {{-- Mobile filter toggle --}}
                     <button class="or-filter-toggle" id="filterToggle" aria-label="Filtres">
                         ⚙️ Filtres
                     </button>
                 </div>
 
-                {{-- Formations --}}
-                @php
-                    $niveauPill = [
-                        'Licence'    => 'pill-sage',
-                        'Master'     => 'pill-marine',
-                        'Ingénierie' => 'pill-accent',
-                        'Doctorat'   => 'pill-gold',
-                    ];
-                    $colorMap = [
-                        'indigo' => 'var(--accent2)',
-                        'cyan'   => 'var(--accent3)',
-                        'violet' => 'var(--accent)',
-                        'green'  => 'var(--accent3)',
-                        'amber'  => 'var(--gold)',
-                    ];
-                @endphp
+                <div class="or-grid">
+                    @forelse($filieres as $filiere)
+                        <article class="or-card">
+                            <div class="or-card-stripe" style="--stripe-color: var(--accent); width: 100%; height: 4px;"></div>
 
-                @if($formations->isEmpty())
-                    <div class="or-empty rev">
-                        <div class="or-empty-icon">🔍</div>
-                        <h3 class="or-empty-title">Aucune formation trouvée</h3>
-                        <p class="or-empty-sub">Essayez d'élargir votre recherche ou de changer de filtre.</p>
-                        <a href="{{ route('student.orientation') }}" class="btn-fill">Voir toutes les formations</a>
-                    </div>
-                @else
-                    <div class="or-grid">
-
-                        @foreach($formations as $formation)
-                            @php
-                                $spec = $formation->specialite;
-                                $np   = $niveauPill[$formation->niveau] ?? 'pill-ink';
-                                $sc   = $colorMap[$spec->color ?? 'indigo'] ?? 'var(--accent)';
-                                $matchScore = $formation->score_matching;
-                                $matchColor = $matchScore >= 80 ? 'var(--accent3)' : ($matchScore >= 60 ? 'var(--gold)' : 'var(--accent)');
-                            @endphp
-                            <article class="or-card btn-fiche rev rev-d{{ ($loop->index % 3) + 1 }}" data-id="{{ $formation->id }}">
-
-                                {{-- Top stripe (match color) --}}
-                                <div class="or-card-stripe" style="--stripe-color:{{ $matchColor }};"></div>
-
-                                <div class="or-card-body">
-
-                                    {{-- Row 1 : Level badge + match score --}}
-                                    <div class="or-card-row-top">
-                                        <div class="or-card-badges">
-                                            <span class="pill {{ $np }}">{{ $formation->niveau }}</span>
-                                            <span class="pill pill-ink">{{ $spec->icon }} {{ $spec->domaine }}</span>
-                                        </div>
-                                        <div class="or-match-chip" style="--chip-color:{{ $matchColor }}">
-                                            <span class="or-match-num">{{ $matchScore }}%</span>
-                                            <span class="or-match-lbl">match</span>
-                                        </div>
-                                    </div>
-
-                                    {{-- Row 2 : Icon + Name --}}
-                                    <div class="or-card-identity">
-                                        <div class="or-card-icon" style="--icon-bg:{{ $matchColor }}">{{ $formation->icon }}</div>
-                                        <div class="or-card-name">{{ $formation->nom }}</div>
-                                    </div>
-
-                                    {{-- Row 3 : Établissement + Ville --}}
-                                    <div class="or-card-meta">
-                                        <span class="or-meta-item">🏛️ {{ $formation->etablissement }}</span>
-                                        <span class="or-meta-sep">·</span>
-                                        <span class="or-meta-item">📍 {{ $formation->ville }}</span>
-                                        <span class="or-meta-sep">·</span>
-                                        <span class="or-meta-item">⏱ {{ $formation->duree }}</span>
-                                    </div>
-
-                                    {{-- Row 4 : Match bar --}}
-                                    <div class="or-bar-track">
-                                        <div class="match-bar-fill or-bar-fill" style="width:{{ $matchScore }}%;background:{{ $matchColor }};"></div>
-                                    </div>
-
-                                    {{-- Row 5 : Description --}}
-                                    <p class="or-card-desc">{{ $formation->description }}</p>
-
-                                    {{-- Row 6 : Footer (salary + CTA) --}}
-                                    <div class="or-card-footer">
-                                        <div class="or-salary">
-                                            <div class="or-salary-label">Salaire estimé</div>
-                                            <div class="or-salary-val">{{ $formation->salaire_min }} – {{ $formation->salaire_max }}</div>
-                                        </div>
-                                        <div style="display:flex;align-items:center;gap:.5rem">
-                                            @php
-                                                $inWishlist = in_array($formation->id, $userVoeuxIds ?? []);
-                                            @endphp
-                                            <button class="btn-voeu {{ $inWishlist ? 'active' : '' }}" data-id="{{ $formation->id }}" title="Ajouter aux vœux" onclick="event.stopPropagation(); window.toggleVoeu(this, {{ $formation->id }})">
-                                                {{ $inWishlist ? '❤️' : '🤍' }}
-                                            </button>
-                                            <button class="or-card-btn" data-id="{{ $formation->id }}">Fiche →</button>
-                                        </div>
-                                    </div>
-
+                            <div class="or-card-body">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.65rem; font-weight: 700; color: var(--ink30); text-transform: uppercase; letter-spacing: 0.05em;">
+                                        #{{ $filiere->code_filiere }}
+                                    </span>
+                                    <span class="pill pill-accent" style="font-size: 0.6rem;">
+                                        {{ $filiere->domaine }}
+                                    </span>
                                 </div>
-                            </article>
-                        @endforeach
-                    </div>
 
-                    {{-- Pagination --}}
-                    @if($formations->hasPages())
-                        <nav class="or-pagination" aria-label="Pagination">
-                            @if($formations->onFirstPage())
-                                <span class="or-page-item or-page-wide disabled">← Préc.</span>
-                            @else
-                                <a href="{{ $formations->previousPageUrl() }}" class="or-page-item or-page-wide">← Préc.</a>
+                                <h3 style="font-family: var(--font-serif); font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 0.25rem; line-height: 1.3; min-height: 2.6rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    {{ $filiere->nom_filiere }}
+                                </h3>
+
+                                <div style="font-size: 0.8rem; font-weight: 600; color: var(--ink60); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+                                    🏛️ {{ $filiere->etablissement }}
+                                </div>
+
+                                <div style="font-size: 0.7rem; color: var(--ink30); margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+                                    {{ $filiere->universite }}
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--ink06); margin-top: auto;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 0.55rem; font-weight: 700; color: var(--ink30); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;">2023</div>
+                                        <div style="font-family: var(--font-serif); font-size: 0.85rem; font-weight: 600; color: var(--ink60);">
+                                            {{ $filiere->sdo_2023 ? number_format($filiere->sdo_2023, 2, '.', ' ') : 'N/A' }}
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center; border-left: 1px solid var(--ink06); border-right: 1px solid var(--ink06);">
+                                        <div style="font-size: 0.55rem; font-weight: 700; color: var(--ink30); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;">2024</div>
+                                        <div style="font-family: var(--font-serif); font-size: 0.85rem; font-weight: 600; color: var(--ink60);">
+                                            {{ $filiere->sdo_2024 ? number_format($filiere->sdo_2024, 2, '.', ' ') : 'N/A' }}
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 0.55rem; font-weight: 700; color: var(--ink30); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;">2025</div>
+                                        <div style="font-family: var(--font-serif); font-size: 0.95rem; font-weight: 700; color: var(--accent);">
+                                            {{ $filiere->sdo_2025 ? number_format($filiere->sdo_2025, 2, '.', ' ') : 'N/A' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="or-empty rev vis">
+                            <div class="or-empty-icon">🔍</div>
+                            <h3 class="or-empty-title">Aucune formation trouvée</h3>
+                            <p class="or-empty-sub">Essayez d'élargir votre recherche ou de changer de filtre.</p>
+                            <a href="{{ route('student.orientation') }}" class="btn-fill">Voir toutes les formations</a>
+                        </div>
+                    @endforelse
+                </div>
+
+                {{-- Pagination --}}
+                <div style="margin-top: 2rem; display: flex; justify-content: center;">
+                    <nav class="or-pagination">
+                        {{-- Previous Page Link --}}
+                        @if($filieres->onFirstPage())
+                            <span class="or-page-item or-page-wide disabled">← Précédent</span>
+                        @else
+                            <a href="{{ $filieres->previousPageUrl() }}" class="or-page-item or-page-wide">← Précédent</a>
+                        @endif
+
+                        {{-- Pagination Elements --}}
+                        @php
+                            $onEachSide = 1;
+                            $window = $onEachSide * 2;
+                            $lastPage = $filieres->lastPage();
+                            $currentPage = $filieres->currentPage();
+                            
+                            $start = max($currentPage - $onEachSide, 1);
+                            $end = min($start + $window, $lastPage);
+                            if ($end - $start < $window) {
+                                $start = max($end - $window, 1);
+                            }
+                        @endphp
+
+                        @if($start > 1)
+                            <a href="{{ $filieres->url(1) }}" class="or-page-item">1</a>
+                            @if($start > 2)
+                                <span class="or-page-item disabled" style="border:none;background:transparent;">...</span>
                             @endif
+                        @endif
 
-                            @foreach($formations->getUrlRange(1, $formations->lastPage()) as $page => $url)
-                                @if($page == $formations->currentPage())
-                                    <span class="or-page-item active">{{ $page }}</span>
-                                @else
-                                    <a href="{{ $url }}" class="or-page-item">{{ $page }}</a>
-                                @endif
-                            @endforeach
-
-                            @if($formations->hasMorePages())
-                                <a href="{{ $formations->nextPageUrl() }}" class="or-page-item or-page-wide">Suiv. →</a>
+                        @for($i = $start; $i <= $end; $i++)
+                            @if($i == $currentPage)
+                                <span class="or-page-item active">{{ $i }}</span>
                             @else
-                                <span class="or-page-item or-page-wide disabled">Suiv. →</span>
+                                <a href="{{ $filieres->url($i) }}" class="or-page-item">{{ $i }}</a>
                             @endif
-                        </nav>
-                    @endif
-                @endif
+                        @endfor
+
+                        @if($end < $lastPage)
+                            @if($end < $lastPage - 1)
+                                <span class="or-page-item disabled" style="border:none;background:transparent;">...</span>
+                            @endif
+                            <a href="{{ $filieres->url($lastPage) }}" class="or-page-item">{{ $lastPage }}</a>
+                        @endif
+
+                        {{-- Next Page Link --}}
+                        @if($filieres->hasMorePages())
+                            <a href="{{ $filieres->nextPageUrl() }}" class="or-page-item or-page-wide">Suivant →</a>
+                        @else
+                            <span class="or-page-item or-page-wide disabled">Suivant →</span>
+                        @endif
+                    </nav>
+                </div>
 
             </main>
         </div>
@@ -296,32 +316,7 @@
     </div>
 
     {{-- Hidden formation data (JSON) --}}
-    @foreach($formations as $formation)
-        @php
-            $spec = $formation->specialite;
-            $np   = $niveauPill[$formation->niveau] ?? 'pill-ink';
-        @endphp
-        <script type="application/json" id="fiche-data-{{ $formation->id }}">{!! json_encode([
-            'id'                => $formation->id,
-            'nom'               => $formation->nom,
-            'etablissement'     => $formation->etablissement,
-            'ville'             => $formation->ville,
-            'duree'             => $formation->duree,
-            'niveau'            => $formation->niveau,
-            'description'       => $formation->description,
-            'debouches'         => $formation->debouches,
-            'conditions_acces'  => $formation->conditions_acces,
-            'salaire_min'       => $formation->salaire_min,
-            'salaire_max'       => $formation->salaire_max,
-            'secteur'           => $formation->secteur,
-            'icon'              => $formation->icon,
-            'score_matching'    => $formation->score_matching,
-            'specialite_nom'    => $spec->nom,
-            'specialite_icon'   => $spec->icon,
-            'specialite_domaine'=> $spec->domaine,
-            'niveau_pill'       => $np,
-        ]) !!}</script>
-    @endforeach
+    {{-- Modal logic removed as filieres use cards without detail popups currently --}}
 
     @include('student.orientation.scripts')
 

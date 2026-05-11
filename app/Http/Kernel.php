@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'role'        => \App\Http\Middleware\EnsureUserHasRole::class,
         'admin'       => \App\Http\Middleware\EnsureIsAdmin::class,
         'riasec.test' => \App\Http\Middleware\EnsureTestInProgress::class,
+        'two-factor'  => \App\Http\Middleware\TwoFactorMiddleware::class,
     ];
 }

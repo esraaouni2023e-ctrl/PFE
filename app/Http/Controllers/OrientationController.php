@@ -4,46 +4,64 @@ namespace App\Http\Controllers;
 
 use App\Models\Specialite;
 use App\Models\Formation;
+use App\Models\Filiere;
 use Illuminate\Http\Request;
 
 class OrientationController extends Controller
 {
     public function index(Request $request)
     {
-        $domaine  = $request->get('domaine', 'Toutes');
-        $search   = $request->get('search', '');
-        $niveau   = $request->get('niveau', '');
+        $domaine        = $request->get('domaine', '');
+        $etablissement  = $request->get('etablissement', '');
+        $recherche      = $request->get('recherche', '');
+        $niveau         = $request->get('niveau', '');
 
-        $specialites = Specialite::with('formations')->get();
+        $query = Filiere::query();
 
-        $formationsQuery = Formation::with('specialite');
-
-        if ($domaine !== 'Toutes') {
-            $formationsQuery->whereHas('specialite', fn($q) => $q->where('domaine', $domaine));
-        }
-
-        if ($search) {
-            $formationsQuery->where(function ($q) use ($search) {
-                $q->where('nom', 'like', "%{$search}%")
-                  ->orWhere('etablissement', 'like', "%{$search}%")
-                  ->orWhere('secteur', 'like', "%{$search}%")
-                  ->orWhereHas('specialite', fn($sq) => $sq->where('nom', 'like', "%{$search}%"));
+        if ($request->filled('recherche')) {
+            $q = $request->recherche;
+            $query->where(function($q2) use ($q) {
+                $q2->where('nom_filiere', 'like', "%$q%")
+                   ->orWhere('etablissement', 'like', "%$q%")
+                   ->orWhere('code_filiere', 'like', "%$q%");
             });
         }
 
-        if ($niveau) {
-            $formationsQuery->where('niveau', $niveau);
+        if ($request->filled('domaine') && $request->domaine !== 'Toutes') {
+            $query->where('domaine', $request->domaine);
         }
 
-        $formations = $formationsQuery->orderByDesc('score_matching')->paginate(12)->withQueryString();
+        if ($request->filled('etablissement')) {
+            $query->where('etablissement', $request->etablissement);
+        }
 
-        $domaines = ['Toutes', 'Technologie', 'Santé', 'Sciences', 'Gestion', 'Arts', 'Droit', 'Éducation'];
-        $niveaux  = ['Licence', 'Master', 'Ingénierie', 'Doctorat'];
+        if ($request->filled('niveau')) {
+            $query->where('nom_filiere', 'like', '%' . $request->niveau . '%');
+        }
 
-        $userVoeuxIds = auth()->check() ? auth()->user()->orientationVoeux()->pluck('formation_id')->toArray() : [];
+        $filieres = $query->paginate(15)->withQueryString();
+
+        $etablissements = Filiere::select('etablissement')
+                                 ->distinct()
+                                 ->orderBy('etablissement')
+                                 ->pluck('etablissement');
+
+        $domaines = [
+            'Économie et Gestion',
+            'Sciences Expérimentales',
+            'Mathématiques et Appliquées',
+            'Informatique',
+            'Technologie',
+            'Sport',
+            'Lettres et Sciences Humaines'
+        ];
+
+        $niveaux = ['Licence', 'Master', 'Ingénierie', 'Doctorat'];
+        $specialites = Specialite::all(); 
 
         return view('student.orientation', compact(
-            'specialites', 'formations', 'domaine', 'search', 'niveau', 'domaines', 'niveaux', 'userVoeuxIds'
+            'filieres', 'etablissements', 'domaines', 'niveaux', 'specialites',
+            'domaine', 'etablissement', 'recherche', 'niveau'
         ));
     }
 

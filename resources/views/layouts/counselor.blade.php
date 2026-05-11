@@ -404,6 +404,7 @@
             <li><a href="{{ route('counselor.dashboard') }}" class="{{ request()->routeIs('counselor.dashboard') ? 'active' : '' }}">Tableau de bord</a></li>
             <li><a href="#">Mes Étudiants</a></li>
             <li><a href="#">Agenda</a></li>
+            <li><a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">📬 Messagerie</a></li>
             <li><a href="#">Ressources IA</a></li>
             <li><a href="{{ route('profile.edit') }}" class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">Mon Profil</a></li>
         </ul>
@@ -411,6 +412,7 @@
         <!-- Right controls -->
         <div class="navbar-right">
             <button class="theme-toggle" id="themeToggle" title="Basculer le thème">🌙</button>
+            @include('partials.notifications')
 
             <div class="role-badge">
                 <span class="role-dot"></span>
@@ -420,6 +422,7 @@
             <div class="avatar-nav" title="{{ auth()->user()->name }}">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </div>
+
 
             <form method="POST" action="{{ route('logout') }}" style="margin:0">
                 @csrf
@@ -445,6 +448,7 @@
             <a href="{{ route('counselor.dashboard') }}" class="{{ request()->routeIs('counselor.dashboard') ? 'active' : '' }}">📊 Tableau de bord</a>
             <a href="#">👥 Mes Étudiants</a>
             <a href="#">📅 Agenda</a>
+            <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">📬 Messagerie</a>
             <a href="#">🧠 Ressources IA</a>
             <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">⚙️ Mon Profil</a>
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto">

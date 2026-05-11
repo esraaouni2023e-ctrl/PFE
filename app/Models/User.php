@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\Lang;
 
 class User extends Authenticatable
 {
@@ -30,6 +33,9 @@ class User extends Authenticatable
         'role',
         'is_admin',
         'avatar',
+        'is_blocked',
+        'two_factor_code',
+        'two_factor_expires_at',
     ];
 
     /**
@@ -160,6 +166,66 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_admin' => 'boolean',
+        'is_blocked' => 'boolean',
+        'two_factor_expires_at' => 'datetime',
     ];
+
+    /**
+     * Envoyer la notification de vérification par e-mail en français.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        VerifyEmail::toMailUsing(function ($notifiable, $url) {
+            return (new MailMessage)
+                ->subject(Lang::get('Vérification de votre adresse e-mail'))
+                ->greeting(Lang::get('Bonjour !'))
+                ->line(Lang::get('Veuillez cliquer sur le bouton ci-dessous pour vérifier votre adresse e-mail.'))
+                ->action(Lang::get('Vérifier l\'adresse e-mail'), $url)
+                ->line(Lang::get('Si vous n\'avez pas créé de compte, aucune autre action n\'est requise.'))
+                ->salutation(Lang::get('Cordialement,') . "\n" . config('app.name'));
+        });
+
+        $this->notify(new VerifyEmail);
+    }
+
+    /**
+     * Generate a new two factor code.
+     */
+    public function generateTwoFactorCode(): void
+    {
+        $this->timestamps = false; // Ne pas mettre à jour updated_at
+        $this->two_factor_code = rand(100000, 999999);
+        $this->two_factor_expires_at = now()->addMinutes(10);
+        $this->save();
+        $this->timestamps = true; // Remettre à true après
+    }
+
+    /**
+     * Reset the two factor code.
+     */
+    public function resetTwoFactorCode(): void
+    {
+        $this->timestamps = false;
+        $this->two_factor_code = null;
+        $this->two_factor_expires_at = null;
+        $this->save();
+        $this->timestamps = true;
+    }
+
+    /**
+     * Messages sent by the user.
+     */
+    public function senderMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    /**
+     * Messages received by the user.
+     */
+    public function receiverMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
 }
 
