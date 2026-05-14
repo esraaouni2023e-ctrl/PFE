@@ -13,16 +13,16 @@ class FilieresSeeder extends Seeder
     public function run(): void
     {
         $mapping = [
-            'ECO_Filieres.xlsx'           => 'Économie et Gestion',
-            'EXP_Filieres-1.xlsx'         => 'Sciences Expérimentales',
-            'filieres_data (1).xlsx'      => 'Mathématiques et Appliquées',
-            'INFO_Filieres.xlsx'          => 'Informatique',
-            'TECH_Filieres.xlsx'          => 'Technologie',
-            'SPORT_Filieres.xlsx'         => 'Sport',
-            'donnees_filiere_enrichies-1.xlsx' => 'Lettres et Sciences Humaines',
+            'ECO_Filieres.xlsx'              => 'Économie et Gestion',
+            'EXP_Filieres.xlsx'              => 'Sciences Expérimentales',
+            'filieres_data.xlsx'             => 'Mathématiques et Appliquées',
+            'INFO_Filieres.xlsx'             => 'Informatique',
+            'TECH_Filieres.xlsx'             => 'Technologie',
+            'SPORT_Filieres.xlsx'            => 'Sport',
+            'donnees_filiere_enrichies.xlsx' => 'Lettres et Sciences Humaines',
         ];
 
-        $directory = storage_path('app/excel');
+        $directory = storage_path('app/excels');
         
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
@@ -46,6 +46,8 @@ class FilieresSeeder extends Seeder
                         $code = trim($row[0] ?? '');
                         if (empty($code)) continue;
 
+                        $gatbDefaults = $this->getGatbDefaults($domaine);
+
                         Filiere::updateOrCreate(
                             ['code_filiere' => $code],
                             [
@@ -56,6 +58,10 @@ class FilieresSeeder extends Seeder
                                 'sdo_2024'      => $this->cleanDecimal($row[5]),
                                 'sdo_2025'      => $this->cleanDecimal($row[6]),
                                 'domaine'       => $domaine,
+                                'g_requis'      => $gatbDefaults['G'],
+                                'v_requis'      => $gatbDefaults['V'],
+                                'n_requis'      => $gatbDefaults['N'],
+                                's_requis'      => $gatbDefaults['S'],
                             ]
                         );
                     }
@@ -79,5 +85,19 @@ class FilieresSeeder extends Seeder
         $value = preg_replace('/[^0-9.]/', '', $value);
         
         return is_numeric($value) ? (float)$value : null;
+    }
+
+    private function getGatbDefaults($domaine): array
+    {
+        return match($domaine) {
+            'Mathématiques et Appliquées'   => ['G'=>12, 'V'=>10, 'N'=>13, 'S'=>11],
+            'Informatique'                  => ['G'=>11, 'V'=>10, 'N'=>13, 'S'=>12],
+            'Économie et Gestion'           => ['G'=>11, 'V'=>11, 'N'=>12, 'S'=>10],
+            'Sciences Expérimentales'       => ['G'=>12, 'V'=>10, 'N'=>11, 'S'=>11],
+            'Technologie'                   => ['G'=>11, 'V'=>10, 'N'=>12, 'S'=>13],
+            'Lettres et Sciences Humaines'  => ['G'=>11, 'V'=>13, 'N'=>9,  'S'=>9],
+            'Sport'                         => ['G'=>10, 'V'=>10, 'N'=>9,  'S'=>12],
+            default                         => ['G'=>10, 'V'=>10, 'N'=>10, 'S'=>10],
+        };
     }
 }

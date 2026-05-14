@@ -7,13 +7,15 @@
     "require": {
         "php": "^8.1",
         "bacon/bacon-qr-code": "^3.1",
-        "guzzlehttp/guzzle": "^7.2",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "guzzlehttp/guzzle": "^7.10",
         "inertiajs/inertia-laravel": "0.6.11",
         "laravel/fortify": "^1.36",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "maatwebsite/excel": "^3.1",
+        "phpoffice/phpword": "^1.4",
         "pragmarx/google2fa": "^9.0",
         "smalot/pdfparser": "*",
         "tightenco/ziggy": "*"

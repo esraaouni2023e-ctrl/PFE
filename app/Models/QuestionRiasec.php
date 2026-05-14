@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -26,6 +27,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class QuestionRiasec extends Model
 {
+    use HasFactory;
+    
     // ── Constantes de dimension ────────────────────────────────────────────
     const DIM_R = 'R'; // Réaliste
     const DIM_I = 'I'; // Investigateur
@@ -58,6 +61,7 @@ class QuestionRiasec extends Model
 
     protected $fillable = [
         'dimension',
+        'bloc',
         'categorie',
         'texte_fr',
         'texte_ar',

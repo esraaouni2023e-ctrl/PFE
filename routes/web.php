@@ -110,6 +110,20 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
         Route::delete('/portfolio/{portfolio}', [\App\Http\Controllers\PortfolioController::class, 'destroy'])->name('portfolio.destroy');
         Route::post('/roadmap', [\App\Http\Controllers\RoadmapController::class, 'generate'])->name('roadmap.generate');
 
+        // ── CV Builder ──
+        Route::prefix('cv')->name('cv.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Student\CvBuilderController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Student\CvBuilderController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Student\CvBuilderController::class, 'store'])->name('store');
+            Route::get('/{cvProfile}/edit', [\App\Http\Controllers\Student\CvBuilderController::class, 'edit'])->name('edit');
+            Route::put('/{cvProfile}', [\App\Http\Controllers\Student\CvBuilderController::class, 'update'])->name('update');
+            Route::delete('/{cvProfile}', [\App\Http\Controllers\Student\CvBuilderController::class, 'destroy'])->name('destroy');
+            Route::post('/{cvProfile}/duplicate', [\App\Http\Controllers\Student\CvBuilderController::class, 'duplicate'])->name('duplicate');
+            Route::get('/{cvProfile}/pdf', [\App\Http\Controllers\Student\CvBuilderController::class, 'downloadPdf'])->name('pdf');
+            Route::get('/{cvProfile}/docx', [\App\Http\Controllers\Student\CvBuilderController::class, 'downloadDocx'])->name('docx');
+            Route::get('/{cvProfile}/preview', [\App\Http\Controllers\Student\CvBuilderController::class, 'preview'])->name('preview');
+        });
+
         // ── Chatbot IA ──
         Route::post('/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot');
     });
@@ -183,6 +197,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             Route::delete('/{question}',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'destroy'])->name('destroy');
             Route::post('/{question}/toggle',[\App\Http\Controllers\Admin\RiasecAdminController::class, 'toggle'])->name('toggle');
         });
+    });
+
     // ── Contacts & Notifications ──────────────────────────────────────────────
     Route::get('/contacts', [\App\Http\Controllers\ContactController::class, 'getContacts'])->name('contacts.index');
     Route::get('/contacts/{id}', [\App\Http\Controllers\ContactController::class, 'show'])->name('contacts.show');
@@ -243,10 +259,8 @@ Route::prefix('riasec')
 
 // ── Recommandations de filières (API Python) ──────────────────────────────
 Route::middleware(['auth'])->group(function () {
-    Route::get('/recommendations', [\App\Http\Controllers\RecommendationController::class, 'showForm'])
-        ->name('recommendations.form');
-    Route::post('/recommendations', [\App\Http\Controllers\RecommendationController::class, 'getRecommendations'])
-        ->name('recommendations.get');
+    Route::get('/recommendations', [\App\Http\Controllers\StudentController::class, 'showRecommendations'])
+        ->name('recommendations.show');
 });
 
 require __DIR__ . '/auth.php';

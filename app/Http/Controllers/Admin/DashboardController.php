@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\ProfileRiasec;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -39,6 +40,28 @@ class DashboardController extends Controller
 
         $recentLogs = \App\Models\AuditLog::with('user')->orderBy('created_at', 'desc')->take(6)->get();
 
+        // --- SIAEPI v2.0 Data ---
+        $totalTests = ProfileRiasec::count();
+        $flaggedCount = ProfileRiasec::where('is_flagged', true)->count();
+        $avgConfidence = ProfileRiasec::avg('confidence_score') ?? 0;
+
+        $suspectProfiles = ProfileRiasec::with('user')
+            ->where('is_flagged', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $codesDistribution = ProfileRiasec::selectRaw('SUBSTRING(code_holland, 1, 1) as letter, COUNT(*) as count')
+            ->whereNotNull('code_holland')
+            ->groupBy('letter')
+            ->pluck('count', 'letter')
+            ->toArray();
+        
+        $chartLabels = ['R', 'I', 'A', 'S', 'E', 'C'];
+        $chartData = [];
+        foreach ($chartLabels as $l) {
+            $chartData[] = $codesDistribution[$l] ?? 0;
+        }
+
         return view('admin.dashboard', compact(
             'totalUsers',
             'newUsersToday',
@@ -48,7 +71,13 @@ class DashboardController extends Controller
             'adminCount',
             'recentUsers',
             'monthlyData',
-            'recentLogs'
+            'recentLogs',
+            'totalTests',
+            'flaggedCount',
+            'avgConfidence',
+            'suspectProfiles',
+            'chartLabels',
+            'chartData'
         ));
     }
 }

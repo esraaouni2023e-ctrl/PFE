@@ -540,7 +540,7 @@
                 <div class="db-ring-center">
                     <span class="db-ring-emoji">🎓</span>
                     <span class="db-ring-label">Profil IA</span>
-                    <span class="db-ring-val">78%</span>
+                    <span class="db-ring-val">{{ $profilIaScore ?? 78 }}%</span>
                 </div>
             </div>
 
@@ -574,20 +574,17 @@
             </div>
             <div>
                 <div class="db-avatar-name">{{ explode(' ', auth()->user()->name)[0] }}</div>
-                <span class="pill pill-sage" style="margin-top:.5rem;">Niveau : Explorateur IA</span>
+                @if(isset($profilRiasec) && $profilRiasec)
+                    <span class="pill pill-sage" style="margin-top:.5rem;">
+                        Code Holland : <strong>{{ $profilRiasec->code_holland }}</strong>
+                    </span>
+                @else
+                    <span class="pill pill-sage" style="margin-top:.5rem;">Niveau : Explorateur IA</span>
+                @endif
             </div>
 
-            @php
-            $skills = [
-                ['label'=>'Créativité',     'val'=>92, 'color'=>'var(--accent)'],
-                ['label'=>'Logique',         'val'=>85, 'color'=>'var(--accent2)'],
-                ['label'=>'Intérêt Tech',    'val'=>89, 'color'=>'var(--accent)'],
-                ['label'=>'Social',          'val'=>64, 'color'=>'var(--accent3)'],
-                ['label'=>'Gestion',         'val'=>71, 'color'=>'var(--gold)'],
-            ];
-            @endphp
             <div class="db-skills">
-                @foreach($skills as $s)
+                @foreach($dynamicSkills as $s)
                 <div class="db-skill-row">
                     <span class="db-skill-name">{{ $s['label'] }}</span>
                     <span class="db-skill-val" style="color:{{ $s['color'] }};">{{ $s['val'] }}%</span>

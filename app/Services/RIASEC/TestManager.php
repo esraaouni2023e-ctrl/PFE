@@ -328,8 +328,10 @@ class TestManager
             ->pluck('question_id')
             ->flip(); // flip pour O(1) lookup
 
-        $answeredByDim  = array_fill_keys(array_keys(QuestionRiasec::DIMENSIONS), 0);
-        $remainingByDim = array_fill_keys(array_keys(QuestionRiasec::DIMENSIONS), 0);
+        // Initialise dynamiquement toutes les dimensions présentes dans la banque
+        $allDimensions  = $allQuestions->pluck('dimension')->unique()->all();
+        $answeredByDim  = array_fill_keys($allDimensions, 0);
+        $remainingByDim = array_fill_keys($allDimensions, 0);
         $lastQuestionId = null;
 
         foreach ($allQuestions as $q) {

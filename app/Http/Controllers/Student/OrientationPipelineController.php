@@ -81,43 +81,20 @@ class OrientationPipelineController extends Controller
                 ->with('info', '🧠 Étape 2/3 — Passez le test RIASEC pour identifier votre profil psychologique.');
         }
 
-        // ── Étape 3 : Générer les recommandations via l'API Python ─────────
-        $scoreFg     = $profile->score_fg;
-        $codeHolland = $riasecProfil->code_holland;
-
-        $result = $this->recommendationService->getRecommendations(
-            (float) $scoreFg,
-            $codeHolland
-        );
-
-        if (!$result['success']) {
-            return redirect()
-                ->route('riasec.results')
-                ->with('warning', '⚠️ Étape 3/3 — Votre profil RIASEC est prêt mais le service de recommandations est inaccessible. Vérifiez que l\'API Python est démarrée.');
-        }
-
-        if (empty($result['data']['recommendations'])) {
-            return redirect()
-                ->route('riasec.results')
-                ->with('info', 'ℹ️ Aucune filière trouvée pour ce profil. Essayez de repasser le test RIASEC.');
-        }
-
-        // Stocke les recommandations en session et redirige vers résultats
+        // ── Étape 3 : Afficher le profil RIASEC (l'utilisateur cliquera ensuite sur le bouton IA) ─────────
         session([
-            'riasec_profile_id'      => $riasecProfil->id,
-            'riasec_recommendations' => $result['data'],
+            'riasec_profile_id' => $riasecProfil->id,
         ]);
 
-        Log::info('OrientationPipeline – recommandations générées', [
+        Log::info('OrientationPipeline – redirigé vers résultats RIASEC', [
             'user_id'      => $userId,
-            'score_fg'     => $scoreFg,
-            'code_holland' => $codeHolland,
-            'count'        => count($result['data']['recommendations']),
+            'score_fg'     => $profile->score_fg,
+            'code_holland' => $riasecProfil->code_holland,
         ]);
 
         return redirect()
             ->route('riasec.results')
-            ->with('success', '✅ Étape 3/3 — Analyse complète ! Voici vos recommandations personnalisées.');
+            ->with('success', '✅ Étape 3/3 — Profil RIASEC complété ! Cliquez sur le bouton CapAvenir IA pour générer vos recommandations.');
     }
 
     /**

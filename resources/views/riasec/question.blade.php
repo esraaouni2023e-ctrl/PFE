@@ -161,6 +161,40 @@
 {{-- ── Main ── --}}
 <div class="q-page" x-data="riasecQ()" x-init="init()">
 
+    {{-- Early Stopping Gauge --}}
+    @if(!empty($earlyStopData))
+    <div class="q-card" style="background:#f8fafc; border:1px solid #e2e8f0; padding:1.5rem; text-align:center;">
+        <div style="position:relative; width:150px; height:75px; margin:0 auto;">
+            <svg viewBox="0 0 100 50" style="width:100%; height:100%; overflow:visible;">
+                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e0e0e0" stroke-width="10" stroke-linecap="round" />
+                @php
+                    $score = $earlyStopData['confidence'];
+                    $color = $score >= 85 ? '#22c55e' : ($score >= 70 ? '#eab308' : '#3b82f6');
+                    $dashOffset = (M_PI * 40) - ($score / 100) * (M_PI * 40);
+                @endphp
+                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="{{ $color }}" stroke-width="10" stroke-linecap="round" 
+                      stroke-dasharray="125.66" stroke-dashoffset="{{ $dashOffset }}" style="transition: stroke-dashoffset 1s;" />
+            </svg>
+            <div style="position:absolute; bottom:-10px; width:100%; font-weight:bold; font-size:1.5rem; color:{{ $color }};">{{ $score }}%</div>
+        </div>
+        
+        <p style="margin-top:1.5rem; font-weight:600; color:#475569; font-size:1.1rem;">
+            {{ $earlyStopData['message'] }}
+        </p>
+
+        @if($earlyStopData['confidence'] >= 70 || $earlyStopData['stop'])
+        <div style="margin-top:1.5rem; display:flex; justify-content:center;">
+            <button type="button" 
+               @click="window.location.href = '{{ route('riasec.complete') }}'"
+               class="btn-fill" 
+               style="background:var(--ink); width:100%; max-width:300px; display:flex; align-items:center; justify-content:center; height:45px; border:none; cursor:pointer;">
+                Terminer le test maintenant
+            </button>
+        </div>
+        @endif
+    </div>
+    @endif
+
     {{-- Feedback anti-ennui (Changement de vague) --}}
     @if(!empty($feedback))
     <div class="q-card" style="background: color-mix(in srgb, var(--accent) 8%, transparent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); padding: 1.5rem;">

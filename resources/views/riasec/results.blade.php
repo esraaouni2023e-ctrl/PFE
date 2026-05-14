@@ -235,11 +235,9 @@
         <div class="res-card">
             <p class="res-card-title">🎓 Filières recommandées</p>
             <div class="pills-row">
-                @forelse($recommendations ?? [] as $rec)
-                <span class="pill-filiere">{{ $rec['Nom_Filiere'] ?? '—' }}</span>
-                @empty
-                <p style="font-size:.8rem;color:var(--ink30);">Calcul algorithmique en cours...</p>
-                @endforelse
+                <a href="{{ route('recommendations.show') }}" class="pill-filiere" style="text-decoration:none; display:inline-block;">
+                    ✨ Voir mes recommandations IA →
+                </a>
             </div>
         </div>
     </div>
@@ -252,116 +250,21 @@
     </div>
     @endif
 
-    {{-- ── Recommandations Algorithmiques (SRF) ── --}}
-    @if(!empty($recommendations))
-    <div style="margin-bottom:2rem;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem;">
-            <div>
-                <p class="res-eyebrow">🤖 Recommandations algorithmiques (SRF)</p>
-                <h2 style="font-family:var(--font-serif);font-size:1.35rem;font-weight:600;color:var(--ink);margin:0;">
-                    Top 3 des filières recommandées
-                </h2>
-            </div>
-            @if($totalFilieres)
-            <span style="background:var(--ink06);border:1px solid var(--glass-border);border-radius:var(--rx);padding:.3rem .8rem;font-size:.75rem;font-weight:700;color:var(--ink60);">
-                {{ $totalFilieres }} filières analysées
-            </span>
-            @endif
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
-            @foreach($recommendations as $i => $rec)
-            <div style="
-                background:var(--ink06);
-                border:1px solid var(--glass-border);
-                border-radius:var(--rl);
-                overflow:hidden;
-                transition:border-color .3s var(--ease), transform .2s var(--ease);
-                position:relative;
-            "
-            onmouseenter="this.style.transform='translateY(-3px)';this.style.borderColor='var(--glass-border-vivid)'"
-            onmouseleave="this.style.transform='translateY(0)';this.style.borderColor='var(--glass-border)'"
-            >
-                {{-- Header coloré --}}
-                <div style="background:linear-gradient(135deg,var(--accent2) 0%,#0e3048 100%);padding:1.1rem 1.2rem 0.8rem;position:relative;">
-                    <span style="position:absolute;top:.7rem;right:.7rem;background:rgba(255,255,255,.18);color:#fff;border-radius:50%;width:26px;height:26px;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;">
-                        #{{ $i + 1 }}
-                    </span>
-                    <div style="font-family:var(--font-serif);font-size:.95rem;font-weight:600;color:#fff;line-height:1.3;padding-right:2rem;margin-bottom:.3rem;">
-                        {{ $rec['Nom_Filiere'] ?? '—' }}
-                    </div>
-                    <div style="font-size:.73rem;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:.3rem;">
-                        🏛️ {{ $rec['Universite'] ?? '' }}
-                    </div>
-                </div>
-
-                {{-- Body --}}
-                <div style="padding:1rem 1.2rem;">
-                    {{-- Tags --}}
-                    <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.85rem;">
-                        @if(!empty($rec['RIASEC']))
-                        <span style="background:color-mix(in srgb,var(--accent2) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 22%,transparent);color:var(--accent2);border-radius:var(--rx);padding:.18rem .55rem;font-size:.68rem;font-weight:700;">
-                            🧠 {{ $rec['RIASEC'] }}
-                        </span>
-                        @endif
-                        @if(!empty($rec['Taux_Employabilite']))
-                        <span style="background:color-mix(in srgb,var(--accent3) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent3) 22%,transparent);color:var(--accent3);border-radius:var(--rx);padding:.18rem .55rem;font-size:.68rem;font-weight:700;">
-                            💼 {{ $rec['Taux_Employabilite'] }}
-                        </span>
-                        @endif
-                        @if(!empty($rec['Croissance_Domaine']))
-                        <span style="background:color-mix(in srgb,var(--gold) 10%,transparent);border:1px solid color-mix(in srgb,var(--gold) 22%,transparent);color:var(--gold);border-radius:var(--rx);padding:.18rem .55rem;font-size:.68rem;font-weight:700;">
-                            📈 {{ $rec['Croissance_Domaine'] }}
-                        </span>
-                        @endif
-                    </div>
-
-                    {{-- Score SRF global --}}
-                    @if(!empty($rec['SRF']))
-                    @php $srf = round($rec['SRF'], 1); @endphp
-                    <div style="margin-bottom:.85rem;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem;">
-                            <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink30);">Score Global (SRF)</span>
-                            <span style="font-size:.82rem;font-weight:700;color:var(--accent2);">{{ $srf }}%</span>
-                        </div>
-                        <div style="height:5px;background:var(--ink10);border-radius:99px;overflow:hidden;">
-                            <div style="height:100%;width:{{ min(100,$srf) }}%;background:linear-gradient(90deg,var(--accent2),#2a7bae);border-radius:99px;transition:width 1s ease;"></div>
-                        </div>
-                    </div>
-                    @endif
-
-                    {{-- Scores détaillés (grille 2×2) --}}
-                    @php
-                        $scoreItems = [
-                            ['label'=>'Académique',    'val'=>$rec['Score_Academique']   ?? null, 'color'=>'#1a4f6e'],
-                            ['label'=>'Psychologique', 'val'=>$rec['Score_Psychologique'] ?? null, 'color'=>'#4a7c59'],
-                            ['label'=>'Marché',        'val'=>$rec['Score_Marche']        ?? null, 'color'=>'#c8973a'],
-                            ['label'=>'SDO 2025',      'val'=>$rec['SDO_2025']            ?? null, 'color'=>'#d4622a'],
-                        ];
-                    @endphp
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
-                        @foreach($scoreItems as $s)
-                        @if($s['val'] !== null)
-                        <div style="background:rgba(11,12,16,.04);border-radius:8px;padding:.45rem .6rem;">
-                            <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink30);margin-bottom:.15rem;">{{ $s['label'] }}</div>
-                            <div style="font-size:.85rem;font-weight:700;color:{{ $s['color'] }};">{{ number_format($s['val'],1) }}%</div>
-                        </div>
-                        @endif
-                        @endforeach
-                    </div>
-
-                    {{-- Explication --}}
-                    @if(!empty($rec['explanation']))
-                    <div style="margin-top:.75rem;padding:.6rem .8rem;border-left:2px solid var(--accent2);border-radius:0 6px 6px 0;background:color-mix(in srgb,var(--accent2) 5%,transparent);font-size:.76rem;color:var(--ink60);line-height:1.5;">
-                        💡 {{ $rec['explanation'] }}
-                    </div>
-                    @endif
-                </div>
-            </div>
-            @endforeach
-        </div>
+    {{-- ── Call to Action : Recommandations IA ── --}}
+    <div style="margin-bottom:2rem; background: linear-gradient(135deg, var(--ink06) 0%, rgba(212,98,42,0.05) 100%); border: 1px solid var(--glass-border-vivid); border-radius: var(--rl); padding: 2rem; text-align: center;">
+        <span style="background:var(--accent);color:#fff;border-radius:var(--rx);padding:.2rem .6rem;font-size:.7rem;font-weight:700;margin-bottom:1rem;display:inline-block;">
+            NOUVEAU · CapAvenir IA
+        </span>
+        <h2 style="font-family:var(--font-serif);font-size:1.6rem;font-weight:600;color:var(--ink);margin-bottom:1rem;">
+            Découvrez vos filières recommandées par l'IA
+        </h2>
+        <p style="font-size:.95rem;color:var(--ink60);max-width:600px;margin:0 auto 1.5rem;line-height:1.6;">
+            Notre nouveau moteur d'intelligence artificielle croise vos résultats psychométriques complets (RIASEC, Big Five, GATB, Schwartz) avec vos performances académiques pour vous proposer les meilleures filières d'orientation en Tunisie.
+        </p>
+        <a href="{{ route('recommendations.show') }}" class="btn-fill" style="font-size: 1rem; padding: 1rem 2.5rem; box-shadow: 0 4px 20px rgba(212,98,42,0.4);">
+            ✨ Générer mes recommandations IA
+        </a>
     </div>
-    @endif
 
     {{-- ── Actions ── --}}
     <div class="res-actions">

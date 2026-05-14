@@ -227,5 +227,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'receiver_id');
     }
+
+    /**
+     * Get the user's CV profiles.
+     */
+    public function cvProfiles(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(CvProfile::class);
+    }
 }
 

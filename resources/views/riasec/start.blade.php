@@ -1,5 +1,5 @@
 @extends('layouts.student')
-@section('title', 'Test RIASEC — Découvre ton profil')
+@section('title', 'Test Psychométrique Complet — CapAvenir')
 
 @section('content')
 <style>
@@ -139,23 +139,42 @@
 <div class="riasec-page">
 
     {{-- ── Eyebrow ── --}}
-    <p class="riasec-eyebrow">🧠 Test RIASEC · Théorie Holland</p>
+    <p class="riasec-eyebrow">🧠 Test Psychométrique Complet · CapAvenir</p>
 
     {{-- ── Titre hero ── --}}
     <h1 class="riasec-hero-title">
-        Découvre ton <em>profil</em><br>d'orientation
+        Découvre ton <em>profil</em><br>psychométrique complet
     </h1>
     <p class="riasec-hero-sub">
-        Le test commence par quelques informations generales, puis 18 questions initiales
-        (3 par dimension RIASEC). Le moteur adapte ensuite la suite selon tes reponses.
+        Ce test combine <strong>4 dimensions scientifiques</strong> — RIASEC (Holland), Big Five (OCEAN),
+        Aptitudes cognitives (GATB) et Valeurs (Schwartz) — pour générer des recommandations
+        de filières précises et personnalisées.
     </p>
 
     {{-- ── Statistiques ── --}}
     <div class="riasec-stats">
-        <div class="stat-chip">📝 <strong>30-{{ $totalQuestions }}</strong> questions</div>
-        <div class="stat-chip">⏱ <strong>~8-15</strong> minutes</div>
-        <div class="stat-chip">🎯 <strong>6</strong> dimensions Holland</div>
+        <div class="stat-chip">📝 <strong>{{ $totalQuestions }}</strong> questions</div>
+        <div class="stat-chip">⏱ <strong>~15-20</strong> minutes</div>
+        <div class="stat-chip">🎯 <strong>4</strong> blocs scientifiques</div>
         <div class="stat-chip">🔒 <strong>100%</strong> anonyme</div>
+    </div>
+
+    {{-- ── Grille des 4 blocs ── --}}
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem;margin-bottom:2.5rem;">
+        @foreach([
+            ['icon'=>'🧭','label'=>'RIASEC · Holland',   'color'=>'#d4622a','desc'=>'6 dimensions vocales : Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel.'],
+            ['icon'=>'🌊','label'=>'Big Five · OCEAN',   'color'=>'#1a4f6e','desc'=>'5 traits de personnalité : Ouverture, Conscienciosité, Extraversion, Agréabilité, Stabilité.'],
+            ['icon'=>'⚡','label'=>'Aptitudes · GATB',   'color'=>'#c8973a','desc'=>'4 aptitudes cognitives : Intelligence générale, Verbal, Numérique, Spatial.'],
+            ['icon'=>'💎','label'=>'Valeurs · Schwartz', 'color'=>'#4a7c59','desc'=>'4 valeurs fondamentales : Sécurité, Réussite, Bienveillance, Autonomie.'],
+        ] as $bloc)
+        <div class="dim-card">
+            <div class="dim-card-top">
+                <div class="dim-letter" style="background:{{ $bloc['color'] }};font-size:1rem;">{{ $bloc['icon'] }}</div>
+                <span style="font-size:.85rem;font-weight:700;color:var(--ink);">{{ $bloc['label'] }}</span>
+            </div>
+            <div class="dim-trait" style="font-size:.75rem;">{{ $bloc['desc'] }}</div>
+        </div>
+        @endforeach
     </div>
 
     {{-- ── Bannière test en cours ── --}}
@@ -188,29 +207,7 @@
     </div>
     @endif
 
-    {{-- ── Grille des 6 dimensions ── --}}
-    @php
-    $dims = [
-        ['L'=>'R','name'=>'Réaliste',       'trait'=>'Concret · Manuel',     'color'=>'#d4622a','emoji'=>'🔧'],
-        ['L'=>'I','name'=>'Investigateur',   'trait'=>'Analytique · Curieux', 'color'=>'#1a4f6e','emoji'=>'🔬'],
-        ['L'=>'A','name'=>'Artistique',      'trait'=>'Créatif · Expressif',  'color'=>'#c8973a','emoji'=>'🎨'],
-        ['L'=>'S','name'=>'Social',          'trait'=>'Humain · Altruiste',   'color'=>'#4a7c59','emoji'=>'🤝'],
-        ['L'=>'E','name'=>'Entreprenant',    'trait'=>'Leader · Ambitieux',   'color'=>'#7c4a7c','emoji'=>'🚀'],
-        ['L'=>'C','name'=>'Conventionnel',   'trait'=>'Organisé · Rigoureux', 'color'=>'#4a6e6e','emoji'=>'📋'],
-    ];
-    @endphp
-    <div class="dim-grid">
-        @foreach($dims as $d)
-        <div class="dim-card">
-            <div class="dim-card-top">
-                <div class="dim-letter" style="background:{{ $d['color'] }}">{{ $d['L'] }}</div>
-                <span style="font-size:1.3rem;">{{ $d['emoji'] }}</span>
-            </div>
-            <div class="dim-name">{{ $d['name'] }}</div>
-            <div class="dim-trait">{{ $d['trait'] }}</div>
-        </div>
-        @endforeach
-    </div>
+
 
     {{-- ── Instructions ── --}}
     <div class="instr-card">

@@ -145,144 +145,131 @@ nav.scrolled{
   animation:fadeUp .9s var(--ease) .35s both;
 }
 
-/* ── HERO MOCKUP CARD ── */
-.hero-mockup{
-  width:100%;max-width:480px;
-  background:color-mix(in srgb,var(--paper) 92%,transparent);
+/* ── BENTO GRID ── */
+.bento-grid{
+  width:100%;max-width:500px;
+  display:grid;
+  grid-template-columns:1.4fr 1fr;
+  grid-template-rows:auto auto auto;
+  gap:12px;
+  animation:fadeUp .9s var(--ease) .4s both;
+}
+.bento-card{
+  position:relative;overflow:hidden;
+  background:color-mix(in srgb,var(--paper) 85%,transparent);
   border:1px solid var(--ink10);
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 32px 80px rgba(0,0,0,.14),0 8px 24px rgba(0,0,0,.08);
-  backdrop-filter:blur(20px);
+  border-radius:16px;
+  padding:1.25rem;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  transition:border-color .3s, transform .3s var(--ease);
 }
-.hero-mockup-bar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.85rem 1.25rem;
-  border-bottom:1px solid var(--ink10);
-  background:var(--cream);
+.bento-card:hover{border-color:color-mix(in srgb,var(--accent) 40%,transparent);transform:translateY(-3px);}
+.bento-glow{
+  position:absolute;width:120px;height:120px;border-radius:50%;
+  filter:blur(50px);opacity:.25;pointer-events:none;
 }
-.hmb-dots{display:flex;gap:.4rem;}
-.hmb-dot{
-  width:10px;height:10px;border-radius:50%;
+.bento-glow-accent{background:var(--accent);top:-30px;right:-20px;}
+.bento-glow-gold{background:var(--gold);bottom:-20px;left:-10px;}
+.bento-glow-marine{background:var(--accent2);top:-20px;left:-20px;}
+.bento-glow-sage{background:var(--accent3);bottom:-20px;right:-20px;}
+
+/* Grid placement */
+.bento-lg{grid-row:span 2;}
+.bento-sm{}
+.bento-wide{grid-column:span 2;}
+
+/* Tags & labels */
+.bento-tag{
+  font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:.65rem;
 }
-.hmb-dot:nth-child(1){background:#ff5f57;}
-.hmb-dot:nth-child(2){background:#ffbd2e;}
-.hmb-dot:nth-child(3){background:#28ca41;}
-.hmb-title{
-  font-size:.78rem;font-weight:600;color:var(--ink60);
+.bento-label{
+  font-size:.88rem;color:var(--ink60);line-height:1.5;margin-top:.5rem;
+}
+.bento-label strong{color:var(--ink);font-weight:700;}
+
+/* RIASEC card */
+.bento-riasec{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem 1rem;}
+.bento-radar{width:140px;height:130px;margin-bottom:.25rem;}
+.bento-shape{
+  fill:color-mix(in srgb,var(--accent) 15%,transparent);
+  stroke:var(--accent);stroke-width:1.5;
+  animation:radarDraw 1.5s var(--ease) .5s both;
+}
+@keyframes radarDraw{from{opacity:0;transform:scale(.3) rotate(-10deg);}to{opacity:1;transform:scale(1) rotate(0);}}
+.bento-radar-dims{position:relative;width:160px;height:0;margin-top:-8px;}
+.bento-radar-dims span{
+  position:absolute;font-size:.65rem;font-weight:800;color:var(--ink30);
   letter-spacing:.04em;
 }
-.hmb-badge{
-  display:flex;align-items:center;gap:.35rem;
-  font-size:.7rem;font-weight:600;color:var(--accent3);
-  background:color-mix(in srgb,var(--accent3) 12%,transparent);
-  padding:.25rem .65rem;border-radius:99px;
-}
-.hmb-badge-dot{
-  width:6px;height:6px;border-radius:50%;background:var(--accent3);
-  animation:dotPulse 2s ease-in-out infinite;
-}
-.hero-mockup-body{padding:1.5rem;}
 
-/* Profile score row */
-.hm-profile{
-  display:flex;align-items:center;gap:1rem;
-  padding:1rem 1.25rem;
-  background:var(--cream);
-  border-radius:12px;
-  margin-bottom:1.25rem;
+/* Score card */
+.bento-score{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.bento-score-circle{position:relative;width:70px;height:70px;}
+.bento-score-circle svg{width:100%;height:100%;transform:rotate(-90deg);}
+.bento-ring-anim{
+  animation:ringDraw 1.5s var(--ease) .6s both;
 }
-.hm-avatar{
-  width:46px;height:46px;border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Fraunces',serif;font-size:1.1rem;font-weight:600;color:#fff;
-  flex-shrink:0;
+@keyframes ringDraw{from{stroke-dashoffset:214;}}
+.bento-score-val{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces',serif;font-size:1.45rem;font-weight:700;color:var(--accent);
+  letter-spacing:-.03em;
 }
-.hm-profile-info{flex:1;min-width:0;}
-.hm-name{font-size:.88rem;font-weight:600;color:var(--ink);}
-.hm-sub{font-size:.75rem;color:var(--ink60);margin-top:.1rem;}
-.hm-score{
-  font-family:'Fraunces',serif;font-size:1.5rem;font-weight:600;
-  color:var(--accent);letter-spacing:-.04em;line-height:1;
-}
-.hm-score-label{font-size:.65rem;color:var(--ink60);text-align:right;}
+.bento-score-val small{font-size:.7rem;font-weight:400;}
 
-/* Match cards */
-.hm-label{
-  font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--ink60);margin-bottom:.75rem;
+/* What-If card */
+.bento-whatif{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.bento-whatif-icon{
+  display:flex;align-items:flex-end;gap:5px;height:50px;
 }
-.hm-match{
-  display:flex;flex-direction:column;gap:.6rem;
-  margin-bottom:1.25rem;
+.bento-bar{
+  width:14px;border-radius:4px 4px 0 0;
+  background:var(--c,var(--accent));
+  height:0;
+  animation:barUp 1s var(--ease) both;
 }
-.hm-match-row{
-  display:flex;align-items:center;gap:.75rem;
-}
-.hm-match-icon{
-  width:34px;height:34px;border-radius:8px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-size:.85rem;
-}
-.hm-match-icon.c1{background:color-mix(in srgb,var(--accent) 12%,transparent);}
-.hm-match-icon.c2{background:color-mix(in srgb,var(--accent2) 12%,transparent);}
-.hm-match-icon.c3{background:color-mix(in srgb,var(--accent3) 12%,transparent);}
-.hm-match-info{flex:1;min-width:0;}
-.hm-match-name{font-size:.82rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hm-bar-wrap{
-  height:5px;background:var(--ink10);border-radius:99px;margin-top:.3rem;
-  overflow:hidden;
-}
-.hm-bar-fill{
-  height:100%;border-radius:99px;
-  animation:barGrow 1.4s var(--ease) both;
-}
-.hm-bar-fill.f1{background:var(--accent);width:92%;animation-delay:.5s;}
-.hm-bar-fill.f2{background:var(--accent2);width:79%;animation-delay:.65s;}
-.hm-bar-fill.f3{background:var(--accent3);width:67%;animation-delay:.8s;}
-@keyframes barGrow{from{width:0;}}
-.hm-pct{font-size:.78rem;font-weight:700;color:var(--ink);min-width:32px;text-align:right;}
+.bento-bar:nth-child(1){animation-delay:.5s;}
+.bento-bar:nth-child(2){animation-delay:.65s;}
+.bento-bar:nth-child(3){animation-delay:.8s;}
+.bento-bar:nth-child(4){animation-delay:.95s;}
+@keyframes barUp{to{height:var(--h,60%);}}
 
-/* Action chip at bottom */
-.hm-action{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.9rem 1.1rem;
-  border-radius:10px;
-  border:1px solid var(--ink10);
-  background:var(--warm);
-  cursor:default;
+/* CV Builder card */
+.bento-cv{display:flex;gap:1.25rem;align-items:center;}
+.bento-cv-preview{
+  width:60px;flex-shrink:0;
+  background:var(--ink06);border:1px solid var(--ink10);
+  border-radius:6px;padding:8px;
+  display:flex;flex-direction:column;gap:5px;
 }
-.hm-action-text{font-size:.82rem;font-weight:500;color:var(--ink);}
-.hm-action-badge{
-  font-size:.72rem;font-weight:700;
-  color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);
-  padding:.25rem .65rem;border-radius:99px;
+.bento-cv-line{
+  height:3px;border-radius:2px;background:var(--ink10);
+  animation:lineSlide .8s var(--ease) both;
+}
+.bento-cv-line.w80{width:80%;animation-delay:.6s;}
+.bento-cv-line.w60{width:60%;animation-delay:.7s;}
+.bento-cv-line.w90{width:90%;animation-delay:.8s;}
+.bento-cv-line.w45{width:45%;animation-delay:.9s;}
+@keyframes lineSlide{from{width:0;opacity:0;}}
+.bento-cv-dots{display:flex;gap:3px;margin-top:2px;}
+.bento-cv-dots span{width:6px;height:6px;border-radius:50%;}
+.bento-cv-right{flex:1;min-width:0;}
+.bento-formats{display:flex;gap:.4rem;margin-top:.5rem;}
+.bf-chip{
+  font-size:.65rem;font-weight:700;letter-spacing:.06em;
+  padding:.2rem .55rem;border-radius:99px;
+  text-transform:uppercase;
+}
+.bf-pdf{background:color-mix(in srgb,#dc2626 12%,transparent);color:#dc2626;border:1px solid color-mix(in srgb,#dc2626 20%,transparent);}
+.bf-docx{background:color-mix(in srgb,var(--accent2) 12%,transparent);color:var(--accent2);border:1px solid color-mix(in srgb,var(--accent2) 20%,transparent);}
+
+/* ── Responsive bento ── */
+@media(max-width:500px){
+  .bento-grid{grid-template-columns:1fr 1fr;}
+  .bento-lg{grid-row:auto;}
 }
 
-/* Floating stat chips outside card */
-.hm-float{
-  position:absolute;
-  display:flex;align-items:center;gap:.5rem;
-  background:color-mix(in srgb,var(--paper) 92%,transparent);
-  backdrop-filter:blur(16px);
-  border:1px solid var(--ink10);
-  border-radius:12px;
-  padding:.55rem 1rem;
-  font-size:.78rem;font-weight:600;color:var(--ink);
-  box-shadow:0 8px 24px rgba(0,0,0,.1);
-  white-space:nowrap;
-  animation:pillFloat ease-in-out infinite;
-}
-.hm-float-dot{
-  width:8px;height:8px;border-radius:50%;
-}
-.hm-float-1{top:-18px;right:12%;animation-duration:4.5s;animation-delay:0s;}
-.hm-float-2{bottom:-18px;left:8%;animation-duration:5.2s;animation-delay:-.9s;}
-@keyframes pillFloat{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-8px);}
-}
 
 /* Large editorial BG text */
 .hero-bg-word{
@@ -994,83 +981,88 @@ footer{
       </div>
     </div>
 
-    <!-- ── RIGHT: Dashboard Mockup ── -->
+    <!-- ── RIGHT: Bento Grid Feature Showcase ── -->
     <div class="hero-right">
-      <!-- Floating chips -->
-      <div class="hm-float hm-float-1">
-        <div class="hm-float-dot" style="background:var(--accent3);"></div>
-        IA active · Analyse en cours
-      </div>
-      <div class="hm-float hm-float-2">
-        <div class="hm-float-dot" style="background:var(--gold);"></div>
-        3 nouvelles recommandations
-      </div>
+      <div class="bento-grid">
 
-      <div class="hero-mockup">
-        <!-- Window bar -->
-        <div class="hero-mockup-bar">
-          <div class="hmb-dots">
-            <div class="hmb-dot"></div>
-            <div class="hmb-dot"></div>
-            <div class="hmb-dot"></div>
+        <!-- Card 1: RIASEC Radar (large) -->
+        <div class="bento-card bento-lg bento-riasec">
+          <div class="bento-glow bento-glow-accent"></div>
+          <div class="bento-tag">Test RIASEC</div>
+          <svg viewBox="0 0 200 180" class="bento-radar">
+            <polygon points="100,15 160,45 160,125 100,155 40,125 40,45" fill="none" stroke="var(--ink10)" stroke-width=".5"/>
+            <polygon points="100,35 148,55 148,115 100,135 52,115 52,55" fill="none" stroke="var(--ink10)" stroke-width=".5"/>
+            <polygon points="100,55 136,67 136,103 100,115 64,103 64,67" fill="none" stroke="var(--ink10)" stroke-width=".5"/>
+            <polygon class="bento-shape" points="100,20 155,48 148,122 100,145 55,110 45,50"/>
+            <circle cx="100" cy="20" r="4" fill="var(--accent)"/>
+            <circle cx="155" cy="48" r="4" fill="var(--accent)"/>
+            <circle cx="148" cy="122" r="3" fill="var(--accent2)"/>
+            <circle cx="100" cy="145" r="2.5" fill="var(--ink30)"/>
+            <circle cx="55" cy="110" r="3" fill="var(--accent2)"/>
+            <circle cx="45" cy="50" r="2.5" fill="var(--ink30)"/>
+          </svg>
+          <div class="bento-radar-dims">
+            <span style="top:0;left:50%;transform:translateX(-50%)">R</span>
+            <span style="top:20%;right:0">I</span>
+            <span style="bottom:18%;right:0">A</span>
+            <span style="bottom:0;left:50%;transform:translateX(-50%)">S</span>
+            <span style="bottom:18%;left:0">E</span>
+            <span style="top:20%;left:0">C</span>
           </div>
-          <span class="hmb-title">Mon profil CapAvenir</span>
-          <div class="hmb-badge">
-            <div class="hmb-badge-dot"></div>
-            En ligne
+          <div class="bento-label">Découvre ton profil<br><strong>psychométrique</strong></div>
+        </div>
+
+        <!-- Card 2: AI Score (small top-right) -->
+        <div class="bento-card bento-sm bento-score">
+          <div class="bento-glow bento-glow-gold"></div>
+          <div class="bento-score-circle">
+            <svg viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="var(--ink10)" stroke-width="3"/>
+              <circle cx="40" cy="40" r="34" fill="none" stroke="var(--accent)" stroke-width="3.5"
+                      stroke-dasharray="214" stroke-dashoffset="40" stroke-linecap="round"
+                      class="bento-ring-anim"/>
+            </svg>
+            <div class="bento-score-val">92<small>%</small></div>
+          </div>
+          <div class="bento-tag" style="margin-top:.5rem;">Score IA</div>
+        </div>
+
+        <!-- Card 3: What-If (small bottom-right) -->
+        <div class="bento-card bento-sm bento-whatif">
+          <div class="bento-glow bento-glow-marine"></div>
+          <div class="bento-whatif-icon">
+            <div class="bento-bar" style="--h:70%;--c:var(--accent)"></div>
+            <div class="bento-bar" style="--h:50%;--c:var(--accent2)"></div>
+            <div class="bento-bar" style="--h:85%;--c:var(--accent3)"></div>
+            <div class="bento-bar" style="--h:40%;--c:var(--gold)"></div>
+          </div>
+          <div class="bento-tag" style="margin-top:.5rem;">Simulateur</div>
+        </div>
+
+        <!-- Card 4: CV Builder (wide bottom) -->
+        <div class="bento-card bento-wide bento-cv">
+          <div class="bento-glow bento-glow-sage"></div>
+          <div class="bento-cv-preview">
+            <div class="bento-cv-line w80"></div>
+            <div class="bento-cv-line w60"></div>
+            <div class="bento-cv-line w90"></div>
+            <div class="bento-cv-line w45"></div>
+            <div class="bento-cv-dots">
+              <span style="background:var(--accent)"></span>
+              <span style="background:var(--accent2)"></span>
+              <span style="background:var(--accent3)"></span>
+            </div>
+          </div>
+          <div class="bento-cv-right">
+            <div class="bento-tag">CV Builder</div>
+            <div class="bento-label">Génère ton CV<br><strong>en 1 clic</strong></div>
+            <div class="bento-formats">
+              <span class="bf-chip bf-pdf">PDF</span>
+              <span class="bf-chip bf-docx">DOCX</span>
+            </div>
           </div>
         </div>
 
-        <!-- Body -->
-        <div class="hero-mockup-body">
-          <!-- Student profile row -->
-          <div class="hm-profile">
-            <div class="hm-avatar">A</div>
-            <div class="hm-profile-info">
-              <div class="hm-name">Amira Khediri</div>
-              <div class="hm-sub">Bac Sciences · 16.4/20</div>
-            </div>
-            <div style="text-align:right;">
-              <div class="hm-score">92<small style="font-size:.9rem;font-weight:300;">%</small></div>
-              <div class="hm-score-label">Score profil</div>
-            </div>
-          </div>
-
-          <!-- Match bars -->
-          <p class="hm-label">Top formations recommandées</p>
-          <div class="hm-match">
-            <div class="hm-match-row">
-              <div class="hm-match-icon c1">💻</div>
-              <div class="hm-match-info">
-                <div class="hm-match-name">Génie Informatique · INSAT</div>
-                <div class="hm-bar-wrap"><div class="hm-bar-fill f1"></div></div>
-              </div>
-              <div class="hm-pct">92%</div>
-            </div>
-            <div class="hm-match-row">
-              <div class="hm-match-icon c2">📊</div>
-              <div class="hm-match-info">
-                <div class="hm-match-name">Data Science · ENIT</div>
-                <div class="hm-bar-wrap"><div class="hm-bar-fill f2"></div></div>
-              </div>
-              <div class="hm-pct">79%</div>
-            </div>
-            <div class="hm-match-row">
-              <div class="hm-match-icon c3">🔬</div>
-              <div class="hm-match-info">
-                <div class="hm-match-name">Biologie · Fac. Sciences Tunis</div>
-                <div class="hm-bar-wrap"><div class="hm-bar-fill f3"></div></div>
-              </div>
-              <div class="hm-pct">67%</div>
-            </div>
-          </div>
-
-          <!-- Bottom action -->
-          <div class="hm-action">
-            <span class="hm-action-text">Voir le rapport complet →</span>
-            <span class="hm-action-badge">Nouveau</span>
-          </div>
-        </div>
       </div>
     </div>
 
