@@ -28,18 +28,36 @@
 
                 <div class="or-hero-actions">
                     <div class="or-hero-meta">
-                        <span class="pill pill-accent">📚 {{ count($domaines) }} domaines</span>
-                        <span class="pill pill-sage">🎓 {{ \App\Models\Filiere::count() }} filières</span>
-                        <span class="pill pill-marine">🇹🇳 Tunisie 2026</span>
+                        <span class="pill pill-accent">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.75rem;height:.75rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                            </svg>
+                            {{ count($domaines) }} domaines
+                        </span>
+                        <span class="pill pill-sage">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.75rem;height:.75rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147L12 15l7.74-4.853a4.5 4.5 0 00-2.122-3.933L12 3 6.382 6.214a4.5 4.5 0 00-2.122 3.933z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v7.5" />
+                            </svg>
+                            {{ \App\Models\Filiere::count() }} filières
+                        </span>
+                        <span class="pill pill-marine">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.75rem;height:.75rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                            </svg>
+                            Tunisie 2026
+                        </span>
                     </div>
                     @php
                         $pipelineStatus = \App\Http\Controllers\Student\OrientationPipelineController::getStatus(auth()->id());
                         $pipelineStep   = $pipelineStatus['step'];
                         $pipelineLabel  = match($pipelineStep) {
-                            1 => '📊 Étape 1/3 — Calculer mon Score',
-                            2 => '🧠 Étape 2/3 — Passer le test RIASEC',
-                            3 => '✅ Voir mes recommandations',
+                            1 => 'Passer le test',
+                            2 => 'Passer le test',
+                            3 => 'Voir mes recommandations',
                         };
+                        $pipelineIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>';
                     @endphp
                     <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
                         <a href="{{ route('student.pipeline') }}"
@@ -49,7 +67,7 @@
                                   font-size:.95rem;padding:.85rem 2rem;gap:.6rem;"
                            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(99,102,241,0.5)'"
                            onmouseout="this.style.transform='';this.style.boxShadow='0 4px 18px rgba(99,102,241,0.35)'">
-                            {{ $pipelineLabel }}
+                            {!! $pipelineIcon !!} {{ $pipelineLabel }}
                         </a>
                     </div>
                 </div>
@@ -65,13 +83,22 @@
 
                 {{-- Section RECHERCHE --}}
                 <div class="or-sidebar-block">
-                    <div class="or-sidebar-label">🔍 Recherche</div>
+                    <div class="or-sidebar-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.9rem;height:.9rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        Recherche
+                    </div>
                     <form method="GET" action="{{ route('student.orientation') }}" id="searchForm">
                         <input type="hidden" name="domaine" value="{{ request('domaine') }}">
                         <input type="hidden" name="etablissement" value="{{ request('etablissement') }}">
-                        <input type="hidden" name="niveau" value="{{ request('niveau') }}">
+
                         <div class="or-search-inner">
-                            <span class="or-search-icon">🔍</span>
+                            <span class="or-search-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:1.1rem;height:1.1rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                            </span>
                             <input type="text" name="recherche" class="or-search-input" id="searchInput"
                                 value="{{ request('recherche') }}" placeholder="Formation, établissement…"
                                 autocomplete="off">
@@ -84,11 +111,16 @@
 
                 {{-- Section DOMAINE (Select Dropdown) --}}
                 <div class="or-sidebar-block">
-                    <div class="or-sidebar-label">🎯 Domaine</div>
+                    <div class="or-sidebar-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.9rem;height:.9rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-3.015-3.015 3 3 0 00-3.015 3.015 3 3 0 003.015 3.015 3 3 0 003.015-3.015zM17.03 16.122a3 3 0 00-3.015-3.015 3 3 0 00-3.015 3.015 3 3 0 003.015 3.015 3 3 0 003.015-3.015zM13.28 10.122a3 3 0 00-3.015-3.015 3 3 0 00-3.015 3.015 3 3 0 003.015 3.015 3 3 0 003.015-3.015z" />
+                        </svg>
+                        Domaine
+                    </div>
                     <form method="GET" action="{{ route('student.orientation') }}">
                         <input type="hidden" name="recherche" value="{{ request('recherche') }}">
                         <input type="hidden" name="etablissement" value="{{ request('etablissement') }}">
-                        <input type="hidden" name="niveau" value="{{ request('niveau') }}">
+
                         <select name="domaine" class="or-search-input" style="padding-left: 0.9rem;" onchange="this.form.submit()">
                             <option value="">Tous les domaines</option>
                             @foreach($domaines as $d)
@@ -102,11 +134,16 @@
 
                 {{-- Section ÉTABLISSEMENT (Select Dropdown) --}}
                 <div class="or-sidebar-block">
-                    <div class="or-sidebar-label">🏛️ Établissement</div>
+                    <div class="or-sidebar-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.9rem;height:.9rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                        </svg>
+                        Établissement
+                    </div>
                     <form method="GET" action="{{ route('student.orientation') }}">
                         <input type="hidden" name="recherche" value="{{ request('recherche') }}">
                         <input type="hidden" name="domaine" value="{{ request('domaine') }}">
-                        <input type="hidden" name="niveau" value="{{ request('niveau') }}">
+
                         <select name="etablissement" class="or-search-input" style="padding-left: 0.9rem;" onchange="this.form.submit()">
                             <option value="">Tous les établissements</option>
                             @foreach($etablissements as $etab)
@@ -118,30 +155,18 @@
                     </form>
                 </div>
 
-                {{-- Section NIVEAU D'ÉTUDES --}}
-                <div class="or-sidebar-block">
-                    <div class="or-sidebar-label">📐 Niveau d'études</div>
-                    <form method="GET" action="{{ route('student.orientation') }}" id="niveauForm">
-                        <input type="hidden" name="domaine" value="{{ request('domaine') }}">
-                        <input type="hidden" name="recherche" value="{{ request('recherche') }}">
-                        <input type="hidden" name="etablissement" value="{{ request('etablissement') }}">
-                        <div class="or-nivel-grid">
-                            <button type="submit" name="niveau" value="" class="or-nivel-btn {{ !request('niveau') ? 'active' : '' }}">
-                                Tous
-                            </button>
-                            @foreach($niveaux as $n)
-                                <button type="submit" name="niveau" value="{{ $n }}" class="or-nivel-btn {{ request('niveau') == $n ? 'active' : '' }}">
-                                    {{ $n }}
-                                </button>
-                            @endforeach
-                        </div>
-                    </form>
-                </div>
+
 
                 {{-- Section SPÉCIALITÉS --}}
                 @if(isset($specialites) && $specialites->count() > 0)
                 <div class="or-sidebar-block">
-                    <div class="or-sidebar-label">🏷️ Spécialités</div>
+                    <div class="or-sidebar-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.9rem;height:.9rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a2.25 2.25 0 003.182 0l4.318-4.318a2.25 2.25 0 000-3.182L11.159 3.659A2.25 2.25 0 009.568 3z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                        </svg>
+                        Spécialités
+                    </div>
                     <div class="or-spec-list">
                         @foreach($specialites->take(5) as $spec)
                             <a href="{{ route('student.orientation', array_merge(request()->all(), ['domaine' => $spec->domaine, 'page' => 1])) }}"
@@ -180,8 +205,11 @@
                         </span>
                     </div>
 
-                    <button class="or-filter-toggle" id="filterToggle" aria-label="Filtres">
-                        ⚙️ Filtres
+                    <button class="or-filter-toggle" id="filterToggle" aria-label="Filtres" style="display:flex;align-items:center;gap:.4rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:1rem;height:1rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 18H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 12h9" />
+                        </svg>
+                        Filtres
                     </button>
                 </div>
 
@@ -204,8 +232,11 @@
                                     {{ $filiere->nom_filiere }}
                                 </h3>
 
-                                <div style="font-size: 0.8rem; font-weight: 600; color: var(--ink60); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
-                                    🏛️ {{ $filiere->etablissement }}
+                                <div style="font-size: 0.8rem; font-weight: 600; color: var(--ink60); display: flex; align-items: center; gap: .4rem; margin-bottom: .25rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:.9rem;height:.9rem;flex-shrink:0;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                                    </svg>
+                                    <span style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">{{ $filiere->etablissement }}</span>
                                 </div>
 
                                 <div style="font-size: 0.7rem; color: var(--ink30); margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
@@ -236,7 +267,9 @@
                         </article>
                     @empty
                         <div class="or-empty rev vis">
-                            <div class="or-empty-icon">🔍</div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:4rem;height:4rem;margin:0 auto 1.5rem; opacity:.3;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
                             <h3 class="or-empty-title">Aucune formation trouvée</h3>
                             <p class="or-empty-sub">Essayez d'élargir votre recherche ou de changer de filtre.</p>
                             <a href="{{ route('student.orientation') }}" class="btn-fill">Voir toutes les formations</a>
@@ -249,9 +282,9 @@
                     <nav class="or-pagination">
                         {{-- Previous Page Link --}}
                         @if($filieres->onFirstPage())
-                            <span class="or-page-item or-page-wide disabled">← Précédent</span>
+                            <span class="or-page-item or-page-wide disabled"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18' /></svg> Précédent</span>
                         @else
-                            <a href="{{ $filieres->previousPageUrl() }}" class="or-page-item or-page-wide">← Précédent</a>
+                            <a href="{{ $filieres->previousPageUrl() }}" class="or-page-item or-page-wide"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18' /></svg> Précédent</a>
                         @endif
 
                         {{-- Pagination Elements --}}
@@ -292,9 +325,9 @@
 
                         {{-- Next Page Link --}}
                         @if($filieres->hasMorePages())
-                            <a href="{{ $filieres->nextPageUrl() }}" class="or-page-item or-page-wide">Suivant →</a>
+                            <a href="{{ $filieres->nextPageUrl() }}" class="or-page-item or-page-wide">Suivant <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg></a>
                         @else
-                            <span class="or-page-item or-page-wide disabled">Suivant →</span>
+                            <span class="or-page-item or-page-wide disabled">Suivant <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg></span>
                         @endif
                     </nav>
                 </div>
@@ -308,7 +341,7 @@
     <div class="or-modal-backdrop" id="ficheModal">
         <div class="or-modal-panel" id="fichePanel">
             <div id="ficheLoading" style="padding:4rem;text-align:center;display:none;">
-                <div style="font-size:2.5rem;margin-bottom:1rem;">⏳</div>
+                <div style="font-size:2.5rem;margin-bottom:1rem;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z' /></svg></div>
                 <div style="color:var(--ink60);font-weight:500;">Chargement de la fiche…</div>
             </div>
             <div id="ficheContent"></div>

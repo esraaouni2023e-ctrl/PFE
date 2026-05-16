@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -124,12 +124,14 @@
             display: flex; align-items: center; gap: .55rem; text-decoration: none;
         }
         .navbar-logo-icon {
-            width: 34px; height: 34px; border-radius: var(--r);
-            background: white; overflow: hidden;
+            height: 40px; width: 40px;
             display: flex; align-items: center; justify-content: center;
-            border: 1px solid var(--ink10);
         }
-        .navbar-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .navbar-logo-icon img { 
+            height: 100%; width: 100%; object-fit: contain; 
+            mix-blend-mode: normal;
+        }
+        [data-theme="dark"] .navbar-logo-icon img { filter: invert(1) brightness(1.2); }
         .navbar-logo-text {
             font-family: var(--font-serif);
             font-size: 1.05rem; font-weight: 600;
@@ -375,12 +377,9 @@
     <nav class="navbar">
         <a href="{{ route('admin.dashboard') }}" class="navbar-logo">
             <div class="navbar-logo-icon">
-                <img src="{{ asset('im1.jpg') }}" alt="CapAvenir Logo">
+                <img src="{{ asset('final.png') }}" alt="CapAvenir Logo">
             </div>
-            <div>
-                <div class="navbar-logo-text">CapAvenir</div>
-                <div class="navbar-logo-sub">Administration</div>
-            </div>
+            <span class="navbar-logo-text"><span>Avenir</span></span>
         </a>
 
         <!-- Desktop Nav -->
@@ -396,9 +395,9 @@
         <!-- Right controls -->
         <div class="navbar-right">
             @php $notifCount = \App\Models\Contact::nonLus()->count(); @endphp
-            <button class="theme-toggle" id="themeToggle" title="Basculer le thème">🌙</button>
+            <button class="theme-toggle" id="themeToggle" title="Basculer le thème"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg></button>
             <a href="{{ route('admin.contacts.index') }}" class="notif-btn" title="Voir les messages">
-                🔔 <span id="notif-badge" class="badge-red" style="position:absolute; top:-5px; right:-5px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:10px; border:2px solid var(--paper); {{ $notifCount > 0 ? '' : 'display:none;' }}">
+                <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--ink60)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0' /></svg> <span id="notif-badge" class="badge-red" style="position:absolute; top:-5px; right:-5px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:10px; border:2px solid var(--paper); {{ $notifCount > 0 ? '' : 'display:none;' }}">
                     {{ $notifCount }}
                 </span>
             </a>
@@ -417,7 +416,6 @@
                     <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
                     <span class="btn-logout-label">Déconnexion</span>
                 </button>
             </form>
@@ -434,20 +432,20 @@
     <div class="mobile-nav" id="mobileNav">
         <div class="mobile-nav-overlay" id="navOverlay"></div>
         <div class="mobile-nav-drawer">
-            <span class="mobile-section-label">📊 Vue Générale</span>
+            <span class="mobile-section-label">Vue Générale</span>
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
 
-            <span class="mobile-section-label">👥 Gestion</span>
+            <span class="mobile-section-label">Gestion</span>
             <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Utilisateurs</a>
             <a href="{{ route('admin.contacts.index') }}" class="{{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">Messages</a>
             <a href="#">Étudiants & Profils</a>
             <a href="#">Conseillers</a>
 
-            <span class="mobile-section-label">📈 Analytique & IA</span>
+            <span class="mobile-section-label">Analytique & IA</span>
             <a href="#">Statistiques Globales</a>
             <a href="#">Recommandations IA</a>
 
-            <span class="mobile-section-label">⚙️ Système</span>
+            <span class="mobile-section-label">Système</span>
             <a href="#">Paramètres</a>
             <a href="#">Logs & Sécurité</a>
 
@@ -455,11 +453,11 @@
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto">
                 @csrf
                 <button type="submit" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:.7rem .9rem;font-family:var(--font-main);font-size:.9rem;font-weight:600;color:#ef4444;border-radius:var(--r);">
-                    🚪 Déconnexion
+                    <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9' /></svg> Déconnexion
                 </button>
             </form>
             @else
-            <a href="{{ route('login') }}" style="margin-top:auto;display:block;padding:.7rem .9rem;font-weight:600;color:var(--accent);text-decoration:none;">🔑 Connexion</a>
+            <a href="{{ route('login') }}" style="margin-top:auto;display:block;padding:.7rem .9rem;font-weight:600;color:var(--accent);text-decoration:none;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z' /></svg> Connexion</a>
             @endauth
         </div>
     </div>
@@ -511,7 +509,7 @@
             const saved = localStorage.getItem('cap-theme');
             if (saved) {
                 html.setAttribute('data-theme', saved);
-                if (themeToggle) themeToggle.textContent = saved === 'dark' ? '🌙' : '☀️';
+                if (themeToggle) themeToggle.textContent = saved === 'dark' ? '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg>' : '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z' /></svg>';
             }
         })();
 
@@ -519,7 +517,7 @@
             const isDark = html.getAttribute('data-theme') === 'dark';
             const next   = isDark ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
-            themeToggle.textContent = next === 'dark' ? '🌙' : '☀️';
+            themeToggle.textContent = next === 'dark' ? '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg>' : '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z' /></svg>';
             localStorage.setItem('cap-theme', next);
         });
 

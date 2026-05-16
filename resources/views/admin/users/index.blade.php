@@ -26,7 +26,7 @@
     {{-- ═══ ACTIONS & FILTERS ═══ --}}
     <div style="display:flex;justify-content:space-between;align-items:center;gap:1.5rem;flex-wrap:wrap;">
         <div style="position:relative;flex:1;min-width:300px;">
-            <span style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;">🔍</span>
+            <span style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--ink30)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196 7.5 7.5 0 0010.607 10.607z' /></svg></span>
             <input type="text" id="searchInput" placeholder="Rechercher par nom, email ou rôle..." 
                 onkeyup="filterTable()"
                 style="width:100%;background:var(--glass-bg-md);border:1px solid var(--glass-border);border-radius:14px;padding:0.75rem 1rem 0.75rem 2.6rem;font-size:0.875rem;color:var(--ink);font-family:var(--font-main);outline:none;transition:0.3s;"
@@ -70,7 +70,7 @@
                                 <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,{{ $user->is_blocked ? 'var(--ink30),var(--ink10)' : ($user->is_admin ? 'var(--red-alert),var(--violet-dark)' : 'var(--accent),var(--violet)') }});display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;color:white;box-shadow:0 4px 12px rgba(0,0,0,0.2);flex-shrink:0;position:relative;">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                     @if($user->is_blocked)
-                                        <div style="position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;border:2px solid var(--paper);">🔒</div>
+                                        <div style="position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;border:2px solid var(--paper);"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M16.5 10.5V6.75a4.5 4.5 0 10-9 0V10.5m-2.25 0h13.5c.621 0 1.125.504 1.125 1.125v6.75c0 .621-.504 1.125-1.125 1.125H5.25a1.125 1.125 0 01-1.125-1.125v-6.75c0-.621.504-1.125 1.125-1.125z' /></svg></div>
                                     @endif
                                 </div>
                                 <div>
@@ -105,7 +105,7 @@
                                         @csrf
                                         <button class="btn-glass" style="width:34px;height:34px;padding:0;border-radius:10px;font-size:0.9rem;{{ $user->is_blocked ? 'color:var(--red);border-color:rgba(220,53,69,0.3);background:rgba(220,53,69,0.05);' : '' }}" 
                                             title="{{ $user->is_blocked ? 'Débloquer' : 'Bloquer' }}" type="submit">
-                                            {{ $user->is_blocked ? '🔓' : '🔒' }}
+                                            {{ $user->is_blocked ? '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z' /></svg>' : '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M16.5 10.5V6.75a4.5 4.5 0 10-9 0V10.5m-2.25 0h13.5c.621 0 1.125.504 1.125 1.125v6.75c0 .621-.504 1.125-1.125 1.125H5.25a1.125 1.125 0 01-1.125-1.125v-6.75c0-.621.504-1.125 1.125-1.125z' /></svg>' }}
                                         </button>
                                     </form>
 
@@ -113,24 +113,24 @@
                                         @if(!$user->is_admin)
                                             <form action="{{ route('admin.users.promote', $user) }}" method="POST" style="margin:0;">
                                                 @csrf
-                                                <button class="btn-glass" style="width:34px;height:34px;padding:0;border-radius:10px;font-size:0.9rem;" title="Promouvoir" type="submit">✨</button>
+                                                <button class="btn-glass" style="width:34px;height:34px;padding:0;border-radius:10px;font-size:0.9rem;" title="Promouvoir" type="submit"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--gold)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z' /></svg></button>
                                             </form>
                                         @else
-                                            <form action="{{ route('admin.users.demote', $user) }}" method="POST" style="margin:0;" onsubmit="return confirm('⬇️ Rétrograder cet administrateur ?');">
+                                            <form action="{{ route('admin.users.demote', $user) }}" method="POST" style="margin:0;" onsubmit="return confirm('Rétrograder cet administrateur ?');">
                                                 @csrf
-                                                <button class="btn-glass" style="width:34px;height:34px;padding:0;border-radius:10px;" title="Rétrograder" type="submit">⬇️</button>
+                                                <button class="btn-glass" style="width:34px;height:34px;padding:0;border-radius:10px;" title="Rétrograder" type="submit"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3' /></svg></button>
                                             </form>
                                         @endif
                                     @endif
 
-                                    <form action="{{ route('admin.users.delete', $user) }}" method="POST" style="margin:0;" onsubmit="return confirm('⚠️ Supprimer cet utilisateur définitivement ?');">
+                                    <form action="{{ route('admin.users.delete', $user) }}" method="POST" style="margin:0;" onsubmit="return confirm('Supprimer cet utilisateur définitivement ?');">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn-glass" style="width:34px;height:34px;padding:0;border-radius:10px;color:#f87171;border-color:rgba(248,113,113,0.2);" 
                                             onmouseover="this.style.background='rgba(248,113,113,0.1)';this.style.borderColor='rgba(248,113,113,0.4)'"
                                             onmouseout="this.style.background='var(--glass-bg)';this.style.borderColor='var(--glass-border)'"
                                             title="Supprimer" type="submit">
-                                            🗑️
+                                            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0' /></svg>
                                         </button>
                                     </form>
                                 @else

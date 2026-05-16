@@ -1,6 +1,6 @@
 <div class="notif-dropdown-container" style="position:relative;">
     <button class="theme-toggle" id="notifBtn" title="Messages" style="position:relative; width:34px; height:34px; border-radius:var(--r); background:var(--ink06); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.95rem; transition:var(--transition); color:var(--ink60);">
-        🔔 <span id="notif-badge" class="badge-red" style="position:absolute; top:-5px; right:-5px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:10px; border:2px solid var(--paper); display:none; background:#ef4444; color:white; font-weight:900;">
+        <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--ink60)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0' /></svg> <span id="notif-badge" class="badge-red" style="position:absolute; top:-5px; right:-5px; width:18px; height:18px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:10px; border:2px solid var(--paper); display:none; background:#ef4444; color:white; font-weight:900;">
             0
         </span>
     </button>
@@ -13,7 +13,7 @@
         
         <div id="notif-list" style="max-height:360px; overflow-y:auto; padding:0.5rem 0;">
             <div style="padding:2rem; text-align:center; color:var(--ink30); font-size:0.8rem;">
-                <div style="font-size:1.5rem; margin-bottom:0.5rem;">📥</div>
+                <div style="font-size:1.5rem; margin-bottom:0.5rem;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--ink30)' style='width:1.5rem;height:1.5rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-4.162c0-2.24-1.5-4.29-3.57-4.972L5.22 8.962c-2.07.682-3.57 2.732-3.57 4.972z' /></svg></div>
                 Aucun nouveau message
             </div>
         </div>
@@ -91,7 +91,7 @@
                     } else {
                         notifList.innerHTML = `
                             <div style="padding:2rem; text-align:center; color:var(--ink30); font-size:0.8rem;">
-                                <div style="font-size:1.5rem; margin-bottom:0.5rem;">📥</div>
+                                <div style="font-size:1.5rem; margin-bottom:0.5rem;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--ink30)' style='width:1.5rem;height:1.5rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-4.162c0-2.24-1.5-4.29-3.57-4.972L5.22 8.962c-2.07.682-3.57 2.732-3.57 4.972z' /></svg></div>
                                 Aucun nouveau message
                             </div>
                         `;

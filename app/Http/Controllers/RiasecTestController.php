@@ -38,18 +38,13 @@ class RiasecTestController extends Controller
             }
 
             if ($progress->answered > 0 && !$progress->isCompleted) {
-                return view('riasec.start', [
-                    'hasOngoingTest' => true,
-                    'progress' => $progress,
-                    'totalQuestions' => QuestionRiasec::actives()->count(),
-                ]);
+                // Redirect to unified pipeline page which handles ongoing tests
+                return redirect()->route('student.pipeline');
             }
         }
 
-        return view('riasec.start', [
-            'hasOngoingTest' => false,
-            'totalQuestions' => QuestionRiasec::actives()->count(),
-        ]);
+        // Redirect to unified pipeline page
+        return redirect()->route('student.pipeline');
     }
 
     public function initialize(Request $request): RedirectResponse

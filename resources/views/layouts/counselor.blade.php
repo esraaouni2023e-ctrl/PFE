@@ -153,12 +153,14 @@
             display: flex; align-items: center; gap: .55rem; text-decoration: none;
         }
         .navbar-logo-icon {
-            width: 34px; height: 34px; border-radius: var(--r);
-            background: white; overflow: hidden;
+            height: 40px; width: 40px;
             display: flex; align-items: center; justify-content: center;
-            border: 1px solid var(--ink10);
         }
-        .navbar-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .navbar-logo-icon img { 
+            height: 100%; width: 100%; object-fit: contain; 
+            mix-blend-mode: normal;
+        }
+        [data-theme="dark"] .navbar-logo-icon img { filter: invert(1) brightness(1.2); }
         .navbar-logo-text {
             font-family: var(--font-serif);
             font-size: 1.05rem; font-weight: 600;
@@ -391,11 +393,11 @@
         <!-- Logo -->
         <a href="{{ route('counselor.dashboard') }}" class="navbar-logo">
             <div class="navbar-logo-icon">
-                <img src="{{ asset('im1.jpg') }}" alt="CapAvenir Logo">
+                <img src="{{ asset('final.png') }}" alt="CapAvenir Logo">
             </div>
+            <span class="navbar-logo-text"><span>Avenir</span></span>
             <div>
-                <div class="navbar-logo-text">CapAvenir</div>
-                <div class="navbar-logo-sub">Espace Conseiller</div>
+                <div class="navbar-logo-sub" style="padding: 2px 6px; background: rgba(11,12,16,0.04); border-radius: 4px;">Espace Conseiller</div>
             </div>
         </a>
 

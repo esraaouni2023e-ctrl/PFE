@@ -6,20 +6,20 @@
     :root {
         --bg-main: #0A1428;
         --bg-dark-gradient: radial-gradient(circle at center, #1a2c4e 0%, #0A1428 100%);
-        --accent-primary: linear-gradient(135deg, #00D4FF 0%, #0099FF 100%);
-        --accent-glow: #FFCC00;
+        --accent-primary: linear-gradient(135deg, #0057B8 0%, #003B8E 100%);
+        --accent-glow: #FF6A00;
         --text-primary: #FFFFFF;
         --text-secondary: #E5F0FF;
         --text-muted: #A3BFFA;
 
         /* Glassmorphism */
         --glass-bg: rgba(255, 255, 255, 0.03);
-        --glass-border: rgba(0, 212, 255, 0.1);
+        --glass-border: rgba(0, 87, 184, 0.2);
         --glass-blur: blur(16px);
 
-        /* 2026 Specifics */
-        --neon-cyan: #00D4FF;
-        --neon-gold: #FFCC00;
+        /* Brand Specifics */
+        --brand-blue: #0057B8;
+        --brand-orange: #FF6A00;
     }
 
     body {
@@ -54,19 +54,19 @@
     }
 
     .glass-card:hover {
-        border-color: rgba(0, 212, 255, 0.3);
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+        border-color: rgba(0, 87, 184, 0.4);
+        box-shadow: 0 0 20px rgba(0, 87, 184, 0.2);
         transform: translateY(-2px);
     }
 
     .btn-primary,
     .btn-futuristic {
-        @apply relative overflow-hidden px-6 py-3 rounded-xl font-bold text-black bg-gradient-to-r from-cyan-400 to-cyan-500 shadow-[0_0_20px_rgba(0,212,255,0.3)] transition-all flex items-center justify-center gap-2;
+        @apply relative overflow-hidden px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-[#0057B8] to-[#003B8E] shadow-[0_0_20px_rgba(0,87,184,0.3)] transition-all flex items-center justify-center gap-2;
     }
 
     .btn-primary:hover,
     .btn-futuristic:hover {
-        @apply shadow-[0_0_30px_rgba(0,212,255,0.5)] -translate-y-0.5;
+        @apply shadow-[0_0_30px_rgba(0,87,184,0.5)] -translate-y-0.5;
     }
 
     .input-field,
@@ -76,8 +76,8 @@
 
     .input-field:focus,
     .input-2026:focus {
-        @apply shadow-[0_0_15px_rgba(0,212,255,0.3)] border-cyan-400;
-        background: rgba(0, 212, 255, 0.05);
+        @apply shadow-[0_0_15px_rgba(0,87,184,0.3)] border-[#0057B8];
+        background: rgba(0, 87, 184, 0.05);
     }
 
     .neural-bg {
@@ -89,8 +89,8 @@
         z-index: -1;
         pointer-events: none;
         background-image:
-            radial-gradient(circle at 15% 50%, rgba(0, 212, 255, 0.05) 0%, transparent 25%),
-            radial-gradient(circle at 85% 30%, rgba(63, 26, 122, 0.1) 0%, transparent 30%);
+            radial-gradient(circle at 15% 50%, rgba(0, 87, 184, 0.05) 0%, transparent 25%),
+            radial-gradient(circle at 85% 30%, rgba(255, 106, 0, 0.1) 0%, transparent 30%);
     }
 }
 

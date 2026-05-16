@@ -66,7 +66,12 @@
             <h1 class="vx-title">Mes <em>vœux</em><br>d'orientation</h1>
         </div>
         <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
-            <span class="vx-count">❤️ {{ $voeux->count() }} vœu{{ $voeux->count() > 1 ? 'x' : '' }}</span>
+            <span class="vx-count">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.9rem;height:.9rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+                {{ $voeux->count() }} vœu{{ $voeux->count() > 1 ? 'x' : '' }}
+            </span>
             <a href="{{ route('student.orientation') }}" class="vx-cta">+ Ajouter des filières</a>
         </div>
     </div>
@@ -74,13 +79,16 @@
     @if($voeux->isEmpty())
         {{-- État vide --}}
         <div class="vx-empty">
-            <div class="vx-empty-icon">💡</div>
+            <div class="vx-empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" style="width:4rem;height:4rem;margin:0 auto; opacity:.2;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+            </div>
             <h2 class="vx-empty-title">Aucun vœu enregistré</h2>
             <p class="vx-empty-sub">
-                Parcourez les filières disponibles et cliquez sur le bouton ❤️<br>
-                pour les ajouter à votre liste de vœux.
+                Parcourez les filières disponibles et ajoutez-les à votre liste de vœux pour organiser votre orientation.
             </p>
-            <a href="{{ route('student.orientation') }}" class="vx-cta">Explorer les filières →</a>
+            <a href="{{ route('student.orientation') }}" class="vx-cta">Explorer les filières <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg></a>
         </div>
 
     @else
@@ -119,11 +127,26 @@
                     <div class="vx-card-icon">{{ $f->icon }}</div>
                     <div class="vx-card-info">
                         <div class="vx-card-nom">{{ $f->nom }}</div>
-                        <div class="vx-card-meta">🏛️ {{ $f->etablissement }} · 📍 {{ $f->ville }}</div>
+                        <div class="vx-card-meta">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.75rem;height:.75rem;display:inline;vertical-align:middle;margin-right:.2rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                            </svg>
+                            {{ $f->etablissement }} · 
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.75rem;height:.75rem;display:inline;vertical-align:middle;margin-right:.2rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                            </svg>
+                            {{ $f->ville }}
+                        </div>
                         <div class="vx-card-tags">
                             <span class="vx-pill">{{ $f->niveau }}</span>
-                            <span class="vx-pill">⏱ {{ $f->duree }}</span>
-                            <span class="vx-pill">{{ $spec->icon }} {{ $spec->domaine }}</span>
+                            <span class="vx-pill">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.65rem;height:.65rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {{ $f->duree }}
+                            </span>
+                            <span class="vx-pill">{{ $spec->domaine }}</span>
                             <span class="vx-pill" style="color:var(--accent3)">{{ $f->score_matching }}% match</span>
                         </div>
                     </div>
@@ -132,18 +155,30 @@
                     <button class="vx-btn-confirm {{ $voeu->est_confirme ? 'confirmed' : '' }}"
                             data-voeu="{{ $voeu->id }}"
                             data-confirmed="{{ $voeu->est_confirme ? '1' : '0' }}"
-                            onclick="toggleConfirm(this)">
-                        {{ $voeu->est_confirme ? '✅ Confirmé' : 'Confirmer' }}
+                            onclick="toggleConfirm(this)" style="display:flex;align-items:center;gap:.3rem;">
+                        @if($voeu->est_confirme)
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:.8rem;height:.8rem;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                        @endif
+                        {{ $voeu->est_confirme ? 'Confirmé' : 'Confirmer' }}
                     </button>
-                    <button class="vx-btn-del" data-voeu="{{ $voeu->id }}" onclick="supprimerVoeu(this)" title="Supprimer">✕</button>
+                    <button class="vx-btn-del" data-voeu="{{ $voeu->id }}" onclick="supprimerVoeu(this)" title="Supprimer">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.9rem;height:.9rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
             </div>
             @endforeach
         </div>
 
         {{-- Export note --}}
-        <div style="margin-top:1.5rem;padding:1rem 1.25rem;background:var(--cream);border:1px solid var(--ink10);border-radius:var(--r);font-size:.82rem;color:var(--ink60)">
-            💡 <strong>Conseil :</strong> Classez vos vœux par ordre de préférence. Le vœu n°1 sera considéré comme votre premier choix.
+        <div style="margin-top:1.5rem;padding:1rem 1.25rem;background:var(--cream);border:1px solid var(--ink10);border-radius:var(--r);font-size:.82rem;color:var(--ink60);display:flex;align-items:flex-start;gap:.75rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:1.2rem;height:1.2rem;color:var(--gold);flex-shrink:0;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.503 7.503 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+            </svg>
+            <span><strong>Conseil :</strong> Classez vos vœux par ordre de préférence. Le vœu n°1 sera considéré comme votre premier choix.</span>
         </div>
 
     @endif
@@ -183,7 +218,7 @@
             card.style.height = '0';
             card.style.opacity = '0';
             setTimeout(() => { card.remove(); updatePriorites(); }, 300);
-            toast('❌ Vœu supprimé.');
+            toast('<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M6 18L18 6M6 6l12 12' /></svg> Vœu supprimé.');
         }
     };
 
@@ -201,9 +236,9 @@
         const data = await res.json();
         if (data.success) {
             btn.dataset.confirmed = newVal ? '1' : '0';
-            btn.textContent       = newVal ? '✅ Confirmé' : 'Confirmer';
+            btn.innerHTML         = newVal ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:.8rem;height:.8rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg> Confirmé' : 'Confirmer';
             btn.classList.toggle('confirmed', newVal);
-            toast(newVal ? '✅ Vœu confirmé !' : 'Vœu déconfirmé.');
+            toast(newVal ? 'Vœu confirmé !' : 'Vœu déconfirmé.');
         }
     };
 
@@ -256,7 +291,7 @@
             headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' },
             body: JSON.stringify({ ids }),
         });
-        toast('📋 Priorités sauvegardées.');
+        toast('<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1.2rem;height:1.2rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z' /></svg> Priorités sauvegardées.');
     }
 })();
 </script>

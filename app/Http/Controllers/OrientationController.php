@@ -11,9 +11,8 @@ class OrientationController extends Controller
 {
     public function index(Request $request)
     {
-        // Si le paramètre domaine n'est pas présent dans l'URL (premier accès), on filtre par défaut sur le Bac de l'étudiant
-        $domaine = $request->get('domaine');
-        if (is_null($domaine)) {
+        // Si aucun paramètre de filtrage n'est présent (premier accès), on filtre par défaut sur le Bac de l'étudiant
+        if (!$request->hasAny(['domaine', 'recherche', 'etablissement', 'niveau'])) {
             $user = auth()->user();
             $sectionBac = $user?->profile?->section_bac ?? 'Informatique';
             $mapBacDomaine = [
@@ -26,6 +25,8 @@ class OrientationController extends Controller
                 'Sport'                   => 'Sport',
             ];
             $domaine = $mapBacDomaine[$sectionBac] ?? 'Informatique';
+        } else {
+            $domaine = $request->get('domaine');
         }
 
         $etablissement  = $request->get('etablissement', '');

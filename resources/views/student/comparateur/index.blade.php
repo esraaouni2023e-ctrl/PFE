@@ -62,7 +62,7 @@
 <div class="cp">
 
     <div class="cp-header">
-        <div class="cp-eyebrow">📊 Outil de comparaison</div>
+        <div class="cp-eyebrow"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z' /></svg> Outil de comparaison</div>
         <h1 class="cp-title">Comparer des <em>filières</em></h1>
         <p class="cp-sub">Sélectionnez 2 à 4 formations pour les comparer côte-à-côte (radar, salaire, durée…)</p>
     </div>
@@ -83,7 +83,7 @@
             @endfor
         </div>
         <button class="cp-btn" id="comparerBtn" onclick="lancer()">
-            📊 Comparer
+            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z' /></svg> Comparer
         </button>
     </div>
 
@@ -93,7 +93,7 @@
             {{-- Radar --}}
             <div class="cp-panel">
                 <div class="cp-panel-head">
-                    <span style="font-size:1.2rem">🕸️</span>
+                    <span style="font-size:1.2rem"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent2)' style='width:1.2rem;height:1.2rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v18M3 12h18M5.25 5.25l13.5 13.5M18.75 5.25l-13.5 13.5' /></svg></span>
                     <h2>Graphique radar</h2>
                 </div>
                 <div class="cp-panel-body">
@@ -108,7 +108,7 @@
             <div>
                 <div class="cp-panel">
                     <div class="cp-panel-head">
-                        <span style="font-size:1.2rem">📋</span>
+                        <span style="font-size:1.2rem"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1.2rem;height:1.2rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M8.25 6.75h12M8.25 12h12M8.25 17.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z' /></svg></span>
                         <h2>Résumé comparatif</h2>
                     </div>
                     <div class="cp-panel-body">
@@ -121,7 +121,7 @@
         {{-- Tableau détaillé --}}
         <div class="cp-panel">
             <div class="cp-panel-head">
-                <span style="font-size:1.2rem">📊</span>
+                <span style="font-size:1.2rem"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z' /></svg></span>
                 <h2>Tableau comparatif détaillé</h2>
             </div>
             <div class="cp-panel-body" style="overflow-x:auto">
@@ -135,7 +135,7 @@
 
     {{-- Placeholder initial --}}
     <div class="cp-placeholder" id="cpPlaceholder">
-        <div class="cp-placeholder-icon">⚖️</div>
+        <div class="cp-placeholder-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--ink30)' style='width:4rem;height:4rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v17.25m0 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.95 19.382c-.285.067-.56.19-.815.362L4.935 21.23a.75.75 0 11-.888-1.208l2.197-1.485c.21-.142.438-.255.677-.336a13.918 13.918 0 0110.158 0c.239.081.467.194.677.336l2.197 1.485a.75.75 0 11-.888 1.208l-2.197-1.485a2.25 2.25 0 00-.815-.362' /></svg></div>
         <h2 class="cp-placeholder-title">Prêt à comparer</h2>
         <p class="cp-placeholder-sub">Sélectionnez au minimum 2 formations ci-dessus<br>et cliquez sur « Comparer »</p>
     </div>
@@ -161,7 +161,7 @@
 
         const btn = document.getElementById('comparerBtn');
         btn.disabled = true;
-        btn.innerHTML = '⏳ Chargement…';
+        btn.innerHTML = '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z' /></svg> Chargement…';
 
         try {
             const res = await fetch('{{ route('student.comparateur.data') }}', {
@@ -183,7 +183,7 @@
             alert('Erreur: ' + e.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '📊 Comparer';
+            btn.innerHTML = '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z' /></svg> Comparer';
         }
     };
 
@@ -252,9 +252,9 @@
         const metrics = [
             { key: 'matching',     label: '🎯 Compatibilité' },
             { key: 'salaire',      label: '💰 Salaire' },
-            { key: 'rapidite',     label: '⚡ Rapidité' },
-            { key: 'insertion',    label: '🚀 Insertion pro' },
-            { key: 'accessibilite',label: '🔓 Accessibilité' },
+            { key: 'rapidite',     label: '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z' /></svg> Rapidité' },
+            { key: 'insertion',    label: '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent3)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M15.59 14.37a6 6 0 01-5.84 7.38 4.75 4.75 0 01-4.51-3.46 8.97 8.97 0 005.54-3.92zM9 15.165V15.303a3 3 0 01-3 3V15.303a3 3 0 013-3z' /></svg> Insertion pro' },
+            { key: 'accessibilite',label: '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z' /></svg> Accessibilité' },
         ];
 
         // Header

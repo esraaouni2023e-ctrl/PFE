@@ -120,7 +120,7 @@
 
 <div class="builder-page" x-data="cvBuilder()">
     <div class="builder-header">
-        <h1>{{ $cvProfile ? '✏️ Modifier' : '📝 Créer' }} un CV</h1>
+        <h1>{{ $cvProfile ? '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10' /></svg> Modifier' : '<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z' /></svg> Créer' }} un CV</h1>
         <div class="builder-header-sub">Remplissez les sections ci-dessous puis exportez en PDF ou DOCX</div>
     </div>
 
@@ -131,12 +131,12 @@
             border-radius: var(--rl); padding: 1rem 1.25rem; margin-bottom: 1.5rem;
         ">
             <div style="display:flex;align-items:center;gap:.5rem;color:#ef4444;font-weight:700;font-size:.88rem;margin-bottom:.65rem;">
-                ⚠️ Corriger les erreurs suivantes avant de sauvegarder :
+                <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='#ef4444' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 12.376zM12 15.75h.008v.008H12v-.008z' /></svg> Corriger les erreurs suivantes avant de sauvegarder :
             </div>
             <ul style="list-style:none;display:flex;flex-direction:column;gap:.35rem;">
                 @foreach($errors->all() as $error)
                     <li style="font-size:.82rem;color:#ef4444;display:flex;align-items:baseline;gap:.4rem;">
-                        <span style="flex-shrink:0;">→</span> {{ $error }}
+                        <span style="flex-shrink:0;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg></span> {{ $error }}
                     </li>
                 @endforeach
             </ul>
@@ -151,7 +151,7 @@
 
         {{-- ═══ Informations Générales ═══ --}}
         <div class="form-section">
-            <div class="form-section-title">📋 Informations Générales</div>
+            <div class="form-section-title"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'></svg> Informations Générales</div>
 
             <div class="form-group">
                 <label class="form-label">Titre du CV *</label>
@@ -195,7 +195,7 @@
 
         {{-- ═══ Expériences Professionnelles ═══ --}}
         <div class="form-section">
-            <div class="form-section-title">💼 Expériences Professionnelles</div>
+            <div class="form-section-title"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M20.25 14.15v4.25c0 .621-.504 1.125-1.125 1.125H4.875c-.621 0-1.125-.504-1.125-1.125v-4.25m16.5 0a2.25 2.25 0 00-2.25-2.25H5.625a2.25 2.25 0 00-2.25 2.25m16.5 0V9.45c0-.621-.504-1.125-1.125-1.125h-1.35m-14.4 0h1.35m14.4 0V5.25c0-.621-.504-1.125-1.125-1.125H5.625c-.621 0-1.125.504-1.125 1.125v2.925m14.4 0H5.625' /></svg> Expériences Professionnelles</div>
             <div class="dynamic-list">
                 <template x-for="(exp, idx) in experiences" :key="idx">
                     <div class="dynamic-item">
@@ -249,7 +249,7 @@
 
         {{-- ═══ Formations ═══ --}}
         <div class="form-section">
-            <div class="form-section-title">🎓 Formation</div>
+            <div class="form-section-title"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M4.26 10.147L12 15l7.74-4.853a4.5 4.5 0 00-2.122-3.933L12 3 6.382 6.214a4.5 4.5 0 00-2.122 3.933z' /><path stroke-linecap='round' stroke-linejoin='round' d='M12 15v7.5' /></svg> Formation</div>
             <div class="dynamic-list">
                 <template x-for="(edu, idx) in educations" :key="idx">
                     <div class="dynamic-item">
@@ -307,7 +307,7 @@
 
         {{-- ═══ Compétences ═══ --}}
         <div class="form-section">
-            <div class="form-section-title">⚡ Compétences</div>
+            <div class="form-section-title"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z' /></svg> Compétences</div>
             <div class="dynamic-list">
                 <template x-for="(skill, idx) in skills" :key="idx">
                     <div class="dynamic-item" style="padding:.7rem 1rem;">
@@ -338,7 +338,7 @@
 
         {{-- ═══ Langues ═══ --}}
         <div class="form-section">
-            <div class="form-section-title">🌐 Langues</div>
+            <div class="form-section-title"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a9.015 9.015 0 018.716 6.747M12 3a9.015 9.015 0 00-8.716 6.747m17.432 0c.11.526.168 1.07.168 1.628 0 4.846-3.92 8.772-8.75 8.772-4.83 0-8.75-3.926-8.75-8.772 0-.558.058-1.102.168-1.628m17.432 0a8.74 8.74 0 01-17.432 0m17.432 0c-.674 2.04-2.186 3.758-4.032 4.796m4.032-4.796c.674-2.04 2.186-3.758 4.032-4.796' /></svg> Langues</div>
             <div class="dynamic-list">
                 <template x-for="(lang, idx) in languages" :key="idx">
                     <div class="dynamic-item" style="padding:.7rem 1rem;">
@@ -364,7 +364,7 @@
 
         {{-- ═══ Actions ═══ --}}
         <div class="form-submit">
-            <a href="{{ route('student.cv.index') }}" class="btn-back">← Retour</a>
+            <a href="{{ route('student.cv.index') }}" class="btn-back"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18' /></svg> Retour</a>
             <button type="button" class="btn-save" @click.prevent="submitForm()">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 {{ $cvProfile ? 'Enregistrer les modifications' : 'Créer le CV' }}

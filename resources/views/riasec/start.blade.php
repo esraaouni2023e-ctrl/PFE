@@ -139,7 +139,7 @@
 <div class="riasec-page">
 
     {{-- ── Eyebrow ── --}}
-    <p class="riasec-eyebrow">🧠 Test Psychométrique Complet · CapAvenir</p>
+    <p class="riasec-eyebrow"><i class="bi bi-cpu"></i> Test Psychométrique Complet · CapAvenir</p>
 
     {{-- ── Titre hero ── --}}
     <h1 class="riasec-hero-title">

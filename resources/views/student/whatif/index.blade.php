@@ -101,7 +101,12 @@ select.wi-input{cursor:pointer}
     <section class="wi-hero">
         <div class="wi-hero-bg">What-If</div>
         <div class="wi-hero-inner">
-            <div class="wi-eyebrow">🧪 Simulateur interactif</div>
+            <div class="wi-eyebrow">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.9rem;height:.9rem;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.503 7.503 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                </svg>
+                Simulateur interact
+            </div>
             <h1 class="wi-title">Calcule ton <em>Score FG</em></h1>
             <p class="wi-sub">Modifie tes notes et vois instantanément les filières accessibles — sans aucune IA.</p>
         </div>
@@ -112,7 +117,9 @@ select.wi-input{cursor:pointer}
         {{-- ══ PANEL FORMULAIRE ══ --}}
         <div class="wi-panel">
             <div class="wi-panel-head">
-                <span style="font-size:1.3rem">⚙️</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem;height:1.25rem;color:var(--accent2);">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 18H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 12h9" />
+                </svg>
                 <h2>Paramètres de simulation</h2>
             </div>
             <div class="wi-panel-body">
@@ -152,13 +159,15 @@ select.wi-input{cursor:pointer}
                     <div class="wi-label">Notes par matière</div>
                     <div class="wi-notes-grid" id="notesGrid">
                         <div style="padding:1rem;text-align:center;color:var(--ink30);font-size:.85rem">
-                            ← Sélectionnez d'abord votre section BAC
+                            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18' /></svg> Sélectionnez d'abord votre section BAC
                         </div>
                     </div>
                 </div>
 
                 <button class="wi-btn" id="simulerBtn" disabled>
-                    <span>🧮</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:1.25rem;height:1.25rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-3-3V18m3-3l3 3m-9-3l-3 3m2.25-13.5h1.5a2.25 2.25 0 012.25 2.25v6.75a2.25 2.25 0 01-2.25 2.25h-1.5a2.25 2.25 0 01-2.25-2.25V5.25a2.25 2.25 0 012.25-2.25z" />
+                    </svg>
                     <span>Simuler mon Score FG</span>
                 </button>
             </div>
@@ -168,13 +177,17 @@ select.wi-input{cursor:pointer}
         <div>
             <div class="wi-panel" id="resultPanel">
                 <div class="wi-panel-head">
-                    <span style="font-size:1.3rem">📊</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem;height:1.25rem;color:var(--accent);">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                    </svg>
                     <h2>Résultats de la simulation</h2>
                 </div>
                 <div class="wi-panel-body">
                     {{-- Placeholder initial --}}
                     <div class="wi-placeholder" id="resultPlaceholder">
-                        <div class="wi-placeholder-icon">🎯</div>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:3rem;height:3rem;margin:0 auto 1rem; opacity:.2;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         <div class="wi-placeholder-text">Remplissez le formulaire<br>et cliquez sur Simuler</div>
                     </div>
 
@@ -187,18 +200,24 @@ select.wi-input{cursor:pointer}
                         </div>
 
                         <div style="margin-bottom:1rem">
-                            <div class="wi-label">🎓 Formations accessibles avec ce score</div>
+                            <div class="wi-label" style="display:flex;align-items:center;gap:.4rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:1rem;height:1rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147L12 15l7.74-4.853a4.5 4.5 0 00-2.122-3.933L12 3 6.382 6.214a4.5 4.5 0 00-2.122 3.933z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v7.5" />
+                                </svg>
+                                Formations accessibles avec ce score
+                            </div>
                             <div class="wi-f-list" id="formationsList"></div>
                         </div>
 
                         <div style="display:flex;gap:.75rem;flex-wrap:wrap">
                             <a href="{{ route('student.voeux.index') }}"
                                style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.1rem;border-radius:8px;background:var(--cream);border:1px solid var(--ink15);font-size:.82rem;font-weight:600;color:var(--ink60);text-decoration:none;transition:all .2s">
-                               ❤️ Voir mes vœux
+                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.9rem;height:.9rem;color:var(--accent);"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg> Voir mes vœux
                             </a>
                             <a href="{{ route('student.comparateur.index') }}"
                                style="display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1.1rem;border-radius:8px;background:var(--cream);border:1px solid var(--ink15);font-size:.82rem;font-weight:600;color:var(--ink60);text-decoration:none;transition:all .2s">
-                               📊 Comparer des filières
+                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.9rem;height:.9rem;color:var(--accent2);"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg> Comparer des filières
                             </a>
                         </div>
                     </div>
@@ -209,7 +228,9 @@ select.wi-input{cursor:pointer}
             @if($historiqueRecent->isNotEmpty())
             <div class="wi-panel" style="margin-top:1.25rem">
                 <div class="wi-panel-head">
-                    <span style="font-size:1.3rem">🕐</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem;height:1.25rem;color:var(--ink30);">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <h2>Simulations récentes</h2>
                 </div>
                 <div class="wi-panel-body" style="padding:1rem">
@@ -227,7 +248,7 @@ select.wi-input{cursor:pointer}
                     </div>
                     <a href="{{ route('student.whatif.historique') }}"
                        style="display:block;text-align:center;margin-top:.875rem;font-size:.78rem;font-weight:600;color:var(--accent);text-decoration:none">
-                       Voir tout l'historique →
+                       Voir tout l'historique <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg>
                     </a>
                 </div>
             </div>
@@ -251,7 +272,7 @@ select.wi-input{cursor:pointer}
     sectionSel.addEventListener('change', async function() {
         const section = this.value;
         if (!section) {
-            notesGrid.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--ink30);font-size:.85rem">← Sélectionnez d\'abord votre section BAC</div>';
+            notesGrid.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--ink30);font-size:.85rem"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18' /></svg> Sélectionnez d'abord votre section BAC</div>`;
             simulerBtn.disabled = true;
             return;
         }
@@ -309,7 +330,7 @@ select.wi-input{cursor:pointer}
         if (!allFilled) { showAlert('Veuillez renseigner toutes les notes.', 'error'); return; }
 
         simulerBtn.disabled = true;
-        simulerBtn.innerHTML = '<span>⏳</span><span>Calcul en cours…</span>';
+        simulerBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:1.25rem;height:1.25rem;animation:spin 2s linear infinite;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg><span>Calcul en cours…</span>';
 
         try {
             const token = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -335,7 +356,7 @@ select.wi-input{cursor:pointer}
             showAlert('Erreur réseau. Veuillez réessayer.', 'error');
         } finally {
             simulerBtn.disabled = false;
-            simulerBtn.innerHTML = '<span>🧮</span><span>Simuler mon Score FG</span>';
+            simulerBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:1.25rem;height:1.25rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-3-3V18m3-3l3 3m-9-3l-3 3m2.25-13.5h1.5a2.25 2.25 0 012.25 2.25v6.75a2.25 2.25 0 01-2.25 2.25h-1.5a2.25 2.25 0 01-2.25-2.25V5.25a2.25 2.25 0 012.25-2.25z" /></svg><span>Simuler mon Score FG</span>';
         }
     });
 

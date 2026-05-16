@@ -1,1 +1,3 @@
-<img src="{{ asset('im1.jpg') }}" alt="CapAvenir Logo" {{ $attributes->merge(['style' => 'object-fit: cover; border-radius: inherit;']) }}>
+<div class="logo-mark" {{ $attributes->merge(['style' => 'display: flex; align-items: center; justify-content: center; overflow: hidden;']) }}>
+    <img src="{{ asset('final.png') }}" alt="CapAvenir Logo" style="height: 100%; width: 100%; object-fit: contain;">
+</div>

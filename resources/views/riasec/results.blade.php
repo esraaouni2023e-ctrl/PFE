@@ -154,7 +154,11 @@
 
     @if($profil->score_coherence !== null)
     <div class="coherence-pill" style="margin-bottom:2rem;">
-        {{ ($profil->score_coherence ?? 0) >= 60 ? '✅' : '⚠️' }}
+        @if(($profil->score_coherence ?? 0) >= 60)
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent3)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        @else
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        @endif
         Fiabilité du test : <strong style="color:{{ ($profil->score_coherence??0)>=60?'var(--accent3)':'var(--gold)' }}">
             {{ $profil->score_coherence }}%
         </strong>
@@ -177,13 +181,20 @@
             @php
             $barColors = ['R'=>'#d4622a','I'=>'#1a4f6e','A'=>'#c8973a','S'=>'#4a7c59','E'=>'#7c4a7c','C'=>'#4a6e6e'];
             $dimLabels = ['R'=>'Réaliste','I'=>'Investigateur','A'=>'Artistique','S'=>'Social','E'=>'Entreprenant','C'=>'Conventionnel'];
-            $dimEmoji  = ['R'=>'🔧','I'=>'🔬','A'=>'🎨','S'=>'🤝','E'=>'🚀','C'=>'📋'];
+            $dimIcon  = [
+                'R'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+                'I'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 16-3.5-3.5"/><circle cx="11" cy="11" r="4"/></svg>',
+                'A'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10Zm0-13a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="m19 12-5 5"/></svg>',
+                'S'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+                'E'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 14.2 0L21 21Z"/><path d="M9 12h6"/><path d="M12 9v6"/></svg>',
+                'C'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 7h8"/><path d="M8 12h8"/><path d="M8 17h8"/></svg>'
+            ];
             arsort($scoresSorted);
             @endphp
             @foreach($scoresSorted as $dim => $sc)
             @php $norm = $scores ? ($scores->normalizedScores[$dim] ?? $sc) : $sc; @endphp
             <div class="score-row">
-                <span class="score-row-label">{{ $dimEmoji[$dim] }}</span>
+                <span class="score-row-label">{!! $dimIcon[$dim] !!}</span>
                 <div class="score-bar-track">
                     <div class="score-bar-fill"
                          style="width:0%;background:{{ $barColors[$dim] }}"
@@ -223,7 +234,10 @@
     {{-- ── Métiers & Filières ── --}}
     <div class="res-charts-grid" style="margin-bottom:1.5rem;">
         <div class="res-card">
-            <p class="res-card-title">💼 Métiers compatibles</p>
+            <p class="res-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                Métiers compatibles
+            </p>
             <div class="pills-row">
                 @forelse($interp['metiers_suggeres'] ?? [] as $m)
                 <span class="pill-metier">{{ $m }}</span>
@@ -233,7 +247,10 @@
             </div>
         </div>
         <div class="res-card">
-            <p class="res-card-title">🎓 Filières recommandées</p>
+            <p class="res-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                Filières recommandées
+            </p>
             <div class="pills-row">
                 <a href="{{ route('recommendations.show') }}" class="pill-filiere" style="text-decoration:none; display:inline-block;">
                     ✨ Voir mes recommandations IA →
@@ -245,7 +262,13 @@
     {{-- ── Fiabilité ── --}}
     @if(!empty($interp['fiabilite'] ?? ''))
     <div class="res-card" style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.5rem;">
-        <span style="font-size:1.4rem;flex-shrink:0;">{{ ($profil->score_coherence??0)>=60?'✅':'⚠️' }}</span>
+        <span style="font-size:1.4rem;flex-shrink:0;">
+            @if(($profil->score_coherence??0)>=60)
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent3)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            @else
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            @endif
+        </span>
         <p style="font-size:.83rem;color:var(--ink60);line-height:1.6;">{{ $interp['fiabilite'] }}</p>
     </div>
     @endif
@@ -270,18 +293,21 @@
     <div class="res-actions">
         @auth
         <button onclick="saveProfile()" class="btn-fill">
-            💾 Enregistrer mon profil
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Enregistrer mon profil
         </button>
         @endauth
         <form action="{{ route('riasec.initialize') }}" method="POST">
             @csrf <input type="hidden" name="restart" value="1">
             <button type="submit" class="btn-ghost"
                     onclick="return confirm('Recommencer le test ?')">
-                🔄 Refaire le test
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                Refaire le test
             </button>
         </form>
         <a href="{{ route('student.orientation') }}" class="btn-ghost">
-            🗺️ Explorer les filières →
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            Explorer les filières →
         </a>
     </div>
 

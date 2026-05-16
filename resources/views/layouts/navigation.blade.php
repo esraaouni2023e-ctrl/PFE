@@ -6,8 +6,8 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2" style="text-decoration: none;">
-                        <img src="{{ asset('im1.jpg') }}" alt="CapAvenir" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; mix-blend-mode: multiply; box-shadow: 0 2px 8px rgba(56,188,212,.15); transition: transform .3s ease;">
-                        <span style="font-weight: 800; color: #0F1D32; font-size: 1.125rem; letter-spacing: -.02em;">CapAvenir</span>
+                        <img src="{{ asset('final.png') }}" alt="CapAvenir" style="height: 38px; width: auto; object-fit: contain;">
+                        <span style="font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 700; color: #1e293b; letter-spacing: -0.03em;"><span style="color: #d4622a;">Avenir</span></span>
                     </a>
                 </div>
 

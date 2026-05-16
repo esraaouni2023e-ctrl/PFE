@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr" class="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,8 +37,8 @@
             z-index: -1;
             animation: pulse 10s infinite alternate;
         }
-        .glow-1 { top: -10%; right: -5%; background: #00D4FF; }
-        .glow-2 { bottom: -10%; left: -5%; background: #4C1D95; }
+        .glow-1 { top: -10%; right: -5%; background: #0057B8; }
+        .glow-2 { bottom: -10%; left: -5%; background: #FF6A00; }
 
         @keyframes pulse {
             from { transform: scale(1); opacity: 0.1; }
@@ -64,7 +64,7 @@
         }
 
         .auth-visual {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(76, 29, 149, 0.1));
+            background: linear-gradient(135deg, rgba(0, 87, 184, 0.1), rgba(255, 106, 0, 0.05));
             padding: 4rem;
             display: flex;
             flex-direction: column;
@@ -79,7 +79,7 @@
         }
 
         .input-2026 {
-            @apply w-full bg-white/5 border border-white/10 rounded-[12px] px-4 py-3 text-sm transition-all focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan outline-none;
+            @apply w-full bg-white/5 border border-white/10 rounded-[12px] px-4 py-3 text-sm transition-all focus:border-[#0057B8] focus:ring-1 focus:ring-[#0057B8] outline-none;
         }
 
         @media (max-width: 768px) {
@@ -97,8 +97,11 @@
     <div class="auth-container glass-morphism">
         <!-- Visual Panel -->
         <div class="auth-visual">
-            <div class="mb-10 w-16 h-16 bg-white p-2 rounded-[16px] shadow-2xl shadow-cyan-500/20">
-                <img src="{{ asset('im1.jpg') }}" alt="Logo" class="w-full h-full object-contain">
+            <div class="mb-10 flex items-center gap-4">
+                <div class="logo-mark" style="height: 52px; width: 52px;">
+                    <img src="{{ asset('final.png') }}" alt="Logo" class="h-full w-full object-contain">
+                </div>
+                <span class="text-3xl font-bold tracking-tight text-white">CapAvenir</span>
             </div>
             
             <h1 class="text-4xl font-extrabold tracking-tight mb-6">
@@ -122,6 +125,14 @@
 
         <!-- Form Side -->
         <div class="auth-form-side">
+            <!-- Mobile Logo -->
+            <div class="md:hidden flex items-center justify-center gap-3 mb-10">
+                <div class="logo-mark" style="height: 40px; width: 40px;">
+                    <img src="{{ asset('final.png') }}" alt="Logo" class="h-full w-full object-contain">
+                </div>
+                <span class="text-2xl font-bold tracking-tight text-white">CapAvenir</span>
+            </div>
+            
             {{ $slot }}
         </div>
     </div>

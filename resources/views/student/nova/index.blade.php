@@ -63,7 +63,7 @@
                 <!-- Bouton de soumission -->
                 <div style="text-align: right; margin-top: 2rem;">
                     <button type="submit" id="submitBtn" class="btn-fill" style="padding: 1rem 2rem; font-size: 1rem;">
-                        <span id="btnText">Calculer mon Score FG 🔢</span>
+                        <span id="btnText">Calculer mon Score FG <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M15.75 15.75V18m-3-3V18m3-3l3 3m-9-3l-3 3m2.25-13.5h1.5a2.25 2.25 0 012.25 2.25v6.75a2.25 2.25 0 01-2.25 2.25h-1.5a2.25 2.25 0 01-2.25-2.25V5.25a2.25 2.25 0 012.25-2.25z' /></svg></span>
                     </button>
                 </div>
             </form>

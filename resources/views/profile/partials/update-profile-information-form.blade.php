@@ -1,21 +1,35 @@
 <section>
-    <header>
+    <div style="display:none;">
         <h2 class="text-lg font-medium text-gray-900">
             {{ __('Profile Information') }}
         </h2>
-
         <p class="mt-1 text-sm text-gray-600">
             {{ __("Update your account's profile information and email address.") }}
         </p>
-    </header>
+    </div>
 
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
+
+        <div>
+            <x-input-label for="avatar" :value="__('Photo de Profil')" />
+            <div style="display:flex; align-items:center; gap:1.5rem; margin-top:0.5rem;">
+                <div class="avatar-preview" style="width:64px; height:64px; border-radius:50%; background:var(--ink10); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                    @if(auth()->user()->avatar)
+                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" style="width:100%; height:100%; object-fit:cover;">
+                    @else
+                        <span style="font-weight:600; font-size:1.5rem;">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                    @endif
+                </div>
+                <input id="avatar" name="avatar" type="file" style="font-size:0.8rem;" accept="image/*" />
+            </div>
+            <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
+        </div>
 
         <div>
             <x-input-label for="name" :value="__('Name')" />
@@ -56,8 +70,8 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
-                >{{ __('Saved.') }}</p>
+                    class="text-sm" style="color: var(--accent3); font-weight: 600;"
+                >{{ __('Enregistré.') }}</p>
             @endif
         </div>
     </form>

@@ -357,16 +357,27 @@
 ──────────────────────────────────────── */
 .db-matching-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1px; background: var(--ink10);
-    border: 1px solid var(--ink10); border-radius: var(--rl); overflow: hidden;
+    gap: 1.5rem;
     margin-bottom: 1.5rem;
 }
+.db-select {
+    appearance: none; -webkit-appearance: none;
+    background: var(--paper); border: 1px solid var(--ink10);
+    border-radius: var(--rx); padding: 0.6rem 2.5rem 0.6rem 1.2rem;
+    font-family: inherit; font-size: 0.85rem; font-weight: 500; color: var(--ink);
+    cursor: pointer; outline: none; transition: all 0.3s var(--ease);
+}
+.db-select:hover, .db-select:focus { border-color: var(--ink30); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 .db-mcard {
     background: var(--paper); padding: 1.75rem;
     display: flex; flex-direction: column; gap: 1rem;
-    transition: background .3s var(--ease); cursor: pointer;
+    transition: all .3s var(--ease); cursor: pointer;
+    border-radius: var(--rl); border: 1px solid var(--ink10);
 }
-.db-mcard:hover { background: var(--cream); }
+.db-mcard:hover {
+    background: var(--cream); transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.05); border-color: var(--ink30);
+}
 .db-mcard-head { display: flex; align-items: center; gap: 1rem; }
 .db-mcard-icon {
     width: 48px; height: 48px; border-radius: var(--r);
@@ -391,51 +402,63 @@
    § 5 — SIMULATEUR
 ──────────────────────────────────────── */
 .db-sim-header {
-    text-align: center; margin-bottom: 2.5rem;
+    text-align: center; margin-bottom: 3.5rem;
 }
 .db-sim-grid {
     display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 1px; background: var(--ink10);
-    border: 1px solid var(--ink10); border-radius: var(--rl); overflow: hidden;
-    margin-bottom: 2rem;
+    gap: 2rem;
+    margin-bottom: 3rem;
 }
 .db-sim-path {
-    background: var(--paper); padding: 2.5rem 2rem;
+    background: var(--cream); padding: 3rem 2rem;
     text-align: center; cursor: pointer;
-    transition: background .3s var(--ease);
+    transition: all .4s var(--ease);
     display: flex; flex-direction: column; align-items: center;
+    border-radius: 24px; border: 1px solid var(--ink10);
+    position: relative;
 }
-.db-sim-path:hover   { background: var(--cream); }
-.db-sim-path.active  { background: var(--ink); }
-.db-sim-path.active:hover { background: color-mix(in srgb,var(--ink) 92%,var(--accent)); }
+.db-sim-path:hover   { background: var(--warm); transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); border-color: var(--ink30); }
+.db-sim-path.active  { background: var(--ink); transform: translateY(-8px); box-shadow: 0 24px 48px color-mix(in srgb, var(--ink) 30%, transparent); border-color: var(--ink); }
 .db-sim-path.active .db-sim-path-title { color: var(--paper); }
-.db-sim-path.active .db-metric-label   { color: rgba(255,255,255,.4); }
-.db-sim-path.active .db-metric-track   { background: rgba(255,255,255,.07); }
-.db-sim-path.active .db-sim-duration   { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.1); color: rgba(255,255,255,.55); }
+.db-sim-path.active .db-metric-label   { color: rgba(255,255,255,.5); }
+.db-sim-path.active .db-metric-track   { background: rgba(255,255,255,.1); }
+.db-sim-path.active .db-sim-duration   { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.6); }
 .db-sim-path.active .db-metric-val     { color: var(--gold); }
 
-.db-sim-icon { font-size: 2.5rem; margin-bottom: .875rem; }
+.db-sim-icon { 
+    width: 64px; height: 64px; border-radius: 18px;
+    background: var(--paper); display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; margin-bottom: 1.5rem;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+}
+.db-sim-path.active .db-sim-icon { background: rgba(255,255,255,.1); }
+
 .db-sim-path-title {
-    font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 600;
-    letter-spacing: -.03em; margin-bottom: 1.75rem;
+    font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 600;
+    letter-spacing: -.02em; margin-bottom: 2rem; line-height: 1.2;
 }
 .db-sim-rec {
-    font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
-    color: var(--accent3); display: block; margin-top: .25rem;
+    font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+    padding: .2rem .6rem; border-radius: var(--rx);
+    display: inline-block; margin-top: .5rem;
 }
-.db-metric { width: 100%; text-align: left; margin-bottom: 1rem; }
-.db-metric-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem; }
-.db-metric-label { font-size: .75rem; font-weight: 500; color: var(--ink60); }
-.db-metric-val   { font-family: 'Fraunces', serif; font-size: .95rem; font-weight: 600; color: var(--accent); letter-spacing: -.02em; }
-.db-metric-track { height: 4px; background: var(--ink10); border-radius: var(--rx); overflow: hidden; }
-.db-metric-fill  { height: 100%; border-radius: var(--rx); transition: width .8s var(--ease) .3s; }
+.db-sim-path.active .db-sim-rec { color: var(--gold); background: rgba(255,255,255,.1); }
+
+.db-metric { width: 100%; text-align: left; margin-bottom: 1.25rem; }
+.db-metric-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+.db-metric-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--ink30); }
+.db-metric-val   { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: var(--accent); }
+.db-metric-track { height: 6px; background: var(--ink10); border-radius: var(--rx); overflow: hidden; }
+.db-metric-fill  { height: 100%; border-radius: var(--rx); transition: width 1s var(--ease); }
+
 .db-sim-duration {
-    margin-top: 1.25rem; padding: .5rem 1rem; border-radius: var(--rx);
-    background: var(--cream); border: 1px solid var(--ink10);
-    font-size: .78rem; font-weight: 500; color: var(--ink60); width: 100%; text-align: center;
+    margin-top: 1.5rem; padding: .6rem 1.25rem; border-radius: var(--rx);
+    background: var(--paper); border: 1px solid var(--ink10);
+    font-size: .8rem; font-weight: 600; color: var(--ink60); width: 100%; text-align: center;
 }
 
-.db-sim-cta { text-align: center; }
+.db-sim-cta { text-align: center; margin-top: 1rem; }
 
 /* ────────────────────────────────────────
    § SECTIONS WRAPPER
@@ -508,14 +531,26 @@
             </p>
 
             <div class="db-hero-ctas">
-                <a href="#test-section" class="btn-fill">🧠 Passer le test intelligent →</a>
-                <a href="#matching-section" class="btn-ghost">Voir mes recommandations</a>
+                <a href="#test-section" class="btn-fill">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                    Passer le test intelligent
+                </a>
+                <a href="#profile-section" class="btn-ghost">Voir mon profil IA</a>
             </div>
 
             <div class="db-hero-stats">
-                <div class="db-stat-pill">⚡ <b>3</b> tests complétés</div>
-                <div class="db-stat-pill">🎯 <b>12</b> parcours suggérés</div>
-                <div class="db-stat-pill">🏆 Top <b>15%</b> des profils</div>
+                <div class="db-stat-pill">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    <b>3</b> tests complétés
+                </div>
+                <div class="db-stat-pill">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5A2.5 2.5 0 0 0 14.5 12a2.5 2.5 0 0 0-2.5-2.5A2.5 2.5 0 0 0 9.5 12a2.5 2.5 0 0 0 2.5 2.5Z"/><path d="M10 2 2.23 7.74a2 2 0 0 0 .81 3.52l1.63.45a3 3 0 0 1 2.14 2.14l.45 1.63a2 2 0 0 0 3.52.81L16.5 10.5"/><path d="m18 16 4 4"/><path d="m20 16-4 4"/></svg>
+                    <b>12</b> parcours suggérés
+                </div>
+                <div class="db-stat-pill">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    Top <b>15%</b> des profils
+                </div>
             </div>
         </div>
 
@@ -538,7 +573,7 @@
                             stroke-dashoffset="118.88"/>
                 </svg>
                 <div class="db-ring-center">
-                    <span class="db-ring-emoji">🎓</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:0.5rem;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     <span class="db-ring-label">Profil IA</span>
                     <span class="db-ring-val">{{ $profilIaScore ?? 78 }}%</span>
                 </div>
@@ -561,17 +596,23 @@
             <p class="stag">Profil cognitif</p>
             <h2 class="sh">Ton profil <em>IA</em></h2>
         </div>
-        <a href="{{ route('profile.edit') }}" class="btn-ghost">✏️ Enrichir mon profil</a>
+        <div></div>
     </div>
 
     <div class="db-profile-grid">
 
         {{-- Left card: avatar + skills --}}
         <div class="card db-avatar-card rev rev-d1">
-            <div class="db-avatar">
-                🎓
-                <div class="db-avatar-badge">⚡</div>
+
+            <div class="db-avatar" style="overflow:hidden;">
+                @if(auth()->user()->avatar)
+                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" style="width:100%; height:100%; object-fit:cover;">
+                @else
+                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                @endif
+                <div class="db-avatar-badge">✓</div>
             </div>
+
             <div>
                 <div class="db-avatar-name">{{ explode(' ', auth()->user()->name)[0] }}</div>
                 @if(isset($profilRiasec) && $profilRiasec)
@@ -600,7 +641,7 @@
             </div>
 
             <div>
-                <div class="db-subsec-label">⚡ Points forts détectés</div>
+                <div class="db-subsec-label">Points forts détectés</div>
                 <div class="db-tags">
                     @foreach(['Résolution de problèmes','Pensée analytique','Curiosité technique','Adaptabilité','Créativité numérique','Communication écrite'] as $tag)
                     <span class="db-tag">{{ $tag }}</span>
@@ -609,7 +650,7 @@
             </div>
 
             <div>
-                <div class="db-subsec-label">📈 Progression du profil</div>
+                <div class="db-subsec-label">Progression du profil</div>
                 <div class="db-timeline">
                     @foreach([
                         ['Test Cognitif Global','12 Fév 2026','92%'],
@@ -630,69 +671,6 @@
     </div>
 </section>
 
-{{-- ════════════════════════════════
-     § 2.5 · PORTFOLIO DE COMPÉTENCES
-════════════════════════════════ --}}
-<section class="db-section rev" id="portfolio-section">
-    <div class="db-section-header">
-        <div>
-            <p class="stag">Mes Réalisations</p>
-            <h2 class="sh">Portfolio & <em>Certifications</em></h2>
-        </div>
-    </div>
-
-    <div class="db-portfolio-container" style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-bottom: 3rem;">
-        {{-- Upload Zone --}}
-        <div class="card" style="padding: 2rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-style: dashed; border-width: 2px;">
-            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📁</div>
-            <h3 style="font-family: 'Fraunces', serif; font-size: 1.2rem; margin-bottom: 0.5rem;">Ajouter un document</h3>
-            <p style="font-size: 0.85rem; color: var(--ink60); margin-bottom: 1.5rem;">L'IA analysera votre certificat ou projet pour extraire vos compétences réelles.</p>
-            
-            <form action="{{ route('student.portfolio.store') }}" method="POST" enctype="multipart/form-data" style="width: 100%;">
-                @csrf
-                <input type="text" name="title" placeholder="Titre (ex: Certificat Python)" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: var(--r); border: 1px solid var(--ink10); background: var(--paper);">
-                <select name="type" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: var(--r); border: 1px solid var(--ink10); background: var(--paper);">
-                    <option value="certificate">Certificat</option>
-                    <option value="project">Projet</option>
-                    <option value="document">Autre Document</option>
-                </select>
-                <input type="file" name="file" accept=".pdf,.jpg,.png" required style="margin-bottom: 1rem; width: 100%; font-size: 0.85rem;">
-                <button type="submit" class="btn-fill" style="width: 100%; justify-content: center;">🚀 Uploader & Analyser</button>
-            </form>
-        </div>
-
-        {{-- Uploaded Items --}}
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-            @forelse($portfolios as $item)
-            <div class="card" style="padding: 1.5rem; display: flex; gap: 1.5rem; align-items: flex-start;">
-                <div style="width: 50px; height: 50px; border-radius: var(--r); background: var(--ink10); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                    {{ $item->type === 'certificate' ? '🎓' : '📄' }}
-                </div>
-                <div style="flex: 1;">
-                    <h4 style="font-family: 'Fraunces', serif; font-size: 1.1rem; margin-bottom: 0.25rem;">{{ $item->title }}</h4>
-                    <p style="font-size: 0.85rem; color: var(--ink60); margin-bottom: 0.75rem;">{{ $item->ai_analysis_summary ?? 'Analyse en cours...' }}</p>
-                    
-                    @if($item->extracted_skills)
-                    <div class="db-tags">
-                        @foreach($item->extracted_skills as $skill)
-                        <span class="db-tag" style="font-size: 0.7rem; padding: 0.2rem 0.6rem;">{{ is_array($skill) ? json_encode($skill) : $skill }}</span>
-                        @endforeach
-                    </div>
-                    @endif
-                </div>
-                <form action="{{ route('student.portfolio.destroy', $item) }}" method="POST">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn-ghost" style="padding: 0.5rem; color: #d93838; border-color: transparent;">🗑️</button>
-                </form>
-            </div>
-            @empty
-            <div class="card" style="padding: 3rem 2rem; text-align: center; color: var(--ink30);">
-                <p>Aucun document dans votre portfolio pour le moment.</p>
-            </div>
-            @endforelse
-        </div>
-    </div>
-</section>
 
 {{-- ════════════════════════════════
      § 3 · ROADMAP DE CARRIÈRE (TIMELINE)
@@ -735,14 +713,21 @@
         @endforeach
     @else
         <div class="card" style="padding: 3rem 2rem; text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:3rem;height:3rem;margin: 0 auto 1rem; color: var(--accent2);">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-10.5v.75m.01 0a.75.75 0 01.75.75v.75m0 0a.75.75 0 01-.75.75H15m0 0a.75.75 0 01-.75-.75V5.25m.75 0V4.5m0 0a.75.75 0 01.75-.75h.75m0 0a.75.75 0 01.75.75v.75m0 0a.75.75 0 01-.75.75H15M9 15l-3 6m0 0l-1.5-3m1.5 3V9m12 0l3 6m0 0l1.5-3m-1.5 3V9" />
+            </svg>
             <h3 style="font-family: 'Fraunces', serif; font-size: 1.5rem; margin-bottom: 1rem;">Créez votre chemin vers le succès</h3>
             <p style="color: var(--ink60); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">Entrez le métier de vos rêves et laissez l'IA tracer le chemin universitaire exact étape par étape pour y arriver.</p>
             
             <form action="{{ route('student.roadmap.generate') }}" method="POST" style="display: flex; gap: 1rem; max-width: 500px; margin: 0 auto;">
                 @csrf
                 <input type="text" name="target_job" placeholder="Ex: Data Scientist, Ingénieur IA..." required style="flex: 1; padding: 0.8rem 1.2rem; border-radius: var(--rx); border: 1px solid var(--ink30); background: transparent;">
-                <button type="submit" class="btn-fill" style="border-radius: var(--rx);">✨ Générer</button>
+                <button type="submit" class="btn-fill" style="border-radius: var(--rx);">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.1rem;height:1.1rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.456-2.455l.259-1.036.259 1.036a3.375 3.375 0 002.455 2.456l1.035.259-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                    </svg>
+                    Générer
+                </button>
             </form>
         </div>
     @endif
@@ -751,47 +736,7 @@
 {{-- ════════════════════════════════
      § 4 · MATCHING
 ════════════════════════════════ --}}
-<section class="db-section rev" id="matching-section">
-    <div class="db-section-header">
-        <div>
-            <p class="stag">Top recommandations</p>
-            <h2 class="sh">Les formations qui te <em>correspondent</em></h2>
-        </div>
-    </div>
 
-    <div class="db-matching-grid">
-        @foreach($predictions as $f)
-        <div class="db-mcard rev rev-d{{ ($loop->index % 3) + 1 }}">
-            <div class="db-mcard-head">
-                <div class="db-mcard-icon">{{ $f['icon'] }}</div>
-                <div>
-                    <div class="db-mcard-name">{{ $f['name'] }}</div>
-                    <div class="db-mcard-univ">{{ $f['univ'] }}</div>
-                </div>
-            </div>
-
-            <div>
-                <div class="db-bar-row">
-                    <span class="db-bar-label">Chances d'Admission</span>
-                    <span class="db-bar-score" style="color: {{ $f['score'] > 80 ? 'var(--accent3)' : ($f['score'] > 60 ? 'var(--gold)' : 'var(--accent)') }};">{{ $f['score'] }}%</span>
-                </div>
-                <div class="db-bar-track">
-                    <div class="db-bar-fill match-bar-fill" style="width:{{ $f['score'] }}%; background: {{ $f['score'] > 80 ? 'var(--accent3)' : ($f['score'] > 60 ? 'var(--gold)' : 'var(--accent)') }};"></div>
-                </div>
-            </div>
-
-            <div class="db-mcard-foot">
-                <span class="pill pill-sage" style="font-size:.7rem; background: {{ $f['score'] > 80 ? 'color-mix(in srgb,var(--accent3) 10%,transparent)' : ($f['score'] > 60 ? 'color-mix(in srgb,var(--gold) 10%,transparent)' : 'color-mix(in srgb,var(--accent) 10%,transparent)') }}; color: {{ $f['score'] > 80 ? 'var(--accent3)' : ($f['score'] > 60 ? 'var(--gold)' : 'var(--accent)') }}; border-color: currentColor;">Score IA</span>
-                <button class="btn-ghost" style="padding:.4rem .9rem;font-size:.78rem;">Détails →</button>
-            </div>
-        </div>
-        @endforeach
-    </div>
-
-    <div style="text-align:center;margin-top:1.5rem;">
-        <button class="btn-ghost">🔄 Comparer ces options</button>
-    </div>
-</section>
 
 {{-- ════════════════════════════════
      § 5 · SIMULATEUR
@@ -807,16 +752,16 @@
 
     @php
     $paths = [
-        ['icon'=>'🩺','title'=>'Médecine',      'metrics'=>['Satisfaction'=>72,'Revenu'=>88,'Demande marché'=>90],'duration'=>'7 ans'],
-        ['icon'=>'⚙️','title'=>'Ingénierie',   'metrics'=>['Satisfaction'=>85,'Revenu'=>82,'Demande marché'=>87],'duration'=>'5 ans','active'=>true],
-        ['icon'=>'📊','title'=>'Data Science',  'metrics'=>['Satisfaction'=>91,'Revenu'=>86,'Demande marché'=>94],'duration'=>'4 ans'],
+        ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>', 'title' => 'Médecine', 'metrics' => ['Satisfaction' => 72, 'Revenu' => 88, 'Demande marché' => 90], 'duration' => '7 ans'],
+        ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>', 'title' => 'Ingénierie', 'metrics' => ['Satisfaction' => 85, 'Revenu' => 82, 'Demande marché' => 87], 'duration' => '5 ans', 'active' => true],
+        ['icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"/><path d="M16 5V3"/><path d="M8 5V3"/><path d="M3 9h18"/><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V13"/><path d="m15 15 3 3-3 3"/></svg>', 'title' => 'Data Science', 'metrics' => ['Satisfaction' => 91, 'Revenu' => 86, 'Demande marché' => 94], 'duration' => '4 ans'],
     ];
     @endphp
 
     <div class="db-sim-grid">
         @foreach($paths as $path)
         <div class="db-sim-path {{ isset($path['active']) ? 'active' : '' }} sim-path-toggle rev rev-d{{ $loop->index + 1 }}">
-            <div class="db-sim-icon">{{ $path['icon'] }}</div>
+            <div class="db-sim-icon">{!! $path['icon'] !!}</div>
             <div class="db-sim-path-title">
                 {{ $path['title'] }}
                 @if(isset($path['active']))
@@ -836,14 +781,16 @@
             </div>
             @endforeach
 
-            <div class="db-sim-duration">⏱ Durée : {{ $path['duration'] }}</div>
+            <div class="db-sim-duration"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:0.85rem;height:0.85rem;display:inline-block;vertical-align:middle;margin-right:0.25rem;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z' /></svg>Durée : {{ $path['duration'] }}</div>
         </div>
         @endforeach
     </div>
 
     <div class="db-sim-cta">
         <button class="btn-dark" style="padding:1rem 2.25rem;font-size:1rem;">
-            🔮 Lancer le simulateur complet →
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Lancer le simulateur complet
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </button>
     </div>
 </section>
@@ -858,7 +805,7 @@
         <a href="#">Support</a>
         <a href="#">À propos</a>
     </div>
-    <span class="db-footer-copy">✦ CapAvenir 2026 · Ton orientation réinventée</span>
+    <span class="db-footer-copy"><i class="bi bi-stars"></i> CapAvenir 2026 · Ton orientation réinventée</span>
 </footer>
 
 </div>{{-- /db --}}
@@ -875,6 +822,8 @@ document.addEventListener('DOMContentLoaded', function () {
         entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); revObs.unobserve(e.target); } });
     }, { threshold: .08, rootMargin: '0px 0px -40px 0px' });
     revEls.forEach(el => revObs.observe(el));
+
+
 
     /* ── Match bar animate ── */
     const barObs = new IntersectionObserver(entries => {

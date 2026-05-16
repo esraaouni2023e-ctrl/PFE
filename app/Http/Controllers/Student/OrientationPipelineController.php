@@ -51,23 +51,16 @@ class OrientationPipelineController extends Controller
         $userId  = $user->id;
         $profile = Profile::where('user_id', $userId)->first();
 
-        // ── Étape 1 : Vérifier le score FG ─────────────────────────────────
-        if (!$profile || !$profile->score_fg) {
-            $sections = $this->scoreFgService->getSections();
-            $gouvernorats = [
-                'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès',
-                'Gafsa', 'Jendouba', 'Kairouan', 'Kasserine', 'Kébili',
-                'Le Kef', 'Mahdia', 'La Manouba', 'Médenine', 'Monastir',
-                'Nabeul', 'Sfax', 'Sidi Bouzid', 'Siliana', 'Sousse',
-                'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan',
-            ];
+        $sections = $this->scoreFgService->getSections();
+        $gouvernorats = [
+            'Ariana', 'Béja', 'Ben Arous', 'Bizerte', 'Gabès',
+            'Gafsa', 'Jendouba', 'Kairouan', 'Kasserine', 'Kébili',
+            'Le Kef', 'Mahdia', 'La Manouba', 'Médenine', 'Monastir',
+            'Nabeul', 'Sfax', 'Sidi Bouzid', 'Siliana', 'Sousse',
+            'Tataouine', 'Tozeur', 'Tunis', 'Zaghouan',
+        ];
 
-            return view('student.pipeline.step1_score', [
-                'profile'      => $profile ?? new Profile(),
-                'sections'     => $sections,
-                'gouvernorats' => $gouvernorats,
-            ]);
-        }
+        $hasScore = $profile && $profile->score_fg;
 
         // ── Étape 2 : Vérifier si le test RIASEC est complété ──────────────
         $riasecProfil = ProfileRiasec::pourUser($userId)
@@ -75,26 +68,45 @@ class OrientationPipelineController extends Controller
             ->recents()
             ->first();
 
-        if (!$riasecProfil) {
+        if ($hasScore && $riasecProfil) {
+            // Tout est fait → résultats
+            session(['riasec_profile_id' => $riasecProfil->id]);
+
+            Log::info('OrientationPipeline – redirigé vers résultats RIASEC', [
+                'user_id'      => $userId,
+                'score_fg'     => $profile->score_fg,
+                'code_holland' => $riasecProfil->code_holland,
+            ]);
+
             return redirect()
-                ->route('riasec.question.entry')
-                ->with('info', '🧠 Étape 2/3 — Passez le test RIASEC pour identifier votre profil psychologique.');
+                ->route('riasec.results')
+                ->with('success', 'Profil complété ! Voici vos recommandations.');
         }
 
-        // ── Étape 3 : Afficher le profil RIASEC (l'utilisateur cliquera ensuite sur le bouton IA) ─────────
-        session([
-            'riasec_profile_id' => $riasecProfil->id,
-        ]);
+        // Determine which tab to show
+        $activeTab = $hasScore ? 'psycho' : 'score';
 
-        Log::info('OrientationPipeline – redirigé vers résultats RIASEC', [
-            'user_id'      => $userId,
-            'score_fg'     => $profile->score_fg,
-            'code_holland' => $riasecProfil->code_holland,
-        ]);
+        // Check for ongoing RIASEC test
+        $sessionId = session('riasec_session_id');
+        $hasOngoingTest = false;
+        $progress = null;
+        $totalQuestions = \App\Models\QuestionRiasec::actives()->count();
 
-        return redirect()
-            ->route('riasec.results')
-            ->with('success', '✅ Étape 3/3 — Profil RIASEC complété ! Cliquez sur le bouton CapAvenir IA pour générer vos recommandations.');
+        if ($sessionId) {
+            $progress = $this->testManager->getProgress($userId, $sessionId);
+            $hasOngoingTest = $progress->answered > 0 && !$progress->isCompleted;
+        }
+
+        return view('student.pipeline.step1_score', [
+            'profile'        => $profile ?? new Profile(),
+            'sections'       => $sections,
+            'gouvernorats'   => $gouvernorats,
+            'activeTab'      => $activeTab,
+            'hasScore'       => $hasScore,
+            'hasOngoingTest' => $hasOngoingTest,
+            'progress'       => $progress,
+            'totalQuestions'  => $totalQuestions,
+        ]);
     }
 
     /**

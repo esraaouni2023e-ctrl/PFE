@@ -199,7 +199,9 @@
     @if(!empty($feedback))
     <div class="q-card" style="background: color-mix(in srgb, var(--accent) 8%, transparent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); padding: 1.5rem;">
         <div style="display: flex; gap: 1rem; align-items: center;">
-            <div style="font-size: 1.5rem;">📣</div>
+            <div style="flex-shrink:0; width:40px; height:40px; border-radius:10px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8c0 4.5-4.5 4.5-4.5 9a1.5 1.5 0 0 1-3 0c0-4.5-4.5-4.5-4.5-9a4.5 4.5 0 0 1 9 0Z"/><path d="M12 21h.01"/></svg>
+            </div>
             <p style="margin: 0; font-family: var(--font-main); font-weight: 600; color: var(--ink); line-height: 1.5;">
                 {{ $feedback }}
             </p>
@@ -212,21 +214,21 @@
         {{-- Meta badges --}}
         @php
         $dimBadge = [
-            'R'=>['color'=>'#d4622a','bg'=>'rgba(212,98,42,.1)','label'=>'Réaliste','emoji'=>'🔧'],
-            'I'=>['color'=>'#1a4f6e','bg'=>'rgba(26,79,110,.1)','label'=>'Investigateur','emoji'=>'🔬'],
-            'A'=>['color'=>'#c8973a','bg'=>'rgba(200,151,58,.1)','label'=>'Artistique','emoji'=>'🎨'],
-            'S'=>['color'=>'#4a7c59','bg'=>'rgba(74,124,89,.1)','label'=>'Social','emoji'=>'🤝'],
-            'E'=>['color'=>'#7c4a7c','bg'=>'rgba(124,74,124,.1)','label'=>'Entreprenant','emoji'=>'🚀'],
-            'C'=>['color'=>'#4a6e6e','bg'=>'rgba(74,110,110,.1)','label'=>'Conventionnel','emoji'=>'📋'],
+            'R'=>['color'=>'#d4622a','bg'=>'rgba(212,98,42,.1)','label'=>'Réaliste','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'],
+            'I'=>['color'=>'#1a4f6e','bg'=>'rgba(26,79,110,.1)','label'=>'Investigateur','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 16-3.5-3.5"/><circle cx="11" cy="11" r="4"/></svg>'],
+            'A'=>['color'=>'#c8973a','bg'=>'rgba(200,151,58,.1)','label'=>'Artistique','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10Zm0-13a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="m19 12-5 5"/></svg>'],
+            'S'=>['color'=>'#4a7c59','bg'=>'rgba(74,124,89,.1)','label'=>'Social','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'],
+            'E'=>['color'=>'#7c4a7c','bg'=>'rgba(124,74,124,.1)','label'=>'Entreprenant','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 14.2 0L21 21Z"/><path d="M9 12h6"/><path d="M12 9v6"/></svg>'],
+            'C'=>['color'=>'#4a6e6e','bg'=>'rgba(74,110,110,.1)','label'=>'Conventionnel','icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 7h8"/><path d="M8 12h8"/><path d="M8 17h8"/></svg>'],
         ];
         $catLabel = ['loisirs'=>'Loisirs','preferences_professionnelles'=>'Pref. Pro.','qualites_personnelles'=>'Qualités'];
-        $db = $dimBadge[$question->dimension] ?? ['color'=>'var(--accent)','bg'=>'var(--ink06)','label'=>$question->dimension,'emoji'=>'❓'];
+        $db = $dimBadge[$question->dimension] ?? ['color'=>'var(--accent)','bg'=>'var(--ink06)','label'=>$question->dimension,'icon'=>''];
         @endphp
 
         <div class="q-meta">
             <span class="q-dim-badge"
                   style="color:{{ $db['color'] }};background:{{ $db['bg'] }};border-color:{{ $db['color'] }}40;">
-                {{ $db['emoji'] }} {{ $db['label'] }}
+                {!! $db['icon'] !!} {{ $db['label'] }}
             </span>
             <span class="q-cat-badge">
                 {{ $catLabel[$question->categorie] ?? $question->categorie }}
@@ -252,7 +254,13 @@
 
             <div class="likert-wrap">
                 @php
-                $emojis = [1=>'😕',2=>'🤔',3=>'😐',4=>'🙂',5=>'😄'];
+                $icons = [
+                    1=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+                    2=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5-2 4-2 4 2 4 2"/></svg>',
+                    3=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>',
+                    4=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/></svg>',
+                    5=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 11 12 14 22 4"/></svg>'
+                ];
                 $lbls   = [1=>'Pas du tout',2=>'Peu',3=>'Neutre',4=>'Plutôt',5=>'Tout à fait'];
                 @endphp
                 @foreach([1,2,3,4,5] as $v)
@@ -261,7 +269,7 @@
                            {{ $existingAnswer == $v ? 'checked' : '' }}
                            x-on:change="onSelect({{ $v }})">
                     <label for="v{{ $v }}">
-                        <span class="likert-emoji">{{ $emojis[$v] }}</span>
+                        <span class="likert-emoji" style="color:var(--ink30)">{!! $icons[$v] !!}</span>
                         <span class="likert-num">{{ $v }}</span>
                         <span class="likert-lbl">{{ $lbls[$v] }}</span>
                     </label>
@@ -306,7 +314,14 @@
         <div class="dim-mini-grid">
             @php
             $dimColors2 = ['R'=>'#d4622a','I'=>'#1a4f6e','A'=>'#c8973a','S'=>'#4a7c59','E'=>'#7c4a7c','C'=>'#4a6e6e'];
-            $dimEmoji2  = ['R'=>'🔧','I'=>'🔬','A'=>'🎨','S'=>'🤝','E'=>'🚀','C'=>'📋'];
+            $dimIcon2  = [
+                'R'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+                'I'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 16-3.5-3.5"/><circle cx="11" cy="11" r="4"/></svg>',
+                'A'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10Zm0-13a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="m19 12-5 5"/></svg>',
+                'S'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+                'E'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 14.2 0L21 21Z"/><path d="M9 12h6"/><path d="M12 9v6"/></svg>',
+                'C'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 7h8"/><path d="M8 12h8"/><path d="M8 17h8"/></svg>'
+            ];
             @endphp
             @foreach($dimColors2 as $d => $col)
             @php
@@ -315,7 +330,7 @@
             $pct = $tot > 0 ? round($ans/$tot*100) : 0;
             @endphp
             <div class="dim-mini-item">
-                <div class="dim-mini-label">{{ $dimEmoji2[$d] }}<br>{{ $d }}</div>
+                <div class="dim-mini-label">{!! $dimIcon2[$d] !!}<br>{{ $d }}</div>
                 <div class="dim-mini-track">
                     <div class="dim-mini-fill" style="width:{{ $pct }}%;background:{{ $col }}"></div>
                 </div>

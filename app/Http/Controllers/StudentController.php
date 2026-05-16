@@ -8,6 +8,7 @@ use App\Models\ProfileRiasec;
 use App\Models\QuestionRiasec;
 use App\Services\AdmissionPredictorService;
 use App\Services\RecommendationService;
+use App\Services\SiaepiRecommendationEngine;
 use App\Services\RIASEC\GatbCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -209,8 +210,8 @@ class StudentController extends Controller
 
         // ── 1. Profil académique ─────────────────────────────────────────
         $academicProfile = Profile::where('user_id', $userId)->first();
-        $scoreFg         = $academicProfile?->score_fg ?? 120;  // fallback 120
-        $sectionBac      = $academicProfile?->section_bac ?? 'Informatique';
+        $scoreFg         = (float) ($academicProfile?->score_fg ?? 0);
+        $sectionBac      = $academicProfile?->section_bac ?? '';
 
         // ── 2. Dernier profil RIASEC complété ────────────────────────────
         $profilRiasec = ProfileRiasec::pourUser($userId)
@@ -218,69 +219,71 @@ class StudentController extends Controller
             ->recents()
             ->first();
 
-        // Vecteur psychométrique RIASEC normalisé (0.0 – 1.0)
         $vecteurRiasec = ['R'=>0.5,'I'=>0.5,'A'=>0.5,'S'=>0.5,'E'=>0.5,'C'=>0.5];
         $codeHolland   = 'ISA';
 
         if ($profilRiasec) {
-            $maxScore = 100;
-            $vecteurRiasec = [
-                'R' => round($profilRiasec->score_r / $maxScore, 4),
-                'I' => round($profilRiasec->score_i / $maxScore, 4),
-                'A' => round($profilRiasec->score_a / $maxScore, 4),
-                'S' => round($profilRiasec->score_s / $maxScore, 4),
-                'E' => round($profilRiasec->score_e / $maxScore, 4),
-                'C' => round($profilRiasec->score_c / $maxScore, 4),
+            $maxScore = max(1, $profilRiasec->score_r + $profilRiasec->score_i +
+                                  $profilRiasec->score_a + $profilRiasec->score_s +
+                                  $profilRiasec->score_e + $profilRiasec->score_c) / 6;
+            $maxScore = max($maxScore, 1);
+            // Normalise 0–1 basé sur le score max de l'étudiant
+            $allScores = [
+                'R' => (float)$profilRiasec->score_r,
+                'I' => (float)$profilRiasec->score_i,
+                'A' => (float)$profilRiasec->score_a,
+                'S' => (float)$profilRiasec->score_s,
+                'E' => (float)$profilRiasec->score_e,
+                'C' => (float)$profilRiasec->score_c,
             ];
+            $maxVal = max(array_values($allScores)) ?: 100;
+            foreach ($allScores as $k => $v) {
+                $vecteurRiasec[$k] = round($v / $maxVal, 4);
+            }
             $codeHolland = $profilRiasec->code_holland;
         }
 
-        // ── 3. Réponses multi-blocs (Big Five, GATB, Schwartz) ──────────
-        $sessionId    = session('riasec_session_id') ?? $profilRiasec?->test_session_id;
-        $textoKeywords = $this->buildTextoFromAnswers($sessionId, $codeHolland, $sectionBac);
-        
-        // ── 3b. Calcul des scores GATB réels de l'étudiant ──────────────
-        $gatbScores = ['G' => 10, 'V' => 10, 'N' => 10, 'S' => 10, 'TOTAL' => 10]; // Defaults
+        // ── 3. Scores GATB réels ─────────────────────────────────────────
+        $sessionId  = session('riasec_session_id') ?? $profilRiasec?->test_session_id;
+        $gatbScores = ['G' => 10, 'V' => 10, 'N' => 10, 'S' => 10];
+
         if ($sessionId) {
             $rawGatbAnswers = AnswerRiasec::where('test_session_id', $sessionId)
-                ->whereHas('question', function($q) {
-                    $q->whereIn('dimension', ['G', 'V', 'Num', 'Sp']);
-                })
-                ->with('question')
-                ->get()
+                ->whereHas('question', fn($q) => $q->whereIn('dimension', ['G', 'V', 'Num', 'Sp']))
+                ->with('question')->get()
                 ->map(function($ans) {
-                    $dimMap = ['Num' => 'N', 'Sp' => 'S']; // Mapping bdd -> gatb
-                    $dim = $ans->question->dimension;
-                    return [
-                        'dimension' => $dimMap[$dim] ?? $dim,
-                        'score' => $ans->valeur
-                    ];
+                    return ['dimension' => ['Num'=>'N','Sp'=>'S'][$ans->question->dimension] ?? $ans->question->dimension, 'score' => $ans->valeur];
                 })->toArray();
-                
+
             if (!empty($rawGatbAnswers)) {
-                $gatbCalculator = new GatbCalculator();
-                $gatbScores = $gatbCalculator->calculateScores($rawGatbAnswers);
+                $gatbCalc = new GatbCalculator();
+                $gatbScores = $gatbCalc->calculateScores($rawGatbAnswers);
             }
         }
 
-        // ── 4. Construction du profil_etudiant complet ───────────────────
-        $profilEtudiant = [
-            'score_fg'                 => (float) $scoreFg,
-            'filiere_etudiant_actuelle'=> $sectionBac,
-            'texte_psycho'             => $textoKeywords,
-            'vecteur_psychometrique'   => $vecteurRiasec,
-            'gatb_scores'              => $gatbScores,
-        ];
+        // ── 4. Appel au moteur SIAEPI PHP-natif ─────────────────────────
+        $engine = new SiaepiRecommendationEngine();
 
-        // ── 5. Appel à l'API Python ──────────────────────────────────────
-        $recommendations = $this->recommendationService->getRecommendations(
-            $profilEtudiant,
-            null,
-            $request->input('top_n', 12)
-        );
+        $result = $engine->recommend([
+            'score_fg'               => $scoreFg,
+            'section_bac'            => $sectionBac,
+            'filiere_etudiant_actuelle' => $sectionBac,
+            'vecteur_psychometrique' => $vecteurRiasec,
+            'gatb_scores'            => $gatbScores,
+            'code_holland'           => $codeHolland,
+        ], (int) $request->input('top_n', 12));
 
-        if (isset($recommendations['error'])) {
-            return view('recommendations.error', ['message' => $recommendations['error']]);
+        // ── 5. Remap au format attendu par la vue ────────────────────────
+        if (!isset($result['error']) && !empty($result['recommandations'])) {
+            $recommendations = [
+                'recommandations'  => $result['recommandations'],
+                'diagnostic'       => $result['diagnostic'],
+                'gap_analysis'     => $result['gap_analysis'] ?? [],
+                'resume'           => $result['diagnostic']['diagnostic'] ?? '',
+                'total_filieres_accessibles' => $result['total_scorees'] ?? 0,
+            ];
+        } else {
+            $recommendations = ['error' => $result['error'] ?? 'Erreur du moteur de recommandation.'];
         }
 
         return view('recommendations.show', [
@@ -288,6 +291,7 @@ class StudentController extends Controller
             'profilRiasec'    => $profilRiasec,
             'codeHolland'     => $codeHolland,
             'scoreFg'         => $scoreFg,
+            'gapAnalysis'     => $result['gap_analysis'] ?? [],
         ]);
     }
 

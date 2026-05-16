@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -151,15 +152,13 @@
             margin-bottom: 3rem;
         }
         .logo-mark {
-            width: 38px; height: 38px; border-radius: 8px;
-            background: var(--accent);
+            width: 52px; height: 52px;
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Fraunces', serif; font-size: 1.05rem; font-weight: 600;
-            color: #fff; letter-spacing: -.03em;
-            box-shadow: 0 4px 16px rgba(0,0,0,.25);
+            overflow: hidden;
         }
+        .logo-mark img { width: 100%; height: 100%; object-fit: contain; }
         .logo-name {
-            font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 600;
+            font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600;
             letter-spacing: -.04em; color: #fff;
         }
 
@@ -325,6 +324,9 @@
             border-color: var(--accent);
             background: var(--accent);
         }
+        label:has(input[type="radio"]:checked) .role-indicator > div {
+            opacity: 1 !important;
+        }
 
         /* ── MISC ── */
         .relative { position: relative; }
@@ -354,7 +356,9 @@
                 <div class="visual-inner">
                     <!-- Logo -->
                     <div class="visual-logo">
-                        <div class="logo-mark">Ca</div>
+                        <div class="logo-mark">
+                            <img src="{{ asset('final.png') }}" alt="Logo">
+                        </div>
                         <span class="logo-name">CapAvenir</span>
                     </div>
 

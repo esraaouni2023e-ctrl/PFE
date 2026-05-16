@@ -581,7 +581,7 @@
 
             <div class="wlc-ctas">
                 <a href="{{ route('student.dashboard') }}" class="wlc-btn-main">
-                    Explorer mon tableau de bord →
+                    Explorer mon tableau de bord <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg>
                 </a>
                 <a href="#steps" class="wlc-btn-ghost">
                     Comment ça marche
@@ -604,7 +604,7 @@
             {{-- Step 01 --}}
             <div class="wlc-step rev rev-d1">
                 <span class="wlc-step-num">01</span>
-                <div class="wlc-step-icon-wrap">🧪</div>
+                <div class="wlc-step-icon-wrap"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M9.75 3.104v17.792m0-17.792c-1.33 0-2.603.33-3.737.921m3.737-.921c1.33 0 2.603.33 3.737.921m-7.474 0c-1.134.591-2.073 1.488-2.686 2.563m2.686-2.563C5.104 5.313 5.25 6.398 5.25 7.5c0 1.102-.146 2.187-.437 3.187m7.474-7.5c1.134.591 2.073 1.488 2.686 2.563m-2.686-2.563c.291.956.437 2.041.437 3.143 0 1.102-.146 2.187-.437 3.187m0 0c-.29.983-.63 1.923-1.01 2.809m-10.148-2.81c.38.886.72 1.826 1.01 2.81m10.148-2.81c-.426 1.256-.832 2.532-1.217 3.824m-10.148-3.824c.385 1.292.79 2.568 1.217 3.824m10.148-3.824c-.426 1.256-.832 2.532-1.217 3.824m-10.148-3.824c.385 1.292.79 2.568 1.217 3.824m10.148-3.824a15.753 15.753 0 01-1.217 3.824m-10.148-3.824a15.753 15.753 0 001.217 3.824m10.148-3.824c.426-1.256.832-2.532 1.217-3.824m-10.148 3.824a15.753 15.753 0 01-1.217-3.824M12 21.75V15' /></svg></div>
                 <h3 class="wlc-step-title">Analyse profonde</h3>
                 <p class="wlc-step-desc">
                     On explore tes aptitudes, tes intérêts et ton style d'intelligence via un quiz adaptatif — engageant, jamais ennuyeux.
@@ -615,7 +615,7 @@
             {{-- Step 02 — featured --}}
             <div class="wlc-step featured rev rev-d2">
                 <span class="wlc-step-num">02</span>
-                <div class="wlc-step-icon-wrap">🪐</div>
+                <div class="wlc-step-icon-wrap"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent2)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M20.25 12c0 4.556-3.694 8.25-8.25 8.25S3.75 16.556 3.75 12 7.444 3.75 12 3.75 20.25 7.444 20.25 12zM12 3c.392 0 .771.027 1.143.08M12 3c-.392 0-.771.027-1.143.08M12 3v3.25m0 14.75c.392 0 .771-.027 1.143-.08M12 21c-.392 0-.771-.027-1.143-.08M12 21v-3.25m9.143-5.82c.027-.372.04-.751.04-1.143 0-.392-.013-.771-.04-1.143M21 12h-3.25m-14.75 0c-.027.372-.04.751-.04 1.143 0 .392.013.771.04 1.143M3 12h3.25m14.286-4.5a11.948 11.948 0 01-3.143 3.143m-14.286-3.143a11.948 11.948 0 003.143 3.143m14.286 11.25a11.948 11.948 0 00-3.143-3.143m-14.286 3.143a11.948 11.948 0 013.143-3.143' /></svg></div>
                 <h3 class="wlc-step-title">Mapping IA</h3>
                 <p class="wlc-step-desc">
                     L'IA génère ton profil personnalisé et te suggère les parcours qui te correspondent à 90 %+, adaptés au système tunisien.
@@ -626,7 +626,7 @@
             {{-- Step 03 --}}
             <div class="wlc-step rev rev-d3">
                 <span class="wlc-step-num">03</span>
-                <div class="wlc-step-icon-wrap">🚀</div>
+                <div class="wlc-step-icon-wrap"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent3)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M15.59 14.37a6 6 0 01-5.84 7.38 4.75 4.75 0 01-4.51-3.46 8.97 8.97 0 005.54-3.92zM9 15.165V15.303a3 3 0 01-3 3V15.303a3 3 0 013-3z' /></svg></div>
                 <h3 class="wlc-step-title">Construction</h3>
                 <p class="wlc-step-desc">
                     Accède aux fiches formations, simule ton futur et construis ton propre chemin — avec l'appui d'un conseiller si besoin.
@@ -649,39 +649,39 @@
         <div class="wlc-actions-grid">
 
             <a href="{{ route('student.test') ?? '#' }}" class="wlc-action-card rev rev-d1">
-                <div class="wlc-action-icon">🧪</div>
+                <div class="wlc-action-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M9.75 3.104v17.792m0-17.792c-1.33 0-2.603.33-3.737.921m3.737-.921c1.33 0 2.603.33 3.737.921m-7.474 0c-1.134.591-2.073 1.488-2.686 2.563m2.686-2.563C5.104 5.313 5.25 6.398 5.25 7.5c0 1.102-.146 2.187-.437 3.187m7.474-7.5c1.134.591 2.073 1.488 2.686 2.563m-2.686-2.563c.291.956.437 2.041.437 3.143 0 1.102-.146 2.187-.437 3.187m0 0c-.29.983-.63 1.923-1.01 2.809m-10.148-2.81c.38.886.72 1.826 1.01 2.81m10.148-2.81c-.426 1.256-.832 2.532-1.217 3.824m-10.148-3.824c.385 1.292.79 2.568 1.217 3.824m10.148-3.824c-.426 1.256-.832 2.532-1.217 3.824m-10.148-3.824c.385 1.292.79 2.568 1.217 3.824m10.148-3.824a15.753 15.753 0 01-1.217 3.824m-10.148-3.824a15.753 15.753 0 001.217 3.824m10.148-3.824c.426-1.256.832-2.532 1.217-3.824m-10.148 3.824a15.753 15.753 0 01-1.217-3.824M12 21.75V15' /></svg></div>
                 <div class="wlc-action-body">
                     <div class="wlc-action-title">Passer le test IA</div>
                     <p class="wlc-action-desc">Commence le quiz adaptatif pour obtenir ton profil complet en 12 minutes.</p>
                 </div>
-                <span class="wlc-action-arrow">→</span>
+                <span class="wlc-action-arrow"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg></span>
             </a>
 
             <a href="{{ route('student.profile') ?? '#' }}" class="wlc-action-card rev rev-d2">
-                <div class="wlc-action-icon">🪐</div>
+                <div class="wlc-action-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent2)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M20.25 12c0 4.556-3.694 8.25-8.25 8.25S3.75 16.556 3.75 12 7.444 3.75 12 3.75 20.25 7.444 20.25 12zM12 3c.392 0 .771.027 1.143.08M12 3c-.392 0-.771.027-1.143.08M12 3v3.25m0 14.75c.392 0 .771-.027 1.143-.08M12 21c-.392 0-.771-.027-1.143-.08M12 21v-3.25m9.143-5.82c.027-.372.04-.751.04-1.143 0-.392-.013-.771-.04-1.143M21 12h-3.25m-14.75 0c-.027.372-.04.751-.04 1.143 0 .392.013.771.04 1.143M3 12h3.25m14.286-4.5a11.948 11.948 0 01-3.143 3.143m-14.286-3.143a11.948 11.948 0 003.143 3.143m14.286 11.25a11.948 11.948 0 00-3.143-3.143m-14.286 3.143a11.948 11.948 0 013.143-3.143' /></svg></div>
                 <div class="wlc-action-body">
                     <div class="wlc-action-title">Voir mon profil IA</div>
                     <p class="wlc-action-desc">Découvre tes aptitudes, tes valeurs et tes formations recommandées.</p>
                 </div>
-                <span class="wlc-action-arrow">→</span>
+                <span class="wlc-action-arrow"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg></span>
             </a>
 
             <a href="{{ route('student.simulator') ?? '#' }}" class="wlc-action-card rev rev-d3">
-                <div class="wlc-action-icon">🔮</div>
+                <div class="wlc-action-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--gold)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 21l-8.25-1.875L1.5 12l2.25-7.125L12 3l8.25 1.875L22.5 12l-2.25 7.125L12 21z' /></svg></div>
                 <div class="wlc-action-body">
                     <div class="wlc-action-title">Simulateur de vie</div>
                     <p class="wlc-action-desc">Visualise ton futur selon chaque filière : métiers, salaires, évolution.</p>
                 </div>
-                <span class="wlc-action-arrow">→</span>
+                <span class="wlc-action-arrow"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg></span>
             </a>
 
             <a href="{{ route('student.advisor') ?? '#' }}" class="wlc-action-card rev rev-d4">
-                <div class="wlc-action-icon">🤝</div>
+                <div class="wlc-action-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M15.191 6.062h-6.382c-.876 0-1.591.715-1.591 1.591v8.694c0 .876.715 1.591 1.591 1.591h6.382c.876 0 1.591-.715 1.591-1.591V7.653c0-.876-.715-1.591-1.591-1.591zM12 15.75h.008v.008H12v-.008z' /></svg></div>
                 <div class="wlc-action-body">
                     <div class="wlc-action-title">Parler à un conseiller</div>
                     <p class="wlc-action-desc">Réserve une séance avec un conseiller certifié ou discute avec le chatbot IA.</p>
                 </div>
-                <span class="wlc-action-arrow">→</span>
+                <span class="wlc-action-arrow"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg></span>
             </a>
 
         </div>
@@ -700,7 +700,7 @@
 
         <div class="wlc-cta-action">
             <a href="{{ route('student.dashboard') }}" class="wlc-btn-cta">
-                Aller à mon tableau de bord →
+                Aller à mon tableau de bord <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3' /></svg>
             </a>
         </div>
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -133,10 +133,11 @@
             }
             .brand:hover a { transform: translateX(3px); }
             .brand img {
-                width: 46px; height: 46px; border-radius: 14px;
-                object-fit: cover;
+                height: 54px; width: auto; max-width: 200px;
+                object-fit: contain;
                 box-shadow: 0 0 30px var(--violet-glow);
-                border: 2px solid rgba(139,92,246,.3);
+                background: transparent;
+                filter: brightness(1.1);
             }
             .brand-name {
                 font-family: 'Space Grotesk', sans-serif;
@@ -551,9 +552,9 @@
         <div class="auth-center">
             <!-- Logo -->
             <div class="brand">
-                <a href="/">
-                    <img src="{{ asset('im1.jpg') }}" alt="CapAvenir">
-                    <span class="brand-name">CapAvenir</span>
+                <a href="/" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none;">
+                    <img src="{{ asset('final.png') }}" alt="CapAvenir" style="height: 64px; width: auto; object-fit: contain;">
+                    <span style="font-family: 'Fraunces', serif; font-size: 1.8rem; font-weight: 700; color: #fff; letter-spacing: -0.03em;"><span style="color: var(--accent, #d4622a);">Avenir</span></span>
                 </a>
             </div>
 

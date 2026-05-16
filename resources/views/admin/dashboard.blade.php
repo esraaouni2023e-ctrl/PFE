@@ -34,7 +34,7 @@
 
 <div class="siaepi">
     <div style="margin-bottom: 2rem;">
-        <p style="font-weight:bold; letter-spacing: 2px; color: var(--accent); font-size:0.8rem;">📊 ADMIN - CAPAVENIR SIAEPI v2.0</p>
+        <p style="font-weight:bold; letter-spacing: 2px; color: var(--accent); font-size:0.8rem;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent)' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z' /></svg> ADMIN - CAPAVENIR SIAEPI v2.0</p>
         <h1 style="font-family: 'Fraunces', serif; font-size: 2.5rem;">Centre de Contrôle Psychométrique</h1>
     </div>
 
@@ -56,7 +56,7 @@
 
     {{-- Tableau Profils Suspects --}}
     <div class="siaepi-section">
-        <h2>⚠️ Tableau des profils suspects</h2>
+        <h2><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='#ef4444' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 12.376zM12 15.75h.008v.008H12v-.008z' /></svg> Tableau des profils suspects</h2>
         @if($suspectProfiles->count() > 0)
         <table class="st">
             <thead>

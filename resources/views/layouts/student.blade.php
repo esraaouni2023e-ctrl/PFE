@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -152,12 +152,14 @@
             display: flex; align-items: center; gap: .55rem; text-decoration: none;
         }
         .navbar-logo-icon {
-            width: 34px; height: 34px; border-radius: var(--r);
-            background: white; overflow: hidden;
+            height: 40px; width: 40px;
             display: flex; align-items: center; justify-content: center;
-            border: 1px solid var(--ink10);
         }
-        .navbar-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .navbar-logo-icon img { 
+            height: 100%; width: 100%; object-fit: contain; 
+            mix-blend-mode: normal;
+        }
+        [data-theme="dark"] .navbar-logo-icon img { filter: invert(1) brightness(1.2); }
         .navbar-logo-text {
             font-family: var(--font-serif);
             font-size: 1.05rem; font-weight: 600;
@@ -401,43 +403,45 @@
         <!-- Logo -->
         <a href="{{ route('student.dashboard') }}" class="navbar-logo">
             <div class="navbar-logo-icon">
-                <img src="{{ asset('im1.jpg') }}" alt="CapAvenir Logo">
+                <img src="{{ asset('final.png') }}" alt="CapAvenir Logo">
             </div>
             <div>
-                <div class="navbar-logo-text">CapAvenir</div>
-                <div class="navbar-logo-sub">Espace Étudiant</div>
+                <span class="navbar-logo-text"><span>Avenir</span></span>
+                <div class="navbar-logo-sub" style="padding: 2px 6px; background: rgba(11,12,16,0.04); border-radius: 4px;">Espace Étudiant</div>
             </div>
         </a>
 
         <!-- Nav links (desktop) -->
         <ul class="navbar-nav">
             <li><a href="{{ route('student.dashboard') }}"    class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Accueil</a></li>
-            <li><a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">🧭 Orientation</a></li>
-            <li><a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">🧪 What-If</a></li>
-            <li><a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">📊 Comparateur</a></li>
-            <li><a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">❤️ Vœux</a></li>
-            <li><a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">🎓 Profil Académique</a></li>
-            <li><a href="{{ route('student.cv.index') }}"     class="{{ request()->routeIs('student.cv.*') ? 'active' : '' }}">📄 CV Builder</a></li>
-            <li><a href="{{ route('messages.index') }}"       class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">📬 Messagerie</a></li>
+            <li><a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">Orientation</a></li>
+            <li><a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">What-If</a></li>
+            <li><a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">Comparateur</a></li>
+            <li><a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">Vœux</a></li>
+            <li><a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">Profil Académique</a></li>
+            <li><a href="{{ route('student.cv.index') }}"     class="{{ request()->routeIs('student.cv.*') ? 'active' : '' }}">CV Builder</a></li>
+            <li><a href="{{ route('messages.index') }}"       class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">Messagerie</a></li>
         </ul>
 
         <!-- Right controls -->
         <div class="navbar-right">
-            <button class="theme-toggle" id="themeToggle" title="Basculer le thème">🌙</button>
+            <button class="theme-toggle" id="themeToggle" title="Basculer le thème"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg></button>
             @include('partials.notifications')
 
-            <div class="avatar-nav" title="{{ auth()->user()?->name ?? 'Invité' }}">
-                {{ strtoupper(substr(auth()->user()?->name ?? 'I', 0, 1)) }}
-            </div>
+            <a href="{{ route('profile.edit') }}" style="text-decoration:none;">
+                <div class="avatar-nav" title="{{ auth()->user()?->name ?? 'Invité' }}" style="overflow:hidden;">
+                    @if(auth()->user()->avatar)
+                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" style="width:100%; height:100%; object-fit:cover;">
+                    @else
+                        {{ strtoupper(substr(auth()->user()?->name ?? 'I', 0, 1)) }}
+                    @endif
+                </div>
+            </a>
 
 
             <form method="POST" action="{{ route('logout') }}" style="margin:0">
                 @csrf
                 <button type="submit" class="btn-logout">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
                     Déconnexion
                 </button>
             </form>
@@ -452,19 +456,19 @@
     <div class="mobile-nav" id="mobileNav">
         <div class="mobile-nav-overlay" id="navOverlay"></div>
         <div class="mobile-nav-drawer">
-            <a href="{{ route('student.dashboard') }}"   class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">🏠 Accueil</a>
-            <a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">🧭 Orientation</a>
-            <a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">🧪 What-If</a>
-            <a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">📊 Comparateur</a>
-            <a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">❤️ Vœux</a>
-            <a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">🎓 Profil Académique</a>
-            <a href="{{ route('student.cv.index') }}"     class="{{ request()->routeIs('student.cv.*') ? 'active' : '' }}">📄 CV Builder</a>
-            <a href="{{ route('messages.index') }}"       class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">📬 Messagerie</a>
-            <a href="{{ route('profile.edit') }}">👤 Mon Profil</a>
+            <a href="{{ route('student.dashboard') }}"   class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Accueil</a>
+            <a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">Orientation</a>
+            <a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">What-If</a>
+            <a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">Comparateur</a>
+            <a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">Vœux</a>
+            <a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">Profil Académique</a>
+            <a href="{{ route('student.cv.index') }}"     class="{{ request()->routeIs('student.cv.*') ? 'active' : '' }}">CV Builder</a>
+            <a href="{{ route('messages.index') }}"       class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">Messagerie</a>
+            <a href="{{ route('profile.edit') }}">Mon Profil</a>
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto">
                 @csrf
                 <button type="submit" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:.7rem .9rem;font-family:var(--font-main);font-size:.9rem;font-weight:600;color:#ef4444;border-radius:var(--r);">
-                    🚪 Déconnexion
+                    Déconnexion
                 </button>
             </form>
         </div>
@@ -477,7 +481,7 @@
 
     <!-- ═══ FLOATING CHAT BUBBLE (mobile) ═══ -->
     <button class="floating-chat-bubble" id="floatingChat" title="ORIENTIA">
-        <span>💬</span>
+        <span><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z' /></svg></span>
         <div class="chat-ping"></div>
     </button>
 
@@ -485,7 +489,7 @@
     <div class="chat-panel" id="chatPanel">
         <div class="chat-panel-header">
             <div style="display:flex;align-items:center;gap:.65rem;">
-                <div class="chat-ai-avatar">🤖</div>
+                <div class="chat-ai-avatar"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M8.25 3v1.5M4.5 8.25H3m18 0h-1.5m-15 7.5H3m18 0h-1.5m-15 4.5V21m3-18v1.5m.375 0h.008v.008H12V3.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z' /></svg></div>
                 <div>
                     <div style="font-weight:700;font-size:.87rem;">ORIENTIA</div>
                     <div style="font-size:.7rem;color:var(--accent3);font-weight:600;">● En ligne</div>
@@ -647,18 +651,16 @@
         const html = document.documentElement;
 
         (function () {
-            const saved = localStorage.getItem('cap-theme');
-            if (saved) {
-                html.setAttribute('data-theme', saved);
-                if (themeToggle) themeToggle.textContent = saved === 'dark' ? '🌙' : '☀️';
-            }
+            const saved = localStorage.getItem('cap-theme') || 'light';
+            html.setAttribute('data-theme', saved);
+            if (themeToggle) themeToggle.innerHTML = saved === 'dark' ? `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg>` : `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z' /></svg>`;
         })();
 
         themeToggle?.addEventListener('click', () => {
             const isDark = html.getAttribute('data-theme') === 'dark';
             const next   = isDark ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
-            themeToggle.textContent = next === 'dark' ? '🌙' : '☀️';
+            themeToggle.innerHTML = next === 'dark' ? `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg>` : `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z' /></svg>`;
             localStorage.setItem('cap-theme', next);
         });
 
@@ -735,7 +737,7 @@
             showTyping();
 
             try {
-                // 4. POST to Laravel → Gemini
+                // 4. POST to Laravel -> Gemini
                 const res = await fetch('{{ route("student.chatbot") }}', {
                     method:  'POST',
                     headers: {
@@ -753,9 +755,9 @@
                 const data = await res.json();
 
                 if (data.error) {
-                    appendMessage('ai', '⚠️ ' + data.error);
+                    appendMessage('ai', `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='#ef4444' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 12.376zM12 15.75h.008v.008H12v-.008z' /></svg> ` + data.error);
                 } else {
-                    const reply = data.reply ?? '🤖 Je n\'ai pas pu générer une réponse.';
+                    const reply = data.reply ?? `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M8.25 3v1.5M4.5 8.25H3m18 0h-1.5m-15 7.5H3m18 0h-1.5m-15 4.5V21m3-18v1.5m.375 0h.008v.008H12V3.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z' /></svg> Je n'ai pas pu générer une réponse.`;
                     appendMessage('ai', reply);
                     // 5. Save AI reply to history (role "model")
                     chatHistory.push({ role: 'model', content: reply });
@@ -763,7 +765,7 @@
 
             } catch (err) {
                 removeTyping();
-                appendMessage('ai', '⚡ Erreur de connexion. Vérifiez votre réseau et réessayez.');
+                appendMessage('ai', `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z' /></svg> Erreur de connexion. Vérifiez votre réseau et réessayez.`);
                 console.error('Chatbot error:', err);
             } finally {
                 chatInput.disabled = false;

@@ -98,7 +98,9 @@
             {{-- Score FG --}}
             <div class="pr-card">
                 <div class="pr-card-head">
-                    <span style="font-size:1.2rem">🎯</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem;height:1.25rem;color:var(--accent);">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <h2>Mon Score FG</h2>
                 </div>
                 <div class="pr-card-body">
@@ -118,11 +120,16 @@
                         </div>
                         <a href="{{ route('student.whatif.index') }}"
                            style="display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.75rem;border-radius:var(--r);background:var(--cream);border:1px solid var(--ink10);font-size:.82rem;font-weight:600;color:var(--ink60);text-decoration:none;transition:all .2s">
-                           🧪 Simuler un scénario
+                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:1rem;height:1rem;">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v17.792M14.25 3.104v17.792M4.5 7.875h15M4.5 12h15M4.5 16.125h15" />
+                           </svg>
+                           Simuler un scénario
                         </a>
                     @else
                         <div style="text-align:center;padding:1.5rem;color:var(--ink30)">
-                            <div style="font-size:2.5rem;margin-bottom:.75rem">📊</div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:2.5rem;height:2.5rem;margin: 0 auto .75rem; opacity:.4;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                            </svg>
                             <div style="font-size:.85rem;font-weight:500;margin-bottom:1rem">Score non encore calculé</div>
                             <p style="font-size:.78rem;color:var(--ink30);margin-bottom:1rem">Complétez vos notes ci-contre pour calculer votre score automatiquement.</p>
                         </div>
@@ -133,9 +140,24 @@
             {{-- Liens rapides --}}
             <div class="pr-card">
                 <div class="pr-card-body" style="display:flex;flex-direction:column;gap:.5rem;">
-                    <a href="{{ route('student.voeux.index') }}" style="display:flex;align-items:center;gap:.625rem;padding:.75rem .875rem;border-radius:var(--r);background:var(--cream);border:1px solid var(--ink10);font-size:.83rem;font-weight:500;color:var(--ink);text-decoration:none">❤️ Mes vœux d'orientation</a>
-                    <a href="{{ route('student.comparateur.index') }}" style="display:flex;align-items:center;gap:.625rem;padding:.75rem .875rem;border-radius:var(--r);background:var(--cream);border:1px solid var(--ink10);font-size:.83rem;font-weight:500;color:var(--ink);text-decoration:none">📊 Comparateur de filières</a>
-                    <a href="{{ route('student.whatif.historique') }}" style="display:flex;align-items:center;gap:.625rem;padding:.75rem .875rem;border-radius:var(--r);background:var(--cream);border:1px solid var(--ink10);font-size:.83rem;font-weight:500;color:var(--ink);text-decoration:none">🕐 Historique des simulations</a>
+                    <a href="{{ route('student.voeux.index') }}" style="display:flex;align-items:center;gap:.625rem;padding:.75rem .875rem;border-radius:var(--r);background:var(--cream);border:1px solid var(--ink10);font-size:.83rem;font-weight:500;color:var(--ink);text-decoration:none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.1rem;height:1.1rem;color:var(--accent);">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
+                        Mes vœux d'orientation
+                    </a>
+                    <a href="{{ route('student.comparateur.index') }}" style="display:flex;align-items:center;gap:.625rem;padding:.75rem .875rem;border-radius:var(--r);background:var(--cream);border:1px solid var(--ink10);font-size:.83rem;font-weight:500;color:var(--ink);text-decoration:none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.1rem;height:1.1rem;color:var(--accent2);">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                        </svg>
+                        Comparateur de filières
+                    </a>
+                    <a href="{{ route('student.whatif.historique') }}" style="display:flex;align-items:center;gap:.625rem;padding:.75rem .875rem;border-radius:var(--r);background:var(--cream);border:1px solid var(--ink10);font-size:.83rem;font-weight:500;color:var(--ink);text-decoration:none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.1rem;height:1.1rem;color:var(--ink30);">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Historique des simulations
+                    </a>
                 </div>
             </div>
         </div>
@@ -148,7 +170,10 @@
                 {{-- Informations BAC --}}
                 <div class="pr-card">
                     <div class="pr-card-head">
-                        <span style="font-size:1.2rem">🎓</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem;height:1.25rem;color:var(--accent2);">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147L12 15l7.74-4.853a4.5 4.5 0 00-2.122-3.933L12 3 6.382 6.214a4.5 4.5 0 00-2.122 3.933z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v7.5" />
+                        </svg>
                         <h2>Baccalauréat</h2>
                     </div>
                     <div class="pr-card-body">
@@ -196,7 +221,9 @@
                 {{-- Notes par matière --}}
                 <div class="pr-card">
                     <div class="pr-card-head">
-                        <span style="font-size:1.2rem">📝</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem;height:1.25rem;color:var(--accent3);">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                        </svg>
                         <h2>Notes par matière</h2>
                     </div>
                     <div class="pr-card-body">
@@ -231,7 +258,7 @@
                                 @endforeach
                             @else
                                 <div id="notesPlaceholder" style="text-align:center;padding:2rem;color:var(--ink30);font-size:.85rem">
-                                    ← Sélectionnez d'abord votre section BAC pour saisir vos notes
+                                    <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18' /></svg> Sélectionnez d'abord votre section BAC pour saisir vos notes
                                 </div>
                             @endif
                         </div>
@@ -241,7 +268,9 @@
                 {{-- Intérêts & Compétences --}}
                 <div class="pr-card">
                     <div class="pr-card-head">
-                        <span style="font-size:1.2rem">💡</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.25rem;height:1.25rem;color:var(--gold);">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.503 7.503 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                        </svg>
                         <h2>Intérêts & Compétences</h2>
                     </div>
                     <div class="pr-card-body">
@@ -257,7 +286,10 @@
                 </div>
 
                 <button type="submit" class="pr-btn">
-                    💾 Sauvegarder et recalculer mon Score FG
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.2rem;height:1.2rem;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0113.186 0z" />
+                    </svg>
+                    Sauvegarder et recalculer mon Score FG
                 </button>
             </form>
         </div>
@@ -269,7 +301,7 @@
 async function loadMatieres(section) {
     const container = document.getElementById('notesContainer');
     if (!section) {
-        container.innerHTML = '<div id="notesPlaceholder" style="text-align:center;padding:2rem;color:var(--ink30);font-size:.85rem">← Sélectionnez d\'abord votre section BAC</div>';
+        container.innerHTML = '<div id="notesPlaceholder" style="text-align:center;padding:2rem;color:var(--ink30);font-size:.85rem"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18' /></svg> Sélectionnez d\'abord votre section BAC</div>';
         return;
     }
     container.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--ink30)">Chargement…</div>';
