@@ -527,7 +527,7 @@
             </h1>
 
             <p class="db-hero-sub">
-                Découvre tes forces réelles, construis un parcours 100% toi et choisis avec confiance — propulsé par l'IA.
+                Bienvenue, {{ auth()->user()->name }}. Découvre tes forces réelles, construis un parcours 100% toi et choisis avec confiance — propulsé par l'IA.
             </p>
 
             <div class="db-hero-ctas">

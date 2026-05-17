@@ -28,20 +28,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Routes de vérification d'e-mail
-Route::get('/email/verify', function () {
-    return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
 
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
-    return redirect('/dashboard');
-})->middleware(['auth', 'signed'])->name('verification.verify');
-
-Route::post('/email/verification-notification', function (Request $request) {
-    $request->user()->sendEmailVerificationNotification();
-    return back()->with('message', 'Lien de vérification envoyé !');
-})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 Route::middleware(['auth', 'two-factor'])->group(function () {
 
@@ -166,7 +153,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Users
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::post('/users/delete/{user}', [UserController::class, 'destroy'])->name('users.delete');
+    Route::delete('/users/delete/{user}', [UserController::class, 'destroy'])->name('users.delete');
     Route::post('/users/promote/{user}', [UserController::class, 'promote'])->name('users.promote');
     Route::post('/users/demote/{user}', [UserController::class, 'demote'])->name('users.demote');
     Route::post('/users/block/{user}', [UserController::class, 'toggleBlock'])->name('users.block');

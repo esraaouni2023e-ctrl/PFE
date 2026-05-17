@@ -29,7 +29,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('student.dashboard'));
+        $response->assertRedirect(route('two-factor.index'));
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
@@ -54,6 +54,6 @@ class AuthenticationTest extends TestCase
             ->post('/logout');
 
         $this->assertGuest();
-        $response->assertRedirect('/');
+        $response->assertRedirect('/login');
     }
 }

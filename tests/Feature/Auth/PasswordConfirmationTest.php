@@ -13,7 +13,6 @@ class PasswordConfirmationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withoutExceptionHandling();
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
     }
 

@@ -257,6 +257,10 @@ class TestManager
 
         // Fallback : toutes les questions actives répondues
         $totalActive   = QuestionRiasec::actives()->count();
+        if ($totalActive === 0) {
+            return false;
+        }
+
         $totalAnswered = AnswerRiasec::session($sessionId)->count();
         return $totalAnswered >= $totalActive;
     }

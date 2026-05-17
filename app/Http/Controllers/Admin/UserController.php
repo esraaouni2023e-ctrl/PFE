@@ -57,7 +57,7 @@ class UserController extends Controller
             return redirect()->route('admin.users.index')->with('error', 'Vous ne pouvez pas vous rétrograder.');
         }
 
-        if (! $user->isAdmin()) {
+        if ($user->role !== User::ROLE_ADMIN) {
             return redirect()->route('admin.users.index')->with('error', 'Cet utilisateur n\'est pas administrateur.');
         }
 

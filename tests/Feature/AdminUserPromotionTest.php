@@ -19,7 +19,7 @@ class AdminUserPromotionTest extends TestCase
 
     public function test_admin_can_promote_and_demote_users()
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::where('role', User::ROLE_SUPER_ADMIN)->first() ?: User::factory()->superAdmin()->create();
         $user = User::factory()->create();
 
         $this->actingAs($admin)

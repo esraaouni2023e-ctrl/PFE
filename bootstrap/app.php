@@ -20,7 +20,9 @@ $app = new Illuminate\Foundation\Application(
 // $env:DB_DATABASE manuellement dans PowerShell).
 if (file_exists($app->environmentPath().'/'.$app->environmentFile())) {
     try {
-        \Dotenv\Dotenv::createImmutable($app->environmentPath(), $app->environmentFile())->safeLoad();
+        if (($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? '') !== 'testing') {
+            \Dotenv\Dotenv::createImmutable($app->environmentPath(), $app->environmentFile())->safeLoad();
+        }
     } catch (\Throwable $e) {
         // Ne pas casser le bootstrap si le fichier .env est invalide.
     }

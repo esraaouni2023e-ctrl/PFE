@@ -14,6 +14,7 @@ class AdminSeesNewRegisteredUserTest extends TestCase
     {
         // Disable CSRF for the test
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+        $this->withoutExceptionHandling();
 
         // Register a new user (simulate public registration)
         $email = 'visible@example.com';
@@ -25,8 +26,8 @@ class AdminSeesNewRegisteredUserTest extends TestCase
             'role' => User::ROLE_STUDENT,
         ]);
 
-        // Create an admin and check admin users list
-        $admin = User::factory()->superAdmin()->create();
+        // Fetch or create the super admin and check admin users list
+        $admin = User::where('role', User::ROLE_SUPER_ADMIN)->first() ?: User::factory()->superAdmin()->create();
 
         // Refresh to ensure is_admin is loaded
         $admin->refresh();
