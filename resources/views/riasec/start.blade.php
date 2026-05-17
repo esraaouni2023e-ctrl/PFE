@@ -186,7 +186,7 @@
             ({{ round($progress->percentage) }}%)
         </div>
         <div class="resume-banner-actions">
-            <a href="{{ route('riasec.question', ['step' => $progress->answered + 1]) }}" class="btn-fill">
+            <a href="{{ route('riasec.question', ['step' => $progress->answered + 1, 't' => time()]) }}" class="btn-fill">
                 Continuer →
             </a>
             <form action="{{ route('riasec.initialize') }}" method="POST">

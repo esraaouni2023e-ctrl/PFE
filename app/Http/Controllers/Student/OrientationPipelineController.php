@@ -142,9 +142,28 @@ class OrientationPipelineController extends Controller
                 'score_fg_updated_at' => now(),
             ]);
 
-            // Démarre automatiquement le test RIASEC
-            return redirect()->route('riasec.question.entry')
-                             ->with('info', '✅ Score calculé avec succès. Voici les questions du test psychologique.');
+            // Démarre automatiquement le test RIASEC en initialisant une nouvelle session
+            $sessionId = \Illuminate\Support\Str::uuid()->toString();
+
+            session([
+                'riasec_session_id' => $sessionId,
+                'riasec_started_at' => now()->toIso8601String(),
+                'riasec_current_step' => 1,
+            ]);
+
+            session()->forget([
+                'riasec_profile_id',
+                'riasec_stopped_early',
+                'riasec_confidence_score',
+                'riasec_blocks_completed',
+            ]);
+
+            ProfileRiasec::pourUser($user->id)
+                ->complets()
+                ->update(['statut' => ProfileRiasec::STATUT_EXPIRE]);
+
+            return redirect()->route('riasec.question', ['step' => 1, 't' => time()])
+                             ->with('info', '✅ Score calculé avec succès. Votre test psychologique commence maintenant.');
 
         } catch (\Exception $e) {
             return back()->withErrors(['erreur' => 'Erreur lors du calcul du score : ' . $e->getMessage()])->withInput();

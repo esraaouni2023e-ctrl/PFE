@@ -351,7 +351,7 @@
         {{-- Navigation --}}
         <div class="q-nav">
             @if($step > 1 && empty($isAdaptive))
-            <a href="{{ route('riasec.question', ['step' => $step - 1]) }}" class="btn-ghost">
+            <a href="{{ route('riasec.question', ['step' => $step - 1, 't' => time()]) }}" class="btn-ghost">
                 ← Précédent
             </a>
             @else

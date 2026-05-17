@@ -34,7 +34,7 @@ class RiasecTestController extends Controller
             $progress = $this->testManager->getProgress(Auth::id(), $sessionId);
 
             if ($progress->answered === 0) {
-                return redirect()->route('riasec.question', ['step' => 1]);
+                return redirect()->route('riasec.question', ['step' => 1, 't' => time()]);
             }
 
             if ($progress->answered > 0 && !$progress->isCompleted) {
@@ -60,9 +60,23 @@ class RiasecTestController extends Controller
                 'riasec_started_at' => now()->toIso8601String(),
                 'riasec_current_step' => 1,
             ]);
+
+            session()->forget([
+                'riasec_profile_id',
+                'riasec_stopped_early',
+                'riasec_confidence_score',
+                'riasec_blocks_completed',
+            ]);
+
+            $userId = Auth::id();
+            if ($userId) {
+                ProfileRiasec::pourUser($userId)
+                    ->complets()
+                    ->update(['statut' => ProfileRiasec::STATUT_EXPIRE]);
+            }
         }
 
-        return redirect()->route('riasec.question', ['step' => 1])
+        return redirect()->route('riasec.question', ['step' => 1, 't' => time()])
             ->with('info', 'Votre test a demarre. Repondez honnetement a chaque question.');
     }
 
@@ -182,7 +196,7 @@ class RiasecTestController extends Controller
                 'success' => true,
                 'completed' => false,
                 'next_step' => $nextStep,
-                'next_url' => route('riasec.question', ['step' => $nextStep]),
+                'next_url' => route('riasec.question', ['step' => $nextStep, 't' => time()]),
                 'progress' => $progress->toArray(),
                 'message' => "Réponse enregistrée. Phase: " . $catState['phase'],
                 'confidence' => $confidence,
@@ -229,7 +243,7 @@ class RiasecTestController extends Controller
             if ($nextQuestion) {
                 $progress = $this->testManager->getProgress($userId, $sessionId);
                 return redirect()
-                    ->route('riasec.question', ['step' => max(1, $progress->answered + 1)])
+                    ->route('riasec.question', ['step' => max(1, $progress->answered + 1), 't' => time()])
                     ->with('warning', 'Vous n\'avez pas encore répondu à assez de questions.');
             }
         }
@@ -315,7 +329,17 @@ class RiasecTestController extends Controller
             'riasec_started_at',
             'riasec_current_step',
             'riasec_profile_id',
+            'riasec_stopped_early',
+            'riasec_confidence_score',
+            'riasec_blocks_completed',
         ]);
+
+        $userId = Auth::id();
+        if ($userId) {
+            ProfileRiasec::pourUser($userId)
+                ->complets()
+                ->update(['statut' => ProfileRiasec::STATUT_EXPIRE]);
+        }
 
         return redirect()
             ->route('riasec.question.entry')

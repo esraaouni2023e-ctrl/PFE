@@ -199,7 +199,7 @@
         <div class="tp-resume">
             <div class="tp-resume-txt"><strong>Test en cours</strong> — {{ $progress->answered }} / {{ $progress->total }} questions ({{ round($progress->percentage) }}%)</div>
             <div class="tp-resume-acts">
-                <a href="{{ route('riasec.question', ['step' => $progress->answered + 1]) }}" class="btn-fill" style="padding:.7rem 1.5rem;font-size:.88rem;">Continuer</a>
+                <a href="{{ route('riasec.question', ['step' => $progress->answered + 1, 't' => time()]) }}" class="btn-fill" style="padding:.7rem 1.5rem;font-size:.88rem;">Continuer</a>
                 <form action="{{ route('riasec.initialize') }}" method="POST">@csrf <input type="hidden" name="restart" value="1"><button type="submit" class="btn-ghost" onclick="return confirm('Effacer le test en cours ?')">Recommencer</button></form>
             </div>
         </div>
