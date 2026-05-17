@@ -22,79 +22,84 @@
            Aligned with student layout & dashboard
         ═══════════════════════════════════════════ */
         :root {
-            /* ── Core palette ── */
-            --ink:     #0b0c10;
-            --paper:   #f7f5f0;
-            --cream:   #ede9e1;
-            --warm:    #e8e1d4;
-            --accent:  #d4622a;   /* terracotta */
-            --accent2: #1a4f6e;   /* marine */
-            --accent3: #4a7c59;   /* sage */
-            --gold:    #c8973a;
-            --ink60:   rgba(11,12,16,.6);
-            --ink30:   rgba(11,12,16,.3);
-            --ink15:   rgba(11,12,16,.15);
-            --ink10:   rgba(11,12,16,.1);
-            --ink06:   rgba(11,12,16,.06);
+            /* ── Core Executive Palette ── */
+            --ink:     #0A192F;   /* Deep Navy Executive Ink */
+            --paper:   #FAF9F5;   /* Luxurious warm cotton paper (anti-glare) */
+            --cream:   #EFECE6;   /* Soft clay cream */
+            --warm:    #E4DFD5;   /* Warm sandstone */
+            
+            --accent:  #FF6A00;   /* CapAvenir Orange */
+            --accent2: #0057B8;   /* CapAvenir Blue */
+            --accent3: #10B981;   /* Emerald Success */
+            --gold:    #FF8C1A;   /* Golden highlight */
+            
+            --ink60:   rgba(10, 25, 47, 0.72);  /* Highly readable body text */
+            --ink30:   rgba(10, 25, 47, 0.45);  /* Readable subtitles */
+            --ink15:   rgba(10, 25, 47, 0.20);  /* Soft borders */
+            --ink10:   rgba(10, 25, 47, 0.12);  /* Subtle borders */
+            --ink06:   rgba(10, 25, 47, 0.06);  /* Accent cards background */
 
             /* ── Radii & easing ── */
-            --r:    6px;
-            --rl:   16px;
+            --r:    8px;
+            --rl:   20px;
             --rx:   999px;
             --ease: cubic-bezier(.16,1,.3,1);
 
             /* ── Component tokens ── */
             --font-main:     'DM Sans', sans-serif;
             --font-serif:    'Fraunces', serif;
-            --navbar-bg:     rgba(247,245,240,.88);
-            --glass-border:  rgba(11,12,16,.10);
-            --glass-border-vivid: rgba(212,98,42,.30);
-            --chat-panel-bg: rgba(247,245,240,.97);
-            --shadow-card:   0 8px 40px rgba(0,0,0,.08);
+            --navbar-bg:     rgba(250, 249, 245, 0.85);
+            --glass-border:  rgba(10, 25, 47, 0.10);
+            --glass-border-vivid: rgba(255, 106, 0, 0.35);
+            --chat-panel-bg: rgba(250, 249, 245, 0.96);
+            --shadow-card:   0 12px 40px rgba(10, 25, 47, 0.05);
             --transition:    0.3s cubic-bezier(.4,0,.2,1);
 
-            /* ── Legacy aliases (child views) ── */
+            /* ── Legacy aliases for child views ── */
             --bg-base:       var(--paper);
             --bg-1:          var(--cream);
             --bg-2:          var(--warm);
             --indigo:        var(--accent);
-            --indigo-light:  #e07848;
+            --indigo-light:  #FF8C1A;
             --violet:        var(--accent2);
-            --violet-dark:   #0f3a52;
+            --violet-dark:   #003B8E;
             --cyan:          var(--accent3);
-            --glass-bg:      rgba(11,12,16,.04);
-            --glass-bg-md:   rgba(11,12,16,.07);
+            --glass-bg:      rgba(10, 25, 47, 0.03);
+            --glass-bg-md:   rgba(10, 25, 47, 0.06);
             --text-primary:  var(--ink);
             --text-secondary: var(--ink60);
             --text-muted:    var(--ink30);
-            --success:       #4a7c59;
-            --warning:       #c8973a;
-            --input-bg:      rgba(11,12,16,.04);
-            --card-surface:  rgba(11,12,16,.04);
-            --card-surface-md: rgba(11,12,16,.07);
+            --success:       var(--accent3);
+            --warning:       var(--gold);
+            --danger:        #EF4444;
+            --input-bg:      rgba(10, 25, 47, 0.04);
+            --card-surface:  rgba(10, 25, 47, 0.03);
+            --card-surface-md: rgba(10, 25, 47, 0.06);
         }
 
-        /* ── Dark mode overrides ── */
+        /* ── Premium Dark Mode overrides ── */
         [data-theme="dark"] {
-            --ink:   #f0ede6;
-            --paper: #10100d;
-            --cream: #18170f;
-            --warm:  #1f1e14;
-            --ink60: rgba(240,237,230,.6);
-            --ink30: rgba(240,237,230,.3);
-            --ink15: rgba(240,237,230,.15);
-            --ink10: rgba(240,237,230,.08);
-            --ink06: rgba(240,237,230,.04);
-            --navbar-bg:     rgba(16,16,13,.88);
-            --glass-border:  rgba(240,237,230,.08);
-            --glass-border-vivid: rgba(212,98,42,.35);
-            --chat-panel-bg: rgba(16,16,13,.97);
-            --shadow-card:   0 8px 40px rgba(0,0,0,.35);
-            --glass-bg:      rgba(240,237,230,.04);
-            --glass-bg-md:   rgba(240,237,230,.07);
-            --input-bg:      rgba(240,237,230,.07);
-            --card-surface:  rgba(240,237,230,.04);
-            --card-surface-md: rgba(240,237,230,.07);
+            --ink:   #F0EDE6;   /* Soft ivory white */
+            --paper: #0A0E17;   /* Deep space dark */
+            --cream: #121824;   /* Dark slate glass */
+            --warm:  #182235;   /* Medium slate glass */
+            
+            --ink60: rgba(240, 237, 230, 0.75);
+            --ink30: rgba(240, 237, 230, 0.45);
+            --ink15: rgba(240, 237, 230, 0.20);
+            --ink10: rgba(240, 237, 230, 0.12);
+            --ink06: rgba(240, 237, 230, 0.06);
+            
+            --navbar-bg:     rgba(10, 14, 23, 0.88);
+            --glass-border:  rgba(240, 237, 230, 0.08);
+            --glass-border-vivid: rgba(255, 106, 0, 0.45);
+            --chat-panel-bg: rgba(10, 14, 23, 0.97);
+            --shadow-card:   0 16px 48px rgba(0, 0, 0, 0.45);
+            --glass-bg:      rgba(240, 237, 230, 0.04);
+            --glass-bg-md:   rgba(240, 237, 230, 0.07);
+            --input-bg:      rgba(240, 237, 230, 0.07);
+            --card-surface:  rgba(240, 237, 230, 0.04);
+            --card-surface-md: rgba(240, 237, 230, 0.07);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

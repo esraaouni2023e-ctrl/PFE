@@ -162,10 +162,10 @@
     {{-- ── Grille des 4 blocs ── --}}
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem;margin-bottom:2.5rem;">
         @foreach([
-            ['icon'=>'🧭','label'=>'RIASEC · Holland',   'color'=>'#d4622a','desc'=>'6 dimensions vocales : Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel.'],
-            ['icon'=>'🌊','label'=>'Big Five · OCEAN',   'color'=>'#1a4f6e','desc'=>'5 traits de personnalité : Ouverture, Conscienciosité, Extraversion, Agréabilité, Stabilité.'],
-            ['icon'=>'⚡','label'=>'Aptitudes · GATB',   'color'=>'#c8973a','desc'=>'4 aptitudes cognitives : Intelligence générale, Verbal, Numérique, Spatial.'],
-            ['icon'=>'💎','label'=>'Valeurs · Schwartz', 'color'=>'#4a7c59','desc'=>'4 valeurs fondamentales : Sécurité, Réussite, Bienveillance, Autonomie.'],
+            ['icon'=>'🧭','label'=>'RIASEC · Holland',   'color'=>'#FF6A00','desc'=>'6 dimensions vocales : Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel.'],
+            ['icon'=>'🌊','label'=>'Big Five · OCEAN',   'color'=>'#0057B8','desc'=>'5 traits de personnalité : Ouverture, Conscienciosité, Extraversion, Agréabilité, Stabilité.'],
+            ['icon'=>'⚡','label'=>'Aptitudes · GATB',   'color'=>'#FF8C1A','desc'=>'4 aptitudes cognitives : Intelligence générale, Verbal, Numérique, Spatial.'],
+            ['icon'=>'💎','label'=>'Valeurs · Schwartz', 'color'=>'#003B8E','desc'=>'4 valeurs fondamentales : Sécurité, Réussite, Bienveillance, Autonomie.'],
         ] as $bloc)
         <div class="dim-card">
             <div class="dim-card-top">

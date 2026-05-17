@@ -32,6 +32,7 @@ class StudentController extends Controller
 
         // Récupération du dernier profil de l'étudiant (complet ou en cours)
         $profilRiasec = \App\Models\ProfileRiasec::pourUser($user->id)
+            ->complets()
             ->recents()
             ->first();
 

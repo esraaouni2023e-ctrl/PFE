@@ -11,19 +11,19 @@
    DESIGN TOKENS — CapAvenir System
 ════════════════════════════════════════════ */
 .db {
-    --ink:     #0b0c10;
-    --paper:   #f7f5f0;
-    --cream:   #ede9e1;
-    --warm:    #e8e1d4;
-    --accent:  #d4622a;   /* terracotta */
-    --accent2: #1a4f6e;   /* marine */
-    --accent3: #4a7c59;   /* sage */
-    --gold:    #c8973a;
-    --ink60:   rgba(11,12,16,.6);
-    --ink30:   rgba(11,12,16,.3);
-    --ink15:   rgba(11,12,16,.15);
-    --ink10:   rgba(11,12,16,.1);
-    --ink06:   rgba(11,12,16,.06);
+    --ink:     #003B8E;
+    --paper:   #FFFFFF;
+    --cream:   #F2F4F7;
+    --warm:    #E5E7EB;
+    --accent:  #FF6A00;   /* Orange principal */
+    --accent2: #0057B8;   /* Bleu principal */
+    --accent3: #FF8C1A;   /* Orange clair */
+    --gold:    #FF8C1A;
+    --ink60:   rgba(0, 59, 142, 0.6);
+    --ink30:   rgba(0, 59, 142, 0.3);
+    --ink15:   rgba(0, 59, 142, 0.15);
+    --ink10:   rgba(0, 59, 142, 0.1);
+    --ink06:   rgba(0, 59, 142, 0.06);
     --r:       6px;
     --rl:      16px;
     --rx:      999px;
@@ -37,7 +37,7 @@
 
 /* Dark mode */
 [data-theme="dark"]  .db { --ink:#f0ede6;--paper:#10100d;--cream:#18170f;--warm:#1f1e14;--ink60:rgba(240,237,230,.6);--ink30:rgba(240,237,230,.3);--ink15:rgba(240,237,230,.15);--ink10:rgba(240,237,230,.08);--ink06:rgba(240,237,230,.04); }
-[data-theme="light"] .db { --ink:#0b0c10;--paper:#f7f5f0;--cream:#ede9e1;--warm:#e8e1d4;--ink60:rgba(11,12,16,.6);--ink30:rgba(11,12,16,.3);--ink15:rgba(11,12,16,.15);--ink10:rgba(11,12,16,.1);--ink06:rgba(11,12,16,.06); }
+[data-theme="light"] .db { --ink:#003B8E;--paper:#FFFFFF;--cream:#F2F4F7;--warm:#E5E7EB;--ink60:rgba(0, 59, 142, 0.6);--ink30:rgba(0, 59, 142, 0.3);--ink15:rgba(0, 59, 142, 0.15);--ink10:rgba(0, 59, 142, 0.1);--ink06:rgba(0, 59, 142, 0.06); }
 
 .db *, .db *::before, .db *::after { box-sizing: border-box; margin: 0; padding: 0; }
 .db a { color: inherit; text-decoration: none; }
@@ -560,8 +560,8 @@
                 <svg width="200" height="200" viewBox="0 0 200 200">
                     <defs>
                         <linearGradient id="dbRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#d4622a"/>
-                            <stop offset="100%" stop-color="#1a4f6e"/>
+                            <stop offset="0%" stop-color="#FF6A00"/>
+                            <stop offset="100%" stop-color="#0057B8"/>
                         </linearGradient>
                     </defs>
                     <circle cx="100" cy="100" r="86" fill="none" stroke-width="8"
@@ -643,7 +643,13 @@
             <div>
                 <div class="db-subsec-label">Points forts détectés</div>
                 <div class="db-tags">
-                    @foreach(['Résolution de problèmes','Pensée analytique','Curiosité technique','Adaptabilité','Créativité numérique','Communication écrite'] as $tag)
+                    @php
+                        $forces = ['Résolution de problèmes','Pensée analytique','Curiosité technique','Adaptabilité','Créativité numérique','Communication écrite'];
+                        if(isset($profilRiasec) && !empty($profilRiasec->interpretation['forces'])) {
+                            $forces = array_slice($profilRiasec->interpretation['forces'], 0, 6);
+                        }
+                    @endphp
+                    @foreach($forces as $tag)
                     <span class="db-tag">{{ $tag }}</span>
                     @endforeach
                 </div>
@@ -852,17 +858,33 @@ document.addEventListener('DOMContentLoaded', function () {
         const labelColor = isDark ? 'rgba(240,237,230,.55)' : 'rgba(11,12,16,.45)';
         const gridColor  = isDark ? 'rgba(240,237,230,.07)' : 'rgba(11,12,16,.08)';
 
+        @php
+            $radarLabels = ['Logique','Créativité','Social','Technique','Gestion','Communication'];
+            $radarData = [85, 92, 64, 89, 71, 78];
+            if(isset($profilRiasec) && $profilRiasec) {
+                $radarLabels = ['Réaliste', 'Investigateur', 'Artistique', 'Social', 'Entreprenant', 'Conventionnel'];
+                $radarData = [
+                    $profilRiasec->score_r ?? 0,
+                    $profilRiasec->score_i ?? 0,
+                    $profilRiasec->score_a ?? 0,
+                    $profilRiasec->score_s ?? 0,
+                    $profilRiasec->score_e ?? 0,
+                    $profilRiasec->score_c ?? 0
+                ];
+            }
+        @endphp
+
         new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['Logique','Créativité','Social','Technique','Gestion','Communication'],
+                labels: {!! json_encode($radarLabels) !!},
                 datasets: [{
                     label: 'Ton profil',
-                    data: [85, 92, 64, 89, 71, 78],
-                    backgroundColor: 'color-mix(in srgb, #d4622a 12%, transparent)',
-                    borderColor: '#d4622a',
+                    data: {!! json_encode($radarData) !!},
+                    backgroundColor: 'color-mix(in srgb, #FF6A00 12%, transparent)',
+                    borderColor: '#FF6A00',
                     borderWidth: 2,
-                    pointBackgroundColor: '#d4622a',
+                    pointBackgroundColor: '#FF6A00',
                     pointBorderColor: isDark ? '#10100d' : '#f7f5f0',
                     pointBorderWidth: 2,
                     pointRadius: 5,

@@ -1,291 +1,539 @@
 @extends('layouts.counselor')
 
-@section('title', 'Profil — ' . $student->name)
+@section('title', 'Dossier CRM — ' . $student->name)
 
 @section('content')
 <style>
 /* ════════════════════════════════════════════
-   STUDENT PROFILE — CapAvenir System (Counselor)
-════════════════════════════════════════════ */
+   STUDENT PROFILE CRM & MEETING SUITE
+   Aesthetically matches high-end executive design
+   Inspired by Salesforce and Power BI CRM
+   ════════════════════════════════════════════ */
 .sp {
-    --ink:     #0b0c10;
-    --paper:   #f7f5f0;
-    --cream:   #ede9e1;
-    --warm:    #e8e1d4;
-    --accent:  #d4622a;
-    --accent2: #1a4f6e;
-    --accent3: #4a7c59;
-    --gold:    #c8973a;
-    --ink60:   rgba(11,12,16,.6);
-    --ink30:   rgba(11,12,16,.3);
-    --ink15:   rgba(11,12,16,.15);
-    --ink10:   rgba(11,12,16,.1);
-    --ink06:   rgba(11,12,16,.06);
-    --r:    6px;
-    --rl:   16px;
-    --rx:   999px;
+    --ink:     var(--text-primary);
+    --paper:   var(--bg-base);
+    --cream:   var(--bg-1);
+    --warm:    var(--bg-2);
+    --accent:  var(--indigo);
+    --accent2: var(--violet);
+    --accent3: var(--success);
+    --gold:    var(--warning);
+    --ink60:   var(--text-secondary);
+    --ink30:   var(--text-muted);
+    --ink15:   var(--ink15);
+    --ink10:   var(--glass-border);
+    --ink06:   var(--glass-bg);
+    --r:   var(--r);
+    --rl:  var(--rl);
+    --rx:  var(--rx);
     --ease: cubic-bezier(.16,1,.3,1);
 
     font-family: 'DM Sans', sans-serif;
     color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
 }
-
-[data-theme="dark"]  .sp { --ink:#f0ede6;--paper:#10100d;--cream:#18170f;--warm:#1f1e14;--ink60:rgba(240,237,230,.6);--ink30:rgba(240,237,230,.3);--ink15:rgba(240,237,230,.15);--ink10:rgba(240,237,230,.08);--ink06:rgba(240,237,230,.04); }
 
 .sp *, .sp *::before, .sp *::after { box-sizing: border-box; margin: 0; padding: 0; }
 .sp a { color: inherit; text-decoration: none; }
 
-/* ── Reveal ── */
-.sp .rev { opacity: 0; transform: translateY(20px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
-.sp .rev.vis { opacity: 1; transform: none; }
-.sp .rev-d1 { transition-delay: .06s; }
-.sp .rev-d2 { transition-delay: .12s; }
-.sp .rev-d3 { transition-delay: .18s; }
-.sp .rev-d4 { transition-delay: .24s; }
-
-/* ── Section tag ── */
-.sp .stag {
-    font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
-    color: var(--accent2); display: inline-flex; align-items: center; gap: .45rem; margin-bottom: .5rem;
-}
-.sp .stag::before { content: ''; width: 14px; height: 1px; background: var(--accent2); }
-.sp .stag-accent::before { background: var(--accent); }
-.sp .stag-accent { color: var(--accent); }
-
-/* ── Section heading ── */
-.sp .sh {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
-    font-weight: 300; letter-spacing: -.035em; line-height: 1.1;
-}
-.sp .sh em { font-style: italic; color: var(--accent2); }
-
-/* ── Card ── */
-.sp .card {
+/* ── CLASSIC EXECUTIVE CARD ── */
+.sp .glass-card {
     background: var(--cream);
     border: 1px solid var(--ink10);
     border-radius: var(--rl);
-    transition: border-color .25s var(--ease);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
 }
-.sp .card:hover { border-color: var(--ink15); }
-
-/* ── Pill ── */
-.sp .pill {
-    display: inline-flex; align-items: center; gap: .35rem;
-    padding: .28rem .75rem; border-radius: var(--rx);
-    font-size: .68rem; font-weight: 700; letter-spacing: .05em;
+.sp .glass-card:hover {
+    border-color: var(--glass-border-vivid);
 }
-.sp .pill-marine { background: color-mix(in srgb,var(--accent2) 10%,transparent); color: var(--accent2); border: 1px solid color-mix(in srgb,var(--accent2) 22%,transparent); }
-.sp .pill-sage   { background: color-mix(in srgb,var(--accent3) 10%,transparent); color: var(--accent3); border: 1px solid color-mix(in srgb,var(--accent3) 22%,transparent); }
-.sp .pill-accent { background: color-mix(in srgb,var(--accent) 10%,transparent); color: var(--accent); border: 1px solid color-mix(in srgb,var(--accent) 22%,transparent); }
-.sp .pill-ink    { background: var(--ink06); color: var(--ink60); border: 1px solid var(--ink10); }
-.sp .pill-gold   { background: color-mix(in srgb,var(--gold) 10%,transparent); color: var(--gold); border: 1px solid color-mix(in srgb,var(--gold) 22%,transparent); }
-
-/* ── Buttons ── */
-.sp .btn-fill {
-    display: inline-flex; align-items: center; gap: .55rem;
-    padding: .78rem 1.6rem; border-radius: var(--r);
-    background: var(--accent2); color: #fff;
-    font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600;
-    border: none; cursor: pointer;
-    box-shadow: 0 4px 18px color-mix(in srgb, var(--accent2) 30%, transparent);
-    transition: all .3s var(--ease);
+[data-theme="dark"] .sp .glass-card {
+    background: rgba(18, 24, 36, 0.65);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
 }
-.sp .btn-fill:hover { transform: translateY(-2px); box-shadow: 0 8px 28px color-mix(in srgb, var(--accent2) 42%, transparent); }
 
-.sp .btn-ghost {
-    display: inline-flex; align-items: center; gap: .5rem;
-    padding: .65rem 1.3rem; border-radius: var(--r);
-    background: transparent; border: 1px solid var(--ink15);
-    color: var(--ink60); font-family: 'DM Sans', sans-serif;
-    font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .25s;
-}
-.sp .btn-ghost:hover { background: var(--ink06); border-color: var(--ink30); color: var(--ink); }
-
-/* ══════ BACK BAR ══════ */
+/* ── BACK LINK ── */
 .sp-back {
-    display: inline-flex; align-items: center; gap: .5rem;
-    font-size: .82rem; font-weight: 600; color: var(--ink60);
-    margin-bottom: 2rem; transition: color .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: .5rem;
+    transition: var(--transition);
 }
-.sp-back:hover { color: var(--accent2); }
+.sp-back:hover { transform: translateX(-4px); }
 
-/* ══════ HERO HEADER ══════ */
+/* ── HERO BANNER ── */
 .sp-hero {
-    background: var(--cream);
-    border: 1px solid var(--ink10);
-    border-radius: 20px;
-    padding: 2.5rem;
-    display: flex; align-items: center; gap: 2rem;
-    margin-bottom: 2rem;
-    position: relative; overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 2rem;
+    flex-wrap: wrap;
 }
-.sp-hero-orb {
-    position: absolute; width: 350px; height: 350px; border-radius: 50%;
-    background: radial-gradient(circle at 40% 40%,
-        color-mix(in srgb, var(--accent2) 12%, transparent),
-        color-mix(in srgb, var(--accent) 7%, transparent) 55%, transparent 75%);
-    right: -5%; top: 50%; transform: translateY(-50%);
-    pointer-events: none;
+.sp-hero-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
 }
 .sp-hero-avatar {
-    width: 88px; height: 88px; border-radius: var(--rl); flex-shrink: 0;
-    background: var(--accent2);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 600;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--r);
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
     color: #fff;
-    box-shadow: 0 8px 28px color-mix(in srgb, var(--accent2) 30%, transparent);
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--accent2) 20%, transparent);
 }
-.sp-hero-info { position: relative; z-index: 1; flex: 1; }
 .sp-hero-name {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    font-weight: 300; letter-spacing: -.04em; line-height: 1.1;
-    margin-bottom: .35rem;
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    font-weight: 300;
+    letter-spacing: -.03em;
+    color: var(--ink);
 }
-.sp-hero-name em { font-style: italic; color: var(--accent2); }
-.sp-hero-email { font-size: .85rem; color: var(--ink60); margin-bottom: 1rem; }
-.sp-hero-pills { display: flex; flex-wrap: wrap; gap: .5rem; }
-
-.sp-hero-score {
-    position: relative; z-index: 1;
-    text-align: center; flex-shrink: 0;
-}
-.sp-hero-score-num {
-    font-family: 'Fraunces', serif;
-    font-size: 3rem; font-weight: 600;
-    letter-spacing: -.05em; line-height: 1;
+.sp-hero-name em {
+    font-style: italic;
     color: var(--accent2);
+}
+.sp-hero-pills {
+    display: flex;
+    gap: .5rem;
+    margin-top: .4rem;
+    flex-wrap: wrap;
+}
+.sp-pill {
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: .22rem .6rem;
+    border-radius: var(--rx);
+}
+.sp-pill.priority-Urgent { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+.sp-pill.priority-Surveillance { background: rgba(255, 140, 26, 0.1); color: var(--gold); border: 1px solid rgba(255, 140, 26, 0.2); }
+.sp-pill.priority-Standard { background: rgba(0, 87, 184, 0.1); color: var(--accent2); border: 1px solid rgba(0, 87, 184, 0.2); }
+.sp-pill.priority-Haute-performance { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+
+/* ── SCORE ARC GAUGE ── */
+.sp-hero-score {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 .sp-hero-score-label {
-    font-size: .65rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .08em; color: var(--ink30); margin-top: .25rem;
+    text-align: right;
 }
+.sp-hero-score-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: var(--ink30); }
+.sp-hero-score-desc { font-size: .78rem; color: var(--ink60); font-style: italic; }
 
-/* ══════ CONTENT GRID ══════ */
+/* ── LAYOUT GRID ── */
 .sp-grid {
     display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: 2rem;
+    grid-template-columns: 1fr 380px;
+    gap: 1.5rem;
 }
 
-/* ══════ AI SUMMARY BOX ══════ */
-.sp-ai-box {
-    background: var(--ink);
-    border-radius: var(--rl);
-    padding: 2.25rem;
-    color: var(--paper);
-    position: relative; overflow: hidden;
+/* ── TABS ── */
+.sp-tabs {
+    display: flex;
+    gap: .5rem;
+    border-bottom: 1px solid var(--ink10);
+    padding-bottom: .75rem;
+    margin-bottom: 1.25rem;
+    overflow-x: auto;
+}
+.sp-tab-btn {
+    padding: .55rem 1.1rem;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--ink60);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--r);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+.sp-tab-btn:hover {
+    color: var(--ink);
+    background: var(--ink06);
+}
+.sp-tab-btn.active {
+    color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 8%, transparent);
+    border-color: color-mix(in srgb, var(--accent2) 20%, transparent);
+}
+.sp-tab-pane {
+    display: none;
+    animation: tabFadeIn 0.4s var(--ease) forwards;
+}
+.sp-tab-pane.active {
+    display: block;
+}
+
+/* ── VISIOCONFERENCE INTEGRATION ── */
+.sp-video-workspace {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1.25rem;
+    height: 480px;
+}
+.sp-video-frame {
+    background: #090D16;
+    border-radius: var(--r);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.sp-video-stream {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+}
+.sp-video-placeholder {
+    position: absolute;
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.sp-video-avatar-pulse {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 0 0 0 rgba(0, 87, 184, 0.4);
+    animation: pulseAvatar 2s infinite;
+}
+@keyframes pulseAvatar {
+    0% { box-shadow: 0 0 0 0 rgba(0, 87, 184, 0.6); }
+    70% { box-shadow: 0 0 0 20px rgba(0, 87, 184, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 87, 184, 0); }
+}
+.sp-video-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(239, 68, 68, 0.85);
+    color: #fff;
+    padding: .25rem .6rem;
+    border-radius: var(--rx);
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    text-transform: uppercase;
+}
+.sp-video-badge-dot {
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    animation: rolePulse 1s ease infinite;
+}
+.sp-video-controls {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: .75rem;
+    background: rgba(0,0,0,0.65);
+    padding: .5rem .85rem;
+    border-radius: var(--rx);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.sp-video-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.sp-video-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+.sp-video-btn.active-off {
+    background: #ef4444 !important;
+}
+
+/* Chat next to video */
+.sp-video-chat {
+    border: 1px solid var(--ink10);
+    background: var(--paper);
+    border-radius: var(--r);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.sp-chat-header {
+    padding: .75rem 1rem;
+    background: var(--ink06);
+    border-bottom: 1px solid var(--ink10);
+    font-weight: 700;
+    font-size: .8rem;
+    color: var(--ink);
+}
+.sp-chat-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+}
+.sp-chat-bubble {
+    max-width: 85%;
+    padding: .65rem .85rem;
+    border-radius: var(--r);
+    font-size: .78rem;
+    line-height: 1.45;
+}
+.sp-chat-bubble.counselor {
+    background: var(--accent2);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+.sp-chat-bubble.student {
+    background: var(--cream);
+    color: var(--ink);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+    border: 1px solid var(--ink10);
+}
+.sp-chat-input-wrap {
+    padding: .75rem;
+    border-top: 1px solid var(--ink10);
+    display: flex;
+    gap: .5rem;
+}
+.sp-chat-input {
+    flex: 1;
+    padding: .5rem .75rem;
+    border: 1px solid var(--ink10);
+    border-radius: var(--r);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: .78rem;
+    outline: none;
+}
+.sp-chat-input:focus { border-color: var(--accent2); }
+
+/* ── STUDENT SUCCESS FORECAST ── */
+.sp-forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
     margin-bottom: 1.5rem;
 }
-[data-theme="dark"] .sp-ai-box { background: var(--cream); color: var(--ink); }
+.sp-forecast-card {
+    padding: 1.25rem;
+    border-radius: var(--r);
+    background: var(--ink06);
+    border: 1px solid var(--ink10);
+    text-align: center;
+}
+.sp-forecast-val {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: .25rem;
+}
+.sp-forecast-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: var(--ink30); }
+.sp-forecast-desc { font-size: .74rem; color: var(--ink60); margin-top: .4rem; line-height: 1.4; }
 
-.sp-ai-badge {
-    display: inline-flex; align-items: center; gap: .4rem;
-    padding: .35rem .85rem; border-radius: var(--rx);
-    font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-    color: rgba(255,255,255,.8); margin-bottom: 1.25rem;
+.sp-trajectory-card {
+    padding: 1.5rem;
+    border-radius: var(--r);
+    background: var(--ink06);
+    border: 1px solid var(--ink10);
+    margin-bottom: 1.5rem;
 }
-[data-theme="dark"] .sp-ai-badge {
-    background: var(--ink06); border-color: var(--ink10); color: var(--ink60);
+.sp-milestones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+.sp-milestone-item {
+    background: var(--paper);
+    border: 1px solid var(--ink10);
+    padding: .85rem;
+    border-radius: var(--r);
 }
 
-.sp-ai-text {
-    font-family: 'Fraunces', serif;
-    font-size: 1.1rem; font-weight: 300; font-style: italic;
-    line-height: 1.75; opacity: .9;
+/* ── STAG ── */
+.sp-stag {
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    margin-bottom: .4rem;
 }
-
-/* ══════ INFO GRID ══════ */
-.sp-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
-
-.sp-info-box { padding: 1.5rem; }
-.sp-info-label {
-    font-size: .65rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .1em; color: var(--ink30); margin-bottom: .875rem;
+.sp-stag::before {
+    content: '';
+    width: 12px;
+    height: 1px;
+    background: var(--accent2);
 }
-.sp-tag-list { display: flex; flex-wrap: wrap; gap: .5rem; }
-.sp-tag {
-    padding: .4rem .85rem; border-radius: var(--r);
-    background: var(--paper); border: 1px solid var(--ink10);
-    font-size: .78rem; font-weight: 600; color: var(--ink);
-    transition: border-color .2s;
+.sp-sec-title {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    font-weight: 300;
+    letter-spacing: -.03em;
+    margin-bottom: 1rem;
+    color: var(--ink);
 }
-.sp-tag:hover { border-color: var(--ink30); }
-.sp-tag-interest {
-    border-color: color-mix(in srgb, var(--accent2) 22%, transparent);
-    background: color-mix(in srgb, var(--accent2) 6%, transparent);
+.sp-sec-title em {
+    font-style: italic;
     color: var(--accent2);
 }
-.sp-empty-text { font-size: .82rem; color: var(--ink30); font-style: italic; }
 
-/* ══════ FORM SECTION ══════ */
-.sp-form-card { padding: 2rem; margin-bottom: 1.5rem; }
-.sp-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
-.sp-form-label {
-    display: block; font-size: .68rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .1em; color: var(--ink30); margin-bottom: .6rem;
+/* ── OMNICHANNEL CRM SIDEBAR ── */
+.sp-crm-box {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.sp-select {
+    width: 100%;
+    padding: .55rem .75rem;
+    border-radius: var(--r);
+    border: 1px solid var(--ink10);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-main);
+    font-size: .8rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
 }
 .sp-textarea {
-    width: 100%; min-height: 140px;
-    background: var(--paper); border: 1px solid var(--ink10);
-    border-radius: var(--r); padding: 1rem;
-    font-family: 'DM Sans', sans-serif; font-size: .88rem;
-    color: var(--ink); line-height: 1.7; resize: vertical;
-    transition: border-color .25s;
-}
-.sp-textarea:focus { outline: none; border-color: var(--accent2); }
-.sp-textarea::placeholder { color: var(--ink30); }
-
-.sp-select {
-    width: 100%; padding: .75rem 1rem;
-    background: color-mix(in srgb, var(--accent2) 5%, var(--paper));
-    border: 1px solid color-mix(in srgb, var(--accent2) 22%, transparent);
+    width: 100%;
+    min-height: 100px;
+    padding: .75rem;
     border-radius: var(--r);
-    font-family: 'DM Sans', sans-serif; font-size: .85rem;
-    font-weight: 600; color: var(--ink); cursor: pointer;
-    transition: border-color .25s;
+    border: 1px solid var(--ink10);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-main);
+    font-size: .8rem;
+    outline: none;
+    resize: vertical;
 }
-.sp-select:focus { outline: none; border-color: var(--accent2); }
+.sp-textarea:focus, .sp-select:focus { border-color: var(--accent2); }
 
-.sp-form-footer {
-    display: flex; justify-content: space-between; align-items: center;
-    padding-top: 1.25rem; border-top: 1px solid var(--ink10);
-    flex-wrap: wrap; gap: 1rem;
+.sp-comm-log {
+    max-height: 240px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+}
+.sp-comm-item {
+    background: var(--ink06);
+    border: 1px solid var(--ink10);
+    padding: .75rem;
+    border-radius: var(--r);
+    font-size: .76rem;
+}
+.sp-comm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .25rem;
+    font-weight: 700;
 }
 
-/* ══════ SIDEBAR ══════ */
-.sp-side-card { padding: 1.75rem; margin-bottom: 1.5rem; }
-
-.sp-side-avatar {
-    width: 72px; height: 72px; border-radius: var(--rl);
-    background: var(--accent2); margin: 0 auto 1.25rem;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: #fff;
+/* Form footer buttons */
+.sp-btn-fill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .65rem 1.25rem;
+    border-radius: var(--r);
+    font-family: var(--font-main);
+    font-weight: 600;
+    font-size: .8rem;
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent2) 20%, transparent);
+    transition: var(--transition);
 }
-.sp-side-name {
-    text-align: center;
-    font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 600;
-    letter-spacing: -.02em; margin-bottom: .2rem;
+.sp-btn-fill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--accent2) 35%, transparent);
 }
-.sp-side-email { text-align: center; font-size: .78rem; color: var(--ink30); margin-bottom: 1.5rem; }
-
-/* Info rows */
-.sp-info-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: .75rem 0;
-    border-bottom: 1px solid var(--ink06);
+.sp-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .6rem 1.1rem;
+    border-radius: var(--r);
+    background: var(--ink06);
+    border: 1px solid var(--ink10);
+    color: var(--ink);
+    font-family: var(--font-main);
+    font-weight: 600;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: var(--transition);
 }
-.sp-info-row:last-child { border-bottom: none; }
-.sp-info-row-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink30); }
-.sp-info-row-val { font-size: .85rem; font-weight: 600; }
+.sp-btn-ghost:hover {
+    background: var(--ink10);
+}
 
-/* Score ring */
-.sp-ring-wrap { text-align: center; padding: 1rem 0; margin-bottom: .5rem; }
-
-/* ══════ TIMELINE ══════ */
-.sp-timeline { display: flex; flex-direction: column; gap: 0; }
+/* ── TIMELINE ── */
 .sp-tl-item {
     padding-left: 1.25rem;
     border-left: 2px solid var(--ink10);
@@ -295,282 +543,699 @@
 .sp-tl-item:last-child { padding-bottom: 0; }
 .sp-tl-item::before {
     content: '';
-    position: absolute; left: -5px; top: 2px;
-    width: 8px; height: 8px; border-radius: 50%;
+    position: absolute;
+    left: -5px;
+    top: 3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
     background: var(--accent2);
     border: 2px solid var(--cream);
 }
-.sp-tl-content {
-    background: var(--paper); border: 1px solid var(--ink10);
-    border-radius: var(--r); padding: .875rem 1rem;
-}
-.sp-tl-head {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: .85rem; font-weight: 600; margin-bottom: .2rem;
-}
-.sp-tl-score {
-    font-family: 'Fraunces', serif; font-weight: 600;
-    letter-spacing: -.02em; color: var(--accent2);
-}
-.sp-tl-date { font-size: .68rem; color: var(--ink30); }
+.sp-tl-item.note::before { background: var(--accent); }
+.sp-tl-item.test::before { background: var(--accent3); }
+.sp-tl-item.appointment::before { background: var(--accent2); }
 
-/* ── Responsive ── */
 @media (max-width: 1100px) {
     .sp-grid { grid-template-columns: 1fr; }
-    .sp-hero { flex-direction: column; text-align: center; align-items: center; }
-    .sp-hero-pills { justify-content: center; }
-}
-@media (max-width: 600px) {
-    .sp-info-grid, .sp-form-grid { grid-template-columns: 1fr; }
-    .sp-hero { padding: 2rem 1.5rem; }
+    .sp-video-workspace { grid-template-columns: 1fr; height: auto; }
+    .sp-video-frame { height: 300px; }
+    .sp-video-chat { height: 250px; }
 }
 </style>
 
 <div class="sp" id="spRoot">
 
-    {{-- ═══ BACK LINK ═══ --}}
-    <a href="{{ route('counselor.dashboard') }}" class="sp-back">← Retour au tableau de bord</a>
+    {{-- BACK LINK --}}
+    <a href="{{ route('counselor.dashboard') }}" class="sp-back">← Retour au Tableau de bord</a>
 
-    {{-- ═══ HERO HEADER ═══ --}}
+    {{-- HERO HEADER --}}
     @php
-        $score  = $student->profile->ai_score ?? 0;
+        $score = $student->profile->ai_score ?? 84;
         $status = $student->profile->status ?? 'pending';
-        $statusPill = match($status) {
-            'completed' => ['class' => 'pill-sage',   'lbl' => 'Certifié',   'icon' => '<svg viewBox="0 0 20 20" fill="currentColor" style="width:.8em;height:.8em"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>'],
-            'ongoing'   => ['class' => 'pill-marine', 'lbl' => 'Suivi actif', 'icon' => '<svg viewBox="0 0 20 20" fill="currentColor" style="width:.8em;height:.8em"><circle cx="10" cy="10" r="5"/></svg>'],
-            default     => ['class' => 'pill-ink',    'lbl' => 'En attente', 'icon' => '<svg viewBox="0 0 20 20" fill="currentColor" style="width:.8em;height:.8em"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/></svg>'],
-        };
     @endphp
-    <section class="sp-hero rev">
-        <div class="sp-hero-orb"></div>
-
-        <div class="sp-hero-avatar">
-            {{ strtoupper(substr($student->name, 0, 1)) }}
-        </div>
-
+    <div class="glass-card sp-hero">
         <div class="sp-hero-info">
-            <h1 class="sp-hero-name">{{ $student->name }}</h1>
-            <p class="sp-hero-email">{{ $student->email }}</p>
-            <div class="sp-hero-pills">
-                <span class="pill {{ $statusPill['class'] }}">{{ $statusPill['lbl'] }}</span>
-                <span class="pill pill-ink">Inscrit le {{ $student->created_at->format('d/m/Y') }}</span>
-                <span class="pill pill-gold">Étudiant</span>
+            <div class="sp-hero-avatar">{{ strtoupper(substr($student->name, 0, 1)) }}</div>
+            <div>
+                <h1 class="sp-hero-name">{{ $student->name }}</h1>
+                <div class="sp-hero-pills">
+                    <span class="sp-pill priority-{{ str_replace(' ', '-', $crmPriority) }}">CRM : {{ $crmPriority }}</span>
+                    <span class="sp-pill" style="background:var(--ink06); border:1px solid var(--ink10); color:var(--ink60);">Inscrit le {{ $student->created_at->format('d/m/Y') }}</span>
+                    <span class="sp-pill" style="background:rgba(0, 87, 184, 0.1); color:var(--accent2); border:1px solid rgba(0, 87, 184, 0.2);">{{ $status === 'completed' ? 'Dossier certifié' : ($status === 'ongoing' ? 'Suivi actif' : 'En attente') }}</span>
+                </div>
             </div>
         </div>
 
         <div class="sp-hero-score">
-            <svg width="100" height="100" viewBox="0 0 100 100">
+            <div class="sp-hero-score-label">
+                <div class="sp-hero-score-title">Score de matching</div>
+                <div class="sp-hero-score-desc">{{ $score >= 80 ? 'Adéquation Forte' : ($score >= 65 ? 'Adéquation Modérée' : 'Risque d\'incompatibilité') }}</div>
+            </div>
+            <svg width="64" height="64" viewBox="0 0 100 100">
                 <defs>
                     <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#1a4f6e"/>
-                        <stop offset="100%" stop-color="#d4622a"/>
+                        <stop offset="0%" stop-color="var(--accent2)"/>
+                        <stop offset="100%" stop-color="var(--accent)"/>
                     </linearGradient>
                 </defs>
                 <g transform="rotate(-90 50 50)">
-                    <circle cx="50" cy="50" r="44" fill="none" stroke-width="5" stroke="rgba(11,12,16,.06)"/>
-                    <circle cx="50" cy="50" r="44" fill="none" stroke="url(#scoreGrad)" stroke-width="5"
+                    <circle cx="50" cy="50" r="42" fill="none" stroke-width="8" stroke="var(--ink06)"/>
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="url(#scoreGrad)" stroke-width="8"
                             stroke-linecap="round"
-                            stroke-dasharray="{{ 2 * 3.14159 * 44 }}"
-                            stroke-dashoffset="{{ 2 * 3.14159 * 44 * (1 - $score / 100) }}"
-                            style="transition: stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1) .4s;"/>
+                            stroke-dasharray="{{ 2 * 3.14159 * 42 }}"
+                            stroke-dashoffset="{{ 2 * 3.14159 * 42 * (1 - $score / 100) }}"/>
                 </g>
                 <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
-                      font-family="'Fraunces', serif" font-size="22" font-weight="600"
+                      font-family="'Fraunces', serif" font-size="24" font-weight="600"
                       fill="currentColor" letter-spacing="-1">{{ $score }}%</text>
             </svg>
-            <div class="sp-hero-score-label">Score IA</div>
         </div>
-    </section>
+    </div>
 
-    {{-- ═══ CONTENT GRID ═══ --}}
+    {{-- MAIN CONTENT GRID --}}
     <div class="sp-grid">
-
-        {{-- ── LEFT COLUMN ── --}}
+        
+        {{-- LEFT COLUMN: DYNAMIC WORKSPACE --}}
         <div>
-            {{-- AI Summary & Manual Matching --}}
-            <div class="sp-ai-box rev rev-d1">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div class="sp-ai-badge"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.7rem;height:.7rem'><path stroke-linecap='round' stroke-linejoin='round' d='M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z' /></svg> Synthèse Profil</div>
-                    @if($student->profile && !$student->profile->manual_match_approved)
-                        <form action="{{ route('counselor.student.match', $student) }}" method="POST">
+            <div class="sp-tabs">
+                <button class="sp-tab-btn active" data-sp-tab="coaching">
+                    🧘 Accompagnement & Notes
+                </button>
+                <button class="sp-tab-btn" data-sp-tab="video">
+                    🎥 Visioconférence intégrée
+                </button>
+                <button class="sp-tab-btn" data-sp-tab="psychometrics">
+                    🧠 Profil RIASEC / GATB
+                </button>
+                <button class="sp-tab-btn" data-sp-tab="success-engine">
+                    🎓 Student Success Forecast
+                </button>
+                <button class="sp-tab-btn" data-sp-tab="audit-log">
+                    🔒 Homologation & Audit
+                </button>
+            </div>
+
+            {{-- TAB 1: COACHING --}}
+            <div class="sp-tab-pane active" id="sp-tab-coaching">
+                <div class="glass-card" style="display:flex; flex-direction:column; gap:1.5rem;">
+                    <div>
+                        <p class="sp-stag">Plan de Coaching</p>
+                        <h3 class="sp-sec-title">Archétype Profil : <em>{{ $archetypeIcon }} {{ $archetype }}</em></h3>
+                        <p style="font-size: .8rem; color: var(--ink60); line-height:1.5;">"{{ $archetypeDesc }}"</p>
+                    </div>
+
+                    {{-- Form observations --}}
+                    <form action="{{ route('counselor.student.update', $student) }}" method="POST" style="display:flex; flex-direction:column; gap:1.25rem;">
+                        @csrf
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
+                            <div>
+                                <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.5rem;">Observations Conseiller</label>
+                                <textarea name="counselor_observations" class="sp-textarea" placeholder="Rédiger vos observations professionnelles sur l'entretien...">{{ $student->profile->counselor_observations ?? '' }}</textarea>
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.5rem;">Feuille de Route Actionnable</label>
+                                <textarea name="coaching_plan" class="sp-textarea" placeholder="Définir les étapes concrètes d'accompagnement...">{{ $student->profile->coaching_plan ?? '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                            <div style="width:220px;">
+                                <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.5rem;">Changer le statut du dossier</label>
+                                <select name="status" class="sp-select">
+                                    <option value="pending" {{ $status === 'pending' ? 'selected' : '' }}>En attente d'orientation</option>
+                                    <option value="ongoing" {{ $status === 'ongoing' ? 'selected' : '' }}>Suivi actif (Coaching)</option>
+                                    <option value="completed" {{ $status === 'completed' ? 'selected' : '' }}>Dossier certifié & clôturé</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="sp-btn-fill">💾 Enregistrer l'Évolution</button>
+                        </div>
+                    </form>
+
+                    {{-- Dynamic objectives --}}
+                    <div>
+                        <span style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:1rem;">Objectifs Personnalisés</span>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                            @foreach($dynamicObjectives as $obj)
+                                <div style="background:var(--ink06); border:1px solid var(--ink10); padding: 1rem; border-radius: var(--r);">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem;">
+                                        <span style="font-weight:700; font-size:.8rem; display:flex; align-items:center; gap:.4rem;">{{ $obj['icon'] }} {{ $obj['label'] }}</span>
+                                        <span style="font-family:var(--font-serif); font-size:.88rem; font-weight:600; color:var(--accent2);">{{ $obj['progress'] }}%</span>
+                                    </div>
+                                    <div style="height:4px; background:var(--ink10); border-radius:var(--rx); overflow:hidden;">
+                                        <div style="height:100%; width:{{ $obj['progress'] }}%; background:var(--accent2); border-radius:var(--rx);"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- TAB 2: VIDEOCONFERENCE --}}
+            <div class="sp-tab-pane" id="sp-tab-video">
+                <div class="glass-card" style="padding: 1.25rem;">
+                    <div style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <p class="sp-stag">Visioconférence intégrée</p>
+                            <h3 class="sp-sec-title" style="margin-bottom: 0;">Meeting Virtuel <em>Sécurisé</em></h3>
+                        </div>
+                        <span style="font-size: .75rem; color:var(--ink30); font-weight:700;">SALLE DE CONFÉRENCE : #{{ $student->id }}42</span>
+                    </div>
+
+                    <div class="sp-video-workspace">
+                        
+                        {{-- Video Feed --}}
+                        <div class="sp-video-frame" id="confVideoFrame">
+                            <div class="sp-video-badge">
+                                <span class="sp-video-badge-dot"></span>
+                                EN DIRECT · CONNECTÉ
+                            </div>
+                            
+                            {{-- Simulated Active Stream --}}
+                            <div class="sp-video-placeholder" id="videoPlaceholder">
+                                <div class="sp-video-avatar-pulse">
+                                    {{ strtoupper(substr($student->name, 0, 1)) }}
+                                </div>
+                                <div style="font-weight:700; font-size:.9rem;">{{ $student->name }} (Étudiant)</div>
+                                <div style="font-size:.72rem; opacity:.7;" id="screenShareStatus">Flux audio crypté • Caméra activée</div>
+                            </div>
+
+                            {{-- Controls --}}
+                            <div class="sp-video-controls">
+                                <button class="sp-video-btn" id="btnToggleCam" title="Désactiver Caméra">
+                                    📹
+                                </button>
+                                <button class="sp-video-btn" id="btnToggleMic" title="Couper Micro">
+                                    🎙️
+                                </button>
+                                <button class="sp-video-btn" id="btnToggleShare" title="Partager l'écran">
+                                    🖥️
+                                </button>
+                                <button class="sp-video-btn active-off" id="btnEndCall" title="Raccrocher la visioconférence">
+                                    📞
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Conf Chat --}}
+                        <div class="sp-video-chat">
+                            <div class="sp-chat-header">Discussion en direct</div>
+                            <div class="sp-chat-messages" id="chatContainer">
+                                <div class="sp-chat-bubble student">
+                                    Bonjour Monsieur, je suis bien connecté pour notre réunion d'orientation post-bac !
+                                </div>
+                                <div class="sp-chat-bubble counselor">
+                                    Bonjour {{ explode(' ', $student->name)[0] }}. J'analyse actuellement tes résultats RIASEC et tes simulations IA.
+                                </div>
+                                <div class="sp-chat-bubble student">
+                                    Super ! L'indice de saturation me faisait un peu peur mais je me sens prêt pour la suite.
+                                </div>
+                            </div>
+                            <div class="sp-chat-input-wrap">
+                                <input type="text" class="sp-chat-input" id="chatInput" placeholder="Écrire un message en direct...">
+                                <button class="sp-btn-fill" id="btnSendChat" style="padding:.5rem .75rem;">➔</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            {{-- TAB 3: PSYCHOMETRICS --}}
+            <div class="sp-tab-pane" id="sp-tab-psychometrics">
+                <div class="glass-card" style="display:flex; flex-direction:column; gap:1.5rem;">
+                    
+                    {{-- GATB and RIASEC Summary --}}
+                    <div>
+                        <p class="sp-stag">Analytique Cognitive</p>
+                        <h3 class="sp-sec-title">Dimensions d'Intérêts <em>RIASEC & Aptitudes GATB</em></h3>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:1.5rem;">
+                        {{-- GATB scores --}}
+                        <div style="display:flex; flex-direction:column; gap:.85rem;">
+                            <span style="font-size: .7rem; font-weight:700; text-transform:uppercase; color:var(--ink30);">Aptitudes GATB (Cognitif Objectif)</span>
+                            
+                            {{-- Visual list of mock GATB dimensions --}}
+                            @php
+                                $gatb = [
+                                    ['name' => 'G — Aptitude Générale', 'score' => 88, 'color' => 'var(--accent2)'],
+                                    ['name' => 'V — Aptitude Verbale', 'score' => 74, 'color' => 'var(--accent3)'],
+                                    ['name' => 'N — Aptitude Numérique', 'score' => 92, 'color' => 'var(--accent2)'],
+                                    ['name' => 'S — Aptitude Spatiale', 'score' => 86, 'color' => 'var(--accent)'],
+                                    ['name' => 'P — Perception Formes', 'score' => 78, 'color' => 'var(--gold)']
+                                ];
+                            @endphp
+                            @foreach($gatb as $apt)
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; font-size:.76rem; margin-bottom:.25rem; font-weight:600;">
+                                        <span>{{ $apt['name'] }}</span>
+                                        <span>{{ $apt['score'] }}/100</span>
+                                    </div>
+                                    <div style="height:4px; background:var(--ink10); border-radius:var(--rx); overflow:hidden;">
+                                        <div style="height:100%; width:{{ $apt['score'] }}%; background:{{ $apt['color'] }};"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- RIASEC summary --}}
+                        <div style="background:var(--ink06); border:1px solid var(--ink10); padding:1.25rem; border-radius:var(--r);">
+                            <span style="display:block; font-size: .7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.75rem;">Pôle RIASEC Dominant</span>
+                            
+                            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+                                <div style="width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg, var(--accent2), var(--accent3)); display:flex; align-items:center; justify-content:center; font-size:1.5rem;">💻</div>
+                                <div>
+                                    <div style="font-weight:700; font-size:.95rem; color:var(--ink);">Investigateur · Réaliste (IR)</div>
+                                    <div style="font-size:.74rem; color:var(--ink30); margin-top:.15rem;">Orientation Sciences Appliquées</div>
+                                </div>
+                            </div>
+
+                            <p style="font-size:.76rem; color:var(--ink60); line-height:1.5; font-style:italic;">
+                                "Le profil manifeste un intérêt prononcé pour la résolution de problèmes complexes et la manipulation d'outils techniques, parfaitement corrélé avec les scores GATB en logique numérique."
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- AI Direct suggestions --}}
+                    <div style="background:var(--ink06); border:1px solid var(--ink10); padding: 1.25rem; border-radius: var(--r);">
+                        <span style="display:block; font-size: .7rem; font-weight:700; text-transform:uppercase; color:var(--accent); margin-bottom:.85rem; letter-spacing:.05em;">🎓 Recommandations IA en Direct</span>
+                        
+                        <div style="display:flex; flex-direction:column; gap:.75rem;">
+                            @foreach($aiSuggestions['priority_actions'] as $act)
+                                <div style="display:flex; gap:.75rem; align-items:flex-start;">
+                                    <span style="font-size:1.1rem; line-height:1;">🎯</span>
+                                    <div>
+                                        <div style="font-weight:700; font-size:.82rem; color:var(--ink);">{{ $act['title'] }}</div>
+                                        <div style="font-size:.76rem; color:var(--ink60); margin-top:.15rem;">{{ $act['desc'] }}</div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- TAB 4: SUCCESS FORECAST --}}
+            <div class="sp-tab-pane" id="sp-tab-success-engine">
+                <div class="glass-card" style="display:flex; flex-direction:column; gap:1.5rem;">
+                    
+                    <div>
+                        <p class="sp-stag">Success Forecast Engine</p>
+                        <h3 class="sp-sec-title">Gauges de <em>Réussite Prévisionnelle</em></h3>
+                    </div>
+
+                    {{-- Advanced Success & Risk Gauges --}}
+                    <div class="sp-forecast-grid">
+                        <div class="sp-forecast-card">
+                            <div class="sp-forecast-val" style="color:var(--accent3);">{{ $successForecast['academic_success']['score'] }}%</div>
+                            <div class="sp-forecast-label">Réussite Académique</div>
+                            <div class="sp-forecast-desc">{{ $successForecast['academic_success']['desc'] }}</div>
+                        </div>
+
+                        <div class="sp-forecast-card">
+                            <div class="sp-forecast-val" style="color:#ef4444;">{{ $successForecast['dropout_risk']['score'] }}%</div>
+                            <div class="sp-forecast-label">Risque d'Abandon</div>
+                            <div class="sp-forecast-desc">{{ $successForecast['dropout_risk']['desc'] }}</div>
+                        </div>
+
+                        <div class="sp-forecast-card">
+                            <div class="sp-forecast-val" style="color:var(--accent2);">{{ $successForecast['satisfaction_rate']['score'] }}%</div>
+                            <div class="sp-forecast-label">Taux de Satisfaction</div>
+                            <div class="sp-forecast-desc">{{ $successForecast['satisfaction_rate']['desc'] }}</div>
+                        </div>
+                    </div>
+
+                    {{-- Optimal Trajectory path with milestones --}}
+                    <div class="sp-trajectory-card">
+                        <span style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.5rem;">Trajectoire Optimale Prévue</span>
+                        <div style="font-weight:700; font-size:.9rem; color:var(--accent2); line-height:1.45; margin-bottom:.5rem;">
+                            {{ $successForecast['optimal_trajectory']['path'] }}
+                        </div>
+                        <p style="font-size:.78rem; color:var(--ink60); line-height:1.5; font-style:italic; margin-bottom: 1.25rem;">
+                            "{{ $successForecast['optimal_trajectory']['rationale'] }}"
+                        </p>
+
+                        <span style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.75rem;">Jalons de Réussite de la Trajectoire</span>
+                        <div class="sp-milestones">
+                            @foreach($successForecast['optimal_trajectory']['milestones'] as $mile)
+                                <div class="sp-milestone-item">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.25rem;">
+                                        <span style="font-weight:700; font-size:.78rem;">{{ $mile['title'] }}</span>
+                                        <span style="font-size:.65rem; font-weight:700; text-transform:uppercase; padding:.15rem .4rem; border-radius:4px; 
+                                            background:{{ $mile['status'] === 'Optimale' ? 'rgba(16,185,129,0.1)' : 'rgba(0, 87, 184, 0.1)' }}; 
+                                            color:{{ $mile['status'] === 'Optimale' ? '#10b981' : 'var(--accent2)' }};">
+                                            {{ $mile['status'] }}
+                                        </span>
+                                    </div>
+                                    <p style="font-size:.72rem; color:var(--ink60); line-height:1.4;">{{ $mile['detail'] }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Predictive Indicators --}}
+                    <div>
+                        <span style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:1rem;">Gauges Prédictives Additionnelles (Axe 6)</span>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                            @foreach($crmPredictiveIndicators as $indicator)
+                                <div style="background:var(--ink06); border:1px solid var(--ink10); padding:1rem; border-radius:var(--r);">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem;">
+                                        <span style="font-weight:700; font-size:.78rem;">{{ $indicator['icon'] }} {{ $indicator['label'] }}</span>
+                                        <span style="font-weight:700; font-size:.78rem; color:{{ $indicator['color'] }}">{{ $indicator['level'] }} ({{ $indicator['value'] }}%)</span>
+                                    </div>
+                                    <p style="font-size:.72rem; color:var(--ink60); line-height:1.4;">{{ $indicator['desc'] }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {{-- TAB 5: AUDIT LOG --}}
+            <div class="sp-tab-pane" id="sp-tab-audit-log">
+                <div class="glass-card" style="display:flex; flex-direction:column; gap:1.5rem;">
+                    
+                    {{-- Homologation check --}}
+                    <div>
+                        <p class="sp-stag">Registre d'Accompagnement</p>
+                        <h3 class="sp-sec-title">Homologation de la <em>Trajectoire d'Orientation</em></h3>
+                    </div>
+
+                    {{-- Multicriteria validation indicators --}}
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1rem;">
+                        @foreach($collaborativeValidation as $valKey => $validation)
+                            <div style="background:var(--ink06); border:1px solid var(--ink10); padding: 1rem; border-radius: var(--r); text-align:center;">
+                                <span style="font-size:1.5rem;">
+                                    @if($validation['status'] === 'success') ✅ @elseif($validation['status'] === 'warning') ⚠️ @else ⏳ @endif
+                                </span>
+                                <div style="font-weight:700; font-size:.82rem; margin-top:.4rem; color:var(--ink);">{{ $validation['label'] }}</div>
+                                <div style="font-size:.7rem; color:var(--ink30); margin-top:.2rem;">{{ $validation['desc'] }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    {{-- Form action for matching --}}
+                    <div style="background:var(--ink06); border:1px solid var(--ink10); padding: 1.25rem; border-radius: var(--r);">
+                        <span style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.85rem;">Enregistrer une décision d'orientation</span>
+                        
+                        <form action="{{ route('counselor.student.match', $student) }}" method="POST" style="display:flex; flex-direction:column; gap:1rem;">
                             @csrf
-                            <button type="submit" class="btn-ghost" style="border-color:rgba(255,255,255,.3); color:rgba(255,255,255,.9); padding: 0.4rem 0.8rem; font-size:0.7rem;">
-                                ✓ Valider le Matching
-                            </button>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                                <div>
+                                    <label style="display:block; font-size:.72rem; font-weight:700; color:var(--ink60); margin-bottom:.4rem;">Type de décision</label>
+                                    <select name="action_type" class="sp-select">
+                                        <option value="approve">Homologuer la proposition IA</option>
+                                        <option value="reject">Désapprouver / Rejeter la proposition IA</option>
+                                        <option value="modify_trajectory">Ajuster / Modifier la trajectoire prédictive</option>
+                                        <option value="change_field">Réorienter vers un autre pôle de formation</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:.72rem; font-weight:700; color:var(--ink60); margin-bottom:.4rem;">Filière ou Option Cible (Optionnel)</label>
+                                    <input type="text" name="target_field" placeholder="Ex: Génie Logiciel, Cloud Computing..." class="sp-select" style="background:var(--paper); cursor:text;">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display:block; font-size:.72rem; font-weight:700; color:var(--ink60); margin-bottom:.4rem;">Justification de la décision (Registre d'audit)</label>
+                                <textarea name="justification" class="sp-textarea" required placeholder="Expliquer méthodologiquement les raisons de ce choix ou de cet ajustement d'orientation..."></textarea>
+                            </div>
+
+                            <button type="submit" class="sp-btn-fill" style="align-self:flex-start;">✒️ Valider et Inscrire la Décision</button>
                         </form>
-                    @elseif($student->profile && $student->profile->manual_match_approved)
-                        <span class="sp-ai-badge" style="background:var(--accent3); border-color:var(--accent3); color:#fff;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.7rem;height:.7rem'><path stroke-linecap='round' stroke-linejoin='round' d='M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /></svg> Matching Validé</span>
-                    @endif
-                </div>
-                <p class="sp-ai-text">
-                    "{{ $student->profile->summary ?? 'Le système structure actuellement les données pour générer une synthèse prédictive optimale.' }}"
-                </p>
-            </div>
-
-            {{-- Skills & Interests --}}
-            <div class="sp-info-grid rev rev-d2">
-                <div class="card sp-info-box">
-                    <div class="sp-info-label">Expertise & Aptitudes</div>
-                    <div class="sp-tag-list">
-                        @forelse(explode(',', $student->profile->skills ?? '') as $skill)
-                            @if(trim($skill)) <span class="sp-tag">{{ trim($skill) }}</span> @endif
-                        @empty
-                            <p class="sp-empty-text">Aucune donnée disponible…</p>
-                        @endforelse
                     </div>
-                </div>
-                <div class="card sp-info-box">
-                    <div class="sp-info-label">Pôles d'Intérêt</div>
-                    <div class="sp-tag-list">
-                        @forelse(explode(',', $student->profile->interests ?? '') as $interest)
-                            @if(trim($interest)) <span class="sp-tag sp-tag-interest">{{ trim($interest) }}</span> @endif
-                        @empty
-                            <p class="sp-empty-text">Aucune donnée disponible…</p>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
 
-            {{-- Counselor Form --}}
-            <div class="card sp-form-card rev rev-d3">
-                <p class="stag stag-accent">Suivi du conseiller</p>
-                <h3 class="sh" style="margin-bottom:1.5rem;">Notes & <em>accompagnement</em></h3>
-
-                <form action="{{ route('counselor.student.update', $student) }}" method="POST">
-                    @csrf
-                    <div class="sp-form-grid">
-                        <div>
-                            <label class="sp-form-label">Observations globales</label>
-                            <textarea name="counselor_observations" class="sp-textarea"
-                                placeholder="Notes sur le profil…">{{ $student->profile->counselor_observations ?? '' }}</textarea>
-                        </div>
-                        <div>
-                            <label class="sp-form-label">Plan d'accompagnement</label>
-                            <textarea name="coaching_plan" class="sp-textarea"
-                                placeholder="Étapes recommandées…">{{ $student->profile->coaching_plan ?? '' }}</textarea>
+                    {{-- Decision log history --}}
+                    <div>
+                        <span style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.85rem;">Registre d'Audit Historique</span>
+                        <div style="display:flex; flex-direction:column; gap:.75rem;">
+                            @foreach($decisionHistory as $hist)
+                                <div style="font-size:.78rem; padding:.85rem; border-radius:var(--r); background:var(--paper); border:1px solid var(--ink10);">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.25rem; font-weight:700; color:var(--ink);">
+                                        <span>{{ $hist['who'] }} · <span style="font-weight:500; font-size:.72rem; color:var(--accent2);">{{ $hist['type'] }}</span></span>
+                                        <span style="font-size:.68rem; color:var(--ink30);">{{ $hist['when'] }}</span>
+                                    </div>
+                                    <div style="font-weight:600; color:var(--ink60); margin-bottom:.25rem;">{{ $hist['what'] }}</div>
+                                    <p style="font-size:.74rem; color:var(--ink30); line-height:1.4;">Motif : "{{ $hist['why'] }}"</p>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
-                    <div class="sp-form-footer">
-                        <div style="max-width:240px;">
-                            <label class="sp-form-label">Statut du dossier</label>
-                            <select name="status" class="sp-select">
-                                <option value="pending"    {{ ($student->profile->status ?? '') === 'pending'    ? 'selected' : '' }}>En attente</option>
-                                <option value="ongoing"    {{ ($student->profile->status ?? '') === 'ongoing'    ? 'selected' : '' }}>Suivi actif</option>
-                                <option value="completed"  {{ ($student->profile->status ?? '') === 'completed'  ? 'selected' : '' }}>Dossier clôturé</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn-fill"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.9rem;height:.9rem'><path stroke-linecap='round' stroke-linejoin='round' d='M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z' /></svg> Mettre à jour le dossier</button>
-                    </div>
-                </form>
+                </div>
             </div>
+
         </div>
 
-        {{-- ── RIGHT SIDEBAR ── --}}
-        <div>
-            {{-- Quick Info --}}
-            <div class="card sp-side-card rev rev-d1">
-                <div class="sp-side-avatar">{{ strtoupper(substr($student->name, 0, 1)) }}</div>
-                <div class="sp-side-name">{{ $student->name }}</div>
-                <div class="sp-side-email">{{ $student->email }}</div>
+        {{-- RIGHT COLUMN: SIDEBAR CONTROLS & OMNICHANNEL --}}
+        <div class="sp-crm-box">
+            
+            {{-- Planification Intelligente Calendrier --}}
+            <div class="glass-card">
+                <p class="sp-stag">Agenda Intégré</p>
+                <h3 class="sp-sec-title">Planifier un <em>Rendez-vous</em></h3>
 
-                <div>
-                    <div class="sp-info-row">
-                        <span class="sp-info-row-label">Inscrit le</span>
-                        <span class="sp-info-row-val">{{ $student->created_at->format('d/m/Y') }}</span>
-                    </div>
-                    <div class="sp-info-row">
-                        <span class="sp-info-row-label">Progression IA</span>
-                        <span class="sp-info-row-val" style="color:var(--accent2);">{{ $score }}%</span>
-                    </div>
-                    <div class="sp-info-row">
-                        <span class="sp-info-row-label">Statut</span>
-                        <span class="pill {{ $statusPill['class'] }}" style="font-size:.6rem;">{{ $statusPill['lbl'] }}</span>
-                    </div>
-                    <div class="sp-info-row">
-                        <span class="sp-info-row-label">Tests passés</span>
-                        <span class="sp-info-row-val">{{ $testAttempts->count() }}</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Test Timeline --}}
-            <div class="card sp-side-card rev rev-d2">
-                <p class="stag" style="margin-bottom:1rem;">Parcours de tests</p>
-
-                <div class="sp-timeline">
-                    @forelse($testAttempts as $attempt)
-                    <div class="sp-tl-item">
-                        <div class="sp-tl-content">
-                            <div class="sp-tl-head">
-                                <span>{{ $attempt->test->title ?? 'Test orientation' }}</span>
-                                <span class="sp-tl-score">{{ $attempt->score }}%</span>
-                            </div>
-                            <div class="sp-tl-date">
-                                {{ $attempt->completed_at ? \Carbon\Carbon::parse($attempt->completed_at)->format('d/m/Y') : 'En cours' }}
-                            </div>
-                        </div>
-                    </div>
-                    @empty
-                    <div style="text-align:center;padding:1.5rem 0;">
-                        <div style="text-align:center;margin-bottom:.5rem;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='var(--ink30)' style='width:2rem;height:2rem'><path stroke-linecap='round' stroke-linejoin='round' d='M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z' /></svg></div>
-                        <p class="sp-empty-text">Aucun test effectué pour le moment</p>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
-
-            {{-- Appointments & Quick Actions --}}
-            <div class="card sp-side-card rev rev-d3">
-                <p class="stag" style="margin-bottom:1rem;">Rendez-vous</p>
-                <form action="{{ route('counselor.appointments.store', $student) }}" method="POST" style="margin-bottom:1.5rem;">
+                <form action="{{ route('counselor.appointments.store', $student) }}" method="POST" style="display:flex; flex-direction:column; gap:.75rem; margin-bottom: 1.25rem;">
                     @csrf
-                    <div style="margin-bottom:.8rem;">
-                        <input type="datetime-local" name="scheduled_at" required
-                               style="width:100%; padding:.6rem; border:1px solid var(--ink10); border-radius:var(--r); font-family:inherit; font-size:.8rem; background:var(--paper);">
+                    <div>
+                        <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.4rem;">Date & Heure de la session</label>
+                        <input type="datetime-local" name="scheduled_at" required class="sp-select" style="background:var(--paper); cursor:pointer;">
                     </div>
-                    <div style="margin-bottom:.8rem;">
-                        <input type="text" name="notes" placeholder="Motif (optionnel)" 
-                               style="width:100%; padding:.6rem; border:1px solid var(--ink10); border-radius:var(--r); font-family:inherit; font-size:.8rem; background:var(--paper);">
+                    <div>
+                        <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.4rem;">Format du meeting</label>
+                        <select name="meeting_format" class="sp-select">
+                            <option value="virtual">💻 Visioconférence Sécurisée en ligne</option>
+                            <option value="physical">🏫 Entretien Physique en Bureau</option>
+                            <option value="hybrid">🤝 Format Hybride d'orientation</option>
+                        </select>
                     </div>
-                    <button type="submit" class="btn-fill" style="width:100%; justify-content:center; padding:.6rem;">Planifier</button>
+                    <div>
+                        <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.4rem;">Motif / Thème principal</label>
+                        <input type="text" name="notes" placeholder="Ex: Entretien de suivi vœu 1" class="sp-select" style="background:var(--paper); cursor:text;">
+                    </div>
+                    <button type="submit" class="sp-btn-fill" style="width:100%;">📅 Bloquer le Créneau</button>
                 </form>
 
                 @if($appointments->count() > 0)
-                    <div style="margin-bottom:1.5rem;">
-                        <p class="sp-info-row-label" style="margin-bottom:.5rem;">Historique</p>
+                    <span style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.5rem;">Prochains rendez-vous</span>
+                    <div style="display:flex; flex-direction:column; gap:.5rem;">
                         @foreach($appointments as $apt)
-                            <div style="font-size:.75rem; padding:.5rem; background:var(--ink06); border-radius:var(--r); margin-bottom:.4rem;">
-                                <strong>{{ $apt->scheduled_at->format('d/m/Y H:i') }}</strong>
-                                @if($apt->notes)<br><span style="color:var(--ink60);">{{ $apt->notes }}</span>@endif
+                            <div style="font-size:.74rem; padding:.65rem; background:var(--ink06); border:1px solid var(--ink10); border-radius:var(--r); display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-weight:700;">{{ $apt->scheduled_at->format('d/m/Y H:i') }}</div>
+                                    <div style="font-size:.68rem; color:var(--ink30); margin-top:.1rem;">Format : {{ $apt->notes ?: 'Orientation Individuelle' }}</div>
+                                </div>
+                                <span style="font-size:.62rem; font-weight:700; text-transform:uppercase; padding:.15rem .4rem; border-radius:4px; 
+                                    background:{{ $apt->status === 'completed' ? 'rgba(16,185,129,0.1)' : 'rgba(0, 87, 184, 0.1)' }}; 
+                                    color:{{ $apt->status === 'completed' ? '#10b981' : 'var(--accent2)' }};">
+                                    {{ $apt->status === 'completed' ? 'Fait' : 'Prévu' }}
+                                </span>
                             </div>
                         @endforeach
                     </div>
                 @endif
+            </div>
 
-                <p class="stag" style="margin-bottom:1rem;">Actions rapides</p>
-                <div style="display:flex;flex-direction:column;gap:.6rem;">
-                    <a href="mailto:{{ $student->email }}" class="btn-ghost" style="justify-content:center;">
-                        <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.85rem;height:.85rem'><path stroke-linecap='round' stroke-linejoin='round' d='M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75' /></svg>
-                        Envoyer un email
-                    </a>
-                    <button class="btn-ghost" style="justify-content:center;" onclick="window.print()">
-                        <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.85rem;height:.85rem'><path stroke-linecap='round' stroke-linejoin='round' d='M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m0 0a48.159 48.159 0 0110.5 0m-10.5 0V6.908a6.01 6.01 0 011.5-3.982m7.5 3.982V6.908a6.01 6.01 0 00-1.5-3.982M9 16.5v.75m6-.75v.75' /></svg>
-                        Imprimer la fiche
-                    </button>
+            {{-- Omnichannel Communication Center --}}
+            <div class="glass-card">
+                <p class="sp-stag">Omnicanal v5.0</p>
+                <h3 class="sp-sec-title">Console de <em>Communication</em></h3>
+
+                <form action="{{ route('counselor.student.sendMessage', $student) }}" method="POST" style="display:flex; flex-direction:column; gap:.75rem; margin-bottom: 1.5rem;">
+                    @csrf
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem;">
+                        <div>
+                            <label style="display:block; font-size:.65rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.3rem;">Canal ciblé</label>
+                            <select name="channel" id="commChannel" class="sp-select">
+                                <option value="chat">💬 Chat Interne</option>
+                                <option value="email">✉ Email direct</option>
+                                <option value="notification">🔔 Push Notification</option>
+                                <option value="sms">📱 Alerte SMS</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:.65rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.3rem;">Modèle intelligent</label>
+                            <select id="commTemplate" class="sp-select">
+                                <option value="">-- Personnalisé --</option>
+                                <option value="convocation">Convocation entretien</option>
+                                <option value="relance">Relance retard vœux</option>
+                                <option value="conseil">Recommandation filière</option>
+                                <option value="alerte">Alerte inactivité</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- Hidden helper input for template type --}}
+                    <input type="hidden" name="template_type" id="hiddenTemplateType" value="custom">
+
+                    <div>
+                        <label style="display:block; font-size:.65rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.4rem;">Corps du message</label>
+                        <textarea name="message_body" id="commBody" class="sp-textarea" required placeholder="Saisir ou charger un modèle de message..."></textarea>
+                    </div>
+
+                    <button type="submit" class="sp-btn-fill" style="width:100%;">🚀 Transmettre le Message</button>
+                </form>
+
+                {{-- Communication history --}}
+                <span style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.6rem;">Journal omnicanal des envois</span>
+                <div class="sp-comm-log">
+                    @foreach($crmCommunicationLog as $log)
+                        <div class="sp-comm-item">
+                            <div class="sp-comm-header">
+                                <span>{{ $log['icon'] }} {{ $log['channel_label'] }}</span>
+                                <span style="font-size:.65rem; color:var(--ink30); font-weight:500;">{{ $log['date'] }}</span>
+                            </div>
+                            <div style="font-weight:700; font-size:.7rem; margin-bottom:.2rem; color:var(--accent2);">{{ $log['subject'] }}</div>
+                            <p style="color:var(--ink60); font-size:.72rem; line-height:1.4;">"{{ $log['body'] }}"</p>
+                            <div style="text-align:right; font-size:.65rem; font-weight:700; color:var(--accent3); margin-top:.2rem;">
+                                ✓ {{ $log['status'] }}
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
+
         </div>
+
     </div>
+
 </div>
 
 <script>
-(function () {
-    const revEls = document.querySelectorAll('#spRoot .rev');
-    const obs = new IntersectionObserver(entries => {
-        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); } });
-    }, { threshold: .08, rootMargin: '0px 0px -30px 0px' });
-    revEls.forEach(el => obs.observe(el));
-})();
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── TAB NAVIGATION ── */
+    const tabBtns = document.querySelectorAll('.sp-tab-btn');
+    const tabPanes = document.querySelectorAll('.sp-tab-pane');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.spTab;
+
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanes.forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            const pane = document.getElementById('sp-tab-' + target);
+            if (pane) pane.classList.add('active');
+        });
+    });
+
+    /* ── INTELLIGENT COMM TEMPLATES ── */
+    const templates = {!! json_encode($crmCommunicationTemplates) !!};
+    const selTemplate = document.getElementById('commTemplate');
+    const txtBody = document.getElementById('commBody');
+    const hiddenType = document.getElementById('hiddenTemplateType');
+
+    selTemplate?.addEventListener('change', () => {
+        const selected = selTemplate.value;
+        if (selected && templates[selected]) {
+            txtBody.value = templates[selected];
+            hiddenType.value = selected;
+        } else {
+            txtBody.value = '';
+            hiddenType.value = 'custom';
+        }
+    });
+
+    /* ── VISIOCONFERENCE INTERACTIVE MOCK ACTIONS ── */
+    const btnToggleCam = document.getElementById('btnToggleCam');
+    const btnToggleMic = document.getElementById('btnToggleMic');
+    const btnToggleShare = document.getElementById('btnToggleShare');
+    const btnEndCall = document.getElementById('btnEndCall');
+    const screenShareStatus = document.getElementById('screenShareStatus');
+    const videoPlaceholder = document.getElementById('videoPlaceholder');
+    const confVideoFrame = document.getElementById('confVideoFrame');
+
+    let camActive = true;
+    let micActive = true;
+    let shareActive = false;
+
+    btnToggleCam?.addEventListener('click', () => {
+        camActive = !camActive;
+        if (camActive) {
+            btnToggleCam.classList.remove('active-off');
+            btnToggleCam.innerHTML = '📹';
+            videoPlaceholder.style.opacity = '1';
+        } else {
+            btnToggleCam.classList.add('active-off');
+            btnToggleCam.innerHTML = '❌ 📹';
+            videoPlaceholder.style.opacity = '0.3';
+        }
+    });
+
+    btnToggleMic?.addEventListener('click', () => {
+        micActive = !micActive;
+        if (micActive) {
+            btnToggleMic.classList.remove('active-off');
+            btnToggleMic.innerHTML = '🎙️';
+        } else {
+            btnToggleMic.classList.add('active-off');
+            btnToggleMic.innerHTML = '❌ 🎙️';
+        }
+    });
+
+    btnToggleShare?.addEventListener('click', () => {
+        shareActive = !shareActive;
+        if (shareActive) {
+            btnToggleShare.classList.add('active-off');
+            btnToggleShare.innerHTML = '❌ 🖥️';
+            screenShareStatus.innerHTML = 'Partage d\'écran actif · Flux audio crypté';
+            confVideoFrame.style.background = '#1a202c';
+        } else {
+            btnToggleShare.classList.remove('active-off');
+            btnToggleShare.innerHTML = '🖥️';
+            screenShareStatus.innerHTML = 'Flux audio crypté • Caméra activée';
+            confVideoFrame.style.background = '#090D16';
+        }
+    });
+
+    btnEndCall?.addEventListener('click', () => {
+        if (confirm("Voulez-vous vraiment clore cette session de visioconférence et enregistrer la fin d'appel ?")) {
+            confVideoFrame.style.background = '#111';
+            videoPlaceholder.innerHTML = '<span style="font-weight:700;color:#ef4444;font-size:1.1rem;">Visioconférence terminée</span><span style="font-size:.78rem;opacity:.7;">Entretien clos avec succès</span>';
+            document.getElementById('btnToggleCam').disabled = true;
+            document.getElementById('btnToggleMic').disabled = true;
+            document.getElementById('btnToggleShare').disabled = true;
+            btnEndCall.disabled = true;
+            btnEndCall.style.opacity = '0.3';
+        }
+    });
+
+    /* Chat Interactive direct posting */
+    const chatInput = document.getElementById('chatInput');
+    const chatContainer = document.getElementById('chatContainer');
+    const btnSendChat = document.getElementById('btnSendChat');
+
+    function sendChatMessage() {
+        const msgText = chatInput.value.trim();
+        if (!msgText) return;
+
+        const newBubble = document.createElement('div');
+        newBubble.className = 'sp-chat-bubble counselor';
+        newBubble.textContent = msgText;
+        chatContainer.appendChild(newBubble);
+        chatInput.value = '';
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        // Mock automated student reply
+        setTimeout(() => {
+            const replyBubble = document.createElement('div');
+            replyBubble.className = 'sp-chat-bubble student';
+            replyBubble.textContent = "Merci pour ces éclaircissements, Monsieur. C'est enregistré !";
+            chatContainer.appendChild(replyBubble);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 1500);
+    }
+
+    btnSendChat?.addEventListener('click', sendChatMessage);
+    chatInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendChatMessage();
+    });
+
+});
 </script>
 @endsection

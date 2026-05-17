@@ -136,6 +136,10 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
         ->name('counselor.appointments.store')
         ->middleware('role:counselor');
 
+    Route::post('/counselor/student/{student}/message', [CounselorController::class, 'sendMessage'])
+        ->name('counselor.student.message')
+        ->middleware('role:counselor');
+
     // ── Messagerie Interne ──
     Route::get('/messages', [\App\Http\Controllers\UserMessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/create', [\App\Http\Controllers\UserMessageController::class, 'create'])->name('messages.create');

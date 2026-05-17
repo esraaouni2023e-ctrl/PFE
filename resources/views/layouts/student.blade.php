@@ -22,19 +22,19 @@
         ═══════════════════════════════════════════ */
         :root {
             /* ── Core palette ── */
-            --ink:     #0b0c10;
-            --paper:   #f7f5f0;
-            --cream:   #ede9e1;
-            --warm:    #e8e1d4;
-            --accent:  #d4622a;   /* terracotta */
-            --accent2: #1a4f6e;   /* marine */
-            --accent3: #4a7c59;   /* sage */
-            --gold:    #c8973a;
-            --ink60:   rgba(11,12,16,.6);
-            --ink30:   rgba(11,12,16,.3);
-            --ink15:   rgba(11,12,16,.15);
-            --ink10:   rgba(11,12,16,.1);
-            --ink06:   rgba(11,12,16,.06);
+            --ink:     #003B8E;
+            --paper:   #FFFFFF;
+            --cream:   #F2F4F7;
+            --warm:    #E5E7EB;
+            --accent:  #FF6A00;   /* Orange principal */
+            --accent2: #0057B8;   /* Bleu principal */
+            --accent3: #FF8C1A;   /* Orange clair */
+            --gold:    #FF8C1A;
+            --ink60:   rgba(0, 59, 142, 0.6);
+            --ink30:   rgba(0, 59, 142, 0.3);
+            --ink15:   rgba(0, 59, 142, 0.15);
+            --ink10:   rgba(0, 59, 142, 0.1);
+            --ink06:   rgba(0, 59, 142, 0.06);
 
             /* ── Radii & easing ── */
             --r:   6px;
@@ -47,7 +47,7 @@
             --font-serif:    'Fraunces', serif;
             --navbar-bg:     rgba(247,245,240,.88);
             --glass-border:  rgba(11,12,16,.10);
-            --glass-border-vivid: rgba(212,98,42,.30);
+            --glass-border-vivid: rgba(255,106,0,.30);
             --chat-panel-bg: rgba(247,245,240,.97);
             --shadow-card:   0 8px 40px rgba(0,0,0,.08);
             --transition:    0.3s cubic-bezier(.4,0,.2,1);
@@ -86,7 +86,7 @@
             --ink06: rgba(240,237,230,.04);
             --navbar-bg:     rgba(16,16,13,.88);
             --glass-border:  rgba(240,237,230,.08);
-            --glass-border-vivid: rgba(212,98,42,.35);
+            --glass-border-vivid: rgba(255,106,0,.35);
             --chat-panel-bg: rgba(16,16,13,.97);
             --shadow-card:   0 8px 40px rgba(0,0,0,.35);
             --glass-bg:      rgba(240,237,230,.04);
@@ -416,8 +416,6 @@
             <li><a href="{{ route('student.dashboard') }}"    class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Accueil</a></li>
             <li><a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">Orientation</a></li>
             <li><a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">Simulateur</a></li>
-            <li><a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">Comparateur</a></li>
-            <li><a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">Vœux</a></li>
             <li><a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">Profil Académique</a></li>
             <li><a href="{{ route('student.cv.index') }}"     class="{{ request()->routeIs('student.cv.*') ? 'active' : '' }}">CV Builder</a></li>
             <li><a href="{{ route('messages.index') }}"       class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">Messagerie</a></li>
@@ -459,8 +457,6 @@
             <a href="{{ route('student.dashboard') }}"   class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Accueil</a>
             <a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">Orientation</a>
             <a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">Simulateur</a>
-            <a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">Comparateur</a>
-            <a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">Vœux</a>
             <a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">Profil Académique</a>
             <a href="{{ route('student.cv.index') }}"     class="{{ request()->routeIs('student.cv.*') ? 'active' : '' }}">CV Builder</a>
             <a href="{{ route('messages.index') }}"       class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">Messagerie</a>

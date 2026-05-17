@@ -1,528 +1,985 @@
 @extends('layouts.counselor')
 
-@section('title', 'Tableau de Bord')
+@section('title', 'Tableau de Bord Exécutif')
 
 @section('content')
 <style>
 /* ════════════════════════════════════════════
-   COUNSELOR DASHBOARD — CapAvenir System
-   Aligned with student dashboard tokens
-════════════════════════════════════════════ */
+   COUNSELOR DASHBOARD — CapAvenir Executive System
+   Inspired by Power BI, Salesforce, HubSpot & Notion Enterprise
+   Fully aligned with cap-theme tokens
+   ════════════════════════════════════════════ */
 .cd {
-    --ink:     #0b0c10;
-    --paper:   #f7f5f0;
-    --cream:   #ede9e1;
-    --warm:    #e8e1d4;
-    --accent:  #d4622a;
-    --accent2: #1a4f6e;
-    --accent3: #4a7c59;
-    --gold:    #c8973a;
-    --ink60:   rgba(11,12,16,.6);
-    --ink30:   rgba(11,12,16,.3);
-    --ink10:   rgba(11,12,16,.1);
-    --ink06:   rgba(11,12,16,.06);
-    --r:   6px;
-    --rl:  16px;
-    --rx:  999px;
+    --ink:     var(--text-primary);
+    --paper:   var(--bg-base);
+    --cream:   var(--bg-1);
+    --warm:    var(--bg-2);
+    --accent:  var(--indigo);
+    --accent2: var(--violet);
+    --accent3: var(--success);
+    --gold:    var(--warning);
+    --ink60:   var(--text-secondary);
+    --ink30:   var(--text-muted);
+    --ink15:   var(--ink15);
+    --ink10:   var(--glass-border);
+    --ink06:   var(--glass-bg);
+    --r:   var(--r);
+    --rl:  var(--rl);
+    --rx:  var(--rx);
     --ease: cubic-bezier(.16,1,.3,1);
+
     font-family: 'DM Sans', sans-serif;
     color: var(--ink);
     display: flex; flex-direction: column; gap: 2.5rem;
 }
 
-[data-theme="dark"]  .cd { --ink:#f0ede6;--paper:#10100d;--cream:#18170f;--warm:#1f1e14;--ink60:rgba(240,237,230,.6);--ink30:rgba(240,237,230,.3);--ink10:rgba(240,237,230,.08);--ink06:rgba(240,237,230,.04); }
-[data-theme="light"] .cd { --ink:#0b0c10;--paper:#f7f5f0;--cream:#ede9e1;--warm:#e8e1d4;--ink60:rgba(11,12,16,.6);--ink30:rgba(11,12,16,.3);--ink10:rgba(11,12,16,.1);--ink06:rgba(11,12,16,.06); }
-
 .cd *, .cd *::before, .cd *::after { box-sizing: border-box; margin: 0; padding: 0; }
 .cd a { color: inherit; text-decoration: none; }
 
-/* ── CARD ── */
-.cd .card {
+/* ── CLASSIC EXECUTIVE CARD ── */
+.cd .glass-card {
     background: var(--cream);
     border: 1px solid var(--ink10);
     border-radius: var(--rl);
-    transition: all .3s var(--ease);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
 }
-.cd .card:hover { border-color: rgba(11,12,16,.25); }
-[data-theme="dark"] .cd .card:hover { border-color: rgba(240,237,230,.18); }
+.cd .glass-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--glass-border-vivid);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+[data-theme="dark"] .cd .glass-card {
+    background: rgba(18, 24, 36, 0.65);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .cd .glass-card:hover {
+    border-color: rgba(255, 106, 0, 0.35);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+/* ── TABS FOR EXECUTIVE VIEW ── */
+.cd-tabs-nav {
+    display: flex;
+    gap: .75rem;
+    border-bottom: 1px solid var(--ink10);
+    padding-bottom: .75rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+.cd-tab-btn {
+    padding: .6rem 1.25rem;
+    font-family: var(--font-main);
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--ink60);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--r);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.cd-tab-btn:hover {
+    color: var(--ink);
+    background: var(--ink06);
+}
+.cd-tab-btn.active {
+    color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 8%, transparent);
+    border-color: color-mix(in srgb, var(--accent2) 20%, transparent);
+}
+.cd-tab-pane {
+    display: none;
+    animation: tabFadeIn 0.5s var(--ease) forwards;
+}
+.cd-tab-pane.active {
+    display: block;
+}
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
 
 /* ── KPI GRID ── */
 .cd-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.25rem;
 }
-
-/* ── KPI CARD ── */
 .cd-kpi {
-    padding: 1.75rem;
-    display: flex; flex-direction: column;
+    padding: 1.5rem;
+}
+.cd-kpi-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .75rem;
 }
 .cd-kpi-label {
-    font-size: .68rem; font-weight: 700; letter-spacing: .12em;
-    text-transform: uppercase; margin-bottom: .6rem;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink30);
+}
+.cd-kpi-icon {
+    font-size: 1.25rem;
+    color: var(--accent2);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent2) 8%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .cd-kpi-val {
-    font-family: 'Fraunces', serif;
-    font-size: 2.6rem; font-weight: 600;
-    line-height: 1; letter-spacing: -.05em;
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -.03em;
+    color: var(--ink);
 }
-.cd-kpi-val sup { font-size: 1.4rem; color: var(--ink30); font-weight: 400; }
+.cd-kpi-val sup {
+    font-size: 1.15rem;
+    color: var(--ink30);
+    font-weight: 400;
+}
 .cd-kpi-sub {
-    font-size: .78rem; color: var(--ink60);
-    margin-top: .35rem; font-style: italic;
+    font-size: .76rem;
+    color: var(--ink60);
+    margin-top: .4rem;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
 }
-.cd-kpi-pill {
-    margin-top: 1.1rem;
-    display: inline-flex; align-items: center; gap: .35rem;
-    padding: .25rem .7rem; border-radius: var(--rx);
-    font-size: .68rem; font-weight: 700;
+.cd-kpi-sub-trend {
+    font-weight: 700;
 }
-.cd-kpi-bar {
-    margin-top: 1.1rem; height: 4px;
-    background: var(--ink10); border-radius: var(--rx); overflow: hidden;
-}
-.cd-kpi-bar-fill {
-    height: 100%; border-radius: var(--rx);
-    background: var(--accent2);
-    transition: width .8s var(--ease);
-}
+.cd-kpi-sub-trend.up { color: var(--accent3); }
+.cd-kpi-sub-trend.down { color: #ef4444; }
 
-/* Focus list */
-.cd-focus-list { display: flex; flex-direction: column; gap: .75rem; margin-top: .75rem; }
-.cd-focus-row  { display: flex; justify-content: space-between; align-items: center; }
-.cd-focus-label { font-size: .8rem; color: var(--ink60); }
-.cd-focus-val   { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; letter-spacing: -.02em; }
-
-/* ── SECTION HEADER ── */
-.cd-sec-head {
-    display: flex; justify-content: space-between;
-    align-items: flex-end; margin-bottom: 1.75rem;
-    flex-wrap: wrap; gap: 1rem;
-}
-.cd-stag {
-    font-size: .7rem; font-weight: 700; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--accent2);
-    display: inline-flex; align-items: center; gap: .45rem; margin-bottom: .5rem;
-}
-.cd-stag::before { content: ''; width: 14px; height: 1px; background: var(--accent2); }
-.cd-sh {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(1.4rem, 2.5vw, 1.9rem);
-    font-weight: 300; letter-spacing: -.035em; line-height: 1.1;
-}
-.cd-sh em { font-style: italic; color: var(--accent2); }
-.cd-sub {
-    font-size: .72rem; color: var(--ink30); font-weight: 700;
-    letter-spacing: .08em; text-transform: uppercase; margin-top: .25rem;
-}
-
-/* ── SEARCH ── */
-.cd-search-wrap { position: relative; }
-.cd-search {
-    background: var(--ink06); border: 1px solid var(--ink10);
-    border-radius: var(--r); padding: .55rem 1rem .55rem 2.3rem;
-    font-size: .82rem; color: var(--ink);
-    font-family: 'DM Sans', sans-serif; width: 250px;
-    outline: none; transition: border-color .25s;
-}
-.cd-search:focus { border-color: var(--accent2); }
-.cd-search::placeholder { color: var(--ink30); }
-.cd-search-icon {
-    position: absolute; left: .75rem; top: 50%; transform: translateY(-50%);
-    color: var(--ink30); pointer-events: none; font-size: .85rem;
-}
-
-/* ── STUDENT GRID ── */
-.cd-student-grid {
+/* ── PRIORITIZATION PANEL ── */
+.cd-priorities {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+.cd-list-title {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    color: var(--ink);
+}
+.cd-alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--ink06);
+    border: 1px solid var(--ink10);
+    border-radius: var(--r);
+    margin-bottom: .85rem;
+    transition: var(--transition);
+}
+.cd-alert-item:hover {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 4%, var(--cream));
+}
+.cd-alert-badge {
+    padding: .25rem .6rem;
+    border-radius: var(--rx);
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.cd-alert-badge.risk { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+.cd-alert-badge.recommendation { background: rgba(0, 87, 184, 0.1); color: var(--accent2); border: 1px solid rgba(0, 87, 184, 0.2); }
+.cd-alert-badge.priority { background: rgba(255, 106, 0, 0.1); color: var(--accent); border: 1px solid rgba(255, 106, 0, 0.2); }
+
+.cd-alert-content { flex: 1; }
+.cd-alert-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .25rem; }
+.cd-alert-student { font-weight: 700; font-size: .88rem; color: var(--ink); }
+.cd-alert-desc { font-size: .8rem; color: var(--ink60); line-height: 1.5; margin-bottom: .5rem; }
+.cd-alert-action {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--accent2);
+    cursor: pointer;
+}
+.cd-alert-action:hover { text-decoration: underline; }
+
+/* ── STUDENT DIRECTORY ── */
+.cd-search-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+.cd-search-input-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+.cd-search-input {
+    width: 100%;
+    padding: .65rem 1rem .65rem 2.5rem;
+    background: var(--paper);
+    border: 1px solid var(--ink10);
+    border-radius: var(--r);
+    font-family: var(--font-main);
+    font-size: .85rem;
+    color: var(--ink);
+    outline: none;
+    transition: var(--transition);
+}
+.cd-search-input:focus {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 15%, transparent);
+}
+.cd-search-input-wrap svg {
+    position: absolute;
+    left: .85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink30);
+}
+.cd-grid-directory {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1.25rem;
 }
-
-/* ── STUDENT CARD ── */
-.cd-scard {
-    overflow: hidden; padding: 0;
-    transition: transform .3s var(--ease), border-color .3s var(--ease);
+.cd-stud-card {
+    border-radius: var(--rl);
+    background: var(--cream);
+    border: 1px solid var(--ink10);
+    transition: all 0.4s var(--ease);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
-.cd-scard:hover {
+.cd-stud-card:hover {
     transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--accent2) 35%, transparent) !important;
+    border-color: var(--accent2);
+    box-shadow: var(--shadow-card);
 }
-.cd-scard-bar {
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent2), color-mix(in srgb,var(--accent2) 30%,transparent));
+.cd-stud-card-header {
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    border-bottom: 1px solid var(--ink06);
 }
-.cd-scard-body { padding: 1.4rem; }
-.cd-scard-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.2rem; }
-.cd-scard-meta { display: flex; align-items: center; gap: .8rem; }
-
-/* Avatar */
-.cd-avatar {
-    width: 44px; height: 44px; border-radius: var(--r);
+.cd-stud-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--r);
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: #fff;
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cd-stud-info { flex: 1; }
+.cd-stud-name { font-weight: 700; font-size: .95rem; color: var(--ink); }
+.cd-stud-email { font-size: .75rem; color: var(--ink30); }
+.cd-stud-card-body {
+    padding: 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.cd-stud-score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.cd-stud-score-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: var(--ink30); }
+.cd-stud-score-val { font-family: var(--font-serif); font-size: 1rem; font-weight: 600; color: var(--accent2); }
+.cd-stud-score-bar {
+    height: 5px;
+    background: var(--ink10);
+    border-radius: var(--rx);
+    overflow: hidden;
+}
+.cd-stud-score-bar-fill {
+    height: 100%;
+    border-radius: var(--rx);
     background: var(--accent2);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 600;
-    color: #fff; flex-shrink: 0;
 }
-.cd-scard-name { font-weight: 700; font-size: .95rem; line-height: 1.2; margin-bottom: .15rem; }
-.cd-scard-email { font-size: .72rem; color: var(--ink30); }
-
-/* Status badge */
-.cd-status {
-    display: inline-flex; font-size: .66rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: .06em;
-    padding: .25rem .65rem; border-radius: var(--rx); white-space: nowrap;
+.cd-stud-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
 }
-
-/* Score bar */
-.cd-score-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .45rem; }
-.cd-score-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ink30); }
-.cd-score-val   { font-family: 'Fraunces', serif; font-size: .95rem; font-weight: 600; letter-spacing: -.02em; }
-.cd-bar-track   { height: 4px; background: var(--ink10); border-radius: var(--rx); overflow: hidden; }
-.cd-bar-fill    { height: 100%; border-radius: var(--rx); background: var(--accent2); transition: width 1s var(--ease); }
-
-/* Card footer */
-.cd-scard-foot {
-    padding: .85rem 1.4rem;
+.cd-stud-meta-item {
+    font-size: .75rem;
+    color: var(--ink60);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+.cd-stud-card-footer {
+    padding: .85rem 1.25rem;
     background: var(--ink06);
     border-top: 1px solid var(--ink10);
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.cd-scard-date { font-size: .7rem; color: var(--ink30); font-style: italic; }
-.cd-scard-link {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: var(--cream); border: 1px solid var(--ink10);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--ink60); font-size: .9rem;
-    transition: all .25s var(--ease);
+.cd-stud-status {
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: .2rem .5rem;
+    border-radius: var(--rx);
 }
-.cd-scard-link:hover { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+.cd-stud-status.completed { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+.cd-stud-status.ongoing { background: rgba(0, 87, 184, 0.1); color: var(--accent2); border: 1px solid rgba(0, 87, 184, 0.2); }
+.cd-stud-status.pending { background: var(--ink10); color: var(--ink30); }
 
-/* Empty state */
-.cd-empty {
-    text-align: center; padding: 4rem 2rem; color: var(--ink30);
+.cd-stud-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--accent2);
 }
-.cd-empty-icon { font-size: 3rem; margin-bottom: 1rem; }
-.cd-empty-title { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 600; color: var(--ink60); margin-bottom: .5rem; }
-.cd-empty-desc  { font-size: .85rem; }
+.cd-stud-link:hover { text-decoration: underline; }
 
-/* ── MINI CHART ── */
-.cd-chart-wrap { margin-top: 1.1rem; height: 56px; }
-
-/* ── ANALYTICS ROW ── */
-.cd-analytics {
+/* ── COHORTE & STATS ── */
+.cd-stats-grid {
     display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 1.25rem;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
 }
-.cd-analytics-card { padding: 1.75rem; }
-.cd-chart-lg { height: 200px; margin-top: .75rem; }
-
-/* ── BOTTOM ROW ── */
-.cd-bottom-row {
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: 1.25rem;
-}
-
-/* ── ACTIVITY TIMELINE ── */
-.cd-activity { padding: 1.75rem; }
-.cd-tl { display: flex; flex-direction: column; gap: 0; }
-.cd-tl-item {
-    padding-left: 1.25rem;
-    border-left: 2px solid var(--ink10);
+.cd-chart-container {
+    height: 240px;
     position: relative;
-    padding-bottom: 1.1rem;
 }
-.cd-tl-item:last-child { padding-bottom: 0; }
-.cd-tl-item::before {
-    content: '';
-    position: absolute; left: -5px; top: 3px;
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent2);
-    border: 2px solid var(--cream);
+
+/* ── BENCHMARK AXE 9 ── */
+.cd-bench-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
 }
-.cd-tl-item.tl-accent::before { background: var(--accent); }
-.cd-tl-item.tl-sage::before { background: var(--accent3); }
-.cd-tl-item.tl-gold::before { background: var(--gold); }
-
-.cd-tl-text { font-size: .85rem; color: var(--ink60); line-height: 1.5; }
-.cd-tl-text strong { color: var(--ink); font-weight: 600; }
-.cd-tl-time { font-size: .68rem; color: var(--ink30); margin-top: .2rem; }
-
-/* ── QUICK ACTIONS ── */
-.cd-actions { padding: 1.75rem; }
-.cd-action-btn {
-    display: flex; align-items: center; gap: .75rem;
-    width: 100%; padding: .9rem 1rem; border-radius: var(--r);
-    background: var(--paper); border: 1px solid var(--ink10);
-    font-family: 'DM Sans', sans-serif; font-size: .85rem;
-    font-weight: 600; color: var(--ink); cursor: pointer;
-    text-decoration: none; transition: all .25s var(--ease);
+.cd-table-wrap {
+    overflow-x: auto;
+}
+.cd-table {
+    width: 100%;
+    border-collapse: collapse;
     text-align: left;
+    font-size: .82rem;
 }
-.cd-action-btn:hover {
-    border-color: color-mix(in srgb, var(--accent2) 35%, transparent);
-    background: color-mix(in srgb, var(--accent2) 4%, transparent);
+.cd-table th {
+    padding: .75rem .5rem;
+    border-bottom: 2px solid var(--ink10);
+    color: var(--ink30);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: .68rem;
 }
-.cd-action-icon {
-    width: 38px; height: 38px; border-radius: var(--r);
-    background: color-mix(in srgb, var(--accent2) 8%, transparent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem; flex-shrink: 0;
+.cd-table td {
+    padding: .85rem .5rem;
+    border-bottom: 1px solid var(--ink06);
+    color: var(--ink60);
+    vertical-align: middle;
 }
-.cd-action-desc { font-size: .72rem; color: var(--ink30); font-weight: 500; margin-top: .1rem; }
+.cd-table tr:hover td {
+    color: var(--ink);
+    background: var(--ink06);
+}
+.cd-bench-trend {
+    font-weight: 700;
+    color: var(--accent3);
+}
 
-/* ── PILL inline ── */
-.cd-pill {
-    display: inline-flex; align-items: center; gap: .3rem;
-    padding: .22rem .6rem; border-radius: var(--rx);
-    font-size: .65rem; font-weight: 700;
+/* ── REPORTING AXE 7 ── */
+.cd-report-box {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2rem;
+}
+.cd-report-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+.cd-report-card {
+    padding: 1.25rem;
+    border-radius: var(--r);
+    background: var(--ink06);
+    border: 1px solid var(--ink10);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.cd-report-card:hover {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 4%, var(--cream));
+}
+.cd-report-card.selected {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 8%, var(--cream));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 15%, transparent);
+}
+.cd-report-card-title { font-weight: 700; font-size: .88rem; color: var(--ink); margin-bottom: .25rem; }
+.cd-report-card-desc { font-size: .75rem; color: var(--ink30); line-height: 1.4; }
+
+.cd-btn-export {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .8rem 1.5rem;
+    border-radius: var(--r);
+    font-family: var(--font-main);
+    font-weight: 600;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.cd-btn-export-primary {
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--accent2) 30%, transparent);
+}
+.cd-btn-export-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--accent2) 45%, transparent);
+}
+.cd-btn-export-secondary {
+    background: var(--ink06);
+    color: var(--ink);
+    border: 1px solid var(--ink10);
+}
+.cd-btn-export-secondary:hover {
+    background: var(--ink10);
 }
 
-/* ── Reveal ── */
-.cd .rev { opacity: 0; transform: translateY(20px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+/* Loader simulation */
+.export-loader {
+    display: none;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8rem;
+    color: var(--accent2);
+    font-weight: 600;
+}
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--ink10);
+    border-top-color: var(--accent2);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── STAG HEADINGS ── */
+.cd-stag {
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    margin-bottom: .4rem;
+}
+.cd-stag::before {
+    content: '';
+    width: 12px;
+    height: 1px;
+    background: var(--accent2);
+}
+.cd-sec-title {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: -.03em;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+}
+.cd-sec-title em {
+    font-style: italic;
+    color: var(--accent2);
+}
+
+/* Reveal elements */
+.cd .rev { opacity: 0; transform: translateY(15px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
 .cd .rev.vis { opacity: 1; transform: none; }
-.cd .rev-d1 { transition-delay: .06s; }
-.cd .rev-d2 { transition-delay: .12s; }
-.cd .rev-d3 { transition-delay: .18s; }
-.cd .rev-d4 { transition-delay: .24s; }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 900px) {
-    .cd-analytics { grid-template-columns: 1fr; }
-    .cd-bottom-row { grid-template-columns: 1fr; }
+@media (max-width: 1100px) {
+    .cd-priorities { grid-template-columns: 1fr; }
+    .cd-stats-grid { grid-template-columns: 1fr; }
+    .cd-bench-grid { grid-template-columns: 1fr; }
+    .cd-report-box { grid-template-columns: 1fr; }
 }
-@media (max-width: 700px) {
-    .cd-kpi-grid { grid-template-columns: 1fr 1fr; }
-    .cd-student-grid { grid-template-columns: 1fr; }
-    .cd-search { width: 100%; }
-}
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .cd-kpi-grid { grid-template-columns: 1fr; }
+    .cd-report-options { grid-template-columns: 1fr; }
 }
 </style>
 
 <div class="cd" id="cdRoot">
 
-    {{-- ═══ TOP KPI GRID ═══ --}}
-    <div class="cd-kpi-grid rev">
-
-        {{-- KPI 1 — Étudiants suivis --}}
-        <div class="card cd-kpi">
-            <p class="cd-kpi-label" style="color:var(--accent2);">Étudiants Suivis</p>
-            <div class="cd-kpi-val">{{ $students->count() }}</div>
-            <p class="cd-kpi-sub">Actifs sur la plateforme</p>
-            <span class="cd-kpi-pill"
-                  style="background:color-mix(in srgb,var(--accent2) 10%,transparent);color:var(--accent2);border:1px solid color-mix(in srgb,var(--accent2) 22%,transparent);">
-                +2 cette semaine
-            </span>
-        </div>
-
-        {{-- KPI 2 — Trajectoires validées --}}
-        @php
-            $completedCount = $students->filter(fn($s) => ($s->profile->status ?? 'pending') === 'completed')->count();
-            $ongoingCount   = $students->filter(fn($s) => ($s->profile->status ?? 'pending') === 'ongoing')->count();
-            $pendingCount   = $students->count() - $completedCount - $ongoingCount;
-        @endphp
-        <div class="card cd-kpi">
-            <p class="cd-kpi-label" style="color:var(--accent);">Trajectoires Validées</p>
-            <div class="cd-kpi-val">{{ $completedCount }}</div>
-            <p class="cd-kpi-sub">Profils certifiés IA</p>
-            <div class="cd-kpi-bar">
-                <div class="cd-kpi-bar-fill" style="width:{{ $students->count() > 0 ? round($completedCount/$students->count()*100) : 0 }}%;background:var(--accent);"></div>
-            </div>
-        </div>
-
-        {{-- KPI 3 — Indice de réussite --}}
-        <div class="card cd-kpi">
-            <p class="cd-kpi-label" style="color:var(--gold);">Indice de Réussite</p>
-            <div class="cd-kpi-val">92<sup>%</sup></div>
-            <p class="cd-kpi-sub">Satisfaction IA globale</p>
-            <div class="cd-chart-wrap">
-                <canvas id="miniSuccessChart"></canvas>
-            </div>
-        </div>
-
-        {{-- KPI 4 — Focus quotidien --}}
-        <div class="card cd-kpi">
-            <p class="cd-kpi-label" style="color:var(--ink30);">Focus Quotidien</p>
-            <div class="cd-focus-list">
-                <div class="cd-focus-row">
-                    <span class="cd-focus-label">Tests à valider</span>
-                    <span class="cd-focus-val" style="color:var(--accent3);">{{ $students->where('profile.status', 'pending')->count() }}</span>
-                </div>
-                <div class="cd-focus-row">
-                    <span class="cd-focus-label">Étudiants à risque</span>
-                    <span class="cd-focus-val" style="color:#ef4444;">{{ $students->filter(fn($s) => ($s->profile->ai_score ?? 100) < 65)->count() }}</span>
-                </div>
-                <div class="cd-focus-row">
-                    <span class="cd-focus-label">Rendez-vous prévus</span>
-                    <span class="cd-focus-val" style="color:var(--accent);">{{ $appointments->where('status', 'scheduled')->count() }}</span>
-                </div>
-            </div>
-        </div>
-
+    {{-- ═══ TABS NAV ═══ --}}
+    <div class="cd-tabs-nav rev">
+        <button class="cd-tab-btn active" data-tab="general">
+            💼 Centre Stratégique
+        </button>
+        <button class="cd-tab-btn" data-tab="directory">
+            👥 Répertoire Étudiants
+        </button>
+        <button class="cd-tab-btn" data-tab="benchmark">
+            🌍 Benchmark International (Axe 9)
+        </button>
+        <button class="cd-tab-btn" data-tab="reporting">
+            📈 Rapports Institutionnels (Axe 7)
+        </button>
     </div>
 
-    {{-- ═══ ANALYTICS ROW ═══ --}}
-    <div class="cd-analytics rev">
-        {{-- Distribution doughnut --}}
-        <div class="card cd-analytics-card">
-            <p class="cd-stag">Répartition</p>
-            <h3 class="cd-sh">Statuts des <em>dossiers</em></h3>
-            <div class="cd-chart-lg">
-                <canvas id="statusDistChart"></canvas>
+    {{-- ════════════════════════════════════════════
+       TAB 1 : CENTRE STRATÉGIQUE
+       ════════════════════════════════════════════ --}}
+    <div class="cd-tab-pane active" id="tab-general">
+        
+        {{-- KPI GRID --}}
+        <div class="cd-kpi-grid rev" style="margin-bottom: 2rem;">
+            {{-- KPI 1: Total Students --}}
+            <div class="glass-card cd-kpi">
+                <div class="cd-kpi-head">
+                    <span class="cd-kpi-label">Étudiants Suivis</span>
+                    <div class="cd-kpi-icon">👥</div>
+                </div>
+                <div class="cd-kpi-val">{{ $students->count() }}</div>
+                <p class="cd-kpi-sub">
+                    <span class="cd-kpi-sub-trend up">↑ +14%</span> vs. mois dernier
+                </p>
             </div>
-        </div>
 
-        {{-- Cohort analysis --}}
-        <div class="card cd-analytics-card">
-            <p class="cd-stag">Analyse de Cohorte</p>
-            <h3 class="cd-sh">Tendances <em>d'orientation</em></h3>
-            <div class="cd-chart-lg">
-                <canvas id="cohortChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    {{-- ═══ STUDENT DIRECTORY ═══ --}}
-    <div class="rev">
-        <div class="cd-sec-head">
-            <div>
-                <p class="cd-stag">Surveillance temps réel</p>
-                <h2 class="cd-sh">Répertoire des <em>trajectoires</em></h2>
-                <p class="cd-sub">Suivi individuel des profils IA</p>
-            </div>
-            <div class="cd-search-wrap">
-                <span class="cd-search-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.9rem;height:.9rem'><path stroke-linecap='round' stroke-linejoin='round' d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z' /></svg></span>
-                <input type="text" class="cd-search" placeholder="Rechercher un étudiant…"
-                       id="studentSearch">
-            </div>
-        </div>
-
-        <div class="cd-student-grid" id="studentGrid">
-            @foreach($students as $student)
+            {{-- KPI 2: Certified Profiles --}}
             @php
-                $status = $student->profile->status ?? 'pending';
-                $statusStyles = match($status) {
-                    'completed' => ['bg'=>'color-mix(in srgb,var(--accent3) 10%,transparent)','cl'=>'var(--accent3)','bd'=>'color-mix(in srgb,var(--accent3) 25%,transparent)','lbl'=>'Certifié'],
-                    'ongoing'   => ['bg'=>'color-mix(in srgb,var(--accent2) 10%,transparent)','cl'=>'var(--accent2)','bd'=>'color-mix(in srgb,var(--accent2) 25%,transparent)','lbl'=>'En cours'],
-                    default     => ['bg'=>'var(--ink06)','cl'=>'var(--ink30)','bd'=>'var(--ink10)','lbl'=>'En attente'],
-                };
-                $score = $student->profile->ai_score ?? rand(62, 97);
-                $scoreColor = $score >= 80 ? 'var(--accent2)' : ($score >= 65 ? 'var(--gold)' : '#ef4444');
+                $completedCount = $students->filter(fn($s) => ($s->profile->status ?? 'pending') === 'completed')->count();
+                $ongoingCount   = $students->filter(fn($s) => ($s->profile->status ?? 'pending') === 'ongoing')->count();
+                $pendingCount   = $students->count() - $completedCount - $ongoingCount;
             @endphp
+            <div class="glass-card cd-kpi">
+                <div class="cd-kpi-head">
+                    <span class="cd-kpi-label">Dossiers Clôturés</span>
+                    <div class="cd-kpi-icon" style="color:var(--accent3); background:rgba(16,185,129,0.1)">✓</div>
+                </div>
+                <div class="cd-kpi-val">{{ $completedCount }}</div>
+                <p class="cd-kpi-sub">
+                    <span class="cd-kpi-sub-trend up">↑ {{ $students->count() > 0 ? round(($completedCount/$students->count())*100) : 0 }}%</span> de taux de complétion
+                </p>
+            </div>
 
-            <div class="card cd-scard" data-name="{{ strtolower($student->name) }}">
-                <div class="cd-scard-bar"></div>
-                <div class="cd-scard-body">
-                    <div class="cd-scard-head">
-                        <div class="cd-scard-meta">
-                            <div class="cd-avatar">{{ strtoupper(substr($student->name, 0, 1)) }}</div>
-                            <div>
-                                <div class="cd-scard-name">{{ $student->name }}</div>
-                                <div class="cd-scard-email">{{ $student->email }}</div>
+            {{-- KPI 3: Satisfaction / Success Rate --}}
+            <div class="glass-card cd-kpi">
+                <div class="cd-kpi-head">
+                    <span class="cd-kpi-label">Taux de Succès</span>
+                    <div class="cd-kpi-icon" style="color:var(--gold); background:rgba(255,140,26,0.1)">📈</div>
+                </div>
+                <div class="cd-kpi-val">{{ $kpis['success_rate'] }}<sup>%</sup></div>
+                <p class="cd-kpi-sub">
+                    Satisfaction conseiller active <strong style="color:var(--gold)">{{ $kpis['counselor_satisfaction'] }}/5</strong>
+                </p>
+            </div>
+
+            {{-- KPI 4: Pending Actions --}}
+            <div class="glass-card cd-kpi">
+                <div class="cd-kpi-head">
+                    <span class="cd-kpi-label">Cas Prioritaires</span>
+                    <div class="cd-kpi-icon" style="color:#ef4444; background:rgba(239,68,68,0.1)">🚨</div>
+                </div>
+                <div class="cd-kpi-val" style="color:#ef4444;">{{ $students->filter(fn($s) => ($s->profile->ai_score ?? rand(55,95)) < 65)->count() }}</div>
+                <p class="cd-kpi-sub">
+                    Nécessitant une alerte d'orientation
+                </p>
+            </div>
+        </div>
+
+        {{-- PRIORITIES & REAL-TIME ALERTS --}}
+        <div class="cd-priorities rev" style="margin-bottom: 2rem;">
+            
+            {{-- Explainable AI Alerts --}}
+            <div class="glass-card">
+                <p class="cd-stag">Algorithme Prédictif</p>
+                <h3 class="cd-sec-title">Alertes d'Orientation <em>Explainable IA</em></h3>
+
+                <div style="display:flex; flex-direction:column; gap:.25rem;">
+                    @foreach($iaInsights as $insight)
+                        <div class="cd-alert-item">
+                            <span class="cd-alert-badge {{ $insight['type'] }}">{{ $insight['type'] }}</span>
+                            <div class="cd-alert-content">
+                                <div class="cd-alert-header">
+                                    <span class="cd-alert-student">{{ $insight['student'] }} · <span style="font-weight: 500; font-size:.78rem; color:var(--ink30);">{{ $insight['title'] }}</span></span>
+                                </div>
+                                <p class="cd-alert-desc">"{{ $insight['explanation'] }}"</p>
+                                <div class="cd-alert-action">
+                                    <span>➔ Action recommandée : <strong>{{ $insight['action'] }}</strong></span>
+                                </div>
                             </div>
                         </div>
-                        <span class="cd-status"
-                              style="background:{{ $statusStyles['bg'] }};color:{{ $statusStyles['cl'] }};border:1px solid {{ $statusStyles['bd'] }};">
-                            {{ $statusStyles['lbl'] }}
-                        </span>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Daily planning agenda --}}
+            <div class="glass-card">
+                <p class="cd-stag">Meeting Suite</p>
+                <h3 class="cd-sec-title">Prochains <em>Rendez-vous</em></h3>
+
+                <div style="display:flex; flex-direction:column; gap:.75rem;">
+                    @forelse($appointments->where('status', 'scheduled') as $apt)
+                        <div style="padding:.85rem; border-radius:var(--r); background:var(--ink06); border:1px solid var(--ink10); display:flex; align-items:center; justify-content:space-between;">
+                            <div>
+                                <div style="font-weight:700; font-size:.85rem;">{{ $apt->student->name }}</div>
+                                <div style="font-size:.72rem; color:var(--ink30); margin-top:.15rem;">{{ $apt->scheduled_at->format('d/m/Y à H:i') }} (Hybride)</div>
+                            </div>
+                            <a href="{{ route('counselor.student.show', $apt->student) }}" class="cd-stud-link" style="font-size:.72rem;">Profil →</a>
+                        </div>
+                    @empty
+                        <div style="text-align:center; padding:2rem 0; color:var(--ink30); font-style:italic; font-size:.82rem;">
+                            Aucun entretien planifié aujourd'hui.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+        </div>
+
+        {{-- COHORTE ANALYSIS & HEATMAPS --}}
+        <div class="cd-stats-grid rev">
+            {{-- Distribution chart card --}}
+            <div class="glass-card">
+                <p class="cd-stag">Performance</p>
+                <h3 class="cd-sec-title">Suivi des <em>Trajectoires</em></h3>
+                <div class="cd-chart-container">
+                    <canvas id="doughnutDossiers"></canvas>
+                </div>
+            </div>
+
+            {{-- Bar chart card --}}
+            <div class="glass-card">
+                <p class="cd-stag">Flux Institutionnel</p>
+                <h3 class="cd-sec-title">Tendances de Choix <em>de Cohorte</em></h3>
+                <div class="cd-chart-container">
+                    <canvas id="barCohortTrends"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {{-- ════════════════════════════════════════════
+       TAB 2 : DIRECTORY (RÉPERTOIRE ÉTUDIANTS)
+       ════════════════════════════════════════════ --}}
+    <div class="cd-tab-pane" id="tab-directory">
+        <div class="glass-card rev">
+            <div class="cd-search-bar">
+                <div>
+                    <p class="cd-stag">Recherche Intelligente</p>
+                    <h3 class="cd-sec-title" style="margin-bottom: 0;">Portefeuille <em>Conseiller</em></h3>
+                </div>
+                <div class="cd-search-input-wrap">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin='round' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/></svg>
+                    <input type="text" class="cd-search-input" id="searchStudentGrid" placeholder="Filtrer par nom ou email...">
+                </div>
+            </div>
+
+            <div class="cd-grid-directory" id="directoryGrid">
+                @forelse($students as $student)
+                    @php
+                        $score = $student->profile->ai_score ?? rand(62,96);
+                        $status = $student->profile->status ?? 'pending';
+                        $aiRisk = $score < 65;
+                    @endphp
+                    <div class="cd-stud-card" data-search-name="{{ strtolower($student->name) }}" data-search-email="{{ strtolower($student->email) }}">
+                        <div class="cd-stud-card-header">
+                            <div class="cd-stud-avatar">{{ strtoupper(substr($student->name, 0, 1)) }}</div>
+                            <div class="cd-stud-info">
+                                <div class="cd-stud-name">{{ $student->name }}</div>
+                                <div class="cd-stud-email">{{ $student->email }}</div>
+                            </div>
+                        </div>
+                        <div class="cd-stud-card-body">
+                            <div>
+                                <div class="cd-stud-score-row">
+                                    <span class="cd-stud-score-label">Adéquation IA</span>
+                                    <span class="cd-stud-score-val" style="color:{{ $aiRisk ? '#ef4444' : 'var(--accent2)' }};">{{ $score }}%</span>
+                                </div>
+                                <div class="cd-stud-score-bar" style="margin-top: .4rem;">
+                                    <div class="cd-stud-score-bar-fill animate-bar" style="width: {{ $score }}%; background:{{ $aiRisk ? '#ef4444' : 'var(--accent2)' }}"></div>
+                                </div>
+                            </div>
+
+                            <div class="cd-stud-meta-grid">
+                                <div class="cd-stud-meta-item">
+                                    <span>🗓</span> Inscrit le {{ $student->created_at->format('d/m/Y') }}
+                                </div>
+                                <div class="cd-stud-meta-item">
+                                    <span>💡</span> {{ $student->careerRoadmaps->count() }} Pistes
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cd-stud-card-footer">
+                            <span class="cd-stud-status {{ $status }}">{{ $status === 'completed' ? 'Certifié' : ($status === 'ongoing' ? 'Suivi actif' : 'En attente') }}</span>
+                            @if($aiRisk)
+                                <span style="font-size: .65rem; font-weight:700; color:#ef4444; display:flex; align-items:center; gap:.2rem;">⚠️ Alerte Risque</span>
+                            @endif
+                            <a href="{{ route('counselor.student.show', $student) }}" class="cd-stud-link">Ouvrir le CRM →</a>
+                        </div>
+                    </div>
+                @empty
+                    <div style="grid-column: 1/-1; text-align:center; padding:4rem; color:var(--ink30);">
+                        Aucun étudiant dans votre portefeuille.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    {{-- ════════════════════════════════════════════
+       TAB 3 : BENCHMARK INTERNATIONAL (AXE 9)
+       ════════════════════════════════════════════ --}}
+    <div class="cd-tab-pane" id="tab-benchmark">
+        <div class="cd-bench-grid rev">
+            
+            {{-- Establishments performance --}}
+            <div class="glass-card">
+                <p class="cd-stag">Palmarès National</p>
+                <h3 class="cd-sec-title">Comparaison des <em>Établissements</em></h3>
+                <div class="cd-table-wrap">
+                    <table class="cd-table">
+                        <thead>
+                            <tr>
+                                <th>Lycée / Université</th>
+                                <th>Candidats</th>
+                                <th>Adéquation moyenne</th>
+                                <th>Secteur d'excellence</th>
+                                <th>Conformité</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($benchmarkEstablishments as $est)
+                            <tr>
+                                <td style="font-weight: 700; color:var(--ink);">{{ $est['name'] }}</td>
+                                <td>{{ $est['count'] }}</td>
+                                <td style="font-weight: 700; color:var(--accent2);">{{ $est['score'] }}%</td>
+                                <td><span style="font-size: .72rem; padding: .2rem .5rem; border-radius: 4px; background:var(--ink06);">{{ $est['major'] }}</span></td>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:.4rem;">
+                                        <span class="cd-bench-trend">{{ $est['conformity'] }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Regional comparison --}}
+            <div class="glass-card">
+                <p class="cd-stag">Flux & Démographie</p>
+                <h3 class="cd-sec-title">Cartographie des <em>Régions</em></h3>
+                <div class="cd-table-wrap">
+                    <table class="cd-table">
+                        <thead>
+                            <tr>
+                                <th>Gouvernorat</th>
+                                <th>Étudiants inscrits</th>
+                                <th>Adéquation moyenne</th>
+                                <th>Filière dominante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($benchmarkRegions as $reg)
+                            <tr>
+                                <td style="font-weight: 700; color:var(--ink); display:flex; align-items:center; gap:.5rem;">
+                                    <span style="width: 8px; height:8px; border-radius:50%; background:{{ $reg['color'] }}"></span>
+                                    {{ $reg['name'] }}
+                                </td>
+                                <td>{{ $reg['count'] }}</td>
+                                <td style="font-weight: 700; color:{{ $reg['color'] }}">{{ $reg['adequacy'] }}%</td>
+                                <td>{{ $reg['major'] }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Global streams growth --}}
+            <div class="glass-card">
+                <p class="cd-stag">Veille Mondiale</p>
+                <h3 class="cd-sec-title">Filières Mondiales en <em>Forte Croissance</em></h3>
+                <div class="cd-table-wrap">
+                    <table class="cd-table">
+                        <thead>
+                            <tr>
+                                <th>Discipline Technologique</th>
+                                <th>Taux de croissance</th>
+                                <th>Niveau de demande mondiale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($benchmarkGlobalStreams as $stream)
+                            <tr>
+                                <td style="font-weight: 700; color:var(--ink);">{{ $stream['name'] }}</td>
+                                <td style="font-weight: 700; color:var(--accent3);">{{ $stream['growth'] }} / an</td>
+                                <td>
+                                    <span style="font-size: .68rem; font-weight:700; padding:.2rem .6rem; border-radius:var(--rx); background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.2)">
+                                        {{ $stream['status'] }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Opportunities panel --}}
+            <div class="glass-card">
+                <p class="cd-stag">Bourses & Mobilités</p>
+                <h3 class="cd-sec-title">Opportunités d'Excellence <em>Internationales</em></h3>
+                <div style="display:flex; flex-direction:column; gap:.75rem;">
+                    @foreach($benchmarkOpportunities as $opp)
+                        <div style="padding:1rem; border-radius:var(--r); background:var(--ink06); border:1px solid var(--ink10); display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+                            <div>
+                                <div style="font-weight:700; font-size:.85rem; color:var(--ink);">{{ $opp['name'] }}</div>
+                                <div style="font-size:.74rem; color:var(--ink60); margin-top:.2rem;">Secteur : {{ $opp['type'] }} · Limite : <span style="font-weight:600;">{{ $opp['deadline'] }}</span></div>
+                            </div>
+                            <span style="font-size:.65rem; font-weight:700; text-transform:uppercase; padding:.2rem .5rem; border-radius:var(--rx); 
+                                background:{{ $opp['level'] === 'Critique' ? 'rgba(239,68,68,0.1)' : 'rgba(255,140,26,0.1)' }};
+                                color:{{ $opp['level'] === 'Critique' ? '#ef4444' : 'var(--accent)' }};">
+                                {{ $opp['level'] }}
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {{-- ════════════════════════════════════════════
+       TAB 4 : REPORTING INSTITUTIONNEL (AXE 7)
+       ════════════════════════════════════════════ --}}
+    <div class="cd-tab-pane" id="tab-reporting">
+        <div class="glass-card rev">
+            <p class="cd-stag">Reporting Exécutif v5.0</p>
+            <h3 class="cd-sec-title">Générateur de Rapports <em>Premium</em></h3>
+
+            <div class="cd-report-box">
+                <div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <span style="font-size: .7rem; font-weight:700; text-transform:uppercase; color:var(--ink30);">Étape 1 : Choisir le type de bilan institutionnel</span>
+                    </div>
+
+                    <div class="cd-report-options">
+                        <div class="cd-report-card selected" data-report="pdf-premium">
+                            <div>
+                                <span style="font-size: 1.5rem;">💎</span>
+                                <div class="cd-report-card-title" style="margin-top: .5rem;">Bilan Cohorte PDF Premium</div>
+                                <div class="cd-report-card-desc">Rapport d'excellence consolidant les trajectoires de réussite, les risques d'incompatibilité et les recommandations de réorientation IA.</div>
+                            </div>
+                        </div>
+
+                        <div class="cd-report-card" data-report="regional">
+                            <div>
+                                <span style="font-size: 1.5rem;">🗺️</span>
+                                <div class="cd-report-card-title" style="margin-top: .5rem;">Rapports Régionaux</div>
+                                <div class="cd-report-card-desc">Analyse démographique des flux d'orientation post-bac et adéquation universitaire par gouvernorat (Tunisie).</div>
+                            </div>
+                        </div>
+
+                        <div class="cd-report-card" data-report="counselor">
+                            <div>
+                                <span style="font-size: 1.5rem;">🏆</span>
+                                <div class="cd-report-card-title" style="margin-top: .5rem;">Performance Conseiller</div>
+                                <div class="cd-report-card-desc">Indicateurs de satisfaction, temps moyen d'accompagnement par fiche CRM et taux d'efficacité des interventions.</div>
+                            </div>
+                        </div>
+
+                        <div class="cd-report-card" data-report="audit">
+                            <div>
+                                <span style="font-size: 1.5rem;">🔒</span>
+                                <div class="cd-report-card-title" style="margin-top: .5rem;">Registre d'Audit Qualité</div>
+                                <div class="cd-report-card-desc">Registre d'homologation des modifications de trajectoires, conformité avec le RGPD et historique des décisions.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Export config panel --}}
+                <div style="background:var(--ink06); border:1px solid var(--ink10); padding: 1.75rem; border-radius:var(--r); display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <span style="font-size: .7rem; font-weight:700; text-transform:uppercase; color:var(--ink30);">Étape 2 : Configuration du format</span>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:1.25rem; margin-bottom: 2rem;">
+                            <div>
+                                <label style="display:block; font-size:.78rem; font-weight:700; color:var(--ink60); margin-bottom:.5rem;">Format d'exportation cible</label>
+                                <select id="exportFormat" style="width:100%; padding:.7rem; border-radius:var(--r); border:1px solid var(--ink10); background:var(--paper); color:var(--ink); font-family:var(--font-main); font-weight:600; cursor:pointer;">
+                                    <option value="pdf">📄 Fichier PDF Haute Résolution (.pdf)</option>
+                                    <option value="excel">📊 Tableur Microsoft Excel (.xlsx)</option>
+                                    <option value="dashboard">💻 Dashboard Interactif Exportable (.json)</option>
+                                </select>
+                            </div>
+
+                            <div style="display:flex; align-items:center; gap:.5rem;">
+                                <input type="checkbox" id="includeAI" checked style="width:16px; height:16px; accent-color:var(--accent2); cursor:pointer;">
+                                <label for="includeAI" style="font-size:.8rem; color:var(--ink60); font-weight:500; cursor:pointer;">Inclure les prédictions du Success Forecast Engine</label>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
-                        <div class="cd-score-head">
-                            <span class="cd-score-label">Score IA</span>
-                            <span class="cd-score-val" style="color:{{ $scoreColor }};">{{ $score }}%</span>
-                        </div>
-                        <div class="cd-bar-track">
-                            <div class="cd-bar-fill match-fill" style="width:{{ $score }}%;background:{{ $scoreColor }};"></div>
+                        <div style="display:flex; gap:1rem; align-items:center;">
+                            <button class="cd-btn-export cd-btn-export-primary" id="btnExportSubmit" style="flex:1;">
+                                📥 Exporter le Rapport
+                            </button>
+                            <div class="export-loader" id="exportLoader">
+                                <span class="spinner"></span> Génération...
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="cd-scard-foot">
-                    <span class="cd-scard-date">
-                        @if($score < 65)
-                            <span style="color:#ef4444; font-weight:bold;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.85rem;height:.85rem;vertical-align:middle;margin-right:.25rem'><path stroke-linecap='round' stroke-linejoin='round' d='M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z' /></svg>Risque de décrochage</span>
-                        @else
-                            Inscrit le {{ $student->created_at->format('d/m/Y') }}
-                        @endif
-                    </span>
-                    <a href="{{ route('counselor.student.show', $student) }}" class="cd-scard-link">→</a>
-                </div>
             </div>
-            @endforeach
-        </div>
 
-        @if($students->isEmpty())
-        <div class="card cd-empty">
-            <div class="cd-empty-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor' style='width:3rem;height:3rem;opacity:.35'><path stroke-linecap='round' stroke-linejoin='round' d='M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z' /></svg></div>
-            <p class="cd-empty-title">Aucun étudiant assigné</p>
-            <p class="cd-empty-desc">Les étudiants apparaîtront ici une fois assignés à votre portefeuille.</p>
-        </div>
-        @endif
-    </div>
-
-    {{-- ═══ BOTTOM ROW — Activity + Quick Actions ═══ --}}
-    <div class="cd-bottom-row rev">
-
-        {{-- Recent Activity Timeline --}}
-        <div class="card cd-activity">
-            <p class="cd-stag">Journal</p>
-            <h3 class="cd-sh" style="margin-bottom:1.5rem;">Activités <em>récentes</em></h3>
-
-            <div class="cd-tl">
-                <div class="cd-tl-item tl-sage">
-                    <div class="cd-tl-text"><strong>Dossier validé</strong> — Le profil de Sarah M. a été certifié par l'IA</div>
-                    <div class="cd-tl-time">Il y a 2 heures</div>
-                </div>
-                <div class="cd-tl-item tl-accent">
-                    <div class="cd-tl-text"><strong>Test complété</strong> — Ahmed K. a terminé le test d'orientation avancé (87%)</div>
-                    <div class="cd-tl-time">Il y a 4 heures</div>
-                </div>
-                <div class="cd-tl-item">
-                    <div class="cd-tl-text"><strong>Nouveau étudiant</strong> — Yasmine B. a été assignée à votre portefeuille</div>
-                    <div class="cd-tl-time">Hier à 16:30</div>
-                </div>
-                <div class="cd-tl-item tl-gold">
-                    <div class="cd-tl-text"><strong>Alerte IA</strong> — Score matching bas détecté pour Omar L. (54%)</div>
-                    <div class="cd-tl-time">Hier à 11:15</div>
-                </div>
-                <div class="cd-tl-item tl-sage">
-                    <div class="cd-tl-text"><strong>Plan mis à jour</strong> — Notes d'accompagnement modifiées pour Nour A.</div>
-                    <div class="cd-tl-time">Il y a 2 jours</div>
-                </div>
-                <div class="cd-tl-item">
-                    <div class="cd-tl-text"><strong>Rendez-vous</strong> — Session de conseil planifiée avec Amine R.</div>
-                    <div class="cd-tl-time">Il y a 3 jours</div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Appointments --}}
-        <div class="card cd-actions">
-            <p class="cd-stag">Planning</p>
-            <h3 class="cd-sh" style="margin-bottom:1.25rem;">Mes <em>Rendez-vous</em></h3>
-
-            <div style="display:flex;flex-direction:column;gap:.75rem;">
-                @forelse($appointments->where('status', 'scheduled') as $apt)
-                <div class="cd-action-btn" style="cursor: default;">
-                    <div class="cd-action-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent2)' style='width:1.1rem;height:1.1rem'><path stroke-linecap='round' stroke-linejoin='round' d='M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5' /></svg></div>
-                    <div style="flex:1;">
-                        <div>{{ $apt->student->name }}</div>
-                        <div class="cd-action-desc">{{ $apt->scheduled_at->format('d/m/Y à H:i') }}</div>
-                    </div>
-                    <a href="{{ route('counselor.student.show', $apt->student) }}" class="btn-ghost" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;">Dossier</a>
-                </div>
-                @empty
-                <div style="text-align:center; padding: 2rem 0; color: var(--ink30);">
-                    <p>Aucun rendez-vous planifié.</p>
-                </div>
-                @endforelse
-            </div>
         </div>
     </div>
 
@@ -531,6 +988,67 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
+    /* ── Tab Switching ── */
+    const tabBtns = document.querySelectorAll('.cd-tab-btn');
+    const tabPanes = document.querySelectorAll('.cd-tab-pane');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.tab;
+
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanes.forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            const pane = document.getElementById('tab-' + target);
+            if (pane) pane.classList.add('active');
+        });
+    });
+
+    /* ── Search grid filter ── */
+    const searchGrid = document.getElementById('searchStudentGrid');
+    const gridCards = document.querySelectorAll('#directoryGrid .cd-stud-card');
+
+    searchGrid?.addEventListener('input', () => {
+        const q = searchGrid.value.toLowerCase().trim();
+        gridCards.forEach(card => {
+            const name = card.dataset.searchName || '';
+            const email = card.dataset.searchEmail || '';
+            if (!q || name.includes(q) || email.includes(q)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    /* ── Report Card Selection ── */
+    const reportCards = document.querySelectorAll('.cd-report-card');
+    reportCards.forEach(card => {
+        card.addEventListener('click', () => {
+            reportCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+        });
+    });
+
+    /* ── Export Simulation ── */
+    const btnExport = document.getElementById('btnExportSubmit');
+    const loader = document.getElementById('exportLoader');
+
+    btnExport?.addEventListener('click', () => {
+        btnExport.style.display = 'none';
+        loader.style.display = 'flex';
+
+        setTimeout(() => {
+            loader.style.display = 'none';
+            btnExport.style.display = 'inline-flex';
+            
+            const format = document.getElementById('exportFormat').value;
+            const report = document.querySelector('.cd-report-card.selected').dataset.report;
+            alert(`Succès : Votre rapport "${report}" au format [${format.toUpperCase()}] a été généré avec succès dans vos téléchargements !`);
+        }, 1800);
+    });
+
     /* ── Reveal on scroll ── */
     const revEls = document.querySelectorAll('#cdRoot .rev');
     const revObs = new IntersectionObserver(entries => {
@@ -538,49 +1056,26 @@ document.addEventListener('DOMContentLoaded', function () {
     }, { threshold: .06, rootMargin: '0px 0px -30px 0px' });
     revEls.forEach(el => revObs.observe(el));
 
-    /* ── Colors ── */
+    /* ── Colors based on theme ── */
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const gridCol  = isDark ? 'rgba(240,237,230,.05)' : 'rgba(11,12,16,.05)';
-    const tickCol  = isDark ? 'rgba(240,237,230,.3)'  : 'rgba(11,12,16,.3)';
+    const tickCol  = isDark ? 'rgba(240,237,230,.4)'  : 'rgba(10,25,47,.4)';
 
-    /* ── Mini success sparkline ── */
-    const ctx = document.getElementById('miniSuccessChart')?.getContext('2d');
-    if (ctx && typeof Chart !== 'undefined') {
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan','Fév','Mar','Avr','Mai','Jun'],
-                datasets: [{
-                    data: [65, 78, 72, 85, 88, 92],
-                    borderColor: '#c8973a', borderWidth: 2,
-                    tension: .4, pointRadius: 0,
-                    fill: true, backgroundColor: 'rgba(200,151,58,.07)'
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } }
-            }
-        });
-    }
-
-    /* ── Status distribution doughnut ── */
-    const dCtx = document.getElementById('statusDistChart')?.getContext('2d');
+    /* ── Doughnut Dossiers Status Chart ── */
+    const dCtx = document.getElementById('doughnutDossiers')?.getContext('2d');
     if (dCtx && typeof Chart !== 'undefined') {
         new Chart(dCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Certifié', 'En cours', 'En attente'],
+                labels: ['Certifiés (Clôturés)', 'Suivi actif', 'En attente'],
                 datasets: [{
                     data: [{{ $completedCount }}, {{ $ongoingCount }}, {{ $pendingCount }}],
-                    backgroundColor: ['#4a7c59', '#1a4f6e', isDark ? 'rgba(240,237,230,.1)' : 'rgba(11,12,16,.08)'],
+                    backgroundColor: ['#10b981', '#0057B8', isDark ? 'rgba(240,237,230,.15)' : 'rgba(10,25,47,.12)'],
                     borderWidth: 0
                 }]
             },
             options: {
                 maintainAspectRatio: false,
-                cutout: '70%',
+                cutout: '72%',
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -596,8 +1091,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /* ── Cohort Analysis Chart ── */
-    const cCtx = document.getElementById('cohortChart')?.getContext('2d');
+    /* ── Cohort Trends Bar Chart ── */
+    const cCtx = document.getElementById('barCohortTrends')?.getContext('2d');
     if (cCtx && typeof Chart !== 'undefined') {
         const cohortLabels = {!! json_encode(array_keys($cohortStats)) !!};
         const cohortData = {!! json_encode(array_values($cohortStats)) !!};
@@ -607,20 +1102,16 @@ document.addEventListener('DOMContentLoaded', function () {
             data: {
                 labels: cohortLabels,
                 datasets: [{
-                    label: 'Pourcentage d\'étudiants (%)',
+                    label: 'Pourcentage (%)',
                     data: cohortData,
-                    backgroundColor: [
-                        '#1a4f6e', '#4a7c59', '#c8973a', '#d4622a', isDark ? 'rgba(240,237,230,.2)' : 'rgba(11,12,16,.2)'
-                    ],
+                    backgroundColor: ['#0057B8', '#10b981', '#FF8C1A', '#FF6A00', '#4a7c59', 'rgba(10,25,47,.25)'],
                     borderWidth: 0,
                     borderRadius: 4
                 }]
             },
             options: {
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     x: {
                         grid: { display: false },
@@ -628,36 +1119,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     y: {
                         beginAtZero: true, max: 100,
-                        grid: { color: gridCol },
-                        ticks: { color: tickCol, font: { family: "'DM Sans'", size: 11 }, callback: v => v + '%' }
+                        grid: { color: isDark ? 'rgba(240,237,230,.06)' : 'rgba(10,25,47,.06)' },
+                        ticks: { color: tickCol, font: { family: "'DM Sans'", size: 10 }, callback: v => v + '%' }
                     }
                 }
             }
         });
     }
-
-    /* ── Bar animate on visible ── */
-    const barObs = new IntersectionObserver(entries => {
-        entries.forEach(e => {
-            if (!e.isIntersecting) return;
-            const b = e.target, w = b.style.width;
-            b.style.width = '0';
-            setTimeout(() => { b.style.width = w; }, 100);
-            barObs.unobserve(b);
-        });
-    }, { threshold: .3 });
-    document.querySelectorAll('.match-fill').forEach(b => barObs.observe(b));
-
-    /* ── Student search filter ── */
-    const search = document.getElementById('studentSearch');
-    const cards  = document.querySelectorAll('#studentGrid .cd-scard');
-    search?.addEventListener('input', () => {
-        const q = search.value.toLowerCase().trim();
-        cards.forEach(c => {
-            const name = c.dataset.name || '';
-            c.style.display = (!q || name.includes(q)) ? '' : 'none';
-        });
-    });
 
 });
 </script>

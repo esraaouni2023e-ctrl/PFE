@@ -8,22 +8,22 @@
    NOVA — CapAvenir System
 ════════════════════════════════════════════ */
     .db {
-        --ink: #0b0c10;
-        --paper: #f7f5f0;
-        --cream: #ede9e1;
-        --warm: #e8e1d4;
-        --accent: #d4622a;
-        /* terracotta */
-        --accent2: #1a4f6e;
-        /* marine */
-        --accent3: #4a7c59;
-        /* sage */
-        --gold: #c8973a;
-        --ink60: rgba(11, 12, 16, .6);
-        --ink30: rgba(11, 12, 16, .3);
-        --ink15: rgba(11, 12, 16, .15);
-        --ink10: rgba(11, 12, 16, .1);
-        --ink06: rgba(11, 12, 16, .06);
+        --ink: #003B8E;
+        --paper: #FFFFFF;
+        --cream: #F2F4F7;
+        --warm: #E5E7EB;
+        --accent: #FF6A00;
+        /* Orange principal */
+        --accent2: #0057B8;
+        /* Bleu principal */
+        --accent3: #FF8C1A;
+        /* Orange clair */
+        --gold: #FF8C1A;
+        --ink60: rgba(0, 59, 142, .6);
+        --ink30: rgba(0, 59, 142, .3);
+        --ink15: rgba(0, 59, 142, .15);
+        --ink10: rgba(0, 59, 142, .1);
+        --ink06: rgba(0, 59, 142, .06);
         --r: 6px;
         --rl: 16px;
         --rx: 999px;
@@ -48,15 +48,15 @@
     }
 
     [data-theme="light"] .db {
-        --ink: #0b0c10;
-        --paper: #f7f5f0;
-        --cream: #ede9e1;
-        --warm: #e8e1d4;
-        --ink60: rgba(11, 12, 16, .6);
-        --ink30: rgba(11, 12, 16, .3);
-        --ink15: rgba(11, 12, 16, .15);
-        --ink10: rgba(11, 12, 16, .1);
-        --ink06: rgba(11, 12, 16, .06);
+        --ink: #003B8E;
+        --paper: #FFFFFF;
+        --cream: #F2F4F7;
+        --warm: #E5E7EB;
+        --ink60: rgba(0, 59, 142, .6);
+        --ink30: rgba(0, 59, 142, .3);
+        --ink15: rgba(0, 59, 142, .15);
+        --ink10: rgba(0, 59, 142, .1);
+        --ink06: rgba(0, 59, 142, .06);
     }
 
     .db *,

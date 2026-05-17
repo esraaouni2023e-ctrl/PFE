@@ -3,7 +3,7 @@
 
 @section('content')
 <style>
-:root{--ink:#0b0c10;--paper:#f7f5f0;--cream:#ede9e1;--warm:#e8e1d4;--accent:#d4622a;--accent2:#1a4f6e;--accent3:#4a7c59;--gold:#c8973a;--ink60:rgba(11,12,16,.6);--ink30:rgba(11,12,16,.3);--ink15:rgba(11,12,16,.15);--ink10:rgba(11,12,16,.1);--ink06:rgba(11,12,16,.06);--r:8px;--rl:16px;--rx:999px;--ease:cubic-bezier(.16,1,.3,1)}
+:root{--ink:#003B8E;--paper:#FFFFFF;--cream:#F2F4F7;--warm:#E5E7EB;--accent:#FF6A00;--accent2:#0057B8;--accent3:#FF8C1A;--gold:#FF8C1A;--ink60:rgba(0,59,142,.6);--ink30:rgba(0,59,142,.3);--ink15:rgba(0,59,142,.15);--ink10:rgba(0,59,142,.1);--ink06:rgba(0,59,142,.06);--r:8px;--rl:16px;--rx:999px;--ease:cubic-bezier(.16,1,.3,1)}
 .cp{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--paper);padding:2rem 2.5rem 5rem;max-width:1300px;margin:0 auto}
 .cp *,.cp *::before,.cp *::after{box-sizing:border-box;margin:0;padding:0}
 /* Header */
@@ -146,7 +146,7 @@
 <script>
 (function() {
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-    const COLORS = ['#d4622a','#1a4f6e','#4a7c59','#c8973a'];
+    const COLORS = ['#FF6A00','#0057B8','#FF8C1A','#003B8E'];
     let radarInstance = null;
 
     window.lancer = async function() {
