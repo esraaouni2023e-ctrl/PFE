@@ -78,7 +78,9 @@ class RiasecTestController extends Controller
         $userId = Auth::id();
         $catState = $this->adaptiveTestEngine->getSessionState($sessionId);
 
-        if ($catState['is_completed'] || $this->testManager->isTestCompleted($userId, $sessionId)) {
+        $catCompleted = $catState['is_completed'] ?? false;
+
+        if ($catCompleted || $this->testManager->isTestCompleted($userId, $sessionId, $catCompleted)) {
             if (! session('riasec_profile_id')) {
                 return redirect()->route('riasec.complete');
             }
@@ -145,9 +147,10 @@ class RiasecTestController extends Controller
 
             // Traitement par le moteur adaptatif bayésien
             $catState = $this->adaptiveTestEngine->processAnswer($sessionId, $answer, $tempsMs);
-            $progress = $this->testManager->getProgress($userId, $sessionId);
+            $catCompleted = $catState['is_completed'] ?? false;
+            $progress = $this->testManager->getProgress($userId, $sessionId, $catCompleted);
 
-            $stop = $catState['is_completed'];
+            $stop = $catCompleted;
             
             // Calcul de la confiance moyenne (top 3) pour affichage
             $certainties = collect($catState['dimensions'])->pluck('certainty')->sortDesc()->take(3);
@@ -213,10 +216,14 @@ class RiasecTestController extends Controller
         $userId = Auth::id();
         $guestId = Auth::check() ? null : session()->getId();
 
-        $isCompleted = $this->testManager->isTestCompleted($userId, $sessionId);
+        $isCompleted  = $this->testManager->isTestCompleted($userId, $sessionId);
         $stoppedEarly = session('riasec_stopped_early', false);
 
-        if (! $isCompleted && ! $stoppedEarly) {
+        // Vérification via le cache CAT également
+        $catState     = $this->adaptiveTestEngine->getSessionState($sessionId);
+        $catCompleted = $catState['is_completed'] ?? false;
+
+        if (! $isCompleted && ! $stoppedEarly && ! $catCompleted) {
             $nextQuestion = $this->testManager->getNextQuestion($userId, $sessionId);
 
             if ($nextQuestion) {
@@ -315,51 +322,6 @@ class RiasecTestController extends Controller
             ->with('info', 'Votre session de test a ete reinitialisee.');
     }
 
-    public function autoRun(Request $request): RedirectResponse
-    {
-        $userId = Auth::id();
-        $guestId = Auth::check() ? null : session()->getId();
-        $sessionId = $this->testManager->generateSessionId();
-
-        session([
-            'riasec_session_id' => $sessionId,
-            'riasec_started_at' => now()->toIso8601String(),
-            'riasec_current_step' => 1,
-        ]);
-
-        $questions = $this->testManager->getAllQuestions();
-
-        if ($questions->isEmpty()) {
-            return redirect()->route('riasec.question.entry')
-                ->with('error', 'Aucune question disponible. Verifiez que les donnees sont bien importees.');
-        }
-
-        $defaultValues = [3, 4, 3, 2, 4, 3, 5, 3];
-
-        foreach ($questions as $i => $question) {
-            $valeur = max(1, min(5, $defaultValues[$i % count($defaultValues)]));
-
-            try {
-                $this->testManager->saveAnswer(
-                    userId: $userId,
-                    questionId: $question->id,
-                    score: $valeur,
-                    sessionId: $sessionId,
-                    guestId: $guestId,
-                );
-            } catch (\Throwable) {
-            }
-        }
-
-        $profil = $this->testManager->saveProfile($userId, $sessionId, $guestId);
-        session(['riasec_profile_id' => $profil->id]);
-
-        session()->forget(['riasec_current_step', 'riasec_started_at']);
-        $this->testManager->invalidateSessionCache($sessionId);
-
-        return redirect()->route('riasec.results')
-            ->with('success', 'Simulation express terminee. Voici votre profil psychometrique complet.');
-    }
 
     public function progressJson(Request $request): JsonResponse
     {

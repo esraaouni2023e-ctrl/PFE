@@ -4,37 +4,50 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\WhatIfRequest;
+use App\Models\Formation;
 use App\Models\SimulationHistory;
+use App\Services\FutureSimulatorService;
 use App\Services\ScoreFGService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * WhatIfController — Simulateur What-If pour le calcul du Score FG.
+ * WhatIfController — Future Simulator / What-If Engine.
  *
- * Permet à l'étudiant de simuler différents scénarios de notes
- * et de voir immédiatement les formations accessibles.
+ * Permet à l'étudiant de simuler différents scénarios académiques
+ * et professionnels via 7 modules de simulation.
  */
 class WhatIfController extends Controller
 {
-    public function __construct(private readonly ScoreFGService $scoreFgService) {}
+    public function __construct(
+        private readonly ScoreFGService $scoreFgService,
+        private readonly FutureSimulatorService $simulator,
+    ) {}
 
     /**
      * Affiche la page du simulateur.
      */
     public function index(): \Illuminate\View\View
     {
-        $user             = auth()->user();
-        $profile          = $user->profile;
+        $user    = auth()->user();
+        $profile = $user->profile;
+
         $historiqueRecent = $user->simulationHistory()
-                                 ->latest()
-                                 ->limit(5)
-                                 ->get();
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $formations = Formation::orderBy('nom')->get();
 
         return view('student.whatif.index', [
-            'sections'        => $this->scoreFgService->getSections(),
-            'profile'         => $profile,
-            'historiqueRecent' => $historiqueRecent,
+            'sections'          => $this->scoreFgService->getSections(),
+            'profile'           => $profile,
+            'historiqueRecent'  => $historiqueRecent,
+            'formations'        => $formations,
+            'pays'              => $this->simulator->getPaysDisponibles(),
+            'niveaux'           => $this->simulator->getNiveauxDisponibles(),
+            'secteursData'      => $this->simulator->getSecteursEmployabilite(),
+            'compatibilite'     => $this->simulator->calculerCompatibiliteCarriere($user),
         ]);
     }
 
@@ -92,6 +105,49 @@ class WhatIfController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Erreur de calcul.'], 500);
+        }
+    }
+
+    /**
+     * Endpoint unifié pour les simulations avancées (AJAX).
+     */
+    public function simulerAvance(Request $request): JsonResponse
+    {
+        $type = $request->input('type');
+
+        try {
+            $result = match ($type) {
+                'variation_notes' => $this->simulator->simulerVariationNotes(
+                    $request->input('section_bac'),
+                    (float) $request->input('moyenne_generale'),
+                    $request->input('notes', []),
+                ),
+                'changement_specialite' => $this->simulator->simulerChangementSpecialite(
+                    $request->input('section_actuelle'),
+                    (float) $request->input('moyenne_generale'),
+                    $request->input('notes', []),
+                    $request->input('nouvelle_section'),
+                ),
+                'filiere_alternative' => $this->simulator->simulerFiliereAlternative(
+                    $request->input('formation_ids', []),
+                ),
+                'etudes_etranger' => $this->simulator->simulerEtudesEtranger(
+                    $request->input('pays', 'france'),
+                    (int) $request->input('duree', 3),
+                ),
+                'roi' => $this->simulator->calculerROI(
+                    $request->input('formation_id'),
+                    $request->input('niveau', 'licence'),
+                ),
+                default => throw new \InvalidArgumentException('Type de simulation invalide.'),
+            };
+
+            return response()->json(['success' => true, 'data' => $result]);
+
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Erreur lors de la simulation.'], 500);
         }
     }
 

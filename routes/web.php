@@ -81,6 +81,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
         Route::prefix('whatif')->name('whatif.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Student\WhatIfController::class, 'index'])->name('index');
             Route::post('/calculer', [\App\Http\Controllers\Student\WhatIfController::class, 'calculer'])->name('calculer');
+            Route::post('/simuler-avance', [\App\Http\Controllers\Student\WhatIfController::class, 'simulerAvance'])->name('simuler-avance');
             Route::get('/matieres', [\App\Http\Controllers\Student\WhatIfController::class, 'getMatieres'])->name('matieres');
             Route::get('/historique', [\App\Http\Controllers\Student\WhatIfController::class, 'historique'])->name('historique');
             Route::delete('/historique/{simulation}', [\App\Http\Controllers\Student\WhatIfController::class, 'destroy'])->name('historique.destroy');
@@ -232,9 +233,7 @@ Route::prefix('riasec')
         Route::delete('/reinitialiser', [\App\Http\Controllers\RiasecTestController::class, 'reset'])
             ->name('reset');
 
-        // ── Simulation express (toutes étapes en 1 clic) ────────────────
-        Route::post('/auto', [\App\Http\Controllers\RiasecTestController::class, 'autoRun'])
-            ->name('auto');
+
 
         // ── Résultats (accessible sans session active, via profile_id) ──
         Route::get('/resultats', [\App\Http\Controllers\RiasecTestController::class, 'results'])

@@ -94,6 +94,36 @@
 
 .likert-legend { display: flex; justify-content: space-between; font-size: .7rem; color: var(--ink30); padding: 0 .2rem; margin-bottom: 1.8rem; }
 
+/* ── Choice Options (QCM) ── */
+.choice-wrap { display: flex; flex-direction: column; gap: .75rem; margin-bottom: 1.5rem; }
+.choice-option input[type="radio"] { display: none; }
+.choice-option label {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.1rem 1.4rem; border-radius: var(--r);
+    border: 1.5px solid var(--glass-border);
+    background: var(--ink06); cursor: pointer;
+    transition: all .25s var(--ease);
+}
+.choice-option label:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 5%, transparent); }
+.choice-option input:checked + label {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.choice-indicator {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--ink30); position: relative;
+    transition: all .2s;
+}
+.choice-option input:checked + label .choice-indicator { border-color: var(--accent); }
+.choice-option input:checked + label .choice-indicator::after {
+    content: ''; position: absolute; top: 4px; left: 4px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+}
+.choice-label { font-size: .95rem; font-weight: 500; color: var(--ink); }
+
+
 /* ── Navigation buttons ── */
 .q-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 
@@ -241,9 +271,15 @@
         </div>
 
         {{-- Texte --}}
-        <p class="q-text">{{ $question->texte_fr }}</p>
+        <p class="q-text">{{ $question->texte }}</p>
         <p style="font-size:.82rem;color:var(--ink60);line-height:1.55;margin-top:-1rem;margin-bottom:1.4rem;">
-            Sur une echelle de 1 a 5 (1 = Pas du tout, 5 = Tout a fait), a quel point cette activite vous attire-t-elle ?
+            @if($question->type_reponse === 'likert')
+                Sur une échelle de 1 à 5 (1 = Pas du tout, 5 = Tout à fait), à quel point êtes-vous d'accord ?
+            @elseif($question->type_reponse === 'choice')
+                Sélectionnez la réponse qui vous semble correcte ou qui vous correspond le mieux.
+            @else
+                Répondez par Oui ou par Non.
+            @endif
         </p>
 
         {{-- Likert --}}
@@ -252,35 +288,65 @@
             <input type="hidden" name="question_id" value="{{ $question->id }}">
             <input type="hidden" name="temps_ms" id="tempsMsField" value="">
 
-            <div class="likert-wrap">
-                @php
-                $icons = [
-                    1=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
-                    2=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5-2 4-2 4 2 4 2"/></svg>',
-                    3=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>',
-                    4=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/></svg>',
-                    5=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 11 12 14 22 4"/></svg>'
-                ];
-                $lbls   = [1=>'Pas du tout',2=>'Peu',3=>'Neutre',4=>'Plutôt',5=>'Tout à fait'];
-                @endphp
-                @foreach([1,2,3,4,5] as $v)
-                <div class="likert-option">
-                    <input type="radio" id="v{{ $v }}" name="valeur" value="{{ $v }}"
-                           {{ $existingAnswer == $v ? 'checked' : '' }}
-                           x-on:change="onSelect({{ $v }})">
-                    <label for="v{{ $v }}">
-                        <span class="likert-emoji" style="color:var(--ink30)">{!! $icons[$v] !!}</span>
-                        <span class="likert-num">{{ $v }}</span>
-                        <span class="likert-lbl">{{ $lbls[$v] }}</span>
-                    </label>
+            @if($question->type_reponse === 'likert')
+                <div class="likert-wrap">
+                    @php
+                    $icons = [
+                        1=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+                        2=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5-2 4-2 4 2 4 2"/></svg>',
+                        3=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>',
+                        4=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/></svg>',
+                        5=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 11 12 14 22 4"/></svg>'
+                    ];
+                    $lbls   = [1=>'Pas du tout',2=>'Peu',3=>'Neutre',4=>'Plutôt',5=>'Tout à fait'];
+                    @endphp
+                    @foreach([1,2,3,4,5] as $v)
+                    <div class="likert-option">
+                        <input type="radio" id="v{{ $v }}" name="valeur" value="{{ $v }}"
+                               {{ $existingAnswer == $v ? 'checked' : '' }}
+                               x-on:change="onSelect({{ $v }})">
+                        <label for="v{{ $v }}">
+                            <span class="likert-emoji" style="color:var(--ink30)">{!! $icons[$v] !!}</span>
+                            <span class="likert-num">{{ $v }}</span>
+                            <span class="likert-lbl">{{ $lbls[$v] }}</span>
+                        </label>
+                    </div>
+                    @endforeach
                 </div>
-                @endforeach
-            </div>
-            <div class="likert-legend">
-                <span>Pas du tout d'accord</span>
-                <span>Tout à fait d'accord</span>
-            </div>
+                <div class="likert-legend">
+                    <span>Pas du tout d'accord</span>
+                    <span>Tout à fait d'accord</span>
+                </div>
+            @elseif($question->type_reponse === 'choice')
+                <div class="choice-wrap">
+                    @foreach($question->options ?? [] as $idx => $opt)
+                        <div class="choice-option">
+                            <input type="radio" id="opt{{ $idx }}" name="valeur" value="{{ $opt['valeur'] }}"
+                                   {{ $existingAnswer == $opt['valeur'] ? 'checked' : '' }}
+                                   x-on:change="onSelect({{ $opt['valeur'] }})">
+                            <label for="opt{{ $idx }}">
+                                <span class="choice-indicator"></span>
+                                <span class="choice-label">{{ $opt['label'] }}</span>
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            @elseif($question->type_reponse === 'boolean')
+                <div class="likert-wrap">
+                    @foreach([0 => 'Non', 1 => 'Oui'] as $v => $l)
+                        <div class="likert-option" style="flex: 1; max-width: 120px;">
+                            <input type="radio" id="b{{ $v }}" name="valeur" value="{{ $v }}"
+                                   {{ $existingAnswer === $v ? 'checked' : '' }}
+                                   x-on:change="onSelect({{ $v }})">
+                            <label for="b{{ $v }}" style="width: 100%;">
+                                <span class="likert-num" style="font-size: 1.1rem;">{{ $l }}</span>
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </form>
+
 
         {{-- Navigation --}}
         <div class="q-nav">

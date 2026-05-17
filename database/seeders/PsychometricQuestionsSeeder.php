@@ -19,9 +19,12 @@ class PsychometricQuestionsSeeder extends Seeder
             $this->intraDomainQuestions(),
             $this->gatbQuestions(),
             $this->bigFiveQuestions(),
+            $this->resilienceQuestions(),
+            $this->attentionCheckQuestions(),
             $this->schwartzQuestions(),
             $this->cddqQuestions(),
-            $this->parcoursScolaireQuestions()
+            $this->parcoursScolaireQuestions(),
+            $this->filieresInteretQuestions()
         );
 
         $ordre = 1;
@@ -29,225 +32,212 @@ class PsychometricQuestionsSeeder extends Seeder
             QuestionRiasec::create(array_merge($q, [
                 'ordre'              => $ordre++,
                 'actif'              => true,
-                'type_reponse'       => 'likert',
-                'poids'              => 1,
-                'discrimination'     => $q['discrimination'] ?? rand(60, 95) / 10.0,
-                'difficulty'         => $q['difficulty'] ?? (rand(-15, 15) / 10.0),
+                'type_reponse'       => $q['type_reponse'] ?? 'likert',
+                'poids'              => $q['poids'] ?? 1,
+                'discrimination'     => $q['discrimination'] ?? (rand(70, 95) / 10.0),
+                'difficulty'         => $q['difficulty'] ?? (rand(-10, 10) / 10.0),
                 'is_reverse'         => $q['is_reverse'] ?? false,
-                'version'            => '2.1',
+                'version'            => '5.0',
                 'is_seed'            => true,
-                'source'             => $q['source'] ?? 'CapAvenir v2.1',
+                'source'             => $q['source'] ?? 'SIAEPI v5.0',
+                'options'            => $q['options'] ?? null,
+                'bacs_cibles'        => $q['bacs_cibles'] ?? null,
             ]));
         }
 
-        $this->command->info('✅ ' . QuestionRiasec::count() . ' questions psychométriques insérées.');
+        $this->command->info('✅ ' . QuestionRiasec::count() . ' questions psychométriques v5.0 insérées.');
     }
 
     /* ══════════════════════════════════════════════════
-       PARTIE 1 : INTÉRÊTS RIASEC (24 questions)
+       PARTIE 1 : INTÉRÊTS RIASEC (30 questions - 20% Reverse)
     ══════════════════════════════════════════════════ */
     private function riasecQuestions(): array
     {
         return [
             // R - Réaliste
-            ['bloc'=>'riasec', 'dimension'=>'R', 'categorie'=>'preferences', 'texte_fr'=>'J’aime travailler avec des machines, des outils ou des équipements techniques.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'R', 'categorie'=>'preferences', 'texte_fr'=>'Je préfère les activités physiques et le travail manuel aux tâches de bureau.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'R', 'categorie'=>'preferences', 'texte_fr'=>'J’aime construire, réparer ou assembler des objets.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'R', 'categorie'=>'preferences', 'texte_fr'=>'Je me sens bien en travaillant en extérieur (chantier, nature, agriculture).', 'source'=>'Holland (1997)'],
+            ['bloc'=>'riasec', 'dimension'=>'R', 'categorie'=>'preferences', 'texte_fr'=>'J’aime travailler avec des machines, des outils ou des équipements techniques.'],
+            ['bloc'=>'riasec', 'dimension'=>'R', 'categorie'=>'preferences', 'texte_fr'=>'Je préfère les activités physiques et le travail manuel aux tâches de bureau.'],
+            ['bloc'=>'riasec', 'dimension'=>'R', 'categorie'=>'preferences', 'texte_fr'=>'J’aime construire, réparer ou assembler des objets.'],
+            ['bloc'=>'riasec', 'dimension'=>'R', 'categorie'=>'preferences', 'texte_fr'=>'Je me sens bien en travaillant en extérieur (chantier, nature, agriculture).'],
+            ['bloc'=>'riasec', 'dimension'=>'R', 'categorie'=>'preferences', 'texte_fr'=>'Je déteste les travaux manuels et l’utilisation d’outils physiques.', 'is_reverse'=>true],
             
             // I - Investigateur
-            ['bloc'=>'riasec', 'dimension'=>'I', 'categorie'=>'preferences', 'texte_fr'=>'J’aime résoudre des problèmes scientifiques ou mathématiques complexes.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'I', 'categorie'=>'preferences', 'texte_fr'=>'Je suis curieux(se) de comprendre comment fonctionnent les choses (corps, machines, systèmes).', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'I', 'categorie'=>'preferences', 'texte_fr'=>'J’aime faire des expériences en laboratoire ou analyser des données.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'I', 'categorie'=>'loisirs', 'texte_fr'=>'Je lis des articles scientifiques ou techniques par plaisir.', 'source'=>'Holland (1997)'],
+            ['bloc'=>'riasec', 'dimension'=>'I', 'categorie'=>'preferences', 'texte_fr'=>'J’aime résoudre des problèmes scientifiques ou mathématiques complexes.'],
+            ['bloc'=>'riasec', 'dimension'=>'I', 'categorie'=>'preferences', 'texte_fr'=>'Je suis curieux(se) de comprendre comment fonctionnent les systèmes complexes.'],
+            ['bloc'=>'riasec', 'dimension'=>'I', 'categorie'=>'preferences', 'texte_fr'=>'J’aime faire des expériences en laboratoire ou analyser des données.'],
+            ['bloc'=>'riasec', 'dimension'=>'I', 'categorie'=>'loisirs', 'texte_fr'=>'Je lis des articles scientifiques ou techniques par plaisir.'],
+            ['bloc'=>'riasec', 'dimension'=>'I', 'categorie'=>'preferences', 'texte_fr'=>'Je trouve l’analyse de données et la recherche scientifique ennuyeuses.', 'is_reverse'=>true],
             
             // A - Artistique
-            ['bloc'=>'riasec', 'dimension'=>'A', 'categorie'=>'preferences', 'texte_fr'=>'J’aime créer des œuvres originales (dessin, musique, écriture, design).', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'A', 'categorie'=>'preferences', 'texte_fr'=>'Je préfère un travail créatif sans routine fixe.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'A', 'categorie'=>'preferences', 'texte_fr'=>'J’aime m’exprimer à travers l’art, le théâtre, la danse ou les médias.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'A', 'categorie'=>'preferences', 'texte_fr'=>'Je suis très sensible à l’esthétique, aux couleurs et aux formes.', 'source'=>'Holland (1997)'],
+            ['bloc'=>'riasec', 'dimension'=>'A', 'categorie'=>'preferences', 'texte_fr'=>'J’aime créer des œuvres originales (dessin, musique, écriture, design).'],
+            ['bloc'=>'riasec', 'dimension'=>'A', 'categorie'=>'preferences', 'texte_fr'=>'Je préfère un travail créatif sans routine fixe.'],
+            ['bloc'=>'riasec', 'dimension'=>'A', 'categorie'=>'preferences', 'texte_fr'=>'J’aime m’exprimer à travers l’art, le théâtre ou les médias.'],
+            ['bloc'=>'riasec', 'dimension'=>'A', 'categorie'=>'preferences', 'texte_fr'=>'Je suis très sensible à l’esthétique, aux couleurs et aux formes.'],
+            ['bloc'=>'riasec', 'dimension'=>'A', 'categorie'=>'preferences', 'texte_fr'=>'Je suis peu sensible à l’art et à l’esthétique dans mon environnement.', 'is_reverse'=>true],
             
             // S - Social
-            ['bloc'=>'riasec', 'dimension'=>'S', 'categorie'=>'preferences', 'texte_fr'=>'J’aime aider, conseiller, enseigner ou soigner les autres.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'S', 'categorie'=>'preferences', 'texte_fr'=>'Je préfère travailler en équipe plutôt que seul(e).', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'S', 'categorie'=>'preferences', 'texte_fr'=>'J’aime écouter les autres et les soutenir dans leurs difficultés.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'S', 'categorie'=>'preferences', 'texte_fr'=>'Les métiers qui ont une forte dimension humaine (santé, éducation, social) m’attirent beaucoup.', 'source'=>'Holland (1997)'],
+            ['bloc'=>'riasec', 'dimension'=>'S', 'categorie'=>'preferences', 'texte_fr'=>'J’aime aider, conseiller, enseigner ou soigner les autres.'],
+            ['bloc'=>'riasec', 'dimension'=>'S', 'categorie'=>'preferences', 'texte_fr'=>'Je préfère travailler en équipe plutôt que seul(e).'],
+            ['bloc'=>'riasec', 'dimension'=>'S', 'categorie'=>'preferences', 'texte_fr'=>'J’aime écouter les autres et les soutenir dans leurs difficultés.'],
+            ['bloc'=>'riasec', 'dimension'=>'S', 'categorie'=>'preferences', 'texte_fr'=>'Les métiers qui ont une forte dimension humaine m’attirent beaucoup.'],
+            ['bloc'=>'riasec', 'dimension'=>'S', 'categorie'=>'preferences', 'texte_fr'=>'J’évite autant que possible de devoir m’occuper des problèmes des autres.', 'is_reverse'=>true],
             
             // E - Entreprenant
-            ['bloc'=>'riasec', 'dimension'=>'E', 'categorie'=>'preferences', 'texte_fr'=>'J’aime convaincre, négocier, vendre ou diriger des projets.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'E', 'categorie'=>'preferences', 'texte_fr'=>'J’ai le goût du risque et des défis ambitieux.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'E', 'categorie'=>'preferences', 'texte_fr'=>'Je suis à l’aise pour parler en public et diriger un groupe.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'E', 'categorie'=>'preferences', 'texte_fr'=>'J’aime la compétition et la réussite sociale.', 'source'=>'Holland (1997)'],
+            ['bloc'=>'riasec', 'dimension'=>'E', 'categorie'=>'preferences', 'texte_fr'=>'J’aime convaincre, négocier, vendre ou diriger des projets.'],
+            ['bloc'=>'riasec', 'dimension'=>'E', 'categorie'=>'preferences', 'texte_fr'=>'J’ai le goût du risque et des défis ambitieux.'],
+            ['bloc'=>'riasec', 'dimension'=>'E', 'categorie'=>'preferences', 'texte_fr'=>'Je suis à l’aise pour parler en public et diriger un groupe.'],
+            ['bloc'=>'riasec', 'dimension'=>'E', 'categorie'=>'preferences', 'texte_fr'=>'J’aime la compétition et la réussite sociale.'],
+            ['bloc'=>'riasec', 'dimension'=>'E', 'categorie'=>'preferences', 'texte_fr'=>'Je préfère suivre les directives plutôt que d’avoir à diriger les autres.', 'is_reverse'=>true],
             
             // C - Conventionnel
-            ['bloc'=>'riasec', 'dimension'=>'C', 'categorie'=>'preferences', 'texte_fr'=>'J’aime classer, organiser des informations et travailler avec des données.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'C', 'categorie'=>'preferences', 'texte_fr'=>'Je préfère suivre des procédures précises et des règles claires.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'C', 'categorie'=>'preferences', 'texte_fr'=>'Je me sens bien en travaillant avec des chiffres et des tableaux.', 'source'=>'Holland (1997)'],
-            ['bloc'=>'riasec', 'dimension'=>'C', 'categorie'=>'preferences', 'texte_fr'=>'Je suis méthodique, rigoureux(se) et attentif(ve) aux détails.', 'source'=>'Holland (1997)'],
+            ['bloc'=>'riasec', 'dimension'=>'C', 'categorie'=>'preferences', 'texte_fr'=>'J’aime classer, organiser des informations et travailler avec des données.'],
+            ['bloc'=>'riasec', 'dimension'=>'C', 'categorie'=>'preferences', 'texte_fr'=>'Je préfère suivre des procédures précises et des règles claires.'],
+            ['bloc'=>'riasec', 'dimension'=>'C', 'categorie'=>'preferences', 'texte_fr'=>'Je me sens bien en travaillant avec des chiffres et des tableaux.'],
+            ['bloc'=>'riasec', 'dimension'=>'C', 'categorie'=>'preferences', 'texte_fr'=>'Je suis méthodique, rigoureux(se) et attentif(ve) aux détails.'],
+            ['bloc'=>'riasec', 'dimension'=>'C', 'categorie'=>'preferences', 'texte_fr'=>'Je dÉteste travailler avec des chiffres, des tableaux ou des classements.', 'is_reverse'=>true],
         ];
     }
 
     /* ══════════════════════════════════════════════════
-       PARTIE 2 : DISCRIMINATION INTRA-DOMAINE (34 questions)
+       PARTIE 2 : DISCRIMINATION INTRA-DOMAINE (10 questions)
     ══════════════════════════════════════════════════ */
     private function intraDomainQuestions(): array
     {
         return [
-            // Santé & Paramédical
+            // Santé
             ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je veux diagnostiquer des maladies et prescrire des traitements.'],
-            ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je suis passionné(e) par les médicaments, leur composition et leurs effets.'],
-            ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je suis attiré(e) par la chirurgie et les soins dentaires.'],
-            ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je veux aider les patients par le mouvement, la rééducation et la kinésithérapie.'],
-            ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je préfère les soins continus et la relation durable avec les patients.'],
-            ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je suis intéressé(e) par la rééducation du langage et de la communication.'],
-            ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je supporte bien la vue du sang, des opérations et des situations d’urgence.'],
+            ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je suis passionné(e) par les médicaments et leurs effets.'],
+            ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je suis attiré(e) par la chirurgie et les soins complexes.'],
+            ['bloc'=>'intra', 'dimension'=>'SANTE', 'categorie'=>'intra', 'texte_fr'=>'Je veux aider les patients par la rééducation et la kinésithérapie.'],
             
-            // SHS (Sciences Humaines & Sociales)
-            ['bloc'=>'intra', 'dimension'=>'SHS', 'categorie'=>'intra', 'texte_fr'=>'Comprendre le comportement humain et la psychologie me passionne.'],
-            ['bloc'=>'intra', 'dimension'=>'SHS', 'categorie'=>'intra', 'texte_fr'=>'J’aime étudier l’histoire, les civilisations et l’évolution des sociétés.'],
-            ['bloc'=>'intra', 'dimension'=>'SHS', 'categorie'=>'intra', 'texte_fr'=>'Transmettre des connaissances et enseigner m’attire énormément.'],
-            ['bloc'=>'intra', 'dimension'=>'SHS', 'categorie'=>'intra', 'texte_fr'=>'J’aimerais travailler dans le domaine du journalisme ou des médias.'],
-            ['bloc'=>'intra', 'dimension'=>'SHS', 'categorie'=>'intra', 'texte_fr'=>'Je suis intéressé(e) par la résolution des problèmes sociaux et l’aide aux populations vulnérables.'],
-            ['bloc'=>'intra', 'dimension'=>'SHS', 'categorie'=>'intra', 'texte_fr'=>'J’aime analyser comment la géographie et l’environnement influencent l’homme.'],
-
-            // Langues
-            ['bloc'=>'intra', 'dimension'=>'LANG', 'categorie'=>'intra', 'texte_fr'=>'J’ai des facilités pour apprendre et parler de nouvelles langues étrangères.'],
-            ['bloc'=>'intra', 'dimension'=>'LANG', 'categorie'=>'intra', 'texte_fr'=>'La traduction et l’interprétation sont des domaines qui m’intéressent.'],
-            ['bloc'=>'intra', 'dimension'=>'LANG', 'categorie'=>'intra', 'texte_fr'=>'J’aimerais travailler à l’international ou avec des personnes de différentes cultures.'],
-            ['bloc'=>'intra', 'dimension'=>'LANG', 'categorie'=>'intra', 'texte_fr'=>'Analyser la littérature étrangère me plaît beaucoup.'],
-            ['bloc'=>'intra', 'dimension'=>'LANG', 'categorie'=>'intra', 'texte_fr'=>'Je suis fasciné(e) par l’origine et l’évolution des mots.'],
-
-            // Design & Arts
-            ['bloc'=>'intra', 'dimension'=>'ART', 'categorie'=>'intra', 'texte_fr'=>'Je maîtrise ou j’aimerais maîtriser des logiciels de création graphique (Photoshop, Illustrator, etc.).'],
-            ['bloc'=>'intra', 'dimension'=>'ART', 'categorie'=>'intra', 'texte_fr'=>'L’architecture, la conception d’espaces et la décoration intérieure m’attirent.'],
-            ['bloc'=>'intra', 'dimension'=>'ART', 'categorie'=>'intra', 'texte_fr'=>'J’aime la production audiovisuelle, le cinéma ou la photographie.'],
-            ['bloc'=>'intra', 'dimension'=>'ART', 'categorie'=>'intra', 'texte_fr'=>'Je suis créatif(ve) dans le domaine de la mode et du stylisme.'],
-            ['bloc'=>'intra', 'dimension'=>'ART', 'categorie'=>'intra', 'texte_fr'=>'Je pratique un art plastique (dessin, peinture, sculpture) régulièrement.'],
-
-            // Droit & Sciences Politiques
-            ['bloc'=>'intra', 'dimension'=>'DROIT', 'categorie'=>'intra', 'texte_fr'=>'Je suis intéressé(e) par les lois, les règles de la société et la justice.'],
-            ['bloc'=>'intra', 'dimension'=>'DROIT', 'categorie'=>'intra', 'texte_fr'=>'Défendre les droits des personnes ou des entreprises me motive.'],
-            ['bloc'=>'intra', 'dimension'=>'DROIT', 'categorie'=>'intra', 'texte_fr'=>'Comprendre la politique, les relations internationales et la géopolitique me passionne.'],
-            ['bloc'=>'intra', 'dimension'=>'DROIT', 'categorie'=>'intra', 'texte_fr'=>'Je suis à l’aise pour argumenter, débattre et convaincre avec logique.'],
-
-            // Economie & Gestion
-            ['bloc'=>'intra', 'dimension'=>'ECO', 'categorie'=>'intra', 'texte_fr'=>'Je m’intéresse au fonctionnement des marchés financiers et de l’économie mondiale.'],
-            ['bloc'=>'intra', 'dimension'=>'ECO', 'categorie'=>'intra', 'texte_fr'=>'J’aimerais gérer une entreprise, son personnel et ses stratégies.'],
-            ['bloc'=>'intra', 'dimension'=>'ECO', 'categorie'=>'intra', 'texte_fr'=>'Le marketing, la publicité et les stratégies de vente m’attirent.'],
-            ['bloc'=>'intra', 'dimension'=>'ECO', 'categorie'=>'intra', 'texte_fr'=>'Gérer des budgets, faire de la comptabilité et de la finance ne me fait pas peur.'],
-
-            // Informatique & Ingénierie
+            // Tech / Info
             ['bloc'=>'intra', 'dimension'=>'INFO', 'categorie'=>'intra', 'texte_fr'=>'J’aime programmer, coder et résoudre des problèmes algorithmiques.'],
-            ['bloc'=>'intra', 'dimension'=>'INFO', 'categorie'=>'intra', 'texte_fr'=>'Je suis attiré(e) par l’intelligence artificielle, les données et la cybersécurité.'],
-            ['bloc'=>'intra', 'dimension'=>'ING', 'categorie'=>'intra', 'texte_fr'=>'Je veux concevoir des systèmes, des structures ou des réseaux techniques.'],
+            ['bloc'=>'intra', 'dimension'=>'INFO', 'categorie'=>'intra', 'texte_fr'=>'Je suis attiré(e) par l’intelligence artificielle et la cybersécurité.'],
+            ['bloc'=>'intra', 'dimension'=>'ING', 'categorie'=>'intra', 'texte_fr'=>'Je veux concevoir des systèmes industriels ou des réseaux techniques.'],
+            
+            // Droit / Eco
+            ['bloc'=>'intra', 'dimension'=>'DROIT', 'categorie'=>'intra', 'texte_fr'=>'Je suis intéressé(e) par les lois, la justice et la défense des droits.'],
+            ['bloc'=>'intra', 'dimension'=>'ECO', 'categorie'=>'intra', 'texte_fr'=>'L’univers de la finance, de la bourse et de l’économie m’intéresse.'],
+            ['bloc'=>'intra', 'dimension'=>'MGT', 'categorie'=>'intra', 'texte_fr'=>'J’aimerais gérer une entreprise et ses ressources humaines.'],
         ];
     }
 
     /* ══════════════════════════════════════════════════
-       PARTIE 3 : APTITUDES COGNITIVES (12 questions)
+       PARTIE 3 : APTITUDES GATB (Objectif - 12 questions)
     ══════════════════════════════════════════════════ */
     private function gatbQuestions(): array
     {
         return [
-            ['bloc'=>'gatb', 'dimension'=>'G', 'categorie'=>'aptitudes', 'texte_fr'=>'Je comprends rapidement les schémas logiques et numériques.', 'source'=>'GATB'],
-            ['bloc'=>'gatb', 'dimension'=>'G', 'categorie'=>'aptitudes', 'texte_fr'=>'Je saisis facilement les concepts nouveaux expliqués en cours.', 'source'=>'GATB'],
-            ['bloc'=>'gatb', 'dimension'=>'G', 'categorie'=>'aptitudes', 'texte_fr'=>'Je peux raisonner à partir de données incomplètes.', 'source'=>'GATB'],
-            
-            ['bloc'=>'gatb', 'dimension'=>'V', 'categorie'=>'aptitudes', 'texte_fr'=>'Je m’exprime clairement à l’oral comme à l’écrit.', 'source'=>'GATB'],
-            ['bloc'=>'gatb', 'dimension'=>'V', 'categorie'=>'aptitudes', 'texte_fr'=>'Rédiger des rapports ou des synthèses ne me pose pas de problème.', 'source'=>'GATB'],
-            ['bloc'=>'gatb', 'dimension'=>'V', 'categorie'=>'aptitudes', 'texte_fr'=>'Je comprends les nuances de sens dans les textes complexes.', 'source'=>'GATB'],
+            // G - Général (Raisonnement Logique)
+            ['bloc'=>'gatb', 'dimension'=>'GATB_G', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Quelle est la suite logique : 2 - 4 - 8 - 16 - ?', 
+             'options'=>[['valeur'=>1, 'label'=>'20'], ['valeur'=>1, 'label'=>'24'], ['valeur'=>5, 'label'=>'32'], ['valeur'=>1, 'label'=>'40']]],
+            ['bloc'=>'gatb', 'dimension'=>'GATB_G', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Si certains A sont B, et tous les B sont C, alors :', 
+             'options'=>[['valeur'=>5, 'label'=>'Certains A sont C'], ['valeur'=>1, 'label'=>'Tous les A sont C'], ['valeur'=>1, 'label'=>'Aucun A n\'est C']]],
+            ['bloc'=>'gatb', 'dimension'=>'GATB_G', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Trouvez l\'intrus parmi ces mots :', 
+             'options'=>[['valeur'=>1, 'label'=>'Cercle'], ['valeur'=>1, 'label'=>'Carré'], ['valeur'=>5, 'label'=>'Pyramide'], ['valeur'=>1, 'label'=>'Triangle']]],
 
-            ['bloc'=>'gatb', 'dimension'=>'N', 'categorie'=>'aptitudes', 'texte_fr'=>'Je fais des calculs mentaux rapidement et avec précision.', 'source'=>'GATB'],
-            ['bloc'=>'gatb', 'dimension'=>'N', 'categorie'=>'aptitudes', 'texte_fr'=>'Les statistiques, les probabilités et les mathématiques ne m’effraient pas.', 'source'=>'GATB'],
-            ['bloc'=>'gatb', 'dimension'=>'N', 'categorie'=>'aptitudes', 'texte_fr'=>'J’aime travailler avec des chiffres et des tableaux de données.', 'source'=>'GATB'],
+            // V - Verbal (Compréhension & Lexique)
+            ['bloc'=>'gatb', 'dimension'=>'GATB_V', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Quel est le synonyme le plus proche de "PRAGMATIQUE" ?', 
+             'options'=>[['valeur'=>1, 'label'=>'Théorique'], ['valeur'=>5, 'label'=>'Pratique'], ['valeur'=>1, 'label'=>'Rêveur']]],
+            ['bloc'=>'gatb', 'dimension'=>'GATB_V', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Complétez l\'analogie : AVION est à AIR ce que BATEAU est à :', 
+             'options'=>[['valeur'=>1, 'label'=>'Voile'], ['valeur'=>1, 'label'=>'Port'], ['valeur'=>5, 'label'=>'Eau']]],
+            ['bloc'=>'gatb', 'dimension'=>'GATB_V', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Que signifie le mot "ÉPHÉMÈRE" ?', 
+             'options'=>[['valeur'=>1, 'label'=>'Éternel'], ['valeur'=>5, 'label'=>'Qui dure peu'], ['valeur'=>1, 'label'=>'Brillant']]],
 
-            ['bloc'=>'gatb', 'dimension'=>'S', 'categorie'=>'aptitudes', 'texte_fr'=>'Je me repère facilement dans l’espace et j’ai le sens de l’orientation.', 'source'=>'GATB'],
-            ['bloc'=>'gatb', 'dimension'=>'S', 'categorie'=>'aptitudes', 'texte_fr'=>'Je visualise mentalement des objets en 3D sans difficulté.', 'source'=>'GATB'],
-            ['bloc'=>'gatb', 'dimension'=>'S', 'categorie'=>'aptitudes', 'texte_fr'=>'Lire des plans, des cartes ou des schémas techniques me vient naturellement.', 'source'=>'GATB'],
+            // N - Numérique (Calcul & Probabilités)
+            ['bloc'=>'gatb', 'dimension'=>'GATB_N', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Si 3 ouvriers construisent un mur en 6 heures, combien d\'heures faut-il à 6 ouvriers ?', 
+             'options'=>[['valeur'=>1, 'label'=>'12h'], ['valeur'=>5, 'label'=>'3h'], ['valeur'=>1, 'label'=>'2h']]],
+            ['bloc'=>'gatb', 'dimension'=>'GATB_N', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Combien font 15% de 200 ?', 
+             'options'=>[['valeur'=>1, 'label'=>'15'], ['valeur'=>1, 'label'=>'20'], ['valeur'=>5, 'label'=>'30']]],
+            ['bloc'=>'gatb', 'dimension'=>'GATB_N', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Quelle est la probabilité de tirer un "6" avec un dé classique ?', 
+             'options'=>[['valeur'=>1, 'label'=>'1/2'], ['valeur'=>5, 'label'=>'1/6'], ['valeur'=>1, 'label'=>'1/10']]],
+
+            // S - Spatial (Visualisation)
+            ['bloc'=>'gatb', 'dimension'=>'GATB_S', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Si vous faites pivoter un "L" de 180° vers la droite, à quoi ressemble-t-il ?', 
+             'options'=>[['valeur'=>1, 'label'=>'Un L normal'], ['valeur'=>1, 'label'=>'Un L couché'], ['valeur'=>5, 'label'=>'Un L à l\'envers et retourné']]],
+            ['bloc'=>'gatb', 'dimension'=>'GATB_S', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Une boîte a 6 faces. Si on l\'ouvre à plat, combien de carrés verra-t-on ?', 
+             'options'=>[['valeur'=>1, 'label'=>'4'], ['valeur'=>5, 'label'=>'6'], ['valeur'=>1, 'label'=>'8']]],
+            ['bloc'=>'gatb', 'dimension'=>'GATB_S', 'categorie'=>'aptitudes', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Quel objet est le plus proche d\'un cylindre ?', 
+             'options'=>[['valeur'=>1, 'label'=>'Un ballon'], ['valeur'=>5, 'label'=>'Une canette'], ['valeur'=>1, 'label'=>'Une boîte de pizza']]],
         ];
     }
 
     /* ══════════════════════════════════════════════════
-       PARTIE 4 : PERSONNALITÉ BIG FIVE (20 questions)
+       PARTIE 4 : PERSONNALITÉ BIG FIVE (14 questions)
     ══════════════════════════════════════════════════ */
     private function bigFiveQuestions(): array
     {
         return [
-            // Ouverture (O)
-            ['bloc'=>'big_five', 'dimension'=>'O', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis curieux(se) et j’aime découvrir de nouvelles choses.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'O', 'categorie'=>'personnalite', 'texte_fr'=>'J’aime explorer des idées nouvelles, même si elles sont inhabituelles.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'O', 'categorie'=>'personnalite', 'texte_fr'=>'J’apprécie l’art, la culture et les expériences esthétiques.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'O', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis imaginatif(ve) et créatif(ve).', 'source'=>'NEO-PI-R'],
-
-            // Conscienciosité (C)
-            ['bloc'=>'big_five', 'dimension'=>'C', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis organisé(e) et je termine toujours ce que je commence.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'C', 'categorie'=>'personnalite', 'texte_fr'=>'Je préfère planifier à l’avance plutôt qu’improviser.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'C', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis rigoureux(se) et je fais attention aux détails.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'C', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis discipliné(e) dans mon travail.', 'source'=>'NEO-PI-R'],
-
-            // Extraversion (E)
-            ['bloc'=>'big_five', 'dimension'=>'E', 'categorie'=>'personnalite', 'texte_fr'=>'Je me sens à l’aise en public et je prends facilement la parole.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'E', 'categorie'=>'personnalite', 'texte_fr'=>'Je préfère travailler en équipe plutôt que seul(e).', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'E', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis énergique et sociable.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'E', 'categorie'=>'personnalite', 'texte_fr'=>'Je recherche souvent les interactions sociales.', 'source'=>'NEO-PI-R'],
-
-            // Agréabilité (A)
-            ['bloc'=>'big_five', 'dimension'=>'A', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis sensible aux émotions des autres.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'A', 'categorie'=>'personnalite', 'texte_fr'=>'Je préfère coopérer plutôt que rivaliser.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'A', 'categorie'=>'personnalite', 'texte_fr'=>'Je fais facilement confiance aux gens.', 'source'=>'NEO-PI-R'],
-            ['bloc'=>'big_five', 'dimension'=>'A', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis bienveillant(e) et j’évite les conflits.', 'source'=>'NEO-PI-R'],
-
-            // Stabilité Emotionnelle (N inversé)
-            ['bloc'=>'big_five', 'dimension'=>'N', 'categorie'=>'personnalite', 'texte_fr'=>'Je gère bien le stress et reste calme dans les situations difficiles.', 'source'=>'NEO-PI-R', 'is_reverse'=>true],
-            ['bloc'=>'big_five', 'dimension'=>'N', 'categorie'=>'personnalite', 'texte_fr'=>'Je me remets rapidement après un échec.', 'source'=>'NEO-PI-R', 'is_reverse'=>true],
-            ['bloc'=>'big_five', 'dimension'=>'N', 'categorie'=>'personnalite', 'texte_fr'=>'Je ne me laisse pas facilement submerger par mes émotions.', 'source'=>'NEO-PI-R', 'is_reverse'=>true],
-            ['bloc'=>'big_five', 'dimension'=>'N', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis généralement de bonne humeur.', 'source'=>'NEO-PI-R', 'is_reverse'=>true],
+            // Ouverture
+            ['bloc'=>'big_five', 'dimension'=>'O', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis curieux(se) et j’aime découvrir de nouvelles choses.'],
+            ['bloc'=>'big_five', 'dimension'=>'O', 'categorie'=>'personnalite', 'texte_fr'=>'J’aime explorer des idées nouvelles et inhabituelles.'],
+            ['bloc'=>'big_five', 'dimension'=>'O', 'categorie'=>'personnalite', 'texte_fr'=>'Je préfère la routine et les choses familières au changement.', 'is_reverse'=>true],
+            
+            // Conscienciosité
+            ['bloc'=>'big_five', 'dimension'=>'C', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis organisé(e) et je termine toujours ce que je commence.'],
+            ['bloc'=>'big_five', 'dimension'=>'C', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis discipliné(e) dans mon travail.'],
+            ['bloc'=>'big_five', 'dimension'=>'C', 'categorie'=>'personnalite', 'texte_fr'=>'Je procrastine souvent avant de terminer mes tâches.', 'is_reverse'=>true],
+            
+            // Extraversion
+            ['bloc'=>'big_five', 'dimension'=>'E', 'categorie'=>'personnalite', 'texte_fr'=>'Je me sens à l’aise en public et je prends facilement la parole.'],
+            ['bloc'=>'big_five', 'dimension'=>'E', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis énergique et sociable.'],
+            ['bloc'=>'big_five', 'dimension'=>'E', 'categorie'=>'personnalite', 'texte_fr'=>'Je préfère passer mes soirées seul(e) au calme.', 'is_reverse'=>true],
+            
+            // Agréabilité
+            ['bloc'=>'big_five', 'dimension'=>'A', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis sensible aux émotions des autres.'],
+            ['bloc'=>'big_five', 'dimension'=>'A', 'categorie'=>'personnalite', 'texte_fr'=>'Je fais facilement confiance aux gens.'],
+            ['bloc'=>'big_five', 'dimension'=>'A', 'categorie'=>'personnalite', 'texte_fr'=>'Je préfère m’imposer plutôt que de coopérer.', 'is_reverse'=>true],
+            
+            // Névrosisme / Stabilité
+            ['bloc'=>'big_five', 'dimension'=>'N', 'categorie'=>'personnalite', 'texte_fr'=>'Je gère bien le stress et reste calme sous pression.', 'is_reverse'=>true],
+            ['bloc'=>'big_five', 'dimension'=>'N', 'categorie'=>'personnalite', 'texte_fr'=>'Je m’inquiète souvent pour des choses sans importance.'],
         ];
     }
 
     /* ══════════════════════════════════════════════════
-       PARTIE 5 : VALEURS PROFESSIONNELLES (8 questions)
+       PARTIE 5 : RÉSILIENCE & PERSÉVÉRANCE (Nouveau Bloc)
     ══════════════════════════════════════════════════ */
-    private function schwartzQuestions(): array
+    private function resilienceQuestions(): array
     {
         return [
-            ['bloc'=>'schwartz', 'dimension'=>'Sec', 'categorie'=>'valeurs', 'texte_fr'=>'La sécurité et la stabilité de l\'emploi sont essentielles pour moi.', 'source'=>'Schwartz SVS'],
-            ['bloc'=>'schwartz', 'dimension'=>'Sec', 'categorie'=>'valeurs', 'texte_fr'=>'Je préfère un environnement de travail prévisible avec peu de risques.', 'source'=>'Schwartz SVS'],
-            ['bloc'=>'schwartz', 'dimension'=>'Ach', 'categorie'=>'valeurs', 'texte_fr'=>'Atteindre mes objectifs professionnels et avoir du succès est une priorité.', 'source'=>'Schwartz SVS'],
-            ['bloc'=>'schwartz', 'dimension'=>'Ach', 'categorie'=>'valeurs', 'texte_fr'=>'Je suis motivé(e) par les défis qui me permettent de montrer mes capacités.', 'source'=>'Schwartz SVS'],
-            ['bloc'=>'schwartz', 'dimension'=>'Ben', 'categorie'=>'valeurs', 'texte_fr'=>'Je veux que mon travail ait un impact positif sur la société ou les autres.', 'source'=>'Schwartz SVS'],
-            ['bloc'=>'schwartz', 'dimension'=>'Ben', 'categorie'=>'valeurs', 'texte_fr'=>'Aider les autres de façon désintéressée est plus important que le salaire.', 'source'=>'Schwartz SVS'],
-            ['bloc'=>'schwartz', 'dimension'=>'Aut', 'categorie'=>'valeurs', 'texte_fr'=>'J’aime prendre mes propres décisions sans dépendre des autres.', 'source'=>'Schwartz SVS'],
-            ['bloc'=>'schwartz', 'dimension'=>'Aut', 'categorie'=>'valeurs', 'texte_fr'=>'Organiser mon travail à ma façon est indispensable à mon épanouissement.', 'source'=>'Schwartz SVS'],
+            ['bloc'=>'resilience', 'dimension'=>'RESILIENCE', 'categorie'=>'personnalite', 'texte_fr'=>'Je n’abandonne jamais mes objectifs, même face à des obstacles majeurs.'],
+            ['bloc'=>'resilience', 'dimension'=>'RESILIENCE', 'categorie'=>'personnalite', 'texte_fr'=>'Je me remets rapidement après un échec important.'],
+            ['bloc'=>'resilience', 'dimension'=>'RESILIENCE', 'categorie'=>'personnalite', 'texte_fr'=>'Je suis capable de rester concentré sur une tâche difficile pendant des heures.'],
+            ['bloc'=>'resilience', 'dimension'=>'RESILIENCE', 'categorie'=>'personnalite', 'texte_fr'=>'Je gère bien la pression lors des examens cruciaux.'],
+            ['bloc'=>'resilience', 'dimension'=>'RESILIENCE', 'categorie'=>'personnalite', 'texte_fr'=>'Je me sens souvent découragé quand les choses ne se passent pas comme prévu.', 'is_reverse'=>true],
+            ['bloc'=>'resilience', 'dimension'=>'RESILIENCE', 'categorie'=>'personnalite', 'texte_fr'=>'Je préfère éviter les situations complexes pour ne pas risquer l\'échec.', 'is_reverse'=>true],
         ];
     }
 
     /* ══════════════════════════════════════════════════
-       PARTIE 6 : BLOCAGES DÉCISIONNELS (5 questions)
+       PARTIE 6 : ATTENTION CHECKS (Trap questions)
     ══════════════════════════════════════════════════ */
-    private function cddqQuestions(): array
+    private function attentionCheckQuestions(): array
     {
         return [
-            ['bloc'=>'cddq', 'dimension'=>'Manque_Connaissance_Soi', 'categorie'=>'blocage', 'texte_fr'=>'J\'ai du mal à savoir ce que j\'aime vraiment faire comme métier.', 'source'=>'CDDQ'],
-            ['bloc'=>'cddq', 'dimension'=>'Manque_Information', 'categorie'=>'blocage', 'texte_fr'=>'Je ne connais pas bien les débouchés des filières qui m\'intéressent.', 'source'=>'CDDQ'],
-            ['bloc'=>'cddq', 'dimension'=>'Anxiete_Decisionnelle', 'categorie'=>'blocage', 'texte_fr'=>'L\'idée de devoir choisir mon parcours me stresse beaucoup.', 'source'=>'CDDQ'],
-            ['bloc'=>'cddq', 'dimension'=>'Peur_Echec', 'categorie'=>'blocage', 'texte_fr'=>'J\'ai peur de m\'engager dans une filière et d\'échouer.', 'source'=>'CDDQ'],
-            ['bloc'=>'cddq', 'dimension'=>'Conflit_Externe', 'categorie'=>'blocage', 'texte_fr'=>'Ce que je veux faire est différent de ce que mes parents/proches attendent de moi.', 'source'=>'CDDQ'],
+            ['bloc'=>'attention', 'dimension'=>'ATTENTION', 'categorie'=>'validation', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Pour vérifier votre attention, veuillez sélectionner "Tout à fait" ci-dessous.', 
+             'options'=>[['valeur'=>1, 'label'=>'Pas du tout'], ['valeur'=>1, 'label'=>'Neutre'], ['valeur'=>5, 'label'=>'Tout à fait']]],
+            ['bloc'=>'attention', 'dimension'=>'ATTENTION', 'categorie'=>'validation', 'type_reponse'=>'choice', 
+             'texte_fr'=>'Ignorez cette question et sélectionnez le chiffre "3".', 
+             'options'=>[['valeur'=>1, 'label'=>'1'], ['valeur'=>1, 'label'=>'2'], ['valeur'=>5, 'label'=>'3']]],
         ];
     }
 
-    /* ══════════════════════════════════════════════════
-       PARTIE 7 : PARCOURS SCOLAIRE & CONTRAINTES (6 questions)
-    ══════════════════════════════════════════════════ */
-    private function parcoursScolaireQuestions(): array
-    {
-        return [
-            ['bloc'=>'parcours', 'dimension'=>'Scolarite', 'categorie'=>'contraintes', 'texte_fr'=>'J’ai des facilités à mémoriser de grandes quantités d’informations.', 'source'=>'CapAvenir'],
-            ['bloc'=>'parcours', 'dimension'=>'Scolarite', 'categorie'=>'contraintes', 'texte_fr'=>'Je suis prêt(e) à faire de longues études (Bac+5 ou plus).', 'source'=>'CapAvenir'],
-            ['bloc'=>'parcours', 'dimension'=>'Scolarite', 'categorie'=>'contraintes', 'texte_fr'=>'Je préfère les études courtes, pratiques et professionnalisantes (BTS, Licence Pro).', 'source'=>'CapAvenir'],
-            ['bloc'=>'parcours', 'dimension'=>'Contraintes', 'categorie'=>'contraintes', 'texte_fr'=>'Je souhaite étudier près de ma ville d’origine.', 'source'=>'CapAvenir'],
-            ['bloc'=>'parcours', 'dimension'=>'Contraintes', 'categorie'=>'contraintes', 'texte_fr'=>'Je suis prêt(e) à étudier à l’étranger si l’opportunité se présente.', 'source'=>'CapAvenir'],
-            ['bloc'=>'parcours', 'dimension'=>'Contraintes', 'categorie'=>'contraintes', 'texte_fr'=>'J’envisage de travailler en parallèle de mes études.', 'source'=>'CapAvenir'],
-        ];
-    }
+    private function schwartzQuestions(): array { return []; }
+    private function cddqQuestions(): array { return []; }
+    private function parcoursScolaireQuestions(): array { return []; }
+    private function filieresInteretQuestions(): array { return []; }
 }

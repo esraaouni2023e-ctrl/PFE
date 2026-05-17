@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use App\Models\ProfileRiasec;
-use App\Services\RecommendationService;
 use App\Services\RIASEC\TestManager;
 use App\Services\ScoreFGService;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +34,6 @@ class OrientationPipelineController extends Controller
 {
     public function __construct(
         private readonly TestManager           $testManager,
-        private readonly RecommendationService $recommendationService,
         private readonly ScoreFGService        $scoreFgService,
     ) {}
 

@@ -81,4 +81,13 @@ class IrtCalibrator
         // Borner le Theta total entre -3.0 et +3.0
         return max(-3.0, min(3.0, $newTheta));
     }
+
+    /**
+     * Calcule l'Erreur Standard de Mesure (SEM) basée sur l'information cumulée.
+     * SEM = 1 / sqrt(TotalInformation)
+     */
+    public function calculateSem(float $totalInformation): float
+    {
+        return $totalInformation > 0 ? (1.0 / sqrt($totalInformation)) : 1.0;
+    }
 }

@@ -336,9 +336,9 @@
         $score  = $student->profile->ai_score ?? 0;
         $status = $student->profile->status ?? 'pending';
         $statusPill = match($status) {
-            'completed' => ['class' => 'pill-sage',   'lbl' => '✅ Certifié'],
-            'ongoing'   => ['class' => 'pill-marine', 'lbl' => '🔵 Suivi actif'],
-            default     => ['class' => 'pill-ink',    'lbl' => '⏳ En attente'],
+            'completed' => ['class' => 'pill-sage',   'lbl' => 'Certifié',   'icon' => '<svg viewBox="0 0 20 20" fill="currentColor" style="width:.8em;height:.8em"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>'],
+            'ongoing'   => ['class' => 'pill-marine', 'lbl' => 'Suivi actif', 'icon' => '<svg viewBox="0 0 20 20" fill="currentColor" style="width:.8em;height:.8em"><circle cx="10" cy="10" r="5"/></svg>'],
+            default     => ['class' => 'pill-ink',    'lbl' => 'En attente', 'icon' => '<svg viewBox="0 0 20 20" fill="currentColor" style="width:.8em;height:.8em"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/></svg>'],
         };
     @endphp
     <section class="sp-hero rev">
@@ -353,8 +353,8 @@
             <p class="sp-hero-email">{{ $student->email }}</p>
             <div class="sp-hero-pills">
                 <span class="pill {{ $statusPill['class'] }}">{{ $statusPill['lbl'] }}</span>
-                <span class="pill pill-ink">📅 Inscrit le {{ $student->created_at->format('d/m/Y') }}</span>
-                <span class="pill pill-gold">🎓 Étudiant</span>
+                <span class="pill pill-ink">Inscrit le {{ $student->created_at->format('d/m/Y') }}</span>
+                <span class="pill pill-gold">Étudiant</span>
             </div>
         </div>
 
@@ -390,7 +390,7 @@
             {{-- AI Summary & Manual Matching --}}
             <div class="sp-ai-box rev rev-d1">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div class="sp-ai-badge">✦ Synthèse Profil</div>
+                    <div class="sp-ai-badge"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.7rem;height:.7rem'><path stroke-linecap='round' stroke-linejoin='round' d='M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z' /></svg> Synthèse Profil</div>
                     @if($student->profile && !$student->profile->manual_match_approved)
                         <form action="{{ route('counselor.student.match', $student) }}" method="POST">
                             @csrf
@@ -399,7 +399,7 @@
                             </button>
                         </form>
                     @elseif($student->profile && $student->profile->manual_match_approved)
-                        <span class="sp-ai-badge" style="background:var(--accent3); border-color:var(--accent3); color:#fff;">✅ Matching Validé</span>
+                        <span class="sp-ai-badge" style="background:var(--accent3); border-color:var(--accent3); color:#fff;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.7rem;height:.7rem'><path stroke-linecap='round' stroke-linejoin='round' d='M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' /></svg> Matching Validé</span>
                     @endif
                 </div>
                 <p class="sp-ai-text">
@@ -410,7 +410,7 @@
             {{-- Skills & Interests --}}
             <div class="sp-info-grid rev rev-d2">
                 <div class="card sp-info-box">
-                    <div class="sp-info-label">🧠 Expertise & Aptitudes</div>
+                    <div class="sp-info-label">Expertise & Aptitudes</div>
                     <div class="sp-tag-list">
                         @forelse(explode(',', $student->profile->skills ?? '') as $skill)
                             @if(trim($skill)) <span class="sp-tag">{{ trim($skill) }}</span> @endif
@@ -420,7 +420,7 @@
                     </div>
                 </div>
                 <div class="card sp-info-box">
-                    <div class="sp-info-label">💡 Pôles d'Intérêt</div>
+                    <div class="sp-info-label">Pôles d'Intérêt</div>
                     <div class="sp-tag-list">
                         @forelse(explode(',', $student->profile->interests ?? '') as $interest)
                             @if(trim($interest)) <span class="sp-tag sp-tag-interest">{{ trim($interest) }}</span> @endif
@@ -455,12 +455,12 @@
                         <div style="max-width:240px;">
                             <label class="sp-form-label">Statut du dossier</label>
                             <select name="status" class="sp-select">
-                                <option value="pending"    {{ ($student->profile->status ?? '') === 'pending'    ? 'selected' : '' }}>⏳ En attente</option>
-                                <option value="ongoing"    {{ ($student->profile->status ?? '') === 'ongoing'    ? 'selected' : '' }}>🤝 Suivi actif</option>
-                                <option value="completed"  {{ ($student->profile->status ?? '') === 'completed'  ? 'selected' : '' }}>✅ Dossier clôturé</option>
+                                <option value="pending"    {{ ($student->profile->status ?? '') === 'pending'    ? 'selected' : '' }}>En attente</option>
+                                <option value="ongoing"    {{ ($student->profile->status ?? '') === 'ongoing'    ? 'selected' : '' }}>Suivi actif</option>
+                                <option value="completed"  {{ ($student->profile->status ?? '') === 'completed'  ? 'selected' : '' }}>Dossier clôturé</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn-fill">📋 Mettre à jour le dossier</button>
+                        <button type="submit" class="btn-fill"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.9rem;height:.9rem'><path stroke-linecap='round' stroke-linejoin='round' d='M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z' /></svg> Mettre à jour le dossier</button>
                     </div>
                 </form>
             </div>
@@ -513,7 +513,7 @@
                     </div>
                     @empty
                     <div style="text-align:center;padding:1.5rem 0;">
-                        <div style="font-size:2rem;margin-bottom:.5rem;">📝</div>
+                        <div style="text-align:center;margin-bottom:.5rem;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='var(--ink30)' style='width:2rem;height:2rem'><path stroke-linecap='round' stroke-linejoin='round' d='M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z' /></svg></div>
                         <p class="sp-empty-text">Aucun test effectué pour le moment</p>
                     </div>
                     @endforelse
@@ -551,10 +551,12 @@
                 <p class="stag" style="margin-bottom:1rem;">Actions rapides</p>
                 <div style="display:flex;flex-direction:column;gap:.6rem;">
                     <a href="mailto:{{ $student->email }}" class="btn-ghost" style="justify-content:center;">
-                        ✉️ Envoyer un email
+                        <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.85rem;height:.85rem'><path stroke-linecap='round' stroke-linejoin='round' d='M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75' /></svg>
+                        Envoyer un email
                     </a>
                     <button class="btn-ghost" style="justify-content:center;" onclick="window.print()">
-                        🖨️ Imprimer la fiche
+                        <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.85rem;height:.85rem'><path stroke-linecap='round' stroke-linejoin='round' d='M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m0 0a48.159 48.159 0 0110.5 0m-10.5 0V6.908a6.01 6.01 0 011.5-3.982m7.5 3.982V6.908a6.01 6.01 0 00-1.5-3.982M9 16.5v.75m6-.75v.75' /></svg>
+                        Imprimer la fiche
                     </button>
                 </div>
             </div>

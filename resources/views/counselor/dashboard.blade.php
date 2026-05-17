@@ -396,7 +396,7 @@
                 <p class="cd-sub">Suivi individuel des profils IA</p>
             </div>
             <div class="cd-search-wrap">
-                <span class="cd-search-icon">🔍</span>
+                <span class="cd-search-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.9rem;height:.9rem'><path stroke-linecap='round' stroke-linejoin='round' d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z' /></svg></span>
                 <input type="text" class="cd-search" placeholder="Rechercher un étudiant…"
                        id="studentSearch">
             </div>
@@ -446,7 +446,7 @@
                 <div class="cd-scard-foot">
                     <span class="cd-scard-date">
                         @if($score < 65)
-                            <span style="color:#ef4444; font-weight:bold;">⚠️ Risque de décrochage</span>
+                            <span style="color:#ef4444; font-weight:bold;"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:.85rem;height:.85rem;vertical-align:middle;margin-right:.25rem'><path stroke-linecap='round' stroke-linejoin='round' d='M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z' /></svg>Risque de décrochage</span>
                         @else
                             Inscrit le {{ $student->created_at->format('d/m/Y') }}
                         @endif
@@ -459,7 +459,7 @@
 
         @if($students->isEmpty())
         <div class="card cd-empty">
-            <div class="cd-empty-icon">👥</div>
+            <div class="cd-empty-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor' style='width:3rem;height:3rem;opacity:.35'><path stroke-linecap='round' stroke-linejoin='round' d='M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z' /></svg></div>
             <p class="cd-empty-title">Aucun étudiant assigné</p>
             <p class="cd-empty-desc">Les étudiants apparaîtront ici une fois assignés à votre portefeuille.</p>
         </div>
@@ -510,7 +510,7 @@
             <div style="display:flex;flex-direction:column;gap:.75rem;">
                 @forelse($appointments->where('status', 'scheduled') as $apt)
                 <div class="cd-action-btn" style="cursor: default;">
-                    <div class="cd-action-icon">📅</div>
+                    <div class="cd-action-icon"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='var(--accent2)' style='width:1.1rem;height:1.1rem'><path stroke-linecap='round' stroke-linejoin='round' d='M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5' /></svg></div>
                     <div style="flex:1;">
                         <div>{{ $apt->student->name }}</div>
                         <div class="cd-action-desc">{{ $apt->scheduled_at->format('d/m/Y à H:i') }}</div>

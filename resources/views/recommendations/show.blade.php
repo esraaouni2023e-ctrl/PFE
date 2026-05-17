@@ -149,7 +149,12 @@
                 </div>
             </div>
 
-            <div class="rec-nom">{{ $f['Nom_Filiere'] ?? 'Filière' }}</div>
+            <div class="rec-nom">
+                {{ $f['Nom_Filiere'] ?? 'Filière' }}
+                @if(!empty($f['is_pareto_optimal']))
+                    <span style="font-size: 0.7rem; background: var(--gold); color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;">⭐ Choix Optimal</span>
+                @endif
+            </div>
             <div class="rec-eta">
                 <span class="rec-eta-ic">
                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -161,7 +166,24 @@
                 </span>
             </div>
 
-            @if(!empty($f['Explication']))
+            @if(!empty($f['Explication']) && is_array($f['Explication']))
+            <div class="rec-expliq" style="font-size: 0.85rem;">
+                @if(!empty($f['Explication']['points_forts']))
+                    <ul style="margin:0; padding-left:1.2rem; color: #10b981;">
+                        @foreach($f['Explication']['points_forts'] as $fort)
+                            <li style="margin-bottom: 2px;">{{ $fort }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+                @if(!empty($f['Explication']['points_faibles']))
+                    <ul style="margin-top:4px; margin-bottom:0; padding-left:1.2rem; color: #ef4444;">
+                        @foreach($f['Explication']['points_faibles'] as $faible)
+                            <li style="margin-bottom: 2px;">{{ $faible }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+            @elseif(!empty($f['Explication']) && is_string($f['Explication']))
             <div class="rec-expliq">{{ $f['Explication'] }}</div>
             @endif
 

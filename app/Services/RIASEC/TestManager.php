@@ -13,40 +13,37 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * TestManager — Service central du module RIASEC.
+ * TestManager v5.0 — Service central du module RIASEC.
  *
- * Orchestre l'intégralité du cycle de vie d'un test Holland :
- *   1. Chargement des questions
- *   2. Enregistrement des réponses (auth + invité)
- *   3. Calcul des scores bruts et normalisés
- *   4. Détermination du trigramme dominant avec départage intelligent
- *   5. Vérification de la cohérence interne (questions inversées)
- *   6. Génération de l'interprétation textuelle sans IA
- *   7. Gestion de la progression
+ * Responsabilités :
+ *  1. Chargement des questions
+ *  2. Enregistrement des réponses
+ *  3. Calcul des scores RIASEC (uniquement Holland R/I/A/S/E/C)
+ *  4. Calcul des scores GATB objectifs et Résilience
+ *  5. Détermination du trigramme dominant
+ *  6. Vérification de la cohérence interne
+ *  7. Génération de l'interprétation
+ *  8. Gestion de la progression et du profil
  *
- * Compatible : utilisateurs authentifiés ET invités (session PHP).
- * SOLID : chaque responsabilité est isolée dans une méthode dédiée.
+ * Architecture v5.0 :
+ *  - Trigramme Holland = uniquement 6 dimensions RIASEC
+ *  - Cohérence = calculée uniquement sur RIASEC
+ *  - GATB, Résilience, Attention = blocs dédiés, stockés séparément dans riasec_profiles
  */
 class TestManager
 {
-    // ── Priorité Holland pour le départage en cas d'égalité ────────────────
+    // ── Ordre de priorité Holland pour le départage en cas d'égalité ──────
     private const HOLLAND_PRIORITY = ['R' => 0, 'I' => 1, 'A' => 2, 'S' => 3, 'E' => 4, 'C' => 5];
 
-    // ── Valeurs min/max de l'échelle Likert ───────────────────────────────
+    // ── Dimensions RIASEC pures (Holland) ─────────────────────────────────
+    private const RIASEC_DIMS = ['R', 'I', 'A', 'S', 'E', 'C'];
+
+    // ── Valeurs Likert min/max ────────────────────────────────────────────
     private const LIKERT_MIN = 1;
     private const LIKERT_MAX = 5;
 
     // ── TTL du cache questions (en secondes) ──────────────────────────────
     private const CACHE_QUESTIONS_TTL = 3600;
-
-    // ── Questions inversées : leur score est renversé (6 - valeur) ────────
-    // Permet de détecter l'incohérence des répondants (ex: "je n'aime pas du tout X"
-    // alors qu'une question inversée de même dimension a obtenu 5).
-    // Renseigner ici les IDs ou codes de questions à inverser après import.
-    private const INVERTED_QUESTION_CODES = [
-        // Exemple : 'R_Q7', 'I_Q15' — à alimenter selon votre banque
-        // La logique s'applique automatiquement si le code est dans cette liste.
-    ];
 
     // ── Libellés d'interprétation par dimension ───────────────────────────
     private const DIMENSION_PROFILES = [
@@ -104,29 +101,13 @@ class TestManager
     // 1. CHARGEMENT DES QUESTIONS
     // ══════════════════════════════════════════════════════════════════════
 
-    /**
-     * Retourne les questions actives groupées par catégorie, dans l'ordre configuré.
-     * Résultats mis en cache pour éviter les requêtes répétitives pendant le test.
-     *
-     * @return Collection<string, Collection<int, QuestionRiasec>>
-     *         Exemple : ['loisirs' => [...], 'preferences_professionnelles' => [...], ...]
-     */
     public function getQuestions(): Collection
     {
         return Cache::remember('riasec.questions.grouped', self::CACHE_QUESTIONS_TTL, function () {
-            return QuestionRiasec::actives()
-                ->ordonnes()
-                ->get()
-                ->groupBy('categorie');
+            return QuestionRiasec::actives()->ordonnes()->get()->groupBy('categorie');
         });
     }
 
-    /**
-     * Retourne toutes les questions actives dans un tableau plat ordonné.
-     * Utilisé pour afficher le test question par question.
-     *
-     * @return Collection<int, QuestionRiasec>
-     */
     public function getAllQuestions(): Collection
     {
         return Cache::remember('riasec.questions.flat', self::CACHE_QUESTIONS_TTL, function () {
@@ -134,35 +115,16 @@ class TestManager
         });
     }
 
-    /**
-     * Retourne la prochaine question sans réponse pour une session donnée.
-     */
     public function getNextQuestion(?int $userId, string $sessionId): ?QuestionRiasec
     {
         $answeredIds = $this->getAnsweredQuestionIds($userId, $sessionId);
-
-        return QuestionRiasec::actives()
-            ->ordonnes()
-            ->whereNotIn('id', $answeredIds)
-            ->first();
+        return QuestionRiasec::actives()->ordonnes()->whereNotIn('id', $answeredIds)->first();
     }
 
     // ══════════════════════════════════════════════════════════════════════
     // 2. ENREGISTREMENT DES RÉPONSES
     // ══════════════════════════════════════════════════════════════════════
 
-    /**
-     * Enregistre ou met à jour la réponse d'un utilisateur/invité à une question.
-     *
-     * @param int|null $userId     Null si utilisateur invité
-     * @param int      $questionId
-     * @param int      $score      Valeur Likert (1-5) ou booléen (0/1)
-     * @param string   $sessionId  UUID de la session de test
-     * @param string|null $guestId ID de session PHP (pour les invités)
-     * @param int|null $tempsMs    Temps de réponse en millisecondes
-     *
-     * @throws \InvalidArgumentException Si le score est hors plage valide
-     */
     public function saveAnswer(
         ?int    $userId,
         int     $questionId,
@@ -171,7 +133,6 @@ class TestManager
         ?string $guestId = null,
         ?int    $tempsMs = null
     ): AnswerRiasec {
-        // Validation du score
         $question = QuestionRiasec::findOrFail($questionId);
 
         if (! $question->valeurEstValide($score)) {
@@ -180,7 +141,6 @@ class TestManager
             );
         }
 
-        // Invalidation du cache de scores pour cette session
         Cache::forget("riasec.scores.{$sessionId}");
 
         return AnswerRiasec::enregistrer(
@@ -194,45 +154,43 @@ class TestManager
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    // 3. CALCUL DES SCORES
+    // 3. CALCUL DES SCORES RIASEC (Holland uniquement)
     // ══════════════════════════════════════════════════════════════════════
 
     /**
-     * Calcule les scores RIASEC bruts et normalisés pour une session donnée.
-     *
-     * Algorithme :
-     *  1. Charge toutes les réponses avec leurs questions (eager load, pas de N+1)
-     *  2. Applique l'inversion des questions marquées comme inversées
-     *  3. Somme les scores pondérés par dimension
-     *  4. Normalise sur 100 (score brut / score max théorique × 100)
-     *  5. Calcule le score de cohérence interne
-     *
-     * @return RiasecScoreDTO
+     * Calcule les scores RIASEC bruts et normalisés.
+     * ⚠️ Seules les 6 dimensions Holland (R/I/A/S/E/C) entrent dans le trigramme.
+     * Les blocs Big Five, GATB, Résilience, Attention sont exclus ici.
      */
     public function calculateScores(?int $userId, string $sessionId): RiasecScoreDTO
     {
-        return Cache::remember("riasec.scores.{$sessionId}", 300, function () use ($userId, $sessionId) {
-            // Charge les réponses avec questions en un seul requête
-            $answers = AnswerRiasec::session($sessionId)
-                ->avecQuestion()
-                ->get();
+        return Cache::remember("riasec.scores.{$sessionId}", 300, function () use ($sessionId) {
+            $answers = AnswerRiasec::session($sessionId)->avecQuestion()->get();
 
-            $dimensions   = array_keys(QuestionRiasec::DIMENSIONS);
-            $rawScores    = array_fill_keys($dimensions, 0);
-            $maxScores    = array_fill_keys($dimensions, 0);
-            $countByDim   = array_fill_keys($dimensions, 0);
+            $rawScores  = array_fill_keys(self::RIASEC_DIMS, 0);
+            $maxScores  = array_fill_keys(self::RIASEC_DIMS, 0);
+            $countByDim = array_fill_keys(self::RIASEC_DIMS, 0);
 
             foreach ($answers as $answer) {
                 $question = $answer->question;
-                if (! $question || ! isset($rawScores[$question->dimension])) {
+
+                // On n'inclut QUE les questions RIASEC pures (bloc 'riasec' ou dimension dans R/I/A/S/E/C)
+                if (! $question) {
                     continue;
                 }
 
-                $dim   = $question->dimension;
+                $dim = $question->dimension;
+                if (! in_array($dim, self::RIASEC_DIMS, true)) {
+                    continue; // Big Five, GATB, Résilience, Attention → ignorés ici
+                }
+
+                if ($question->bloc && $question->bloc !== 'riasec') {
+                    continue; // Exclure les blocs autres que riasec pour les dimensions R/I/A/S/E/C
+                }
+
                 $poids = $question->poids;
 
-                // Inversion des questions de contrôle
-                $valeur = $this->isInvertedQuestion($question)
+                $valeur = $question->is_reverse
                     ? $this->invertScore($answer->valeur, $question->type_reponse)
                     : $answer->valeur;
 
@@ -243,14 +201,14 @@ class TestManager
 
             // Normalisation 0–100
             $normalized = [];
-            foreach ($dimensions as $dim) {
+            foreach (self::RIASEC_DIMS as $dim) {
                 $normalized[$dim] = $maxScores[$dim] > 0
                     ? round(($rawScores[$dim] / $maxScores[$dim]) * 100, 2)
                     : 0.0;
             }
 
-            $trigram    = $this->determineDominantTrigram($normalized);
-            $coherence  = $this->calculateCoherenceScore($answers, $countByDim);
+            $trigram   = $this->determineDominantTrigram($normalized);
+            $coherence = $this->calculateCoherenceScore($answers);
 
             return new RiasecScoreDTO(
                 rawScores:        $rawScores,
@@ -266,28 +224,14 @@ class TestManager
     // 4. TRIGRAMME DOMINANT
     // ══════════════════════════════════════════════════════════════════════
 
-    /**
-     * Détermine le code Holland à 3 lettres dominant.
-     *
-     * Règles de classement :
-     *  1. Score normalisé décroissant (plus haut = premier)
-     *  2. En cas d'égalité parfaite : priorité Holland R > I > A > S > E > C
-     *
-     * @param  array<string, float> $normalizedScores  ['R'=>72.5, 'I'=>80.0, ...]
-     * @return string  Trigramme (ex: "IRA")
-     */
     public function determineDominantTrigram(array $normalizedScores): string
     {
-        // Copie pour ne pas modifier l'original
-        $scores = $normalizedScores;
+        // Ne prend QUE les 6 dimensions Holland
+        $scores = array_intersect_key($normalizedScores, array_flip(self::RIASEC_DIMS));
 
-        // Tri stable : score décroissant, puis priorité Holland croissante
         uksort($scores, function (string $a, string $b) use ($scores): int {
-            $scoreDiff = $scores[$b] <=> $scores[$a];
-            if ($scoreDiff !== 0) {
-                return $scoreDiff;
-            }
-            // Égalité → priorité Holland (R=0, I=1, ..., C=5)
+            $diff = $scores[$b] <=> $scores[$a];
+            if ($diff !== 0) return $diff;
             return self::HOLLAND_PRIORITY[$a] <=> self::HOLLAND_PRIORITY[$b];
         });
 
@@ -299,13 +243,21 @@ class TestManager
     // ══════════════════════════════════════════════════════════════════════
 
     /**
-     * Vérifie si toutes les questions actives ont reçu une réponse dans la session.
+     * Vérifie si le test est terminé.
+     * Accepte le flag is_completed du moteur CAT (arrêt adaptatif précoce)
+     * OU vérifie que toutes les questions actives ont été répondues.
+     *
+     * @param bool $catCompleted  Flag direct du AdaptiveTestEngine (prioritaire)
      */
-    public function isTestCompleted(?int $userId, string $sessionId): bool
+    public function isTestCompleted(?int $userId, string $sessionId, bool $catCompleted = false): bool
     {
-        $totalActive  = QuestionRiasec::actives()->count();
-        $totalAnswered = AnswerRiasec::session($sessionId)->count();
+        if ($catCompleted) {
+            return true;
+        }
 
+        // Fallback : toutes les questions actives répondues
+        $totalActive   = QuestionRiasec::actives()->count();
+        $totalAnswered = AnswerRiasec::session($sessionId)->count();
         return $totalAnswered >= $totalActive;
     }
 
@@ -314,28 +266,35 @@ class TestManager
     // ══════════════════════════════════════════════════════════════════════
 
     /**
-     * Retourne un DTO complet de progression du test.
+     * Retourne l'état de progression du test.
      *
-     * @return TestProgressDTO
+     * Le "total" affiché à l'étudiant = questions RIASEC pures (30)
+     * pour éviter d'afficher "18/74" qui panique les étudiants.
+     * L'arrêt adaptatif est signalé via $catCompleted.
+     *
+     * @param bool $catCompleted  Flag direct du AdaptiveTestEngine
      */
-    public function getProgress(?int $userId, string $sessionId): TestProgressDTO
+    public function getProgress(?int $userId, string $sessionId, bool $catCompleted = false): TestProgressDTO
     {
-        $allQuestions = $this->getAllQuestions();
-        $total        = $allQuestions->count();
+        // Total affiché = questions RIASEC seulement (barre de progression lisible)
+        $riasecQuestions = QuestionRiasec::actives()
+            ->whereIn('dimension', self::RIASEC_DIMS)
+            ->where('bloc', 'riasec')
+            ->ordonnes()
+            ->get();
 
-        // Questions répondues pour cette session (indexées par question_id)
-        $answered = AnswerRiasec::session($sessionId)
-            ->pluck('question_id')
-            ->flip(); // flip pour O(1) lookup
+        $total    = $riasecQuestions->count(); // 30
+        $answered = AnswerRiasec::session($sessionId)->count();
 
-        // Initialise dynamiquement toutes les dimensions présentes dans la banque
-        $allDimensions  = $allQuestions->pluck('dimension')->unique()->all();
-        $answeredByDim  = array_fill_keys($allDimensions, 0);
-        $remainingByDim = array_fill_keys($allDimensions, 0);
+        $allDimensions  = array_fill_keys(self::RIASEC_DIMS, 0);
+        $answeredByDim  = $allDimensions;
+        $remainingByDim = array_fill_keys(self::RIASEC_DIMS, 0);
         $lastQuestionId = null;
 
-        foreach ($allQuestions as $q) {
-            if ($answered->has($q->id)) {
+        $answeredIds = AnswerRiasec::session($sessionId)->pluck('question_id')->flip();
+
+        foreach ($riasecQuestions as $q) {
+            if ($answeredIds->has($q->id)) {
                 $answeredByDim[$q->dimension]++;
                 $lastQuestionId = $q->id;
             } else {
@@ -343,14 +302,18 @@ class TestManager
             }
         }
 
-        $answeredCount = array_sum($answeredByDim);
-        $percentage    = $total > 0 ? ($answeredCount / $total) * 100 : 0.0;
+        // La progression affichée est basée sur les questions RIASEC
+        $riasecAnswered = array_sum($answeredByDim);
+        $percentage     = $total > 0 ? ($riasecAnswered / $total) * 100 : 0.0;
+
+        // Terminé si : arrêt adaptatif OU toutes les questions RIASEC répondues
+        $isCompleted = $catCompleted || ($riasecAnswered >= $total);
 
         return new TestProgressDTO(
-            answered:             $answeredCount,
-            total:                $total,
+            answered:             $answered, // total réponses session (pour le log)
+            total:                $total,    // 30 questions RIASEC (pour la barre)
             percentage:           $percentage,
-            isCompleted:          $answeredCount >= $total,
+            isCompleted:          $isCompleted,
             answeredByDimension:  $answeredByDim,
             remainingByDimension: $remainingByDim,
             lastQuestionId:       $lastQuestionId,
@@ -359,19 +322,23 @@ class TestManager
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    // 7. GESTION DU PROFIL
+    // 7. GESTION DU PROFIL (avec GATB + Résilience)
     // ══════════════════════════════════════════════════════════════════════
 
     /**
-     * Crée ou met à jour le ProfileRiasec après calcul des scores.
-     * À appeler en fin de test ou après chaque réponse (mode temps-réel).
+     * Crée ou met à jour le ProfileRiasec avec les scores RIASEC, GATB et Résilience.
      */
     public function saveProfile(?int $userId, string $sessionId, ?string $guestId = null): ProfileRiasec
     {
         $scores   = $this->calculateScores($userId, $sessionId);
         $progress = $this->getProgress($userId, $sessionId);
-
         $interp   = $this->generateInterpretation($scores);
+
+        // ── Calcul GATB (scores objectifs) ───────────────────────────────
+        $gatbScores = $this->calculateGatbScores($sessionId);
+
+        // ── Calcul Résilience ─────────────────────────────────────────────
+        $resilienceScore = $this->calculateResilienceScore($sessionId);
 
         return ProfileRiasec::updateOrCreate(
             ['test_session_id' => $sessionId],
@@ -386,67 +353,45 @@ class TestManager
                 'score_c'                => (int) round($scores->scoreC()),
                 'code_holland'           => $scores->trigram,
                 'statut'                 => $progress->isCompleted
-                                            ? ProfileRiasec::STATUT_COMPLET
-                                            : ProfileRiasec::STATUT_EN_COURS,
+                                              ? ProfileRiasec::STATUT_COMPLET
+                                              : ProfileRiasec::STATUT_EN_COURS,
                 'nb_questions_repondues' => $progress->answered,
                 'nb_questions_total'     => $progress->total,
                 'score_coherence'        => $scores->coherenceScore,
                 'interpretation'         => $interp,
                 'complete_at'            => $progress->isCompleted ? now() : null,
+
+                // ── GATB Scores (0–100) ──────────────────────────────────
+                'score_gatb_g'           => $gatbScores['GATB_G'] ?? 0,
+                'score_gatb_v'           => $gatbScores['GATB_V'] ?? 0,
+                'score_gatb_n'           => $gatbScores['GATB_N'] ?? 0,
+                'score_gatb_s'           => $gatbScores['GATB_S'] ?? 0,
+
+                // ── Résilience (0–100) ────────────────────────────────────
+                'score_resilience'       => $resilienceScore,
             ]
         );
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    // 8. INTERPRÉTATION TEXTUELLE (sans IA)
+    // 8. INTERPRÉTATION TEXTUELLE
     // ══════════════════════════════════════════════════════════════════════
 
-    /**
-     * Génère une interprétation textuelle structurée du profil RIASEC.
-     *
-     * Logique :
-     *  - Décrit les 3 dimensions dominantes (trigramme)
-     *  - Propose des métiers et filières compatibles
-     *  - Adapte le ton au niveau de confiance (score de cohérence)
-     *  - Identifie les forces principales
-     *
-     * @param  RiasecScoreDTO $scores
-     * @return array          Tableau structuré pour stockage dans ProfileRiasec::interpretation
-     */
     public function generateInterpretation(RiasecScoreDTO $scores): array
     {
         $trigram  = $scores->trigram;
         $dominant = $scores->dominantDimension();
         $top3     = str_split($trigram);
 
-        // Profils des 3 dimensions dominantes
         $profiles = array_map(
             fn ($dim) => self::DIMENSION_PROFILES[$dim] ?? [],
             $top3
         );
 
-        // Filières fusionnées (intersection des suggestions)
-        $allFilieres = collect($profiles)
-            ->flatMap(fn ($p) => $p['filieres'] ?? [])
-            ->unique()
-            ->values()
-            ->all();
+        $allFilieres = collect($profiles)->flatMap(fn ($p) => $p['filieres'] ?? [])->unique()->values()->all();
+        $allMetiers  = collect($profiles)->flatMap(fn ($p) => $p['metiers'] ?? [])->unique()->values()->all();
+        $allForces   = collect($profiles)->flatMap(fn ($p) => $p['forces'] ?? [])->unique()->values()->all();
 
-        // Métiers fusionnés
-        $allMetiers = collect($profiles)
-            ->flatMap(fn ($p) => $p['metiers'] ?? [])
-            ->unique()
-            ->values()
-            ->all();
-
-        // Forces fusionnées
-        $allForces = collect($profiles)
-            ->flatMap(fn ($p) => $p['forces'] ?? [])
-            ->unique()
-            ->values()
-            ->all();
-
-        // Nuance selon la cohérence
         $fiabiliteNote = match (true) {
             $scores->coherenceScore >= 80 => 'Ce profil présente un niveau de cohérence excellent. Les résultats sont très fiables.',
             $scores->coherenceScore >= 60 => 'Ce profil est globalement cohérent. Les résultats sont fiables.',
@@ -455,48 +400,139 @@ class TestManager
         };
 
         return [
-            'trigram'          => $trigram,
-            'dominant'         => $dominant,
-            'profil_label'     => self::DIMENSION_PROFILES[$dominant]['label'] ?? '',
-            'profil_emoji'     => self::DIMENSION_PROFILES[$dominant]['emoji'] ?? '',
-            'description'      => $this->buildProfileDescription($top3, $scores),
-            'forces'           => array_slice($allForces, 0, 6),
-            'metiers_suggeres' => array_slice($allMetiers, 0, 8),
+            'trigram'            => $trigram,
+            'dominant'           => $dominant,
+            'profil_label'       => self::DIMENSION_PROFILES[$dominant]['label'] ?? '',
+            'profil_emoji'       => self::DIMENSION_PROFILES[$dominant]['emoji'] ?? '',
+            'description'        => $this->buildProfileDescription($top3, $scores),
+            'forces'             => array_slice($allForces, 0, 6),
+            'metiers_suggeres'   => array_slice($allMetiers, 0, 8),
             'filieres_suggerees' => array_slice($allFilieres, 0, 8),
-            'scores_detail'    => $scores->toArray(),
-            'fiabilite'        => $fiabiliteNote,
-            'coherence_score'  => $scores->coherenceScore,
-            'generated_at'     => now()->toIso8601String(),
+            'scores_detail'      => $scores->toArray(),
+            'fiabilite'          => $fiabiliteNote,
+            'coherence_score'    => $scores->coherenceScore,
+            'generated_at'       => now()->toIso8601String(),
         ];
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    // MÉTHODES PRIVÉES — COHÉRENCE & UTILITAIRES
+    // MÉTHODES PUBLIQUES UTILITAIRES
+    // ══════════════════════════════════════════════════════════════════════
+
+    public function generateSessionId(): string
+    {
+        return (string) Str::uuid();
+    }
+
+    public function invalidateSessionCache(string $sessionId): void
+    {
+        Cache::forget("riasec.scores.{$sessionId}");
+    }
+
+    public function getDimensionProfile(string $dimension): ?array
+    {
+        return self::DIMENSION_PROFILES[strtoupper($dimension)] ?? null;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // MÉTHODES PRIVÉES — CALCULS SPÉCIALISÉS
     // ══════════════════════════════════════════════════════════════════════
 
     /**
-     * Calcule le score de cohérence interne (0-100).
-     *
-     * Principe : compare les écarts intra-dimension entre questions similaires.
-     * Un fort écart entre deux questions de même dimension → incohérence.
-     *
-     * Algorithme simplifié :
-     *  - Pour chaque dimension, calcule la variance des réponses
-     *  - Une variance élevée signifie des réponses contradictoires
-     *  - Score cohérence = 100 - (variance_moy_normalisée × 100)
+     * Calcule les scores GATB objectifs (0–100).
+     * La valeur 5 = bonne réponse (100%), toute autre valeur = mauvaise réponse (0%).
      */
-    private function calculateCoherenceScore(Collection $answers, array $countByDim): int
+    private function calculateGatbScores(string $sessionId): array
     {
+        $scores = [
+            'GATB_G' => 0,
+            'GATB_V' => 0,
+            'GATB_N' => 0,
+            'GATB_S' => 0,
+        ];
+
+        $answers = AnswerRiasec::session($sessionId)
+            ->avecQuestion()
+            ->get()
+            ->filter(fn ($a) => $a->question && $a->question->bloc === 'gatb');
+
+        $totals  = ['GATB_G' => 0, 'GATB_V' => 0, 'GATB_N' => 0, 'GATB_S' => 0];
+        $correct = ['GATB_G' => 0, 'GATB_V' => 0, 'GATB_N' => 0, 'GATB_S' => 0];
+
+        foreach ($answers as $answer) {
+            $dim = $answer->question->dimension;
+            if (! isset($totals[$dim])) {
+                continue;
+            }
+            $totals[$dim]++;
+            if ($answer->valeur === 5) {
+                $correct[$dim]++;
+            }
+        }
+
+        foreach ($scores as $dim => $_) {
+            $scores[$dim] = $totals[$dim] > 0
+                ? (int) round(($correct[$dim] / $totals[$dim]) * 100)
+                : 0;
+        }
+
+        return $scores;
+    }
+
+    /**
+     * Calcule le score de résilience/persévérance (0–100).
+     * Basé sur les questions Likert du bloc 'resilience' (avec inversion des items inversés).
+     */
+    private function calculateResilienceScore(string $sessionId): int
+    {
+        $answers = AnswerRiasec::session($sessionId)
+            ->avecQuestion()
+            ->get()
+            ->filter(fn ($a) => $a->question && $a->question->bloc === 'resilience');
+
         if ($answers->isEmpty()) {
+            return 0;
+        }
+
+        $totalRaw = 0;
+        $maxRaw   = 0;
+
+        foreach ($answers as $answer) {
+            $valeur = $answer->question->is_reverse
+                ? (6 - $answer->valeur)
+                : $answer->valeur;
+
+            $totalRaw += $valeur;
+            $maxRaw   += self::LIKERT_MAX;
+        }
+
+        return $maxRaw > 0 ? (int) round(($totalRaw / $maxRaw) * 100) : 0;
+    }
+
+    /**
+     * Calcule le score de cohérence interne (0–100) sur les seules dimensions RIASEC.
+     * Exclut explicitement Big Five, GATB, Résilience et Attention.
+     */
+    private function calculateCoherenceScore(Collection $answers): int
+    {
+        // Filtre sur RIASEC pur (bloc 'riasec' ou dimension dans R/I/A/S/E/C sans autre bloc)
+        $riasecAnswers = $answers->filter(function ($a) {
+            $q = $a->question;
+            return $q
+                && in_array($q->dimension, self::RIASEC_DIMS, true)
+                && (! $q->bloc || $q->bloc === 'riasec');
+        });
+
+        if ($riasecAnswers->isEmpty()) {
             return 0;
         }
 
         $varianceByDim = [];
 
-        foreach (array_keys(QuestionRiasec::DIMENSIONS) as $dim) {
-            $dimAnswers = $answers->filter(
-                fn ($a) => $a->question?->dimension === $dim
-            )->pluck('valeur');
+        foreach (self::RIASEC_DIMS as $dim) {
+            $dimAnswers = $riasecAnswers
+                ->filter(fn ($a) => $a->question?->dimension === $dim)
+                ->pluck('valeur');
 
             if ($dimAnswers->count() < 2) {
                 continue;
@@ -511,26 +547,11 @@ class TestManager
             return 100;
         }
 
-        // Variance max théorique sur échelle 1-5 ≈ 4.0
-        $maxVariance  = 4.0;
-        $avgVariance  = array_sum($varianceByDim) / count($varianceByDim);
-        $coherence    = max(0, 100 - (int) round(($avgVariance / $maxVariance) * 100));
+        $maxVariance = 4.0; // Variance max théorique sur échelle 1-5
+        $avgVariance = array_sum($varianceByDim) / count($varianceByDim);
+        $coherence   = max(0, 100 - (int) round(($avgVariance / $maxVariance) * 100));
 
         return min(100, $coherence);
-    }
-
-    /**
-     * Indique si une question doit être inversée (question de contrôle de cohérence).
-     */
-    private function isInvertedQuestion(QuestionRiasec $question): bool
-    {
-        // Vérifie si la source contient un marqueur d'inversion
-        // Convention : ajouter "[INV]" dans le champ source de la question inversée
-        if ($question->source && str_contains($question->source, '[INV]')) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -539,27 +560,17 @@ class TestManager
     private function invertScore(int $valeur, string $typeReponse): int
     {
         return match ($typeReponse) {
-            'likert'  => (self::LIKERT_MIN + self::LIKERT_MAX) - $valeur, // 6 - valeur
+            'likert'  => (self::LIKERT_MIN + self::LIKERT_MAX) - $valeur,
             'boolean' => 1 - $valeur,
             default   => $valeur,
         };
     }
 
-    /**
-     * Retourne les IDs de questions déjà répondues dans une session.
-     *
-     * @return array<int>
-     */
     private function getAnsweredQuestionIds(?int $userId, string $sessionId): array
     {
-        return AnswerRiasec::session($sessionId)
-            ->pluck('question_id')
-            ->all();
+        return AnswerRiasec::session($sessionId)->pluck('question_id')->all();
     }
 
-    /**
-     * Construit le texte de description du profil combiné (jusqu'à 3 dimensions).
-     */
     private function buildProfileDescription(array $top3, RiasecScoreDTO $scores): string
     {
         $primary   = self::DIMENSION_PROFILES[$top3[0]] ?? null;
@@ -583,36 +594,5 @@ class TestManager
         }
 
         return $desc;
-    }
-
-    // ══════════════════════════════════════════════════════════════════════
-    // UTILITAIRES PUBLICS
-    // ══════════════════════════════════════════════════════════════════════
-
-    /**
-     * Génère un nouvel UUID v4 de session de test.
-     * À appeler une seule fois au démarrage du test.
-     */
-    public function generateSessionId(): string
-    {
-        return (string) Str::uuid();
-    }
-
-    /**
-     * Invalide tous les caches liés à une session (après réponse, fin de test).
-     */
-    public function invalidateSessionCache(string $sessionId): void
-    {
-        Cache::forget("riasec.scores.{$sessionId}");
-    }
-
-    /**
-     * Retourne les libellés de profil pour une dimension donnée.
-     *
-     * @return array{label:string, emoji:string, description:string, forces:array, metiers:array, filieres:array}|null
-     */
-    public function getDimensionProfile(string $dimension): ?array
-    {
-        return self::DIMENSION_PROFILES[strtoupper($dimension)] ?? null;
     }
 }

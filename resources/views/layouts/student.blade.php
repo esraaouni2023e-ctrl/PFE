@@ -415,7 +415,7 @@
         <ul class="navbar-nav">
             <li><a href="{{ route('student.dashboard') }}"    class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Accueil</a></li>
             <li><a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">Orientation</a></li>
-            <li><a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">What-If</a></li>
+            <li><a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">Simulateur</a></li>
             <li><a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">Comparateur</a></li>
             <li><a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">Vœux</a></li>
             <li><a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">Profil Académique</a></li>
@@ -458,7 +458,7 @@
         <div class="mobile-nav-drawer">
             <a href="{{ route('student.dashboard') }}"   class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">Accueil</a>
             <a href="{{ route('student.orientation') }}"  class="{{ request()->routeIs('student.orientation') ? 'active' : '' }}">Orientation</a>
-            <a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">What-If</a>
+            <a href="{{ route('student.whatif.index') }}" class="{{ request()->routeIs('student.whatif.*') ? 'active' : '' }}">Simulateur</a>
             <a href="{{ route('student.comparateur.index') }}" class="{{ request()->routeIs('student.comparateur.*') ? 'active' : '' }}">Comparateur</a>
             <a href="{{ route('student.voeux.index') }}"  class="{{ request()->routeIs('student.voeux.*') ? 'active' : '' }}">Vœux</a>
             <a href="{{ route('student.profil') }}"       class="{{ request()->routeIs('student.profil') ? 'active' : '' }}">Profil Académique</a>

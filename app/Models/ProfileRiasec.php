@@ -59,21 +59,40 @@ class ProfileRiasec extends Model
         'interpretation',
         'duree_minutes',
         'complete_at',
+        // v5.0 — GATB
+        'score_gatb_g', 'score_gatb_v', 'score_gatb_n', 'score_gatb_s',
+        // v5.0 — Résilience
+        'score_resilience',
+        // v5.0 — Fraude & validation
+        'is_flagged', 'validation_status', 'flag_reason',
+        // Early stopping
+        'stopped_early', 'confidence_score', 'blocks_completed',
     ];
 
     protected $casts = [
-        'score_r'                 => 'integer',
-        'score_i'                 => 'integer',
-        'score_a'                 => 'integer',
-        'score_s'                 => 'integer',
-        'score_e'                 => 'integer',
-        'score_c'                 => 'integer',
-        'score_coherence'         => 'integer',
-        'nb_questions_repondues'  => 'integer',
-        'nb_questions_total'      => 'integer',
-        'duree_minutes'           => 'integer',
-        'interpretation'          => 'array',
-        'complete_at'             => 'datetime',
+        'score_r'                => 'integer',
+        'score_i'                => 'integer',
+        'score_a'                => 'integer',
+        'score_s'                => 'integer',
+        'score_e'                => 'integer',
+        'score_c'                => 'integer',
+        'score_coherence'        => 'integer',
+        'nb_questions_repondues' => 'integer',
+        'nb_questions_total'     => 'integer',
+        'duree_minutes'          => 'integer',
+        'interpretation'         => 'array',
+        'complete_at'            => 'datetime',
+        // v5.0
+        'score_gatb_g'           => 'integer',
+        'score_gatb_v'           => 'integer',
+        'score_gatb_n'           => 'integer',
+        'score_gatb_s'           => 'integer',
+        'score_resilience'       => 'integer',
+        'is_flagged'             => 'boolean',
+        'flag_reason'            => 'array',
+        'stopped_early'          => 'boolean',
+        'confidence_score'       => 'float',
+        'blocks_completed'       => 'integer',
     ];
 
     protected $hidden = [];

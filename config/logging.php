@@ -65,6 +65,12 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'orientation' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/orientation.log'),
+            'level' => 'info',
+        ],
+
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),

@@ -7,7 +7,6 @@ use App\Models\Profile;
 use App\Models\ProfileRiasec;
 use App\Models\QuestionRiasec;
 use App\Services\AdmissionPredictorService;
-use App\Services\RecommendationService;
 use App\Services\SiaepiRecommendationEngine;
 use App\Services\RIASEC\GatbCalculator;
 use Illuminate\Http\Request;
@@ -16,12 +15,10 @@ use Illuminate\Support\Facades\Auth;
 class StudentController extends Controller
 {
     protected AdmissionPredictorService $predictor;
-    protected RecommendationService $recommendationService;
 
-    public function __construct(AdmissionPredictorService $predictor, RecommendationService $recommendationService)
+    public function __construct(AdmissionPredictorService $predictor)
     {
         $this->predictor = $predictor;
-        $this->recommendationService = $recommendationService;
     }
 
     public function index()
@@ -64,36 +61,43 @@ class StudentController extends Controller
                 ];
             }
 
-            // Extraction des scores réels GATB
+            // Extraction des scores réels GATB (v5.0 : GATB_G/V/N/S + rétrocompat G/V/Num/Sp)
             $sessionId = $profilRiasec->test_session_id;
             if ($sessionId) {
-                $rawGatbAnswers = \App\Models\AnswerRiasec::where('test_session_id', $sessionId)
-                    ->whereHas('question', function($q) {
-                        $q->whereIn('dimension', ['G', 'V', 'Num', 'Sp']);
-                    })
-                    ->with('question')
-                    ->get()
-                    ->map(function($ans) {
-                        $dimMap = ['Num' => 'N', 'Sp' => 'S'];
-                        $dim = $ans->question->dimension;
-                        return [
-                            'dimension' => $dimMap[$dim] ?? $dim,
-                            'score'     => $ans->valeur
-                        ];
-                    })->toArray();
+                // Utilise les colonnes calculées si disponibles
+                $gScoreG = $profilRiasec->score_gatb_g ?? null;
+                $gScoreN = $profilRiasec->score_gatb_n ?? null;
 
-                if (!empty($rawGatbAnswers)) {
-                    $gatbCalc = new \App\Services\RIASEC\GatbCalculator();
-                    $gScores  = $gatbCalc->calculateScores($rawGatbAnswers);
+                if (is_null($gScoreG)) {
+                    // Recalcul à la volée (rétrocompatibilité)
+                    $rawGatbAnswers = \App\Models\AnswerRiasec::where('test_session_id', $sessionId)
+                        ->whereHas('question', function ($q) {
+                            $q->whereIn('dimension', ['GATB_G', 'GATB_V', 'GATB_N', 'GATB_S', 'G', 'V', 'Num', 'Sp']);
+                        })
+                        ->with('question')
+                        ->get()
+                        ->map(fn ($ans) => [
+                            'dimension' => $ans->question->dimension,
+                            'score'     => $ans->valeur,
+                        ])->toArray();
 
+                    if (!empty($rawGatbAnswers)) {
+                        $gatbCalc = new \App\Services\RIASEC\GatbCalculator();
+                        $gScores  = $gatbCalc->calculateScores($rawGatbAnswers);
+                        $gScoreG  = $gScores['GATB_G'] ?? 0;
+                        $gScoreN  = $gScores['GATB_N'] ?? 0;
+                    }
+                }
+
+                if ($gScoreG > 0 || $gScoreN > 0) {
                     $dynamicSkills[] = [
                         'label' => 'Logique GATB (G)',
-                        'val'   => round(($gScores['G'] ?? 10) * 5), // sur 100
+                        'val'   => min(100, (int) $gScoreG),
                         'color' => 'var(--accent2)'
                     ];
                     $dynamicSkills[] = [
                         'label' => 'Calcul GATB (N)',
-                        'val'   => round(($gScores['N'] ?? 10) * 5),
+                        'val'   => min(100, (int) $gScoreN),
                         'color' => 'var(--accent)'
                     ];
                 }
@@ -141,40 +145,52 @@ class StudentController extends Controller
             $sessionId     = $profilRiasec->test_session_id;
             $textoKeywords = $this->buildTextoFromAnswers($sessionId, $codeHolland, $sectionBac);
 
-            $gatbScores = ['G' => 10, 'V' => 10, 'N' => 10, 'S' => 10, 'TOTAL' => 10];
-            if ($sessionId) {
+            // v5.0 : Utilise les colonnes pré-calculées du profil en priorité
+            $gatbScores = [
+                'GATB_G' => $profilRiasec->score_gatb_g ?? 0,
+                'GATB_V' => $profilRiasec->score_gatb_v ?? 0,
+                'GATB_N' => $profilRiasec->score_gatb_n ?? 0,
+                'GATB_S' => $profilRiasec->score_gatb_s ?? 0,
+                'TOTAL'  => 0,
+            ];
+            if (array_sum(array_values($gatbScores)) === 0 && $sessionId) {
+                // Recalcul si colonnes vides (ancienne session)
                 $rawGatbAnswers = \App\Models\AnswerRiasec::where('test_session_id', $sessionId)
-                    ->whereHas('question', function($q) {
-                        $q->whereIn('dimension', ['G', 'V', 'Num', 'Sp']);
+                    ->whereHas('question', function ($q) {
+                        $q->whereIn('dimension', ['GATB_G', 'GATB_V', 'GATB_N', 'GATB_S', 'G', 'V', 'Num', 'Sp']);
                     })
                     ->with('question')
                     ->get()
-                    ->map(function($ans) {
-                        $dimMap = ['Num' => 'N', 'Sp' => 'S'];
-                        $dim = $ans->question->dimension;
-                        return [
-                            'dimension' => $dimMap[$dim] ?? $dim,
-                            'score'     => $ans->valeur
-                        ];
-                    })->toArray();
+                    ->map(fn ($ans) => [
+                        'dimension' => $ans->question->dimension,
+                        'score'     => $ans->valeur,
+                    ])->toArray();
 
                 if (!empty($rawGatbAnswers)) {
                     $gatbCalc   = new \App\Services\RIASEC\GatbCalculator();
                     $gatbScores = $gatbCalc->calculateScores($rawGatbAnswers);
                 }
             }
+            $gatbScores['TOTAL'] = round(
+                (($gatbScores['GATB_G'] ?? 0) + ($gatbScores['GATB_V'] ?? 0) +
+                 ($gatbScores['GATB_N'] ?? 0) + ($gatbScores['GATB_S'] ?? 0)) / 4, 1
+            );
 
             $profilEtudiant = [
                 'score_fg'                 => (float) $scoreFg,
+                'section_bac'              => $sectionBac,
                 'filiere_etudiant_actuelle'=> $sectionBac,
                 'texte_psycho'             => $textoKeywords,
                 'vecteur_psychometrique'   => $vecteurRiasec,
                 'gatb_scores'              => $gatbScores,
+                'code_holland'             => $codeHolland,
             ];
 
-            // On demande le Top 6 à l'IA
+            // On demande le Top 6 au moteur SIAEPI PHP-natif
             try {
-                $recs = $this->recommendationService->getRecommendations($profilEtudiant, null, 6);
+                $engine = new \App\Services\SiaepiRecommendationEngine();
+                $recs = $engine->recommend($profilEtudiant, 6);
+                
                 if (!isset($recs['error']) && !empty($recs['recommandations'])) {
                     $predictions = [];
                     foreach ($recs['recommandations'] as $r) {
@@ -182,12 +198,13 @@ class StudentController extends Controller
                             'icon'  => '🎯',
                             'name'  => $r['Nom_Filiere'] ?? 'Formation',
                             'univ'  => ($r['Etablissement'] ?? '') . ' – ' . ($r['Universite'] ?? ''),
-                            'score' => isset($r['Score_Final_Contextuel']) ? round($r['Score_Final_Contextuel'] * 100) : 80,
+                            'score' => isset($r['Score_Final_Contextuel']) ? round($r['Score_Final_Contextuel'] * 100) : (isset($r['Score_Final']) ? round($r['Score_Final'] * 100) : 80),
                             'code'  => $r['Code_Filiere'] ?? ''
                         ];
                     }
                 }
             } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Erreur SIAEPI: " . $e->getMessage());
                 // Silencieux pour le fallback MVP
             }
         }
@@ -243,35 +260,79 @@ class StudentController extends Controller
             $codeHolland = $profilRiasec->code_holland;
         }
 
-        // ── 3. Scores GATB réels ─────────────────────────────────────────
+        // ── 3. Scores GATB réels (v5.0) ─────────────────────────────────
         $sessionId  = session('riasec_session_id') ?? $profilRiasec?->test_session_id;
-        $gatbScores = ['G' => 10, 'V' => 10, 'N' => 10, 'S' => 10];
 
-        if ($sessionId) {
+        // Priorité aux colonnes pré-calculées du profil
+        $gatbScores = [
+            'GATB_G' => $profilRiasec?->score_gatb_g ?? 0,
+            'GATB_V' => $profilRiasec?->score_gatb_v ?? 0,
+            'GATB_N' => $profilRiasec?->score_gatb_n ?? 0,
+            'GATB_S' => $profilRiasec?->score_gatb_s ?? 0,
+        ];
+
+        if (array_sum(array_values($gatbScores)) === 0 && $sessionId) {
             $rawGatbAnswers = AnswerRiasec::where('test_session_id', $sessionId)
-                ->whereHas('question', fn($q) => $q->whereIn('dimension', ['G', 'V', 'Num', 'Sp']))
+                ->whereHas('question', fn ($q) => $q->whereIn('dimension', [
+                    'GATB_G', 'GATB_V', 'GATB_N', 'GATB_S', 'G', 'V', 'Num', 'Sp'
+                ]))
                 ->with('question')->get()
-                ->map(function($ans) {
-                    return ['dimension' => ['Num'=>'N','Sp'=>'S'][$ans->question->dimension] ?? $ans->question->dimension, 'score' => $ans->valeur];
-                })->toArray();
+                ->map(fn ($ans) => [
+                    'dimension' => $ans->question->dimension,
+                    'score'     => $ans->valeur,
+                ])->toArray();
 
             if (!empty($rawGatbAnswers)) {
-                $gatbCalc = new GatbCalculator();
+                $gatbCalc   = new GatbCalculator();
                 $gatbScores = $gatbCalc->calculateScores($rawGatbAnswers);
             }
         }
 
         // ── 4. Appel au moteur SIAEPI PHP-natif ─────────────────────────
         $engine = new SiaepiRecommendationEngine();
-
-        $result = $engine->recommend([
+        $adaptiveEngine = new \App\Services\RIASEC\AdaptiveTestEngine();
+        
+        // Récupération des dimensions complètes depuis l'état adaptatif
+        $catState = $adaptiveEngine->getSessionState($sessionId);
+        
+        $fullProfile = [
             'score_fg'               => $scoreFg,
             'section_bac'            => $sectionBac,
             'filiere_etudiant_actuelle' => $sectionBac,
             'vecteur_psychometrique' => $vecteurRiasec,
             'gatb_scores'            => $gatbScores,
             'code_holland'           => $codeHolland,
-        ], (int) $request->input('top_n', 12));
+            // SIAEPI v4.0 : Dimensions composites
+            'big_five' => [
+                // v5.0 : clés B5_ en priorité, fallback ancienne notation
+                'O' => $catState['dimensions']['B5_O']['score'] ?? $catState['dimensions']['O']['score'] ?? 0.0,
+                'C' => $catState['dimensions']['B5_C']['score'] ?? $catState['dimensions']['C']['score'] ?? 0.0,
+                'E' => $catState['dimensions']['B5_E']['score'] ?? $catState['dimensions']['E']['score'] ?? 0.0,
+                'A' => $catState['dimensions']['B5_A']['score'] ?? $catState['dimensions']['A']['score'] ?? 0.0,
+                'N' => $catState['dimensions']['B5_N']['score'] ?? $catState['dimensions']['N']['score'] ?? 0.0,
+            ],
+            'valeurs' => [
+                'Sec' => $catState['dimensions']['Sec']['score'] ?? 0.0,
+                'Ach' => $catState['dimensions']['Ach']['score'] ?? 0.0,
+                'Ben' => $catState['dimensions']['Ben']['score'] ?? 0.0,
+                'Aut' => $catState['dimensions']['Aut']['score'] ?? 0.0,
+            ],
+            'interests' => [
+                'MED'   => $catState['dimensions']['MED']['score'] ?? 0.0,
+                'ENG'   => $catState['dimensions']['ENG']['score'] ?? 0.0,
+                'INFO'  => $catState['dimensions']['INFO']['score'] ?? 0.0,
+                'DROIT' => $catState['dimensions']['DROIT']['score'] ?? 0.0,
+                'ECO'   => $catState['dimensions']['ECO']['score'] ?? 0.0,
+                'EDU'   => $catState['dimensions']['EDU']['score'] ?? 0.0,
+                'ART'   => $catState['dimensions']['ART']['score'] ?? 0.0,
+                'LTR'   => $catState['dimensions']['LTR']['score'] ?? 0.0,
+                'SOC'   => $catState['dimensions']['SOC']['score'] ?? 0.0,
+                'SPO'   => $catState['dimensions']['SPO']['score'] ?? 0.0,
+                'ARCHI' => $catState['dimensions']['ARCHI']['score'] ?? 0.0,
+            ]
+        ];
+
+        $result = $engine->recommend($fullProfile, (int) $request->input('top_n', 12));
 
         // ── 5. Remap au format attendu par la vue ────────────────────────
         if (!isset($result['error']) && !empty($result['recommandations'])) {
@@ -322,10 +383,11 @@ class StudentController extends Controller
 
         // Ajoute mots-clés académiques
         $sectionKeywords = [
-            'Informatique' => 'programmation algorithme réseau système logiciel',
-            'Mathématiques'=> 'calcul abstraction modélisation probabilité',
-            'Économie'     => 'finance marché économie gestion comptabilité',
-            'Sciences'     => 'biologie chimie physique laboratoire expérience',
+            'Informatique' => 'informatique programmation algorithme réseau système logiciel data',
+            'Mathématiques'=> 'mathématiques calcul abstraction modélisation probabilité',
+            'Économie'     => 'économie finance marché gestion comptabilité commerce',
+            'Sciences'     => 'sciences biologie chimie physique laboratoire expérience',
+            'Lettres'      => 'lettres langues littérature traduction',
         ];
         $keywords[] = $sectionKeywords[$section] ?? 'autonomie résolution problèmes organisation';
 

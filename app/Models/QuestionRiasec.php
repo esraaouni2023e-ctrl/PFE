@@ -44,6 +44,16 @@ class QuestionRiasec extends Model
         self::DIM_S => 'Social',
         self::DIM_E => 'Entreprenant',
         self::DIM_C => 'Conventionnel',
+        
+        // GATB (Aptitudes)
+        'GATB_G' => 'Aptitude Générale',
+        'GATB_V' => 'Aptitude Verbale',
+        'GATB_N' => 'Aptitude Numérique',
+        'GATB_S' => 'Aptitude Spatiale',
+        
+        // Comportemental
+        'RESILIENCE' => 'Résilience & Persévérance',
+        'ATTENTION'  => 'Vérification d\'attention',
     ];
 
     const TYPES_REPONSE = ['likert', 'boolean', 'choice'];
