@@ -3,8 +3,8 @@
 
 @section('content')
 <style>
-:root{--ink:#003B8E;--paper:#FFFFFF;--cream:#F2F4F7;--warm:#E5E7EB;--accent:#FF6A00;--accent2:#0057B8;--accent3:#FF8C1A;--gold:#FF8C1A;--ink60:rgba(0,59,142,.6);--ink30:rgba(0,59,142,.3);--ink15:rgba(0,59,142,.15);--ink10:rgba(0,59,142,.1);--ink06:rgba(0,59,142,.06);--r:8px;--rl:16px;--rx:999px;--ease:cubic-bezier(.16,1,.3,1)}
-.cp{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--paper);padding:2rem 2.5rem 5rem;max-width:1300px;margin:0 auto}
+:root{--ink:#1E2937;--paper:#FFFFFF;--cream:#F8FAFC;--warm:#E2E8F0;--accent:#FF5E00;--accent2:#002D6B;--accent3:#FF7A1F;--gold:#FF7A1F;--ink60:rgba(30,41,55,.6);--ink30:rgba(30,41,55,.3);--ink15:rgba(30,41,55,.15);--ink10:rgba(30,41,55,.15);--ink06:rgba(30,41,55,.06);--r:8px;--rl:16px;--rx:999px;--ease:cubic-bezier(.16,1,.3,1)}
+.cp{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--cream);padding:2rem 2.5rem 5rem;max-width:1300px;margin:0 auto}
 .cp *,.cp *::before,.cp *::after{box-sizing:border-box;margin:0;padding:0}
 /* Header */
 .cp-header{margin-bottom:2rem}
@@ -146,7 +146,7 @@
 <script>
 (function() {
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-    const COLORS = ['#FF6A00','#0057B8','#FF8C1A','#003B8E'];
+    const COLORS = ['#FF5E00','#002D6B','#FF7A1F','#1E2937'];
     let radarInstance = null;
 
     window.lancer = async function() {
@@ -289,7 +289,7 @@
         `).join('');
 
         // Score rows with bars
-        tbody += '<tr><td colspan="${formations.length+1}" style="height:8px;background:var(--cream)"></td></tr>';
+        tbody += `<tr><td colspan="${formations.length+1}" style="height:8px;background:var(--cream)"></td></tr>`;
         tbody += metrics.map(m => `
             <tr class="cp-metric-row">
                 <td>${m.label}</td>

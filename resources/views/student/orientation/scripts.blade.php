@@ -175,27 +175,6 @@
         searchTimer = setTimeout(() => searchForm.submit(), 600);
     });
 
-    /* ── Toggle Voeu AJAX ── */
-    window.toggleVoeu = async function(btn, formationId) {
-        btn.disabled = true;
-        const CSRF = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
-        try {
-            const res = await fetch(`/student/voeux/toggle/${formationId}`, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' },
-            });
-            const data = await res.json();
-            if (data.success) {
-                const isActive = data.action === 'added';
-                btn.classList.toggle('active', isActive);
-                btn.textContent = isActive ? '❤️' : '🤍';
-            }
-        } catch(e) {
-            console.error('Erreur toggle voeu', e);
-        } finally {
-            btn.disabled = false;
-        }
-    };
 
 })();
 </script>

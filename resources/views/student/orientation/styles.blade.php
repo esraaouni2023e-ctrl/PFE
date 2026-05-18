@@ -3,18 +3,18 @@
    ORIENTATION — CapAvenir Design System
 ══════════════════════════════════════════ */
 .or {
-    --ink:#003B8E; --paper:#FFFFFF; --cream:#F2F4F7; --warm:#E5E7EB;
-    --accent:#FF6A00; --accent2:#0057B8; --accent3:#FF8C1A; --gold:#FF8C1A;
-    --ink60:rgba(0,59,142,.6); --ink30:rgba(0,59,142,.3);
-    --ink15:rgba(0,59,142,.15); --ink10:rgba(0,59,142,.1); --ink06:rgba(0,59,142,.06);
+    --ink:#1E2937; --paper:#FFFFFF; --cream:#F8FAFC; --warm:#E2E8F0;
+    --accent:#FF5E00; --accent2:#002D6B; --accent3:#FF7A1F; --gold:#FF7A1F;
+    --ink60:rgba(30,41,55,.6); --ink30:rgba(30,41,55,.3);
+    --ink15:rgba(30,41,55,.15); --ink10:rgba(30,41,55,.1); --ink06:rgba(30,41,55,.06);
     --r:6px; --rl:16px; --rx:999px; --ease:cubic-bezier(.16,1,.3,1);
-    font-family:'DM Sans',sans-serif; color:var(--ink); background:var(--paper);
+    font-family:'DM Sans',sans-serif; color:var(--ink); background:var(--cream);
     padding:2rem 2.5rem 5rem;
 }
 [data-theme="dark"] .or {
-    --ink:#f0ede6; --paper:#10100d; --cream:#18170f; --warm:#1f1e14;
-    --ink60:rgba(240,237,230,.6); --ink30:rgba(240,237,230,.3);
-    --ink15:rgba(240,237,230,.15); --ink10:rgba(240,237,230,.08); --ink06:rgba(240,237,230,.04);
+    --ink:#F1F5F9; --paper:#1E293B; --cream:#0F172A; --warm:#334155;
+    --ink60:rgba(241,245,249,.6); --ink30:rgba(241,245,249,.3);
+    --ink15:rgba(241,245,249,.15); --ink10:rgba(241,245,249,.08); --ink06:rgba(241,245,249,.04);
 }
 .or *,.or *::before,.or *::after { box-sizing:border-box; margin:0; padding:0; }
 .or a { color:inherit; text-decoration:none; }

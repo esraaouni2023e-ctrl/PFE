@@ -1,7 +1,7 @@
 <script>
 (function(){
 const CSRF=document.querySelector('meta[name="csrf-token"]')?.content??'';
-const COLORS=['#FF6A00','#0057B8','#FF8C1A','#003B8E'];
+const COLORS=['#FF5E00','#002D6B','#FF7A1F','#1E2937'];
 let chartInstances={};
 
 // ── Tab switching ──
@@ -196,7 +196,7 @@ function renderROI(d){
     <div style="margin-top:1rem"><div class="fs-chart-wrap"><canvas id="fs-roi-chart"></canvas></div></div>`;
     // Line chart
     if(chartInstances.roi) chartInstances.roi.destroy();
-    chartInstances.roi=new Chart(document.getElementById('fs-roi-chart'),{type:'line',data:{labels:d.evolution.map(e=>'An '+e.annee),datasets:[{label:'Salaire mensuel (TND)',data:d.evolution.map(e=>e.salaire),borderColor:'var(--accent)',backgroundColor:'rgba(255,106,0,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'var(--accent)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(11,12,16,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+    chartInstances.roi=new Chart(document.getElementById('fs-roi-chart'),{type:'line',data:{labels:d.evolution.map(e=>'An '+e.annee),datasets:[{label:'Salaire mensuel (TND)',data:d.evolution.map(e=>e.salaire),borderColor:'var(--accent)',backgroundColor:'rgba(255,94,0,.08)',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'var(--accent)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(11,12,16,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
 }
 
 // ── Module 7: Compatibilité (pre-rendered) ──

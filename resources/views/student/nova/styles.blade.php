@@ -8,22 +8,19 @@
    NOVA — CapAvenir System
 ════════════════════════════════════════════ */
     .db {
-        --ink: #003B8E;
-        --paper: #FFFFFF;
-        --cream: #F2F4F7;
-        --warm: #E5E7EB;
-        --accent: #FF6A00;
-        /* Orange principal */
-        --accent2: #0057B8;
-        /* Bleu principal */
-        --accent3: #FF8C1A;
-        /* Orange clair */
-        --gold: #FF8C1A;
-        --ink60: rgba(0, 59, 142, .6);
-        --ink30: rgba(0, 59, 142, .3);
-        --ink15: rgba(0, 59, 142, .15);
-        --ink10: rgba(0, 59, 142, .1);
-        --ink06: rgba(0, 59, 142, .06);
+        --ink: #1E2937;   /* Gris Anthracite (texte principal) */
+        --paper: #FFFFFF;   /* Blanc Pur */
+        --cream: #F8FAFC;   /* Blanc Gris Très Clair */
+        --warm: #E2E8F0;   /* Gris Froid Moderne */
+        --accent: #FF5E00;   /* Orange Moderne Dynamique */
+        --accent2: #002D6B;   /* Bleu Profond Premium */
+        --accent3: #FF7A1F;   /* Orange Doux Corail */
+        --gold: #FF7A1F;
+        --ink60: rgba(30, 41, 55, .6);
+        --ink30: rgba(30, 41, 55, .3);
+        --ink15: rgba(30, 41, 55, .15);
+        --ink10: rgba(30, 41, 55, .15);
+        --ink06: rgba(30, 41, 55, .06);
         --r: 6px;
         --rl: 16px;
         --rx: 999px;
@@ -31,32 +28,32 @@
 
         font-family: 'DM Sans', sans-serif;
         color: var(--ink);
-        background: var(--paper);
+        background: var(--cream);
         padding: 2rem 3rem 5rem;
     }
 
     [data-theme="dark"] .db {
-        --ink: #f0ede6;
-        --paper: #10100d;
-        --cream: #18170f;
-        --warm: #1f1e14;
-        --ink60: rgba(240, 237, 230, .6);
-        --ink30: rgba(240, 237, 230, .3);
-        --ink15: rgba(240, 237, 230, .15);
-        --ink10: rgba(240, 237, 230, .08);
-        --ink06: rgba(240, 237, 230, .04);
+        --ink: #F1F5F9;
+        --paper: #1E293B;
+        --cream: #0F172A;
+        --warm: #334155;
+        --ink60: rgba(241, 245, 249, .6);
+        --ink30: rgba(241, 245, 249, .3);
+        --ink15: rgba(241, 245, 249, .15);
+        --ink10: rgba(241, 245, 249, .08);
+        --ink06: rgba(241, 245, 249, .04);
     }
 
     [data-theme="light"] .db {
-        --ink: #003B8E;
+        --ink: #1E2937;
         --paper: #FFFFFF;
-        --cream: #F2F4F7;
-        --warm: #E5E7EB;
-        --ink60: rgba(0, 59, 142, .6);
-        --ink30: rgba(0, 59, 142, .3);
-        --ink15: rgba(0, 59, 142, .15);
-        --ink10: rgba(0, 59, 142, .1);
-        --ink06: rgba(0, 59, 142, .06);
+        --cream: #F8FAFC;
+        --warm: #E2E8F0;
+        --ink60: rgba(30, 41, 55, .6);
+        --ink30: rgba(30, 41, 55, .3);
+        --ink15: rgba(30, 41, 55, .15);
+        --ink10: rgba(30, 41, 55, .15);
+        --ink06: rgba(30, 41, 55, .06);
     }
 
     .db *,

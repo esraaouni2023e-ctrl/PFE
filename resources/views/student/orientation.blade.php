@@ -168,10 +168,37 @@
                         Spécialités
                     </div>
                     <div class="or-spec-list">
+                        @php
+                            $domainIcons = [
+                                'Informatique'                  => 'bi-laptop',
+                                'Mathématiques et Appliquées'   => 'bi-calculator',
+                                'Économie et Gestion'           => 'bi-graph-up-arrow',
+                                'Sciences Expérimentales'       => 'bi-clipboard-pulse',
+                                'Technologie'                   => 'bi-cpu',
+                                'Sport'                         => 'bi-trophy',
+                                'Lettres et Sciences Humaines'  => 'bi-book-half',
+                            ];
+                            $domainColors = [
+                                'Informatique'                  => '#0ea5e9',
+                                'Mathématiques et Appliquées'   => '#6366f1',
+                                'Économie et Gestion'           => '#10b981',
+                                'Sciences Expérimentales'       => '#ec4899',
+                                'Technologie'                   => '#f59e0b',
+                                'Sport'                         => '#ef4444',
+                                'Lettres et Sciences Humaines'  => '#8b5cf6',
+                            ];
+                        @endphp
                         @foreach($specialites->take(5) as $spec)
+                            @php
+                                $dom = $spec->domaine ?? '';
+                                $iClass = $domainIcons[$dom] ?? 'bi-journal-code';
+                                $iColor = $domainColors[$dom] ?? 'var(--accent)';
+                            @endphp
                             <a href="{{ route('student.orientation', array_merge(request()->all(), ['domaine' => $spec->domaine, 'page' => 1])) }}"
                                 class="or-spec-pill {{ request('domaine') == $spec->domaine ? 'active' : '' }}">
-                                <span class="or-spec-pill-icon">{{ $spec->icon }}</span>
+                                <span class="or-spec-pill-icon" style="color: {{ $iColor }};">
+                                    <i class="bi {{ $iClass }}"></i>
+                                </span>
                                 <span class="or-spec-pill-name">{{ $spec->nom }}</span>
                                 <span class="or-spec-pill-count">{{ $spec->nb_formations }}</span>
                             </a>
@@ -223,9 +250,11 @@
                                     <span style="font-size: 0.65rem; font-weight: 700; color: var(--ink30); text-transform: uppercase; letter-spacing: 0.05em;">
                                         #{{ $filiere->code_filiere }}
                                     </span>
-                                    <span class="pill pill-accent" style="font-size: 0.6rem;">
-                                        {{ $filiere->domaine }}
-                                    </span>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span class="pill pill-accent" style="font-size: 0.6rem;">
+                                            {{ $filiere->domaine }}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <h3 style="font-family: var(--font-serif); font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 0.25rem; line-height: 1.3; min-height: 2.6rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">

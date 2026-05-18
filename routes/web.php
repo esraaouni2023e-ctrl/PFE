@@ -74,15 +74,6 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
             Route::delete('/historique/{simulation}', [\App\Http\Controllers\Student\WhatIfController::class, 'destroy'])->name('historique.destroy');
         });
 
-        // ── Vœux d'orientation ──
-        Route::prefix('voeux')->name('voeux.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Student\VoeuxController::class, 'index'])->name('index');
-            Route::post('/toggle/{formation}', [\App\Http\Controllers\Student\VoeuxController::class, 'toggle'])->name('toggle');
-            Route::post('/reordonner', [\App\Http\Controllers\Student\VoeuxController::class, 'reordonner'])->name('reordonner');
-            Route::patch('/{voeu}', [\App\Http\Controllers\Student\VoeuxController::class, 'update'])->name('update');
-            Route::delete('/{voeu}', [\App\Http\Controllers\Student\VoeuxController::class, 'destroy'])->name('destroy');
-        });
-
         // ── Profil Académique ──
         Route::get('/profil', [\App\Http\Controllers\Student\StudentProfileController::class, 'show'])->name('profil');
         Route::put('/profil', [\App\Http\Controllers\Student\StudentProfileController::class, 'update'])->name('profil.update');

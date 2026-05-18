@@ -22,19 +22,19 @@
         ═══════════════════════════════════════════ */
         :root {
             /* ── Core palette ── */
-            --ink:     #003B8E;
-            --paper:   #FFFFFF;
-            --cream:   #F2F4F7;
-            --warm:    #E5E7EB;
-            --accent:  #FF6A00;   /* Orange principal */
-            --accent2: #0057B8;   /* Bleu principal */
-            --accent3: #FF8C1A;   /* Orange clair */
-            --gold:    #FF8C1A;
-            --ink60:   rgba(0, 59, 142, 0.6);
-            --ink30:   rgba(0, 59, 142, 0.3);
-            --ink15:   rgba(0, 59, 142, 0.15);
-            --ink10:   rgba(0, 59, 142, 0.1);
-            --ink06:   rgba(0, 59, 142, 0.06);
+            --ink:     #1E2937;   /* Gris Anthracite (texte principal) */
+            --paper:   #FFFFFF;   /* Blanc Pur */
+            --cream:   #F8FAFC;   /* Blanc Gris Très Clair (fond principal) */
+            --warm:    #E2E8F0;   /* Gris Froid Moderne (bordures) */
+            --accent:  #FF5E00;   /* Orange Moderne Dynamique */
+            --accent2: #002D6B;   /* Bleu Profond Premium */
+            --accent3: #FF7A1F;   /* Orange Doux Corail */
+            --gold:    #FF7A1F;
+            --ink60:   rgba(30, 41, 55, 0.6);
+            --ink30:   rgba(30, 41, 55, 0.3);
+            --ink15:   rgba(30, 41, 55, 0.15);
+            --ink10:   rgba(30, 41, 55, 0.1);
+            --ink06:   rgba(30, 41, 55, 0.06);
 
             /* ── Radii & easing ── */
             --r:   6px;
@@ -45,55 +45,59 @@
             /* ── Component tokens ── */
             --font-main:     'DM Sans', sans-serif;
             --font-serif:    'Fraunces', serif;
-            --navbar-bg:     rgba(247,245,240,.88);
-            --glass-border:  rgba(11,12,16,.10);
-            --glass-border-vivid: rgba(255,106,0,.30);
-            --chat-panel-bg: rgba(247,245,240,.97);
-            --shadow-card:   0 8px 40px rgba(0,0,0,.08);
+            --navbar-bg:     rgba(248, 250, 252, 0.88); /* Background cream with backdrop-filter */
+            --glass-border:  rgba(30, 41, 55, 0.10);
+            --glass-border-vivid: rgba(255, 94, 0, 0.25); /* Orange Moderne Dynamique border */
+            --chat-panel-bg: rgba(248, 250, 252, 0.97);
+            --shadow-card:   0 8px 40px rgba(0, 45, 107, 0.08); /* Bleu Profond Premium brand shadow */
             --transition:    0.3s cubic-bezier(.4,0,.2,1);
 
             /* ── Legacy aliases (used by child views) ── */
             --bg-base:       var(--paper);
             --bg-1:          var(--cream);
             --bg-2:          var(--warm);
-            --indigo:        var(--accent);
-            --indigo-light:  #e07848;
-            --violet:        var(--accent2);
-            --violet-dark:   #0f3a52;
+            --indigo:        var(--accent2);
+            --indigo-light:  #004A9F; /* Bleu Institutionnel */
+            --violet:        var(--accent);
+            --violet-dark:   #d14d00;
             --cyan:          var(--accent3);
-            --glass-bg:      rgba(11,12,16,.04);
-            --glass-bg-md:   rgba(11,12,16,.07);
+            --glass-bg:      rgba(30, 41, 55, 0.04);
+            --glass-bg-md:   rgba(30, 41, 55, 0.07);
             --text-primary:  var(--ink);
             --text-secondary: var(--ink60);
             --text-muted:    var(--ink30);
-            --success:       #4a7c59;
-            --warning:       #c8973a;
-            --input-bg:      rgba(11,12,16,.04);
-            --card-surface:  rgba(11,12,16,.04);
-            --card-surface-md: rgba(11,12,16,.07);
+            --success:       #10B981;
+            --warning:       #F59E0B;
+            --input-bg:      rgba(30, 41, 55, 0.04);
+            --card-surface:  rgba(30, 41, 55, 0.04);
+            --card-surface-md: rgba(30, 41, 55, 0.07);
         }
 
         /* ── Dark mode overrides ── */
         [data-theme="dark"] {
-            --ink:   #f0ede6;
-            --paper: #10100d;
-            --cream: #18170f;
-            --warm:  #1f1e14;
-            --ink60: rgba(240,237,230,.6);
-            --ink30: rgba(240,237,230,.3);
-            --ink15: rgba(240,237,230,.15);
-            --ink10: rgba(240,237,230,.08);
-            --ink06: rgba(240,237,230,.04);
-            --navbar-bg:     rgba(16,16,13,.88);
-            --glass-border:  rgba(240,237,230,.08);
-            --glass-border-vivid: rgba(255,106,0,.35);
-            --chat-panel-bg: rgba(16,16,13,.97);
-            --shadow-card:   0 8px 40px rgba(0,0,0,.35);
-            --glass-bg:      rgba(240,237,230,.04);
-            --glass-bg-md:   rgba(240,237,230,.07);
-            --input-bg:      rgba(240,237,230,.07);
-            --card-surface:  rgba(240,237,230,.04);
-            --card-surface-md: rgba(240,237,230,.07);
+            --ink:   #F1F5F9;   /* Texte clair */
+            --paper: #1E293B;   /* Gris foncé pour les cartes */
+            --cream: #0F172A;   /* Fond sombre */
+            --warm:  #334155;   /* Bordures sombres */
+            --accent: #FF7A1F;  /* Orange reste visible */
+            --accent2: #1E60D1; /* Bleu principal dark mode */
+            --accent3: #FF7A1F;
+            --gold:    #FF7A1F;
+            --ink60: rgba(241, 245, 249, 0.6);
+            --ink30: rgba(241, 245, 249, 0.3);
+            --ink15: rgba(241, 245, 249, 0.15);
+            --ink10: rgba(241, 245, 249, 0.08);
+            --ink06: rgba(241, 245, 249, 0.04);
+            --navbar-bg:     rgba(15, 23, 42, 0.88);
+            --glass-border:  rgba(241, 245, 249, 0.08);
+            --glass-border-vivid: rgba(30, 96, 209, 0.35); /* Bleu principal dark mode border */
+            --chat-panel-bg: rgba(15, 23, 42, 0.97);
+            --shadow-card:   0 8px 40px rgba(0, 0, 0, 0.35);
+            --glass-bg:      rgba(241, 245, 249, 0.04);
+            --glass-bg-md:   rgba(241, 245, 249, 0.07);
+            --input-bg:      rgba(241, 245, 249, 0.07);
+            --card-surface:  rgba(241, 245, 249, 0.04);
+            --card-surface-md: rgba(241, 245, 249, 0.07);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -101,7 +105,7 @@
 
         body {
             font-family: var(--font-main);
-            background: var(--paper);
+            background: var(--cream);
             color: var(--ink);
             overflow-x: hidden;
             min-height: 100vh;

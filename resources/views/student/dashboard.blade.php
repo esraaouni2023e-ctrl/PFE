@@ -11,19 +11,19 @@
    DESIGN TOKENS — CapAvenir System
 ════════════════════════════════════════════ */
 .db {
-    --ink:     #003B8E;
-    --paper:   #FFFFFF;
-    --cream:   #F2F4F7;
-    --warm:    #E5E7EB;
-    --accent:  #FF6A00;   /* Orange principal */
-    --accent2: #0057B8;   /* Bleu principal */
-    --accent3: #FF8C1A;   /* Orange clair */
-    --gold:    #FF8C1A;
-    --ink60:   rgba(0, 59, 142, 0.6);
-    --ink30:   rgba(0, 59, 142, 0.3);
-    --ink15:   rgba(0, 59, 142, 0.15);
-    --ink10:   rgba(0, 59, 142, 0.1);
-    --ink06:   rgba(0, 59, 142, 0.06);
+    --ink:     #1E2937;   /* Gris Anthracite (texte principal) */
+    --paper:   #FFFFFF;   /* Blanc Pur */
+    --cream:   #F8FAFC;   /* Blanc Gris Très Clair */
+    --warm:    #E2E8F0;   /* Gris Froid Moderne */
+    --accent:  #FF5E00;   /* Orange Moderne Dynamique */
+    --accent2: #002D6B;   /* Bleu Profond Premium */
+    --accent3: #FF7A1F;   /* Orange Doux Corail */
+    --gold:    #FF7A1F;
+    --ink60:   rgba(30, 41, 55, 0.6);
+    --ink30:   rgba(30, 41, 55, 0.3);
+    --ink15:   rgba(30, 41, 55, 0.15);
+    --ink10:   rgba(30, 41, 55, 0.1);
+    --ink06:   rgba(30, 41, 55, 0.06);
     --r:       6px;
     --rl:      16px;
     --rx:      999px;
@@ -31,13 +31,13 @@
 
     font-family: 'DM Sans', sans-serif;
     color: var(--ink);
-    background: var(--paper);
+    background: var(--cream);
     padding: 2rem 3rem 5rem;
 }
 
 /* Dark mode */
-[data-theme="dark"]  .db { --ink:#f0ede6;--paper:#10100d;--cream:#18170f;--warm:#1f1e14;--ink60:rgba(240,237,230,.6);--ink30:rgba(240,237,230,.3);--ink15:rgba(240,237,230,.15);--ink10:rgba(240,237,230,.08);--ink06:rgba(240,237,230,.04); }
-[data-theme="light"] .db { --ink:#003B8E;--paper:#FFFFFF;--cream:#F2F4F7;--warm:#E5E7EB;--ink60:rgba(0, 59, 142, 0.6);--ink30:rgba(0, 59, 142, 0.3);--ink15:rgba(0, 59, 142, 0.15);--ink10:rgba(0, 59, 142, 0.1);--ink06:rgba(0, 59, 142, 0.06); }
+[data-theme="dark"]  .db { --ink:#F1F5F9;--paper:#1E293B;--cream:#0F172A;--warm:#334155;--ink60:rgba(241,245,249,.6);--ink30:rgba(241,245,249,.3);--ink15:rgba(241,245,249,.15);--ink10:rgba(241,245,249,.08);--ink06:rgba(241,245,249,.04); }
+[data-theme="light"] .db { --ink:#1E2937;--paper:#FFFFFF;--cream:#F8FAFC;--warm:#E2E8F0;--ink60:rgba(30, 41, 55, 0.6);--ink30:rgba(30, 41, 55, 0.3);--ink15:rgba(30, 41, 55, 0.15);--ink10:rgba(30, 41, 55, 0.1);--ink06:rgba(30, 41, 55, 0.06); }
 
 .db *, .db *::before, .db *::after { box-sizing: border-box; margin: 0; padding: 0; }
 .db a { color: inherit; text-decoration: none; }
@@ -678,66 +678,7 @@
 </section>
 
 
-{{-- ════════════════════════════════
-     § 3 · ROADMAP DE CARRIÈRE (TIMELINE)
-════════════════════════════════ --}}
-<section class="db-section rev" id="parcours-section">
-    <div class="db-section-header">
-        <div>
-            <p class="stag">Sur mesure</p>
-            <h2 class="sh">Ta Roadmap de <em>Carrière</em></h2>
-        </div>
-    </div>
 
-    @if($roadmaps->count() > 0)
-        @foreach($roadmaps as $roadmap)
-        <div class="card" style="padding: 2.5rem; margin-bottom: 1.5rem; position: relative;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h3 style="font-family: 'Fraunces', serif; font-size: 1.5rem; color: var(--accent);">Objectif : {{ $roadmap->target_job }}</h3>
-                <span class="pill pill-sage">Généré par IA</span>
-            </div>
-
-            <div style="position: relative; padding-left: 2rem; border-left: 2px solid var(--ink10); display: flex; flex-direction: column; gap: 2rem;">
-                @if(is_array($roadmap->steps))
-                    @foreach($roadmap->steps as $step)
-                    <div style="position: relative;">
-                        {{-- Timeline Dot --}}
-                        <div style="position: absolute; left: -2.65rem; top: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); border: 4px solid var(--paper);"></div>
-                        
-                        <div style="background: var(--paper); border: 1px solid var(--ink10); border-radius: var(--rl); padding: 1.5rem;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <h4 style="font-weight: 600; font-size: 1.1rem;">{{ $step['title'] ?? 'Étape' }}</h4>
-                                <span class="pill pill-gold">{{ $step['duration'] ?? '' }}</span>
-                            </div>
-                            <p style="font-size: 0.9rem; color: var(--ink60); line-height: 1.6;">{{ $step['description'] ?? '' }}</p>
-                        </div>
-                    </div>
-                    @endforeach
-                @endif
-            </div>
-        </div>
-        @endforeach
-    @else
-        <div class="card" style="padding: 3rem 2rem; text-align: center;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:3rem;height:3rem;margin: 0 auto 1rem; color: var(--accent2);">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-10.5v.75m.01 0a.75.75 0 01.75.75v.75m0 0a.75.75 0 01-.75.75H15m0 0a.75.75 0 01-.75-.75V5.25m.75 0V4.5m0 0a.75.75 0 01.75-.75h.75m0 0a.75.75 0 01.75.75v.75m0 0a.75.75 0 01-.75.75H15M9 15l-3 6m0 0l-1.5-3m1.5 3V9m12 0l3 6m0 0l1.5-3m-1.5 3V9" />
-            </svg>
-            <h3 style="font-family: 'Fraunces', serif; font-size: 1.5rem; margin-bottom: 1rem;">Créez votre chemin vers le succès</h3>
-            <p style="color: var(--ink60); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">Entrez le métier de vos rêves et laissez l'IA tracer le chemin universitaire exact étape par étape pour y arriver.</p>
-            
-            <form action="{{ route('student.roadmap.generate') }}" method="POST" style="display: flex; gap: 1rem; max-width: 500px; margin: 0 auto;">
-                @csrf
-                <input type="text" name="target_job" placeholder="Ex: Data Scientist, Ingénieur IA..." required style="flex: 1; padding: 0.8rem 1.2rem; border-radius: var(--rx); border: 1px solid var(--ink30); background: transparent;">
-                <button type="submit" class="btn-fill" style="border-radius: var(--rx);">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.1rem;height:1.1rem;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.456-2.455l.259-1.036.259 1.036a3.375 3.375 0 002.455 2.456l1.035.259-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                    </svg>
-                    Générer
-                </button>
-            </form>
-        </div>
-    @endif
-</section>
 
 {{-- ════════════════════════════════
      § 4 · MATCHING

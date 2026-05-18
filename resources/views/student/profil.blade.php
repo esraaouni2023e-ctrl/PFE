@@ -3,8 +3,8 @@
 
 @section('content')
 <style>
-:root{--ink:#003B8E;--paper:#FFFFFF;--cream:#F2F4F7;--warm:#E5E7EB;--accent:#FF6A00;--accent2:#0057B8;--accent3:#FF8C1A;--gold:#FF8C1A;--ink60:rgba(0,59,142,.6);--ink30:rgba(0,59,142,.3);--ink15:rgba(0,59,142,.15);--ink10:rgba(0,59,142,.1);--ink06:rgba(0,59,142,.06);--r:8px;--rl:16px;--rx:999px;--ease:cubic-bezier(.16,1,.3,1)}
-.pr{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--paper);padding:2rem 2.5rem 5rem;max-width:1100px;margin:0 auto}
+:root{--ink:#1E2937;--paper:#FFFFFF;--cream:#F8FAFC;--warm:#E2E8F0;--accent:#FF5E00;--accent2:#002D6B;--accent3:#FF7A1F;--gold:#FF7A1F;--ink60:rgba(30,41,55,.6);--ink30:rgba(30,41,55,.3);--ink15:rgba(30,41,55,.15);--ink10:rgba(30,41,55,.15);--ink06:rgba(30,41,55,.06);--r:8px;--rl:16px;--rx:999px;--ease:cubic-bezier(.16,1,.3,1)}
+.pr{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--cream);padding:2rem 2.5rem 5rem;max-width:1100px;margin:0 auto}
 .pr *,.pr *::before,.pr *::after{box-sizing:border-box;margin:0;padding:0}
 /* Layout */
 .pr-layout{display:grid;grid-template-columns:300px 1fr;gap:1.75rem;align-items:start}
@@ -140,12 +140,6 @@
             {{-- Liens rapides --}}
             <div class="pr-card">
                 <div class="pr-card-body" style="display:flex;flex-direction:column;gap:.5rem;">
-                    <a href="{{ route('student.voeux.index') }}" style="display:flex;align-items:center;gap:.625rem;padding:.75rem .875rem;border-radius:var(--r);background:var(--cream);border:1px solid var(--ink10);font-size:.83rem;font-weight:500;color:var(--ink);text-decoration:none">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.1rem;height:1.1rem;color:var(--accent);">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                        </svg>
-                        Mes vœux d'orientation
-                    </a>
                     <a href="{{ route('student.comparateur.index') }}" style="display:flex;align-items:center;gap:.625rem;padding:.75rem .875rem;border-radius:var(--r);background:var(--cream);border:1px solid var(--ink10);font-size:.83rem;font-weight:500;color:var(--ink);text-decoration:none">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:1.1rem;height:1.1rem;color:var(--accent2);">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
@@ -258,7 +252,7 @@
                                 @endforeach
                             @else
                                 <div id="notesPlaceholder" style="text-align:center;padding:2rem;color:var(--ink30);font-size:.85rem">
-                                    <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18' /></svg> Sélectionnez d'abord votre section BAC pour saisir vos notes
+                                    <i class="bi bi-info-circle" style="margin-right:.4rem;font-size:1.1rem;vertical-align:middle;"></i> Sélectionnez d'abord votre section BAC pour saisir vos notes
                                 </div>
                             @endif
                         </div>
@@ -301,7 +295,7 @@
 async function loadMatieres(section) {
     const container = document.getElementById('notesContainer');
     if (!section) {
-        container.innerHTML = '<div id="notesPlaceholder" style="text-align:center;padding:2rem;color:var(--ink30);font-size:.85rem"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18' /></svg> Sélectionnez d\'abord votre section BAC</div>';
+        container.innerHTML = '<div id="notesPlaceholder" style="text-align:center;padding:2rem;color:var(--ink30);font-size:.85rem"><i class="bi bi-info-circle" style="margin-right:.4rem;font-size:1.1rem;vertical-align:middle;"></i> Sélectionnez d\'abord votre section BAC</div>';
         return;
     }
     container.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--ink30)">Chargement…</div>';

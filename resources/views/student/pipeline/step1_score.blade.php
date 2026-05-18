@@ -153,7 +153,7 @@
                                 </div>
                             @endforeach
                         @else
-                            <div id="notesPlaceholder" style="text-align:center;padding:2.5rem;color:var(--ink30);font-size:.85rem;background:var(--ink06);border-radius:var(--r);border:1px dashed var(--ink15);">Sélectionnez votre section de Bac pour afficher les matières.</div>
+                            <div id="notesPlaceholder" style="text-align:center;padding:2.5rem;color:var(--ink30);font-size:.85rem;background:var(--ink06);border-radius:var(--r);border:1px dashed var(--ink15);"><i class="bi bi-info-circle" style="margin-right:.4rem;font-size:1.1rem;vertical-align:middle;"></i> Sélectionnez votre section de Bac pour afficher les matières.</div>
                         @endif
                     </div>
                 </div>
@@ -180,10 +180,10 @@
             ];
             @endphp
             @foreach([
-                ['label'=>'RIASEC · Holland','color'=>'#FF6A00','code'=>'R','desc'=>'6 dimensions vocales : Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel.'],
-                ['label'=>'Big Five · OCEAN','color'=>'#0057B8','code'=>'B5','desc'=>'5 traits de personnalité : Ouverture, Conscienciosité, Extraversion, Agréabilité, Stabilité.'],
-                ['label'=>'Aptitudes · GATB','color'=>'#FF8C1A','code'=>'G','desc'=>'4 aptitudes cognitives : Intelligence générale, Verbal, Numérique, Spatial.'],
-                ['label'=>'Valeurs · Schwartz','color'=>'#003B8E','code'=>'V','desc'=>'4 valeurs fondamentales : Sécurité, Réussite, Bienveillance, Autonomie.'],
+                ['label'=>'RIASEC · Holland','color'=>'#FF5E00','code'=>'R','desc'=>'6 dimensions vocales : Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel.'],
+                ['label'=>'Big Five · OCEAN','color'=>'#004A9F','code'=>'B5','desc'=>'5 traits de personnalité : Ouverture, Conscienciosité, Extraversion, Agréabilité, Stabilité.'],
+                ['label'=>'Aptitudes · GATB','color'=>'#FF7A1F','code'=>'G','desc'=>'4 aptitudes cognitives : Intelligence générale, Verbal, Numérique, Spatial.'],
+                ['label'=>'Valeurs · Schwartz','color'=>'#002D6B','code'=>'V','desc'=>'4 valeurs fondamentales : Sécurité, Réussite, Bienveillance, Autonomie.'],
             ] as $bloc)
             <div class="tp-bloc">
                 <div class="tp-bloc-top">
@@ -245,7 +245,7 @@ const existingData = @json(old('notes_matieres', $profile->notes_matieres ?? [])
 
 function loadMatieres(section) {
     const c = document.getElementById('notesContainer');
-    if (!section) { c.innerHTML = '<div id="notesPlaceholder" style="text-align:center;padding:2.5rem;color:var(--ink30);font-size:.85rem;background:var(--ink06);border-radius:var(--r);border:1px dashed var(--ink15);">Sélectionnez votre section de Bac pour afficher les matières.</div>'; return; }
+    if (!section) { c.innerHTML = '<div id="notesPlaceholder" style="text-align:center;padding:2.5rem;color:var(--ink30);font-size:.85rem;background:var(--ink06);border-radius:var(--r);border:1px dashed var(--ink15);"><i class="bi bi-info-circle" style="margin-right:.4rem;font-size:1.1rem;vertical-align:middle;"></i> Sélectionnez votre section de Bac pour afficher les matières.</div>'; return; }
     const m = formulesData[section];
     if (!m) { c.innerHTML = '<div style="color:#ef4444;text-align:center;padding:1rem;">Section inconnue.</div>'; return; }
     c.innerHTML = '<div style="font-size:.82rem;color:var(--ink60);margin-bottom:1rem;font-style:italic">Notes pour la section ' + section + '.</div>';
