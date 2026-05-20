@@ -11,6 +11,22 @@ use App\Models\Appointment;
 class CounselorController extends Controller
 {
     /**
+     * Display the pending approval screen for counselors.
+     */
+    public function pending(Request $request)
+    {
+        $user = $request->user();
+        
+        // Load the professional profile
+        $user->load('counselorProfile');
+
+        return view('counselor.pending', [
+            'user' => $user,
+            'profile' => $user->counselorProfile,
+        ]);
+    }
+
+    /**
      * Display a listing of students for the counselor.
      */
     public function index()
@@ -298,15 +314,6 @@ class CounselorController extends Controller
             'icon' => 'simulation'
         ];
 
-        // 5. Add wishes (Vœux)
-        $crmTimeline[] = [
-            'date' => \Carbon\Carbon::now()->subDays(3),
-            'type' => 'wish',
-            'title' => 'Vœux d\'orientation enregistrés',
-            'desc' => "1. Génie Logiciel (FST) | 2. Licence Computer Science (Tunis) | 3. Business Analytics (IHEC)",
-            'meta' => '3 vœux sauvegardés',
-            'icon' => 'wish'
-        ];
 
         // 6. Add reports (Rapports)
         $crmTimeline[] = [
@@ -741,5 +748,174 @@ class CounselorController extends Controller
         session(['sent_messages' => $sentMessages]);
 
         return redirect()->back()->with('success', 'Message omnicanal transmis avec succès via le canal ' . $channelLabels[$request->channel] . '.');
+    }
+
+    /**
+     * Display a dedicated students list page.
+     */
+    public function students(Request $request)
+    {
+        $query = User::where('role', User::ROLE_STUDENT)->with(['profile', 'careerRoadmaps']);
+
+        // Search filter
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $students = $query->get();
+
+        // Compute metrics for each student
+        $studentsData = $students->map(function ($student) {
+            $aiScore = $student->profile->ai_score ?? rand(55, 95);
+            $status = $student->profile->status ?? 'pending';
+
+            if ($aiScore < 65) {
+                $riskLevel = 'high';
+                $riskLabel = 'Risque élevé';
+            } elseif ($aiScore < 78) {
+                $riskLevel = 'medium';
+                $riskLabel = 'Surveillance';
+            } elseif ($aiScore < 90) {
+                $riskLevel = 'standard';
+                $riskLabel = 'Standard';
+            } else {
+                $riskLevel = 'excellent';
+                $riskLabel = 'Excellent';
+            }
+
+            $appointmentCount = Appointment::where('student_id', $student->id)
+                ->where('counselor_id', auth()->id())
+                ->count();
+
+            return [
+                'user' => $student,
+                'aiScore' => $aiScore,
+                'status' => $status,
+                'riskLevel' => $riskLevel,
+                'riskLabel' => $riskLabel,
+                'interests' => $student->profile->interests ?? 'Non renseigné',
+                'appointmentCount' => $appointmentCount,
+                'hasRoadmap' => $student->careerRoadmaps->isNotEmpty(),
+            ];
+        });
+
+        // Apply status filter
+        if ($statusFilter = $request->get('status')) {
+            $studentsData = $studentsData->filter(fn($s) => $s['status'] === $statusFilter);
+        }
+
+        // Apply risk filter
+        if ($riskFilter = $request->get('risk')) {
+            $studentsData = $studentsData->filter(fn($s) => $s['riskLevel'] === $riskFilter);
+        }
+
+        // Stats
+        $stats = [
+            'total' => $students->count(),
+            'completed' => $students->filter(fn($s) => ($s->profile->status ?? 'pending') === 'completed')->count(),
+            'ongoing' => $students->filter(fn($s) => ($s->profile->status ?? 'pending') === 'ongoing')->count(),
+            'atRisk' => $studentsData->filter(fn($s) => $s['riskLevel'] === 'high')->count(),
+        ];
+
+        return view('counselor.students', compact('studentsData', 'stats', 'search', 'statusFilter', 'riskFilter'));
+    }
+
+    /**
+     * Display the counselor agenda page.
+     */
+    public function agenda()
+    {
+        $appointments = Appointment::where('counselor_id', auth()->id())
+            ->with('student')
+            ->orderBy('scheduled_at', 'asc')
+            ->get();
+
+        // Separate into upcoming and past
+        $now = \Carbon\Carbon::now();
+        $upcoming = $appointments->filter(fn($a) => $a->scheduled_at->gte($now))->values();
+        $past = $appointments->filter(fn($a) => $a->scheduled_at->lt($now))->sortByDesc('scheduled_at')->values();
+
+        // Group upcoming by week
+        $upcomingByWeek = $upcoming->groupBy(function ($a) {
+            return $a->scheduled_at->startOfWeek()->format('d M Y');
+        });
+
+        // Stats
+        $thisMonth = $appointments->filter(fn($a) => $a->scheduled_at->isCurrentMonth());
+        $stats = [
+            'total' => $appointments->count(),
+            'thisMonth' => $thisMonth->count(),
+            'upcoming' => $upcoming->count(),
+            'completed' => $appointments->filter(fn($a) => $a->status === 'completed')->count(),
+            'nextAppointment' => $upcoming->first(),
+        ];
+
+        // Students for new appointment form
+        $students = User::where('role', User::ROLE_STUDENT)->orderBy('name')->get(['id', 'name', 'email']);
+
+        return view('counselor.agenda', compact('upcoming', 'past', 'upcomingByWeek', 'stats', 'students'));
+    }
+
+    /**
+     * Display the AI resources page.
+     */
+    public function resources()
+    {
+        // RIASEC dimensions
+        $riasecDimensions = [
+            ['code' => 'R', 'name' => 'Réaliste', 'color' => '#ef4444', 'desc' => 'Préfère les activités physiques, concrètes et manuelles. Aime travailler avec des outils, machines et animaux.', 'careers' => 'Ingénieur mécanique, Architecte, Technicien, Agriculteur'],
+            ['code' => 'I', 'name' => 'Investigateur', 'color' => '#0057B8', 'desc' => 'Aime observer, apprendre, analyser et résoudre des problèmes complexes. Esprit scientifique et curieux.', 'careers' => 'Chercheur, Data Scientist, Médecin, Analyste'],
+            ['code' => 'A', 'name' => 'Artistique', 'color' => '#8B5CF6', 'desc' => 'Créatif, expressif et original. Préfère les activités non structurées et l\'expression artistique.', 'careers' => 'Designer, Musicien, Écrivain, Photographe'],
+            ['code' => 'S', 'name' => 'Social', 'color' => '#10b981', 'desc' => 'Aime aider, enseigner, conseiller et servir les autres. Compétences interpersonnelles élevées.', 'careers' => 'Enseignant, Psychologue, Conseiller, Infirmier'],
+            ['code' => 'E', 'name' => 'Entreprenant', 'color' => '#FF5E00', 'desc' => 'Persuasif, ambitieux et orienté vers le leadership. Aime diriger et influencer les décisions.', 'careers' => 'Entrepreneur, Manager, Avocat, Commercial'],
+            ['code' => 'C', 'name' => 'Conventionnel', 'color' => '#F59E0B', 'desc' => 'Organisé, méthodique et précis. Préfère les tâches structurées et les environnements ordonnés.', 'careers' => 'Comptable, Administrateur, Banquier, Archiviste'],
+        ];
+
+        // GATB aptitudes
+        $gatbAptitudes = [
+            ['code' => 'G', 'name' => 'Intelligence Générale', 'desc' => 'Capacité de raisonnement logique et abstrait, compréhension de relations complexes.'],
+            ['code' => 'V', 'name' => 'Aptitude Verbale', 'desc' => 'Compréhension et utilisation efficace du langage écrit et oral.'],
+            ['code' => 'N', 'name' => 'Aptitude Numérique', 'desc' => 'Rapidité et précision dans les calculs arithmétiques et le raisonnement quantitatif.'],
+            ['code' => 'S', 'name' => 'Aptitude Spatiale', 'desc' => 'Visualisation d\'objets en 3D, compréhension de formes géométriques et relations spatiales.'],
+            ['code' => 'P', 'name' => 'Perception des Formes', 'desc' => 'Identification rapide de détails visuels et de différences entre les formes.'],
+            ['code' => 'Q', 'name' => 'Perception Clericale', 'desc' => 'Rapidité de perception des détails dans du matériel écrit ou tabulé.'],
+            ['code' => 'K', 'name' => 'Coordination Motrice', 'desc' => 'Coordination des mouvements des yeux et des mains pour des tâches précises.'],
+            ['code' => 'F', 'name' => 'Dextérité Digitale', 'desc' => 'Manipulation rapide et précise de petits objets avec les doigts.'],
+            ['code' => 'M', 'name' => 'Dextérité Manuelle', 'desc' => 'Habileté à effectuer des mouvements avec les mains de manière coordonnée.'],
+        ];
+
+        // Guides pratiques
+        $guides = [
+            ['title' => 'Guide de l\'entretien d\'orientation', 'desc' => 'Méthodologie structurée pour conduire un entretien de 45 minutes avec un étudiant indécis.', 'category' => 'Méthodologie', 'readTime' => '12 min'],
+            ['title' => 'Interpréter un profil RIASEC', 'desc' => 'Comment lire et analyser les résultats du test RIASEC pour formuler des recommandations fiables.', 'category' => 'Psychométrie', 'readTime' => '8 min'],
+            ['title' => 'Détecter les signaux de décrochage', 'desc' => 'Les 7 indicateurs précoces de décrochage et les stratégies d\'intervention recommandées.', 'category' => 'Prévention', 'readTime' => '10 min'],
+            ['title' => 'Utiliser le Success Forecast Engine', 'desc' => 'Guide complet du moteur prédictif IA de CapAvenir : inputs, algorithme et interprétation des scores.', 'category' => 'IA & Technologie', 'readTime' => '15 min'],
+            ['title' => 'Gestion du stress pré-bac', 'desc' => 'Techniques d\'accompagnement psychologique pour les étudiants en période de forte pression académique.', 'category' => 'Psychologie', 'readTime' => '9 min'],
+            ['title' => 'Bonnes pratiques de communication', 'desc' => 'Comment rédiger des messages efficaces aux étudiants et parents via les canaux de la plateforme.', 'category' => 'Communication', 'readTime' => '6 min'],
+        ];
+
+        // FAQ
+        $faq = [
+            ['q' => 'Comment le score IA est-il calculé ?', 'a' => 'Le score IA combine les résultats RIASEC (40%), les aptitudes GATB (30%), l\'historique académique (20%) et les indicateurs comportementaux (10%) pour produire un indice d\'adéquation sur 100.'],
+            ['q' => 'Puis-je modifier une recommandation IA ?', 'a' => 'Oui. Le système IA propose, le conseiller dispose. Vous pouvez approuver, rejeter ou modifier toute trajectoire via le panneau d\'homologation dans le profil CRM de l\'étudiant.'],
+            ['q' => 'Comment gérer un étudiant en situation de risque ?', 'a' => 'Accédez à son profil CRM → onglet "Student Success Forecast" pour voir les indicateurs prédictifs. Utilisez ensuite l\'onglet "Accompagnement" pour planifier une intervention ciblée.'],
+            ['q' => 'Les données des tests sont-elles auditables ?', 'a' => 'Oui. Chaque test, décision et intervention est enregistré dans le journal d\'audit (onglet "Homologation & Audit" du profil étudiant) avec horodatage et traçabilité complète.'],
+            ['q' => 'Comment fonctionne la visioconférence ?', 'a' => 'La visioconférence est accessible depuis le profil CRM de l\'étudiant → onglet "Visioconférence intégrée". Elle supporte la caméra, le micro, le partage d\'écran et le chat en direct.'],
+        ];
+
+        // Engine stats
+        $engineStats = [
+            'accuracy' => 94,
+            'studentsProcessed' => User::where('role', User::ROLE_STUDENT)->count(),
+            'testsAnalyzed' => \App\Models\TestAttempt::count(),
+            'avgProcessingTime' => '2.3s',
+            'modelVersion' => 'CapAvenir AI v3.2',
+            'lastTraining' => 'Janvier 2026',
+        ];
+
+        return view('counselor.resources', compact('riasecDimensions', 'gatbAptitudes', 'guides', 'faq', 'engineStats'));
     }
 }

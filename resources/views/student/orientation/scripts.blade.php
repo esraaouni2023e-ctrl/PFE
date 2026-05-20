@@ -86,8 +86,8 @@
             </div>
             <svg width="88" height="88" style="flex-shrink:0;">
                 <defs><linearGradient id="ringG" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#FF6A00"/>
-                    <stop offset="100%" stop-color="#0057B8"/>
+                    <stop offset="0%" stop-color="#EA580C"/>
+                    <stop offset="100%" stop-color="#0A2540"/>
                 </linearGradient></defs>
                 <g transform="rotate(-90 44 44)">
                     <circle cx="44" cy="44" r="40" fill="none" stroke-width="6" stroke="rgba(11,12,16,.07)"/>

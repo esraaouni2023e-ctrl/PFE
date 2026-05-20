@@ -40,6 +40,23 @@ class DashboardController extends Controller
 
         $recentLogs = \App\Models\AuditLog::with('user')->orderBy('created_at', 'desc')->take(6)->get();
 
+        // --- Counselor Validation Stats ---
+        $pendingCounselorsCount = User::where('role', User::ROLE_COUNSELOR_PENDING)->where('status', User::STATUS_PENDING_APPROVAL)->count();
+        $approvedCounselorsCount = User::where('role', User::ROLE_COUNSELOR)->where('status', User::STATUS_APPROVED)->count();
+        $rejectedCounselorsCount = User::where('status', User::STATUS_REJECTED)->count();
+        $pendingCounselorsList = User::where('role', User::ROLE_COUNSELOR_PENDING)
+            ->where('status', User::STATUS_PENDING_APPROVAL)
+            ->with('counselorProfile')
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
+        // --- Student Specific Stats ---
+        $recentStudentsList = User::where('role', User::ROLE_STUDENT)
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
         // --- SIAEPI v2.0 Data ---
         $totalTests = ProfileRiasec::count();
         $flaggedCount = ProfileRiasec::where('is_flagged', true)->count();
@@ -77,7 +94,12 @@ class DashboardController extends Controller
             'avgConfidence',
             'suspectProfiles',
             'chartLabels',
-            'chartData'
+            'chartData',
+            'pendingCounselorsCount',
+            'approvedCounselorsCount',
+            'rejectedCounselorsCount',
+            'pendingCounselorsList',
+            'recentStudentsList'
         ));
     }
 }

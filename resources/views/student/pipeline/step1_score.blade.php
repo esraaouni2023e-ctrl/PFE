@@ -180,10 +180,10 @@
             ];
             @endphp
             @foreach([
-                ['label'=>'RIASEC · Holland','color'=>'#FF5E00','code'=>'R','desc'=>'6 dimensions vocales : Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel.'],
-                ['label'=>'Big Five · OCEAN','color'=>'#004A9F','code'=>'B5','desc'=>'5 traits de personnalité : Ouverture, Conscienciosité, Extraversion, Agréabilité, Stabilité.'],
-                ['label'=>'Aptitudes · GATB','color'=>'#FF7A1F','code'=>'G','desc'=>'4 aptitudes cognitives : Intelligence générale, Verbal, Numérique, Spatial.'],
-                ['label'=>'Valeurs · Schwartz','color'=>'#002D6B','code'=>'V','desc'=>'4 valeurs fondamentales : Sécurité, Réussite, Bienveillance, Autonomie.'],
+                ['label'=>'RIASEC · Holland','color'=>'#EA580C','code'=>'R','desc'=>'6 dimensions vocales : Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel.'],
+                ['label'=>'Big Five · OCEAN','color'=>'#0A2540','code'=>'B5','desc'=>'5 traits de personnalité : Ouverture, Conscienciosité, Extraversion, Agréabilité, Stabilité.'],
+                ['label'=>'Aptitudes · GATB','color'=>'#F97316','code'=>'G','desc'=>'4 aptitudes cognitives : Intelligence générale, Verbal, Numérique, Spatial.'],
+                ['label'=>'Valeurs · Schwartz','color'=>'#38BDF8','code'=>'V','desc'=>'4 valeurs fondamentales : Sécurité, Réussite, Bienveillance, Autonomie.'],
             ] as $bloc)
             <div class="tp-bloc">
                 <div class="tp-bloc-top">

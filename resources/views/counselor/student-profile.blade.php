@@ -620,19 +620,19 @@
         <div>
             <div class="sp-tabs">
                 <button class="sp-tab-btn active" data-sp-tab="coaching">
-                    🧘 Accompagnement & Notes
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Accompagnement & Notes
                 </button>
                 <button class="sp-tab-btn" data-sp-tab="video">
-                    🎥 Visioconférence intégrée
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg> Visioconférence intégrée
                 </button>
                 <button class="sp-tab-btn" data-sp-tab="psychometrics">
-                    🧠 Profil RIASEC / GATB
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg> Profil RIASEC / GATB
                 </button>
                 <button class="sp-tab-btn" data-sp-tab="success-engine">
-                    🎓 Student Success Forecast
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 10 3 12 0v-5"/></svg> Student Success Forecast
                 </button>
                 <button class="sp-tab-btn" data-sp-tab="audit-log">
-                    🔒 Homologation & Audit
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Homologation & Audit
                 </button>
             </div>
 
@@ -668,7 +668,7 @@
                                     <option value="completed" {{ $status === 'completed' ? 'selected' : '' }}>Dossier certifié & clôturé</option>
                                 </select>
                             </div>
-                            <button type="submit" class="sp-btn-fill">💾 Enregistrer l'Évolution</button>
+                            <button type="submit" class="sp-btn-fill"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Enregistrer l'Évolution</button>
                         </div>
                     </form>
 
@@ -724,16 +724,16 @@
                             {{-- Controls --}}
                             <div class="sp-video-controls">
                                 <button class="sp-video-btn" id="btnToggleCam" title="Désactiver Caméra">
-                                    📹
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
                                 </button>
                                 <button class="sp-video-btn" id="btnToggleMic" title="Couper Micro">
-                                    🎙️
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
                                 </button>
                                 <button class="sp-video-btn" id="btnToggleShare" title="Partager l'écran">
-                                    🖥️
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
                                 </button>
                                 <button class="sp-video-btn active-off" id="btnEndCall" title="Raccrocher la visioconférence">
-                                    📞
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                                 </button>
                             </div>
                         </div>
@@ -754,7 +754,7 @@
                             </div>
                             <div class="sp-chat-input-wrap">
                                 <input type="text" class="sp-chat-input" id="chatInput" placeholder="Écrire un message en direct...">
-                                <button class="sp-btn-fill" id="btnSendChat" style="padding:.5rem .75rem;">➔</button>
+                                <button class="sp-btn-fill" id="btnSendChat" style="padding:.5rem .75rem;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
                             </div>
                         </div>
 
@@ -805,7 +805,7 @@
                             <span style="display:block; font-size: .7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.75rem;">Pôle RIASEC Dominant</span>
                             
                             <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
-                                <div style="width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg, var(--accent2), var(--accent3)); display:flex; align-items:center; justify-content:center; font-size:1.5rem;">💻</div>
+                                <div style="width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg, var(--accent2), var(--accent3)); display:flex; align-items:center; justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg></div>
                                 <div>
                                     <div style="font-weight:700; font-size:.95rem; color:var(--ink);">Investigateur · Réaliste (IR)</div>
                                     <div style="font-size:.74rem; color:var(--ink30); margin-top:.15rem;">Orientation Sciences Appliquées</div>
@@ -820,12 +820,12 @@
 
                     {{-- AI Direct suggestions --}}
                     <div style="background:var(--ink06); border:1px solid var(--ink10); padding: 1.25rem; border-radius: var(--r);">
-                        <span style="display:block; font-size: .7rem; font-weight:700; text-transform:uppercase; color:var(--accent); margin-bottom:.85rem; letter-spacing:.05em;">🎓 Recommandations IA en Direct</span>
+                        <span style="display:block; font-size: .7rem; font-weight:700; text-transform:uppercase; color:var(--accent); margin-bottom:.85rem; letter-spacing:.05em;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 10 3 12 0v-5"/></svg> Recommandations IA en Direct</span>
                         
                         <div style="display:flex; flex-direction:column; gap:.75rem;">
                             @foreach($aiSuggestions['priority_actions'] as $act)
                                 <div style="display:flex; gap:.75rem; align-items:flex-start;">
-                                    <span style="font-size:1.1rem; line-height:1;">🎯</span>
+                                    <span style="font-size:1.1rem; line-height:1; display:flex;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
                                     <div>
                                         <div style="font-weight:700; font-size:.82rem; color:var(--ink);">{{ $act['title'] }}</div>
                                         <div style="font-size:.76rem; color:var(--ink60); margin-top:.15rem;">{{ $act['desc'] }}</div>
@@ -929,7 +929,7 @@
                         @foreach($collaborativeValidation as $valKey => $validation)
                             <div style="background:var(--ink06); border:1px solid var(--ink10); padding: 1rem; border-radius: var(--r); text-align:center;">
                                 <span style="font-size:1.5rem;">
-                                    @if($validation['status'] === 'success') ✅ @elseif($validation['status'] === 'warning') ⚠️ @else ⏳ @endif
+                                    @if($validation['status'] === 'success') <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> @elseif($validation['status'] === 'warning') <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg> @else <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink30)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> @endif
                                 </span>
                                 <div style="font-weight:700; font-size:.82rem; margin-top:.4rem; color:var(--ink);">{{ $validation['label'] }}</div>
                                 <div style="font-size:.7rem; color:var(--ink30); margin-top:.2rem;">{{ $validation['desc'] }}</div>
@@ -964,7 +964,7 @@
                                 <textarea name="justification" class="sp-textarea" required placeholder="Expliquer méthodologiquement les raisons de ce choix ou de cet ajustement d'orientation..."></textarea>
                             </div>
 
-                            <button type="submit" class="sp-btn-fill" style="align-self:flex-start;">✒️ Valider et Inscrire la Décision</button>
+                            <button type="submit" class="sp-btn-fill" style="align-self:flex-start;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Valider et Inscrire la Décision</button>
                         </form>
                     </div>
 
@@ -1007,16 +1007,16 @@
                     <div>
                         <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.4rem;">Format du meeting</label>
                         <select name="meeting_format" class="sp-select">
-                            <option value="virtual">💻 Visioconférence Sécurisée en ligne</option>
-                            <option value="physical">🏫 Entretien Physique en Bureau</option>
-                            <option value="hybrid">🤝 Format Hybride d'orientation</option>
+                            <option value="virtual">Visioconférence Sécurisée en ligne</option>
+                            <option value="physical">Entretien Physique en Bureau</option>
+                            <option value="hybrid">Format Hybride d'orientation</option>
                         </select>
                     </div>
                     <div>
                         <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.4rem;">Motif / Thème principal</label>
                         <input type="text" name="notes" placeholder="Ex: Entretien de suivi vœu 1" class="sp-select" style="background:var(--paper); cursor:text;">
                     </div>
-                    <button type="submit" class="sp-btn-fill" style="width:100%;">📅 Bloquer le Créneau</button>
+                    <button type="submit" class="sp-btn-fill" style="width:100%;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> Bloquer le Créneau</button>
                 </form>
 
                 @if($appointments->count() > 0)
@@ -1050,10 +1050,10 @@
                         <div>
                             <label style="display:block; font-size:.65rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.3rem;">Canal ciblé</label>
                             <select name="channel" id="commChannel" class="sp-select">
-                                <option value="chat">💬 Chat Interne</option>
-                                <option value="email">✉ Email direct</option>
-                                <option value="notification">🔔 Push Notification</option>
-                                <option value="sms">📱 Alerte SMS</option>
+                                <option value="chat">Chat Interne</option>
+                                <option value="email">Email direct</option>
+                                <option value="notification">Push Notification</option>
+                                <option value="sms">Alerte SMS</option>
                             </select>
                         </div>
                         <div>
@@ -1076,7 +1076,7 @@
                         <textarea name="message_body" id="commBody" class="sp-textarea" required placeholder="Saisir ou charger un modèle de message..."></textarea>
                     </div>
 
-                    <button type="submit" class="sp-btn-fill" style="width:100%;">🚀 Transmettre le Message</button>
+                    <button type="submit" class="sp-btn-fill" style="width:100%;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Transmettre le Message</button>
                 </form>
 
                 {{-- Communication history --}}
@@ -1091,7 +1091,7 @@
                             <div style="font-weight:700; font-size:.7rem; margin-bottom:.2rem; color:var(--accent2);">{{ $log['subject'] }}</div>
                             <p style="color:var(--ink60); font-size:.72rem; line-height:1.4;">"{{ $log['body'] }}"</p>
                             <div style="text-align:right; font-size:.65rem; font-weight:700; color:var(--accent3); margin-top:.2rem;">
-                                ✓ {{ $log['status'] }}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M20 6 9 17l-5-5"/></svg> {{ $log['status'] }}
                             </div>
                         </div>
                     @endforeach
@@ -1158,11 +1158,11 @@ document.addEventListener('DOMContentLoaded', function () {
         camActive = !camActive;
         if (camActive) {
             btnToggleCam.classList.remove('active-off');
-            btnToggleCam.innerHTML = '📹';
+            btnToggleCam.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>';
             videoPlaceholder.style.opacity = '1';
         } else {
             btnToggleCam.classList.add('active-off');
-            btnToggleCam.innerHTML = '❌ 📹';
+            btnToggleCam.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/><line x1="2" y1="2" x2="22" y2="22" stroke="#ef4444" stroke-width="2.5"/></svg>';
             videoPlaceholder.style.opacity = '0.3';
         }
     });
@@ -1171,10 +1171,10 @@ document.addEventListener('DOMContentLoaded', function () {
         micActive = !micActive;
         if (micActive) {
             btnToggleMic.classList.remove('active-off');
-            btnToggleMic.innerHTML = '🎙️';
+            btnToggleMic.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>';
         } else {
             btnToggleMic.classList.add('active-off');
-            btnToggleMic.innerHTML = '❌ 🎙️';
+            btnToggleMic.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/><line x1="2" y1="2" x2="22" y2="22" stroke="#ef4444" stroke-width="2.5"/></svg>';
         }
     });
 
@@ -1182,12 +1182,12 @@ document.addEventListener('DOMContentLoaded', function () {
         shareActive = !shareActive;
         if (shareActive) {
             btnToggleShare.classList.add('active-off');
-            btnToggleShare.innerHTML = '❌ 🖥️';
+            btnToggleShare.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/><line x1="2" y1="2" x2="22" y2="22" stroke="#ef4444" stroke-width="2.5"/></svg>';
             screenShareStatus.innerHTML = 'Partage d\'écran actif · Flux audio crypté';
             confVideoFrame.style.background = '#1a202c';
         } else {
             btnToggleShare.classList.remove('active-off');
-            btnToggleShare.innerHTML = '🖥️';
+            btnToggleShare.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>';
             screenShareStatus.innerHTML = 'Flux audio crypté • Caméra activée';
             confVideoFrame.style.background = '#090D16';
         }

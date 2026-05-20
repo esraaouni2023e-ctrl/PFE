@@ -22,19 +22,19 @@
         ═══════════════════════════════════════════ */
         :root {
             /* ── Core palette ── */
-            --ink:     #1E2937;   /* Gris Anthracite (texte principal) */
+            --ink:     #1E293B;   /* Gris Anthracite (texte principal) */
             --paper:   #FFFFFF;   /* Blanc Pur */
             --cream:   #F8FAFC;   /* Blanc Gris Très Clair (fond principal) */
             --warm:    #E2E8F0;   /* Gris Froid Moderne (bordures) */
-            --accent:  #FF5E00;   /* Orange Moderne Dynamique */
-            --accent2: #002D6B;   /* Bleu Profond Premium */
-            --accent3: #FF7A1F;   /* Orange Doux Corail */
-            --gold:    #FF7A1F;
-            --ink60:   rgba(30, 41, 55, 0.6);
-            --ink30:   rgba(30, 41, 55, 0.3);
-            --ink15:   rgba(30, 41, 55, 0.15);
-            --ink10:   rgba(30, 41, 55, 0.1);
-            --ink06:   rgba(30, 41, 55, 0.06);
+            --accent:  #EA580C;   /* Orange Moderne Dynamique Pro */
+            --accent2: #0A2540;   /* Bleu Profond Premium (Obsidian) */
+            --accent3: #F97316;   /* Orange Doux Pro */
+            --gold:    #F97316;
+            --ink60:   rgba(30, 41, 59, 0.6);
+            --ink30:   rgba(30, 41, 59, 0.3);
+            --ink15:   rgba(30, 41, 59, 0.15);
+            --ink10:   rgba(30, 41, 59, 0.1);
+            --ink06:   rgba(30, 41, 59, 0.06);
 
             /* ── Radii & easing ── */
             --r:   6px;
@@ -46,10 +46,10 @@
             --font-main:     'DM Sans', sans-serif;
             --font-serif:    'Fraunces', serif;
             --navbar-bg:     rgba(248, 250, 252, 0.88); /* Background cream with backdrop-filter */
-            --glass-border:  rgba(30, 41, 55, 0.10);
-            --glass-border-vivid: rgba(255, 94, 0, 0.25); /* Orange Moderne Dynamique border */
+            --glass-border:  rgba(30, 41, 59, 0.10);
+            --glass-border-vivid: rgba(234, 88, 12, 0.25); /* Orange Moderne Dynamique border */
             --chat-panel-bg: rgba(248, 250, 252, 0.97);
-            --shadow-card:   0 8px 40px rgba(0, 45, 107, 0.08); /* Bleu Profond Premium brand shadow */
+            --shadow-card:   0 8px 40px rgba(10, 37, 64, 0.08); /* Bleu Profond Premium brand shadow */
             --transition:    0.3s cubic-bezier(.4,0,.2,1);
 
             /* ── Legacy aliases (used by child views) ── */
@@ -57,42 +57,42 @@
             --bg-1:          var(--cream);
             --bg-2:          var(--warm);
             --indigo:        var(--accent2);
-            --indigo-light:  #004A9F; /* Bleu Institutionnel */
+            --indigo-light:  #0F2D59; /* Bleu Institutionnel Pro */
             --violet:        var(--accent);
-            --violet-dark:   #d14d00;
+            --violet-dark:   #c2410c;
             --cyan:          var(--accent3);
-            --glass-bg:      rgba(30, 41, 55, 0.04);
-            --glass-bg-md:   rgba(30, 41, 55, 0.07);
+            --glass-bg:      rgba(30, 41, 59, 0.04);
+            --glass-bg-md:   rgba(30, 41, 59, 0.07);
             --text-primary:  var(--ink);
             --text-secondary: var(--ink60);
             --text-muted:    var(--ink30);
             --success:       #10B981;
             --warning:       #F59E0B;
-            --input-bg:      rgba(30, 41, 55, 0.04);
-            --card-surface:  rgba(30, 41, 55, 0.04);
-            --card-surface-md: rgba(30, 41, 55, 0.07);
+            --input-bg:      rgba(30, 41, 59, 0.04);
+            --card-surface:  rgba(30, 41, 59, 0.04);
+            --card-surface-md: rgba(30, 41, 59, 0.07);
         }
 
         /* ── Dark mode overrides ── */
         [data-theme="dark"] {
             --ink:   #F1F5F9;   /* Texte clair */
-            --paper: #1E293B;   /* Gris foncé pour les cartes */
-            --cream: #0F172A;   /* Fond sombre */
-            --warm:  #334155;   /* Bordures sombres */
-            --accent: #FF7A1F;  /* Orange reste visible */
-            --accent2: #1E60D1; /* Bleu principal dark mode */
-            --accent3: #FF7A1F;
-            --gold:    #FF7A1F;
+            --paper: #0E1324;   /* Obsidian sombre pour les cartes */
+            --cream: #070A10;   /* Fond abysse ultra sombre */
+            --warm:  #1D2433;   /* Bordures sombres */
+            --accent: #F97316;  /* Orange reste visible */
+            --accent2: #38BDF8; /* Bleu principal dark mode (Sky) */
+            --accent3: #FB923C;
+            --gold:    #FB923C;
             --ink60: rgba(241, 245, 249, 0.6);
             --ink30: rgba(241, 245, 249, 0.3);
             --ink15: rgba(241, 245, 249, 0.15);
             --ink10: rgba(241, 245, 249, 0.08);
             --ink06: rgba(241, 245, 249, 0.04);
-            --navbar-bg:     rgba(15, 23, 42, 0.88);
+            --navbar-bg:     rgba(7, 10, 16, 0.88);
             --glass-border:  rgba(241, 245, 249, 0.08);
-            --glass-border-vivid: rgba(30, 96, 209, 0.35); /* Bleu principal dark mode border */
-            --chat-panel-bg: rgba(15, 23, 42, 0.97);
-            --shadow-card:   0 8px 40px rgba(0, 0, 0, 0.35);
+            --glass-border-vivid: rgba(56, 189, 248, 0.35); /* Sky blue border */
+            --chat-panel-bg: rgba(7, 10, 16, 0.97);
+            --shadow-card:   0 8px 40px rgba(0, 0, 0, 0.45);
             --glass-bg:      rgba(241, 245, 249, 0.04);
             --glass-bg-md:   rgba(241, 245, 249, 0.07);
             --input-bg:      rgba(241, 245, 249, 0.07);

@@ -13,7 +13,7 @@ class EnsureUserHasRole
      * Usage in routes: ->middleware('role:student') or ->middleware('role:counselor')
      * Admin users (is_admin = true) can access all areas without restriction.
      */
-    public function handle(Request $request, Closure $next, string $roles): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = $request->user();
         if (! $user) {
@@ -25,9 +25,7 @@ class EnsureUserHasRole
             return $next($request);
         }
 
-        $allowed = array_map('trim', explode(',', $roles));
-
-        if (! in_array($user->role, $allowed, true)) {
+        if (! in_array($user->role, $roles, true)) {
             abort(403, 'Accès non autorisé.');
         }
 

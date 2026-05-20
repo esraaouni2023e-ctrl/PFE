@@ -1,0 +1,1369 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\geometry{margin=2cm, top=2.5cm, bottom=2.5cm}
+
+% Couleurs CapAvenir
+\definecolor{capblue}{RGB}{0, 87, 184}      % #0057B8
+\definecolor{capdark}{RGB}{0, 59, 142}      % #003B8E
+\definecolor{caporange}{RGB}{255, 106, 0}   % #FF6A00
+\definecolor{rowgray}{RGB}{242, 246, 252}
+\definecolor{rowwhite}{RGB}{255, 255, 255}
+
+% En-tête et pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{capdark}\textbf{CapAvenir} --- Plateforme d'Orientation Intelligente}
+\fancyhead[R]{\small\color{capdark}Cahier des Cas d'Utilisation}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{capblue}\leaders\hrule height \headrulewidth\hfill}}
+
+% Style des titres de section
+\titleformat{\section}{\Large\bfseries\color{capdark}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{capblue}}{}{0em}{}
+
+% Commande en-tête de cas d'utilisation
+\newcommand{\ucheader}[2]{%
+  \noindent\colorbox{capblue}{\parbox{\dimexpr\linewidth-2\fboxsep}{%
+    \color{white}\bfseries\large Cas d'utilisation~: #1 \hfill \normalsize Acteur~: #2
+  }}\\[2pt]
+}
+
+% Colonnes de tableau
+\newcolumntype{L}{>{\raggedright\arraybackslash}p{3.8cm}}
+\newcolumntype{R}{>{\raggedright\arraybackslash}p{11.2cm}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=capblue,
+    urlcolor=caporange,
+    pdfauthor={Projet PFE --- CapAvenir},
+    pdftitle={Cahier des Cas d'Utilisation --- CapAvenir}
+}
+
+%=============================================================
+\begin{document}
+%=============================================================
+
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+  {\color{capblue}\rule{\linewidth}{3pt}}\\[0.5em]
+  {\Huge\bfseries\color{capdark} Cahier des Cas d'Utilisation}\\[0.6em]
+  {\large\color{capblue} Plateforme CapAvenir --- Système SIAEPI d'Orientation Intelligente}\\[0.3em]
+  {\color{caporange}\rule{\linewidth}{1.5pt}}\\[1.5em]
+  {\large Spécification fonctionnelle complète}\\[0.3em]
+  {\normalsize 4 acteurs $\cdot$ 28 cas d'utilisation documentés}\\[2em]
+  \begin{tabular}{ll}
+    \textbf{Projet}     & Fin d'Études (PFE) \\
+    \textbf{Plateforme} & CapAvenir v5.0 \\
+    \textbf{Stack}      & Laravel 10 $\cdot$ PHP 8.2 $\cdot$ Moteur SIAEPI $\cdot$ CAT 2PL \\
+    \textbf{Année}      & 2025 -- 2026 \\
+  \end{tabular}
+  \vfill
+  {\color{capblue}\rule{\linewidth}{3pt}}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%=============================================================
+\section{Présentation de la plateforme CapAvenir}
+%=============================================================
+
+\textbf{CapAvenir} est une plateforme web d'orientation académique intelligente développée avec le framework \textbf{Laravel 10} (PHP 8.2). Elle intègre le moteur psychométrique \textbf{SIAEPI v5.0}, un moteur de test adaptatif (\textit{CAT --- Computerized Adaptive Testing}) basé sur le modèle IRT 2PL, ainsi que plusieurs modules d'aide à la décision destinés aux étudiants bacheliers tunisiens.
+
+\subsection*{Architecture et acteurs}
+La plateforme distingue quatre acteurs principaux~:
+\begin{enumerate}
+  \item \textbf{Visiteur / Invité} : utilisateur non authentifié accédant à la landing page publique.
+  \item \textbf{Étudiant} : bénéficiaire principal du système d'orientation.
+  \item \textbf{Conseiller d'Orientation} : encadreur supervisant les dossiers psychométriques des étudiants.
+  \item \textbf{Administrateur} : gestionnaire de la configuration globale de la plateforme.
+\end{enumerate}
+
+\subsection*{Modules fonctionnels implémentés}
+\begin{itemize}
+  \item \textbf{Test CAT adaptatif} (RIASEC 6 dimensions + GATB 8 aptitudes + Big Five) via \texttt{AdaptiveTestEngine} et \texttt{TestManager}
+  \item \textbf{Moteur de recommandation SIAEPI} avec score pondéré, filtres d'exclusion durs et optimisation de Pareto
+  \item \textbf{Simulateur What-If} (scénarios prospectifs via \texttt{FutureSimulatorService})
+  \item \textbf{Comparateur de filières} multi-critères (jusqu'à 3 filières en parallèle)
+  \item \textbf{CV Builder} avec export PDF / DOCX
+  \item \textbf{Assistant Nova} (chatbot IA via API Gemini avec stratégie de fallback)
+  \item \textbf{Pipeline d'orientation} 3 étapes (test $\rightarrow$ score $\rightarrow$ recommandations)
+  \item \textbf{Tableau de bord CRM Conseiller} avec analyse prédictive et historique de suivi
+  \item \textbf{Panneau Admin} (CRUD utilisateurs, questions RIASEC, import Excel filières, audit)
+  \item \textbf{Double authentification (2FA)} par OTP email
+\end{itemize}
+
+\newpage
+
+%=============================================================
+\section{Acteur : Visiteur / Invité}
+%=============================================================
+
+Le visiteur désigne tout utilisateur non authentifié arrivant sur la plateforme CapAvenir. Il peut accéder à la landing page publique, passer un test RIASEC en mode découverte et soumettre une demande de contact.
+
+%-------------------------------------------------------------
+\subsection{S'inscrire (Créer un compte)}
+%-------------------------------------------------------------
+\ucheader{S'inscrire (Créer un compte)}{Visiteur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-V01 \\
+\hline
+Cas d'utilisation & S'inscrire (Créer un compte) \\
+\hline
+\rowcolor{rowgray}Acteur & Visiteur \\
+\hline
+Précondition & Le visiteur n'est pas connecté et dispose d'une adresse email valide. \\
+\hline
+\rowcolor{rowgray}Postcondition & Un compte utilisateur est créé en base de données avec le rôle \texttt{student} par défaut~; un profil vide est initialisé. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le visiteur clique sur « S'inscrire » depuis la landing page.
+  \item Le système affiche le formulaire d'inscription (nom, email, mot de passe, confirmation, rôle).
+  \item Le visiteur saisit ses informations et soumet.
+  \item Le système vérifie l'unicité de l'email via la règle \texttt{unique:users} et la robustesse du mot de passe (\texttt{min:8}).
+  \item Le système enregistre l'utilisateur avec le rôle \texttt{student} et crée un profil associé.
+  \item Le système redirige vers la page de connexion avec un message de succès.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Email déjà existant $\rightarrow$ Validation Laravel retourne une erreur et invite l'utilisateur à se connecter.
+  \item Données invalides (mot de passe trop court, format email incorrect) $\rightarrow$ Les champs en erreur sont surlignés en rouge.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{Auth/RegisterController}, \texttt{User} (Model), \texttt{Profile} (Model), vue \texttt{auth/register.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{S'authentifier avec double facteur (2FA)}
+%-------------------------------------------------------------
+\ucheader{S'authentifier (Connexion + OTP 2FA)}{Visiteur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-V02 \\
+\hline
+Cas d'utilisation & S'authentifier avec double facteur (2FA) \\
+\hline
+\rowcolor{rowgray}Acteur & Visiteur (possédant un compte) \\
+\hline
+Précondition & L'utilisateur possède un compte actif et non bloqué (\texttt{is\_blocked = 0}). \\
+\hline
+\rowcolor{rowgray}Postcondition & Session sécurisée active~; redirection vers le tableau de bord correspondant au rôle. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'utilisateur saisit son email et son mot de passe sur \texttt{/login}.
+  \item \texttt{LoginController} vérifie les identifiants.
+  \item Si le 2FA est activé, le système génère un code OTP à 6 chiffres, le stocke dans la session et l'envoie par email via \texttt{TwoFactorController}.
+  \item L'utilisateur est redirigé vers \texttt{/two-factor} pour saisir le code.
+  \item Le système valide le code OTP. La session est authentifiée.
+  \item Le middleware \texttt{two-factor} lève le verrou et redirige selon le rôle (\texttt{student}, \texttt{counselor}, \texttt{admin}).
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Identifiants invalides $\rightarrow$ Message d'erreur, compte non ouvert.
+  \item Compte bloqué (\texttt{is\_blocked = 1}) $\rightarrow$ Le système refuse la connexion avec un message explicatif.
+  \item Code OTP expiré ou incorrect $\rightarrow$ Blocage de l'accès~; possibilité de renvoi via \texttt{POST /two-factor/resend}.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{Auth/LoginController}, \texttt{Auth/TwoFactorController}, middleware \texttt{two-factor} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Envoyer un message de contact}
+%-------------------------------------------------------------
+\ucheader{Envoyer un message de contact}{Visiteur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-V03 \\
+\hline
+Cas d'utilisation & Envoyer un message de contact \\
+\hline
+\rowcolor{rowgray}Acteur & Visiteur \\
+\hline
+Précondition & Accès à la landing page publique. \\
+\hline
+\rowcolor{rowgray}Postcondition & Le message est enregistré dans la table \texttt{contacts} et l'administrateur peut le consulter depuis son panneau. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le visiteur accède au formulaire de contact en bas de la landing page.
+  \item Il saisit son nom, email, objet et message, puis clique sur « Envoyer ».
+  \item \texttt{ContactController::store()} valide les données et enregistre le contact.
+  \item Un message de succès est affiché.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Champs vides ou email invalide $\rightarrow$ Le système bloque l'envoi et surligne les champs en erreur.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{ContactController}, \texttt{Contact} (Model), route publique \texttt{POST /contact} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Passer le test RIASEC en mode invité}
+%-------------------------------------------------------------
+\ucheader{Passer le test RIASEC (mode découverte invité)}{Visiteur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-V04 \\
+\hline
+Cas d'utilisation & Passer le test RIASEC en mode invité \\
+\hline
+\rowcolor{rowgray}Acteur & Visiteur \\
+\hline
+Précondition & Accès à la plateforme (aucune authentification requise). \\
+\hline
+\rowcolor{rowgray}Postcondition & Profil RIASEC calculé et résultats affichés. Les données sont stockées en base si l'invité s'inscrit, ou purgées à expiration de session. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le visiteur accède au test RIASEC via \texttt{GET /riasec/question}.
+  \item \texttt{RiasecTestController::start()} initialise une session de test via \texttt{POST /riasec/question}.
+  \item Le moteur \texttt{TestManager} génère dynamiquement la première question en fonction du modèle adaptatif 2PL.
+  \item Le visiteur répond question par question~; \texttt{storeAnswer()} enregistre chaque réponse et met à jour $\theta$ (niveau latent).
+  \item Le \texttt{BehavioralAnalyzer} surveille les temps de réponse et la cohérence comportementale.
+  \item L'arrêt précoce (\textit{Early Stopping}) est déclenché dès que l'erreur de mesure SEM descend sous le seuil.
+  \item Le profil RIASEC est calculé et affiché à l'adresse \texttt{GET /riasec/resultats}.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Test abandonné $\rightarrow$ La session expire et les réponses temporaires sont purgées automatiquement.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{RiasecTestController}, \texttt{TestManager}, \texttt{AdaptiveTestEngine}, \texttt{BehavioralAnalyzer}, \texttt{EarlyStoppingService}, middleware \texttt{riasec.test} \\
+\hline
+\end{tabular}
+
+\newpage
+
+%=============================================================
+\section{Acteur : Étudiant}
+%=============================================================
+
+L'étudiant est le bénéficiaire central de CapAvenir. Il utilise les outils d'intelligence artificielle et les modules d'analyse pour construire et simuler son projet d'orientation académique.
+
+%-------------------------------------------------------------
+\subsection{Passer le test d'orientation adaptatif (CAT)}
+%-------------------------------------------------------------
+\ucheader{Passer le test d'orientation intelligent (CAT + GATB)}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E01 \\
+\hline
+Cas d'utilisation & Passer le test d'orientation adaptatif (CAT) \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Étudiant authentifié, aucun test en cours d'analyse. \\
+\hline
+\rowcolor{rowgray}Postcondition & Profil psychométrique complet généré~: 6 dimensions RIASEC, 8 aptitudes GATB, indicateurs Big Five, score de cohérence et flags comportementaux. Profil enregistré dans \texttt{ProfileRiasec}. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant accède au module de test depuis son tableau de bord.
+  \item \texttt{TestManager} génère dynamiquement la question suivante selon l'algorithme 2PL (paramètres de difficulté $b$ et discrimination $a$).
+  \item L'étudiant répond sur échelle de Likert 1--5.
+  \item Le \texttt{BehavioralAnalyzer} surveille en temps réel~: temps de réponse, patterns d'incohérence, indices de fraude.
+  \item \texttt{AdaptiveTestEngine} met à jour le niveau latent $\theta$ par méthode de Newton-Raphson.
+  \item Les étapes 2 à 5 se répètent jusqu'au déclenchement de l'\textit{Early Stopping} (SEM $<$ seuil configuré).
+  \item \texttt{GatbCalculator} calcule les 8 aptitudes cognitives (raisonnement verbal, numérique, spatial, etc.).
+  \item \texttt{PostTestValidator} valide l'intégrité du profil et le stocke définitivement.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Fraude détectée (temps de réponse anormal, cohérence $<$ seuil) $\rightarrow$ \texttt{BehavioralAnalyzer} lève un drapeau \texttt{fraud\_flag} dans \texttt{ProfileRiasec} et pénalise les scores de certitude.
+  \item Test interrompu $\rightarrow$ L'état est sauvegardé en session pour reprise ultérieure.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{TestManager}, \texttt{AdaptiveTestEngine}, \texttt{BehavioralAnalyzer}, \texttt{EarlyStoppingService}, \texttt{GatbCalculator}, \texttt{IrtCalibrator}, \texttt{PostTestValidator}, \texttt{ProfileRiasec} (Model) \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Suivre le pipeline d'orientation (3 étapes)}
+%-------------------------------------------------------------
+\ucheader{Suivre le pipeline d'orientation (Profil $\rightarrow$ Test $\rightarrow$ Recommandations)}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E02 \\
+\hline
+Cas d'utilisation & Suivre le pipeline d'orientation guidé \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Étudiant authentifié avec rôle \texttt{student}. \\
+\hline
+\rowcolor{rowgray}Postcondition & Les 3 étapes du pipeline sont complétées~; l'étudiant accède à ses recommandations finales. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant clique sur « Commencer mon orientation » depuis son tableau de bord.
+  \item \textbf{Étape 1 --- Profil académique}~: l'étudiant renseigne sa section de BAC et ses notes~; \texttt{OrientationPipelineController::storeStep1()} calcule et enregistre le score FG.
+  \item \textbf{Étape 2 --- Test CAT}~: redirection vers \texttt{/riasec/question} pour passer le test psychométrique adaptatif complet.
+  \item \textbf{Étape 3 --- Recommandations}~: le moteur SIAEPI génère le top-12 des filières correspondantes.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Profil incomplet lors de l'étape 1 $\rightarrow$ Le système bloque la progression et invite à compléter les champs manquants.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{OrientationPipelineController}, routes \texttt{student.pipeline}, vue \texttt{student/pipeline/step1\_score.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Consulter les recommandations personnalisées (SIAEPI)}
+%-------------------------------------------------------------
+\ucheader{Consulter les recommandations de filières (SIAEPI v5.0)}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E03 \\
+\hline
+Cas d'utilisation & Consulter les recommandations de filières (SIAEPI v5.0) \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Profil psychométrique CAT complété et profil académique renseigné (score FG calculé). \\
+\hline
+\rowcolor{rowgray}Postcondition & Top-12 des filières affiché avec scores de matching, Gap Analysis et indicateurs Pareto. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant accède à l'espace « Recommandations » via \texttt{GET /recommendations}.
+  \item \texttt{SiaepiRecommendationEngine} extrait les dimensions RIASEC, les aptitudes GATB, le Big Five et le score FG officiel.
+  \item Le moteur applique les filtres d'exclusion durs (incompatibilité académique, seuils SDO).
+  \item Le score d'adéquation pondéré global est calculé par filière (axes~: Vocation, Académique, Marché, Accessibilité).
+  \item Le système identifie les filières optimales au sens de Pareto.
+  \item Les recommandations, la Gap Analysis et les indices de cohérence sont affichés.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Profil académique manquant $\rightarrow$ Le système redirige l'étudiant vers la page de saisie de ses notes BAC.
+  \item Aucune filière ne passe les filtres durs $\rightarrow$ Affichage d'un message explicatif invitant l'étudiant à consulter son conseiller.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{SiaepiRecommendationEngine}, \texttt{ScoreFGService}, \texttt{StudentController::showRecommendations()}, \texttt{Filiere} (Model) \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Gérer son profil académique (Notes du BAC)}
+%-------------------------------------------------------------
+\ucheader{Gérer son profil académique (Notes et Score FG)}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E04 \\
+\hline
+Cas d'utilisation & Gérer son profil académique \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Étudiant authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Section de BAC et notes enregistrées~; score FG calculé automatiquement et persisté dans \texttt{Profile}. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant ouvre la page « Mon Profil » via \texttt{GET /student/profil}.
+  \item Il sélectionne sa section officielle de BAC tunisien dans la liste déroulante.
+  \item Le système adapte dynamiquement les champs aux matières correspondantes.
+  \item L'étudiant saisit sa moyenne générale et ses notes par matière, puis valide via \texttt{PUT /student/profil}.
+  \item \texttt{StudentProfileController::update()} vérifie la validité des notes (0 à 20) et calcule le score global via la formule officielle.
+  \item Le profil académique est sauvegardé.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Note en dehors des bornes [0, 20] $\rightarrow$ Le système refuse la sauvegarde et affiche une erreur de validation.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{StudentProfileController}, \texttt{ScoreFGService}, \texttt{Profile} (Model), vue \texttt{student/profil.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Utiliser le comparateur de filières}
+%-------------------------------------------------------------
+\ucheader{Utiliser le comparateur de filières (multi-critères)}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E05 \\
+\hline
+Cas d'utilisation & Utiliser le comparateur de filières \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Étudiant authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Tableau comparatif affiché avec graphique radar interactif et indicateurs colorés. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant accède à \texttt{GET /student/comparateur}.
+  \item Il sélectionne jusqu'à 3 filières universitaires depuis la liste.
+  \item Il valide via \texttt{POST /student/comparateur/data}.
+  \item \texttt{ComparateurController::comparer()} extrait les données de chaque filière~: seuil d'accès SDO, taux d'employabilité, salaire moyen, adéquation RIASEC, localisation.
+  \item Le système présente un tableau comparatif avec indicateurs visuels colorés et un graphique radar.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Moins de 2 filières sélectionnées $\rightarrow$ La comparaison est bloquée avec un message d'aide.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{ComparateurController}, \texttt{Filiere} (Model), vue \texttt{student/comparateur/index.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Utiliser le simulateur de futurs (What-If)}
+%-------------------------------------------------------------
+\ucheader{Utiliser le simulateur de futurs (What-If)}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E06 \\
+\hline
+Cas d'utilisation & Utiliser le simulateur de futurs (What-If) \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Étudiant authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Scénario prospectif calculé (delta impact, nouvelles filières débloquées, ROI prévisionnel) et enregistré dans \texttt{simulation\_history}. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant ouvre le « Simulateur de Futurs » via \texttt{GET /student/whatif}.
+  \item Il sélectionne un axe de simulation~: variation de notes, coût des études, ROI à 10 ans.
+  \item Il ajuste les réglettes ou saisit des valeurs hypothétiques.
+  \item \texttt{WhatIfController::calculer()} ou \texttt{simulerAvance()} invoque \texttt{FutureSimulatorService} pour calculer le delta d'impact.
+  \item Le système affiche~: nouveau score FG estimé, filières débloquées, salaire prévisionnel, probabilité de succès.
+  \item L'étudiant sauvegarde le scénario dans son historique.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Suppression d'un scénario historique $\rightarrow$ \texttt{DELETE /student/whatif/historique/\{simulation\}} supprime définitivement la simulation.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{WhatIfController}, \texttt{FutureSimulatorService}, \texttt{SimulationHistory} (Model), vues \texttt{student/whatif/} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Interagir avec l'assistant Nova (Chatbot IA)}
+%-------------------------------------------------------------
+\ucheader{Interagir avec l'assistant Nova (Chatbot Gemini)}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E07 \\
+\hline
+Cas d'utilisation & Interagir avec l'assistant Nova \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Étudiant authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Réponse contextuelle personnalisée renvoyée via l'API Gemini (ou Ollama en fallback local). \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant accède au module Nova via \texttt{GET /student/orientation/nova}.
+  \item Il formule sa question en langage naturel dans l'interface de chat.
+  \item \texttt{NovaOrientationController::analyze()} enrichit la requête avec les métadonnées de l'étudiant (profil RIASEC, notes BAC, filière cible).
+  \item Le système contacte l'API Gemini en appliquant la stratégie de \textit{fallback} (rotation entre modèles Gemini Flash et Pro).
+  \item La réponse structurée est affichée à l'étudiant.
+  \item Le résultat final est accessible via \texttt{GET /student/orientation/nova/resultat}.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Limite de requêtes API dépassée (HTTP 429) $\rightarrow$ Le système bascule automatiquement sur le modèle suivant de la chaîne de secours (\texttt{OllamaService} en local).
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{NovaOrientationController}, \texttt{NovaOrientationService}, \texttt{OllamaService}, vues \texttt{student/nova/} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Créer et gérer ses CV (CV Builder)}
+%-------------------------------------------------------------
+\ucheader{Créer et gérer ses CV (CV Builder + Export)}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E08 \\
+\hline
+Cas d'utilisation & Créer et gérer ses CV \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Étudiant authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & CV enregistré en base (tables \texttt{cv\_profiles}, \texttt{cv\_education}, \texttt{cv\_experiences}, \texttt{cv\_skills}, \texttt{cv\_languages})~; export PDF et DOCX disponibles. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant se rend dans « CV Builder » via \texttt{GET /student/cv}.
+  \item Il crée un nouveau CV via \texttt{GET /student/cv/create} ou édite un brouillon existant.
+  \item Il renseigne ses rubriques~: coordonnées, formations, expériences, compétences, langues.
+  \item Il sélectionne un template graphique (\textit{modern}).
+  \item Le système affiche une prévisualisation dynamique en temps réel.
+  \item Il télécharge son CV au format PDF (\texttt{PdfGeneratorService}) ou Word (\texttt{DocxGeneratorService}).
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Duplication de CV $\rightarrow$ \texttt{POST /student/cv/\{cvProfile\}/duplicate} clone le profil CV complet.
+  \item Suppression $\rightarrow$ \texttt{DELETE /student/cv/\{cvProfile\}} supprime le CV et toutes ses données liées.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{CvBuilderController}, \texttt{PdfGeneratorService}, \texttt{DocxGeneratorService}, \texttt{CvProfile}, \texttt{CvEducation}, \texttt{CvExperience}, \texttt{CvSkill}, \texttt{CvLanguage} (Models), template \texttt{cv\_templates/modern\_pdf.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Gérer son portfolio de compétences}
+%-------------------------------------------------------------
+\ucheader{Gérer son portfolio de compétences}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E09 \\
+\hline
+Cas d'utilisation & Gérer son portfolio de compétences \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Étudiant authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Réalisation ou projet académique consigné dans \texttt{portfolio\_items} et rattaché au profil de l'étudiant. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant accède à son portfolio depuis son tableau de bord.
+  \item Il clique sur « Ajouter un projet ».
+  \item Il saisit le titre, la description, les tags de compétences, et téléverse un justificatif.
+  \item \texttt{PortfolioController::store()} valide et enregistre l'item.
+  \item Le projet est rattaché au profil de l'étudiant.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Suppression d'un item $\rightarrow$ \texttt{DELETE /student/portfolio/\{portfolio\}} supprime l'item.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{PortfolioController}, \texttt{PortfolioItem} (Model) \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Générer sa roadmap de carrière}
+%-------------------------------------------------------------
+\ucheader{Générer sa roadmap de carrière (IA Gemini)}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E10 \\
+\hline
+Cas d'utilisation & Générer sa roadmap de carrière \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Profil RIASEC/CAT actif et filière recommandée disponible. \\
+\hline
+\rowcolor{rowgray}Postcondition & Itinéraire professionnel structuré (formations, compétences, certifications, jalons) enregistré dans \texttt{career\_roadmaps}. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant clique sur « Générer ma Roadmap » (\texttt{POST /student/roadmap}).
+  \item \texttt{RoadmapController::generate()} récupère le trigramme Holland et le profil RIASEC de l'étudiant.
+  \item Le service IA (Gemini via \texttt{ChatbotController}) construit un itinéraire professionnel structuré~: formations, compétences à acquérir, certifications, secteurs clés.
+  \item La roadmap est enregistrée et affichée sous forme de frise interactive dans le tableau de bord.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Service d'IA indisponible $\rightarrow$ Le système affiche un parcours générique basé sur la filière recommandée numéro 1.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{RoadmapController}, \texttt{ChatbotController}, \texttt{CareerRoadmap} (Model) \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Communiquer via la messagerie interne}
+%-------------------------------------------------------------
+\ucheader{Communiquer via la messagerie interne}{Étudiant}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-E11 \\
+\hline
+Cas d'utilisation & Communiquer via la messagerie interne \\
+\hline
+\rowcolor{rowgray}Acteur & Étudiant \\
+\hline
+Précondition & Étudiant authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Message stocké dans la table \texttt{messages}~; indicateur de non-lecture mis à jour. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant ouvre la messagerie interne depuis son tableau de bord.
+  \item Il clique sur « Nouveau message » vers son conseiller assigné.
+  \item Il rédige et envoie via \texttt{UserMessageController}.
+  \item Le système stocke le message et met à jour le compteur de notifications.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Message vide $\rightarrow$ Le système bloque l'envoi avec une erreur de validation.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{UserMessageController}, \texttt{Message} (Model) \\
+\hline
+\end{tabular}
+
+\newpage
+
+%=============================================================
+\section{Acteur : Conseiller d'Orientation}
+%=============================================================
+
+Le conseiller supervise les dossiers psychométriques des étudiants via un tableau de bord CRM avancé. Il peut analyser les recommandations générées par l'IA, planifier des rendez-vous, rédiger des observations de suivi, valider les matchings et envoyer des communications omnicanales.
+
+%-------------------------------------------------------------
+\subsection{Consulter le tableau de bord analytique}
+%-------------------------------------------------------------
+\ucheader{Consulter le tableau de bord analytique (CRM Conseiller)}{Conseiller d'orientation}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-C01 \\
+\hline
+Cas d'utilisation & Consulter le tableau de bord analytique \\
+\hline
+\rowcolor{rowgray}Acteur & Conseiller d'orientation \\
+\hline
+Précondition & Conseiller authentifié avec le rôle \texttt{counselor}. \\
+\hline
+\rowcolor{rowgray}Postcondition & KPIs de la cohorte, tendances d'orientation, heatmaps sectorielles et insights IA affichés. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le conseiller accède à son tableau de bord via \texttt{GET /counselor}.
+  \item \texttt{CounselorController::index()} agrège~: liste des étudiants, \texttt{cohortStats} (répartition sectorielle), \texttt{kpis} (taux de réussite, risque d'abandon, progression), \texttt{heatmaps} (filières saturées / émergentes), \texttt{iaInsights} (alertes IA explicables).
+  \item Le système affiche également les données de benchmark national et international (établissements, régions, tendances mondiales).
+  \item Les rendez-vous à venir du conseiller sont listés avec horodatage.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Aucun étudiant dans la base $\rightarrow$ Affichage d'un état vide avec message d'invitation.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{CounselorController}, \texttt{User}, \texttt{Profile}, \texttt{Appointment} (Models), vue \texttt{counselor/dashboard.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Consulter le dossier complet d'un étudiant}
+%-------------------------------------------------------------
+\ucheader{Consulter le dossier psychométrique d'un étudiant}{Conseiller d'orientation}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-C02 \\
+\hline
+Cas d'utilisation & Consulter le dossier complet d'un étudiant \\
+\hline
+\rowcolor{rowgray}Acteur & Conseiller d'orientation \\
+\hline
+Précondition & Conseiller authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Fiche complète affichée~: archétype de profil, risk flags, timeline CRM, plan de coaching, indicateurs prédictifs, historique de décisions. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le conseiller clique sur un étudiant depuis son tableau de bord.
+  \item \texttt{CounselorController::showStudent()} charge le profil complet, les tentatives de test, les rendez-vous, et génère les données CRM~:
+  \begin{itemize}
+    \item \texttt{crmPriority}~: niveau de priorité de suivi (Urgent, Surveillance, Standard, Haute performance).
+    \item \texttt{riskFlags}~: incohérence d'orientation, motivation faible, stress élevé, faible compatibilité.
+    \item \texttt{crmTimeline}~: chronologie des événements (tests, RDV, notes, simulations, rapports).
+    \item \texttt{archetype} + \texttt{coachingPlan}~: archétype IA et plan de coaching automatisé.
+    \item \texttt{crmPredictiveIndicators}~: risque d'échec prévisionnel, mauvais choix de filière, risque de décrochage.
+    \item \texttt{successForecast}~: taux de réussite académique prévisionnelle, trajectoire optimale.
+  \end{itemize}
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item L'utilisateur sélectionné n'est pas un étudiant $\rightarrow$ \texttt{abort(403)}.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{CounselorController::showStudent()}, \texttt{User}, \texttt{Profile}, \texttt{TestAttempt}, \texttt{Appointment} (Models), vue \texttt{counselor/student-profile.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Rédiger des observations de suivi}
+%-------------------------------------------------------------
+\ucheader{Rédiger des observations de suivi et mettre à jour le profil}{Conseiller d'orientation}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-C03 \\
+\hline
+Cas d'utilisation & Rédiger des observations de suivi \\
+\hline
+\rowcolor{rowgray}Acteur & Conseiller d'orientation \\
+\hline
+Précondition & Dossier étudiant ouvert. \\
+\hline
+\rowcolor{rowgray}Postcondition & Observation (\texttt{counselor\_observations}), plan de coaching (\texttt{coaching\_plan}) et statut du dossier (\texttt{status}) mis à jour dans \texttt{Profile}. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le conseiller remplit le formulaire de suivi (observations, plan de coaching, statut~: pending / ongoing / completed).
+  \item Il soumet via \texttt{PATCH /counselor/students/\{student\}}.
+  \item \texttt{CounselorController::updateProfile()} valide les données et met à jour le profil.
+  \item La mise à jour apparaît dans la timeline CRM de l'étudiant.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Statut invalide $\rightarrow$ La validation Laravel rejette la requête.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{CounselorController::updateProfile()}, \texttt{Profile} (Model) \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Planifier un rendez-vous d'orientation}
+%-------------------------------------------------------------
+\ucheader{Planifier un rendez-vous d'orientation}{Conseiller d'orientation}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-C04 \\
+\hline
+Cas d'utilisation & Planifier un rendez-vous d'orientation \\
+\hline
+\rowcolor{rowgray}Acteur & Conseiller d'orientation \\
+\hline
+Précondition & Conseiller authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Rendez-vous enregistré dans \texttt{appointments} avec statut \texttt{scheduled}. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le conseiller accède au planificateur depuis le dossier d'un étudiant.
+  \item Il saisit la date/heure (\texttt{scheduled\_at}) et les notes du rendez-vous.
+  \item Il soumet via \texttt{POST /counselor/students/\{student\}/appointments}.
+  \item \texttt{CounselorController::storeAppointment()} valide que la date est dans le futur (\texttt{after:now}) et crée le rendez-vous.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Date passée $\rightarrow$ La validation bloque la création avec un message d'erreur.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{CounselorController::storeAppointment()}, \texttt{Appointment} (Model) \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Valider ou ajuster le matching étudiant-filière}
+%-------------------------------------------------------------
+\ucheader{Valider / Ajuster le matching étudiant-filière (Homologation)}{Conseiller d'orientation}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-C05 \\
+\hline
+Cas d'utilisation & Valider ou ajuster le matching étudiant-filière \\
+\hline
+\rowcolor{rowgray}Acteur & Conseiller d'orientation \\
+\hline
+Précondition & Recommandations SIAEPI générées et dossier étudiant ouvert. \\
+\hline
+\rowcolor{rowgray}Postcondition & Champ \texttt{manual\_match\_approved} mis à jour dans \texttt{Profile}~; \texttt{counselor\_observations} enrichi avec la justification horodatée. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le conseiller sélectionne une action~: Approuver, Rejeter, Modifier la trajectoire ou Changer la filière.
+  \item Il rédige une justification obligatoire (min. 10 caractères).
+  \item Il soumet via \texttt{POST /counselor/students/\{student\}/approve-match}.
+  \item \texttt{CounselorController::approveMatch()} applique la décision~:
+  \begin{itemize}
+    \item \textit{approve} $\rightarrow$ \texttt{manual\_match\_approved = true}, observation enregistrée.
+    \item \textit{reject} $\rightarrow$ \texttt{manual\_match\_approved = false}, préfixe \texttt{[REJET IA]} ajouté.
+    \item \textit{modify\_trajectory} / \textit{change\_field} $\rightarrow$ Mise à jour des intérêts et observations.
+  \end{itemize}
+  \item L'historique décisionnel (\texttt{decisionHistory}) est mis à jour.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Justification vide ou trop courte ($<$ 10 caractères) $\rightarrow$ Validation Laravel bloque l'envoi.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{CounselorController::approveMatch()}, \texttt{Profile} (Model) \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Envoyer une communication omnicanale}
+%-------------------------------------------------------------
+\ucheader{Envoyer une communication omnicanale à un étudiant}{Conseiller d'orientation}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-C06 \\
+\hline
+Cas d'utilisation & Envoyer une communication omnicanale \\
+\hline
+\rowcolor{rowgray}Acteur & Conseiller d'orientation \\
+\hline
+Précondition & Conseiller authentifié, dossier d'un étudiant ouvert. \\
+\hline
+\rowcolor{rowgray}Postcondition & Message envoyé via le canal sélectionné (Chat, Email, Notification Push, SMS) et enregistré dans le journal de communication CRM. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le conseiller sélectionne un canal~: chat interne, email, notification push ou SMS.
+  \item Il choisit un template (convocation, relance, conseil, alerte) ou rédige librement.
+  \item Il soumet via \texttt{POST /counselor/students/\{student\}/send-message}.
+  \item \texttt{CounselorController::sendMessage()} valide et enregistre le message dans la session CRM.
+  \item Le journal de communication est mis à jour en temps réel.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Corps du message vide ou trop court ($<$ 5 caractères) $\rightarrow$ Validation bloque l'envoi.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{CounselorController::sendMessage()}, \texttt{Message} (Model) \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Vérifier son statut d'approbation et consulter ses justificatifs}
+%-------------------------------------------------------------
+\ucheader{Vérifier son statut et consulter ses justificatifs}{Conseiller en attente / rejeté}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-C07 \\
+\hline
+Cas d'utilisation & Vérifier son statut d'approbation et consulter ses justificatifs \\
+\hline
+\rowcolor{rowgray}Acteur & Conseiller d'orientation (en attente ou refusé) \\
+\hline
+Précondition & Conseiller authentifié ayant le statut \texttt{PENDING\_APPROVAL} ou \texttt{REJECTED}. \\
+\hline
+\rowcolor{rowgray}Postcondition & Redirection stricte et blocage d'accès aux fonctionnalités du tableau de bord. Visualisation des informations transmises et motifs de refus éventuels. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le conseiller tente d'accéder à son tableau de bord d'orientation.
+  \item Le middleware \texttt{counselor.approved} intercepte la requête.
+  \item Le système identifie que le statut est \texttt{PENDING\_APPROVAL} et le redirige vers \texttt{/counselor/pending}.
+  \item Le système présente une barre d'avancement (Création du compte $\rightarrow$ Dossier soumis $\rightarrow$ Attente d'évaluation).
+  \item Les détails du dossier soumis (nom, spécialité, expérience, CV PDF) sont affichés pour vérification.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Statut \texttt{REJECTED} $\rightarrow$ Le système affiche une bannière d'alerte rouge avec le motif du refus fourni par l'administrateur, et invite à contacter le support.
+  \item Le conseiller clique sur « Se déconnecter » $\rightarrow$ Clôture sécurisée de la session.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{CounselorController::pending()}, middleware \texttt{counselor.approved}, vue \texttt{counselor/pending.blade.php} \\
+\hline
+\end{tabular}
+
+\newpage
+
+%=============================================================
+\section{Acteur : Administrateur}
+%=============================================================
+
+L'administrateur est responsable de la configuration globale de la plateforme~: gestion des utilisateurs et de leurs rôles, administration du questionnaire RIASEC, import des filières, consultation du journal d'audit et paramétrage des critères de référence de matching.
+
+%-------------------------------------------------------------
+\subsection{Consulter le tableau de bord d'administration}
+%-------------------------------------------------------------
+\ucheader{Consulter le tableau de bord d'administration}{Administrateur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-A01 \\
+\hline
+Cas d'utilisation & Consulter le tableau de bord d'administration \\
+\hline
+\rowcolor{rowgray}Acteur & Administrateur \\
+\hline
+Précondition & Accès authentifié avec le rôle \texttt{admin}. \\
+\hline
+\rowcolor{rowgray}Postcondition & Indicateurs globaux affichés~: nombre d'inscrits par rôle, tests terminés, étudiants actifs. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur accède à \texttt{GET /admin} (route protégée par le middleware \texttt{role:admin}).
+  \item \texttt{Admin/DashboardController::index()} agrège les statistiques globales de la plateforme.
+  \item Les KPIs principaux sont affichés~: utilisateurs inscrits, étudiants actifs, conseillers, tests passés.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Accès sans rôle admin $\rightarrow$ Redirection automatique par le middleware \texttt{role:admin}.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{Admin/DashboardController}, vue \texttt{admin/dashboard.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Gérer les comptes utilisateurs et les rôles}
+%-------------------------------------------------------------
+\ucheader{Gérer les comptes utilisateurs (CRUD + Rôles)}{Administrateur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-A02 \\
+\hline
+Cas d'utilisation & Gérer les comptes utilisateurs et les rôles \\
+\hline
+\rowcolor{rowgray}Acteur & Administrateur \\
+\hline
+Précondition & Administrateur authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Statut, rôle ou validité d'un compte utilisateur mis à jour~; session active de l'utilisateur ciblé invalidée. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur ouvre « Gestion des utilisateurs » via \texttt{GET /admin/users}.
+  \item Le système affiche la table paginée de tous les comptes.
+  \item L'administrateur peut~:
+  \begin{itemize}
+    \item Bloquer/Débloquer~: \texttt{POST /admin/users/block/\{user\}} (toggle \texttt{is\_blocked}).
+    \item Promouvoir~: \texttt{POST /admin/users/promote/\{user\}} (étudiant $\rightarrow$ conseiller $\rightarrow$ admin).
+    \item Rétrograder~: \texttt{POST /admin/users/demote/\{user\}}.
+    \item Supprimer~: \texttt{DELETE /admin/users/\{user\}}.
+  \end{itemize}
+  \item Le système applique le changement et met à jour le champ \texttt{role} dans \texttt{users}.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Tentative de blocage de son propre compte $\rightarrow$ Le système interdit l'action (protection dans \texttt{UserController}).
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{Admin/UserController}, \texttt{User} (Model), vue \texttt{admin/users/index.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Gérer les questions du test RIASEC (CRUD)}
+%-------------------------------------------------------------
+\ucheader{Gérer les questions du test RIASEC (CRUD complet)}{Administrateur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-A03 \\
+\hline
+Cas d'utilisation & Gérer les questions du test RIASEC \\
+\hline
+\rowcolor{rowgray}Acteur & Administrateur \\
+\hline
+Précondition & Accès au module de test RIASEC. \\
+\hline
+\rowcolor{rowgray}Postcondition & Question créée, modifiée, désactivée ou supprimée dans le pool CAT (\texttt{riasec\_questions}). \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur ouvre \texttt{GET /admin/riasec/questions}.
+  \item Le système affiche toutes les questions avec~: énoncé, paramètres 2PL (difficulté $b$, discrimination $a$), dimension Holland ciblée, catégorie GATB, statut inversé (\textit{reverse scored}), bloc, \textit{bacs cibles}.
+  \item L'administrateur crée une question via \texttt{GET /admin/riasec/questions/create} $\rightarrow$ \texttt{POST /admin/riasec/questions}.
+  \item Il peut éditer (\texttt{PUT}), supprimer (\texttt{DELETE}) ou basculer le statut (\texttt{toggle}).
+  \item Il peut exporter toutes les données via \texttt{GET /admin/riasec/export} (CSV).
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Question déjà répondue par des étudiants $\rightarrow$ Recommandé de désactiver (toggle) plutôt que de supprimer, pour préserver l'intégrité des calculs historiques.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{Admin/RiasecAdminController}, \texttt{QuestionRiasec} (Model), vues \texttt{admin/riasec/} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Importer des filières depuis Excel}
+%-------------------------------------------------------------
+\ucheader{Importer les filières et formations (Excel)}{Administrateur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-A04 \\
+\hline
+Cas d'utilisation & Importer des filières depuis un fichier Excel \\
+\hline
+\rowcolor{rowgray}Acteur & Administrateur \\
+\hline
+Précondition & Fichier Excel contenant les données de filières (SDO, RIASEC, sections BAC acceptées) prêt. \\
+\hline
+\rowcolor{rowgray}Postcondition & Table \texttt{filieres} mise à jour en masse par transaction SQL. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur accède à \texttt{GET /admin/filieres/import}.
+  \item Il sélectionne son fichier Excel et soumet via \texttt{POST /admin/filieres/import}.
+  \item \texttt{FiliereImportController::store()} parse et valide le fichier (codes RIASEC, SDO, sections BAC).
+  \item Les filières valides sont insérées en base par transaction SQL globale.
+  \item Un rapport de résultat est affiché (lignes importées / lignes rejetées).
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Schéma invalide ou valeurs corrompues $\rightarrow$ Annulation complète (\textit{rollback}), rapport d'erreurs précisant les lignes défaillantes.
+  \item Suppression par catégorie $\rightarrow$ \texttt{DELETE /admin/filieres/import/\{categorie\}}.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{Admin/FiliereImportController}, \texttt{Filiere}, \texttt{Specialite} (Models) \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Consulter le journal d'audit et de sécurité}
+%-------------------------------------------------------------
+\ucheader{Consulter le journal d'audit et de sécurité}{Administrateur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-A05 \\
+\hline
+Cas d'utilisation & Consulter le journal d'audit et de sécurité \\
+\hline
+\rowcolor{rowgray}Acteur & Administrateur \\
+\hline
+Précondition & Administrateur authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Journal des actions critiques affiché (promotions, connexions échouées, suppressions, modifications). \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur accède à \texttt{GET /admin/audit}.
+  \item \texttt{AuditController::index()} récupère les entrées de \texttt{audit\_logs}~: action, utilisateur, IP, horodatage, détails.
+  \item L'administrateur filtre les logs par type d'événement ou période.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Journal volumineux $\rightarrow$ Pagination stricte et export CSV possible.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{Admin/AuditController}, \texttt{AuditLog} (Model), vue \texttt{admin/audit.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Gérer les critères et références de matching}
+%-------------------------------------------------------------
+\ucheader{Gérer les critères et références de matching (SIAEPI)}{Administrateur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-A06 \\
+\hline
+Cas d'utilisation & Gérer les critères et références de matching \\
+\hline
+\rowcolor{rowgray}Acteur & Administrateur \\
+\hline
+Précondition & Accès aux paramètres de configuration du moteur SIAEPI. \\
+\hline
+\rowcolor{rowgray}Postcondition & Sections de référence (\texttt{reference\_sections}) et critères (\texttt{reference\_criteria}) mis à jour pour les prochains calculs de matching. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur ouvre \texttt{GET /admin/references}.
+  \item Il consulte et modifie les sections et critères de référence.
+  \item Il peut créer une section (\texttt{POST /admin/references}), un critère (\texttt{POST /admin/references/criteria}) ou les supprimer.
+  \item Les nouveaux paramètres s'appliquent aux prochains calculs SIAEPI.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Données incomplètes $\rightarrow$ La validation Laravel rejette la requête.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{Admin/ReferenceController}, \texttt{ReferenceSection}, \texttt{ReferenceCriterion} (Models), vue \texttt{admin/references.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Gérer les messages de contact}
+%-------------------------------------------------------------
+\ucheader{Gérer les messages de contact visiteurs}{Administrateur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-A07 \\
+\hline
+Cas d'utilisation & Gérer les messages de contact visiteurs \\
+\hline
+\rowcolor{rowgray}Acteur & Administrateur \\
+\hline
+Précondition & Administrateur authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Messages traités, lus ou supprimés. Compteur de notifications mis à jour. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur accède à \texttt{GET /admin/contacts}.
+  \item Le système liste les messages reçus de la landing page publique.
+  \item L'administrateur consulte le détail d'un message via \texttt{GET /admin/contacts/\{id\}}.
+  \item Il peut supprimer un message via \texttt{DELETE /admin/contacts/\{id\}}.
+  \item Le compteur de notifications non lues est mis à jour via \texttt{GET /admin/notifications/count}.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item Aucun message $\rightarrow$ Affichage d'un état vide.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{ContactController}, \texttt{Contact} (Model), vue \texttt{admin/contacts/} \\
+\hline
+\end{tabular}
+
+\vspace{1em}
+
+%-------------------------------------------------------------
+\subsection{Valider ou refuser les candidatures des conseillers}
+%-------------------------------------------------------------
+\ucheader{Valider ou refuser les candidatures des conseillers}{Administrateur}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{capblue}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}Identifiant & UC-A08 \\
+\hline
+Cas d'utilisation & Valider ou refuser les candidatures des conseillers \\
+\hline
+\rowcolor{rowgray}Acteur & Administrateur \\
+\hline
+Précondition & Administrateur authentifié. \\
+\hline
+\rowcolor{rowgray}Postcondition & Conseiller approuvé (rôle mis à jour à \texttt{counselor}, statut à \texttt{APPROVED}) ou rejeté (statut à \texttt{REJECTED} avec motif). \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur accède à « Candidatures Conseillers » via \texttt{GET /admin/counselors}.
+  \item Le système affiche le tableau des demandes en attente (nom, spécialité, expérience, justificatif CV).
+  \item L'administrateur clique sur « Approuver ».
+  \item Le système met à jour le rôle de l'utilisateur à \texttt{counselor}, son statut à \texttt{APPROVED}, associe l'ID de l'admin et enregistre la date.
+  \item L'utilisateur est notifié et peut désormais accéder aux fonctionnalités CRM du dashboard conseiller.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item L'administrateur clique sur « Refuser » $\rightarrow$ Une boîte modale s'ouvre pour saisir obligatoirement un motif de refus.
+  \item Il saisit le motif de refus et valide $\rightarrow$ Le statut passe à \texttt{REJECTED} et le motif est persisté dans le profil.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{Admin/AdminCounselorController}, \texttt{User} (Model), \texttt{CounselorProfile} (Model), vue \texttt{admin/counselors/index.blade.php} \\
+\hline
+\end{tabular}
+
+\vspace{2em}
+\begin{center}
+{\color{capblue}\rule{\linewidth}{1pt}}\\[0.5em]
+{\small\textbf{CapAvenir} --- Cahier des Cas d'Utilisation --- 28 cas documentés sur 4 acteurs}\\[0.2em]
+{\small Stack~: Laravel 10 $\cdot$ PHP 8.2 $\cdot$ Moteur SIAEPI v5.0 $\cdot$ CAT 2PL $\cdot$ API Gemini}\\[0.3em]
+{\color{capblue}\rule{\linewidth}{1pt}}
+\end{center}
+
+\end{document}

@@ -18,8 +18,14 @@ class User extends Authenticatable
     // Rôles principaux
     public const ROLE_STUDENT = 'student';
     public const ROLE_COUNSELOR = 'counselor';
+    public const ROLE_COUNSELOR_PENDING = 'counselor_pending';
     public const ROLE_ADMIN = 'admin';
     public const ROLE_SUPER_ADMIN = 'super_admin';
+
+    // Statuts d'approbation
+    public const STATUS_PENDING_APPROVAL = 'PENDING_APPROVAL';
+    public const STATUS_APPROVED = 'APPROVED';
+    public const STATUS_REJECTED = 'REJECTED';
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +37,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'status',
         'is_admin',
         'avatar',
         'is_blocked',
@@ -47,11 +54,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is a counselor.
+     * Check if the user is a counselor (either fully approved or pending approval).
      */
     public function isCounselor(): bool
     {
-        return $this->role === self::ROLE_COUNSELOR;
+        return in_array($this->role, [self::ROLE_COUNSELOR, self::ROLE_COUNSELOR_PENDING], true);
+    }
+
+    /**
+     * Check if the user is a counselor fully approved.
+     */
+    public function isApprovedCounselor(): bool
+    {
+        return $this->role === self::ROLE_COUNSELOR && $this->status === self::STATUS_APPROVED;
     }
 
     /**
@@ -70,6 +85,14 @@ class User extends Authenticatable
         return $this->hasOne(Profile::class);
     }
 
+    /**
+     * Get the professional counselor profile associated with the user.
+     */
+    public function counselorProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(CounselorProfile::class);
+    }
+
     public function portfolioItems(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(PortfolioItem::class);
@@ -80,10 +103,6 @@ class User extends Authenticatable
         return $this->hasMany(CareerRoadmap::class);
     }
 
-    public function orientationVoeux(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(OrientationVoeu::class);
-    }
 
     public function simulationHistory(): \Illuminate\Database\Eloquent\Relations\HasMany
     {

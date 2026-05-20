@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Espace Conseiller') — CapAvenir</title>
 
-    <!-- Google Fonts: DM Sans + Fraunces -->
+    <!-- Google Fonts: DM Sans + Fraunces (same as student layout) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet">
@@ -18,88 +18,88 @@
 
     <style>
         /* ═══════════════════════════════════════════
-           DESIGN TOKENS — CapAvenir System (conseiller)
-           Aligned with student layout & dashboard
+           DESIGN TOKENS — CapAvenir System (counselor)
+           PERFECTLY ALIGNED with student layout
         ═══════════════════════════════════════════ */
         :root {
-            /* ── Core Executive Palette ── */
-            --ink:     #0A192F;   /* Deep Navy Executive Ink */
-            --paper:   #FAF9F5;   /* Luxurious warm cotton paper (anti-glare) */
-            --cream:   #EFECE6;   /* Soft clay cream */
-            --warm:    #E4DFD5;   /* Warm sandstone */
-            
-            --accent:  #FF6A00;   /* CapAvenir Orange */
-            --accent2: #0057B8;   /* CapAvenir Blue */
-            --accent3: #10B981;   /* Emerald Success */
-            --gold:    #FF8C1A;   /* Golden highlight */
-            
-            --ink60:   rgba(10, 25, 47, 0.72);  /* Highly readable body text */
-            --ink30:   rgba(10, 25, 47, 0.45);  /* Readable subtitles */
-            --ink15:   rgba(10, 25, 47, 0.20);  /* Soft borders */
-            --ink10:   rgba(10, 25, 47, 0.12);  /* Subtle borders */
-            --ink06:   rgba(10, 25, 47, 0.06);  /* Accent cards background */
+            /* ── Core palette (IDENTICAL to student) ── */
+            --ink:     #1E293B;   /* Gris Anthracite (texte principal) */
+            --paper:   #FFFFFF;   /* Blanc Pur */
+            --cream:   #F8FAFC;   /* Blanc Gris Très Clair (fond principal) */
+            --warm:    #E2E8F0;   /* Gris Froid Moderne (bordures) */
+            --accent:  #EA580C;   /* Orange Moderne Dynamique Pro */
+            --accent2: #0A2540;   /* Bleu Profond Premium (Obsidian) */
+            --accent3: #F97316;   /* Orange Doux Pro */
+            --gold:    #F97316;
+            --ink60:   rgba(30, 41, 59, 0.6);
+            --ink30:   rgba(30, 41, 59, 0.3);
+            --ink15:   rgba(30, 41, 59, 0.15);
+            --ink10:   rgba(30, 41, 59, 0.1);
+            --ink06:   rgba(30, 41, 59, 0.06);
 
             /* ── Radii & easing ── */
-            --r:    8px;
-            --rl:   20px;
-            --rx:   999px;
+            --r:   6px;
+            --rl:  16px;
+            --rx:  999px;
             --ease: cubic-bezier(.16,1,.3,1);
 
             /* ── Component tokens ── */
             --font-main:     'DM Sans', sans-serif;
             --font-serif:    'Fraunces', serif;
-            --navbar-bg:     rgba(250, 249, 245, 0.85);
-            --glass-border:  rgba(10, 25, 47, 0.10);
-            --glass-border-vivid: rgba(255, 106, 0, 0.35);
-            --chat-panel-bg: rgba(250, 249, 245, 0.96);
-            --shadow-card:   0 12px 40px rgba(10, 25, 47, 0.05);
+            --navbar-bg:     rgba(248, 250, 252, 0.88);
+            --glass-border:  rgba(30, 41, 59, 0.10);
+            --glass-border-vivid: rgba(234, 88, 12, 0.25);
+            --chat-panel-bg: rgba(248, 250, 252, 0.97);
+            --shadow-card:   0 8px 40px rgba(10, 37, 64, 0.08);
             --transition:    0.3s cubic-bezier(.4,0,.2,1);
 
-            /* ── Legacy aliases for child views ── */
+            /* ── Legacy aliases (used by child views) ── */
             --bg-base:       var(--paper);
             --bg-1:          var(--cream);
             --bg-2:          var(--warm);
-            --indigo:        var(--accent);
-            --indigo-light:  #FF8C1A;
-            --violet:        var(--accent2);
-            --violet-dark:   #003B8E;
+            --indigo:        var(--accent2);
+            --indigo-light:  #0F2D59;
+            --violet:        var(--accent);
+            --violet-dark:   #c2410c;
             --cyan:          var(--accent3);
-            --glass-bg:      rgba(10, 25, 47, 0.03);
-            --glass-bg-md:   rgba(10, 25, 47, 0.06);
+            --glass-bg:      rgba(30, 41, 59, 0.04);
+            --glass-bg-md:   rgba(30, 41, 59, 0.07);
             --text-primary:  var(--ink);
             --text-secondary: var(--ink60);
             --text-muted:    var(--ink30);
-            --success:       var(--accent3);
-            --warning:       var(--gold);
+            --success:       #10B981;
+            --warning:       #F59E0B;
             --danger:        #EF4444;
-            --input-bg:      rgba(10, 25, 47, 0.04);
-            --card-surface:  rgba(10, 25, 47, 0.03);
-            --card-surface-md: rgba(10, 25, 47, 0.06);
+            --input-bg:      rgba(30, 41, 59, 0.04);
+            --card-surface:  rgba(30, 41, 59, 0.04);
+            --card-surface-md: rgba(30, 41, 59, 0.07);
         }
 
-        /* ── Premium Dark Mode overrides ── */
+        /* ── Dark mode overrides (IDENTICAL to student) ── */
         [data-theme="dark"] {
-            --ink:   #F0EDE6;   /* Soft ivory white */
-            --paper: #0A0E17;   /* Deep space dark */
-            --cream: #121824;   /* Dark slate glass */
-            --warm:  #182235;   /* Medium slate glass */
-            
-            --ink60: rgba(240, 237, 230, 0.75);
-            --ink30: rgba(240, 237, 230, 0.45);
-            --ink15: rgba(240, 237, 230, 0.20);
-            --ink10: rgba(240, 237, 230, 0.12);
-            --ink06: rgba(240, 237, 230, 0.06);
-            
-            --navbar-bg:     rgba(10, 14, 23, 0.88);
-            --glass-border:  rgba(240, 237, 230, 0.08);
-            --glass-border-vivid: rgba(255, 106, 0, 0.45);
-            --chat-panel-bg: rgba(10, 14, 23, 0.97);
-            --shadow-card:   0 16px 48px rgba(0, 0, 0, 0.45);
-            --glass-bg:      rgba(240, 237, 230, 0.04);
-            --glass-bg-md:   rgba(240, 237, 230, 0.07);
-            --input-bg:      rgba(240, 237, 230, 0.07);
-            --card-surface:  rgba(240, 237, 230, 0.04);
-            --card-surface-md: rgba(240, 237, 230, 0.07);
+            --ink:   #F1F5F9;
+            --paper: #0E1324;
+            --cream: #070A10;
+            --warm:  #1D2433;
+            --accent: #F97316;
+            --accent2: #38BDF8;
+            --accent3: #FB923C;
+            --gold:    #FB923C;
+            --ink60: rgba(241, 245, 249, 0.6);
+            --ink30: rgba(241, 245, 249, 0.3);
+            --ink15: rgba(241, 245, 249, 0.15);
+            --ink10: rgba(241, 245, 249, 0.08);
+            --ink06: rgba(241, 245, 249, 0.04);
+            --navbar-bg:     rgba(7, 10, 16, 0.88);
+            --glass-border:  rgba(241, 245, 249, 0.08);
+            --glass-border-vivid: rgba(56, 189, 248, 0.35);
+            --chat-panel-bg: rgba(7, 10, 16, 0.97);
+            --shadow-card:   0 8px 40px rgba(0, 0, 0, 0.45);
+            --glass-bg:      rgba(241, 245, 249, 0.04);
+            --glass-bg-md:   rgba(241, 245, 249, 0.07);
+            --input-bg:      rgba(241, 245, 249, 0.07);
+            --card-surface:  rgba(241, 245, 249, 0.04);
+            --card-surface-md: rgba(241, 245, 249, 0.07);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -107,7 +107,7 @@
 
         body {
             font-family: var(--font-main);
-            background: var(--paper);
+            background: var(--cream);
             color: var(--ink);
             overflow-x: hidden;
             min-height: 100vh;
@@ -141,7 +141,7 @@
             background: radial-gradient(circle, color-mix(in srgb,var(--accent3) 6%,transparent) 0%, transparent 70%);
         }
 
-        /* ═══ NAVBAR ═══ */
+        /* ═══ NAVBAR (IDENTICAL structure to student) ═══ */
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
             display: flex; align-items: center; justify-content: space-between;
@@ -184,16 +184,22 @@
             display: block; padding: .38rem .8rem;
             font-size: .8rem; font-weight: 600;
             color: var(--ink60); text-decoration: none;
-            border-radius: var(--r); transition: var(--transition);
+            border-radius: var(--r);
+            transition: var(--transition);
         }
-        .navbar-nav a:hover { color: var(--ink); background: var(--ink06); }
+        .navbar-nav a:hover {
+            color: var(--ink);
+            background: var(--ink06);
+        }
         .navbar-nav a.active {
-            color: var(--accent2);
-            background: color-mix(in srgb, var(--accent2) 8%, transparent);
+            color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 8%, transparent);
         }
 
         /* Right area */
-        .navbar-right { display: flex; align-items: center; gap: .6rem; }
+        .navbar-right {
+            display: flex; align-items: center; gap: .6rem;
+        }
 
         /* Theme toggle */
         .theme-toggle {
@@ -205,7 +211,7 @@
         }
         .theme-toggle:hover { border-color: var(--ink30); color: var(--ink); }
 
-        /* Role badge — marine (accent2) for counselor */
+        /* Role badge — accent color for counselor */
         .role-badge {
             display: flex; align-items: center; gap: .4rem;
             padding: .28rem .75rem; border-radius: var(--rx);
@@ -224,10 +230,11 @@
         /* Avatar */
         .avatar-nav {
             width: 34px; height: 34px; border-radius: 50%;
-            background: var(--accent2);
+            background: var(--ink);
             display: flex; align-items: center; justify-content: center;
-            font-size: .82rem; font-weight: 700; color: #fff;
-            cursor: pointer; transition: var(--transition);
+            font-size: .82rem; font-weight: 700; color: var(--paper);
+            cursor: pointer;
+            transition: var(--transition);
         }
         .avatar-nav:hover { opacity: .85; }
 
@@ -251,7 +258,8 @@
         }
         .burger-btn span {
             display: block; width: 22px; height: 2px;
-            background: var(--ink); border-radius: 2px; transition: var(--transition);
+            background: var(--ink); border-radius: 2px;
+            transition: var(--transition);
         }
 
         /* Mobile nav drawer */
@@ -260,7 +268,8 @@
         }
         .mobile-nav.open { display: block; }
         .mobile-nav-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,.5);
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,.5);
             backdrop-filter: blur(4px);
         }
         .mobile-nav-drawer {
@@ -278,11 +287,8 @@
             text-decoration: none; border-radius: var(--r);
             transition: var(--transition); font-size: .9rem;
         }
-        .mobile-nav-drawer a:hover { background: var(--ink06); color: var(--ink); }
-        .mobile-nav-drawer a.active {
-            color: var(--accent2);
-            background: color-mix(in srgb, var(--accent2) 8%, transparent);
-        }
+        .mobile-nav-drawer a:hover  { background: var(--ink06); color: var(--ink); }
+        .mobile-nav-drawer a.active { color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
 
         /* ═══ PAGE CONTENT ═══ */
         .page-content {
@@ -331,7 +337,7 @@
         .badge-violet { background: color-mix(in srgb,var(--accent2) 10%,transparent); color: var(--accent2); border: 1px solid color-mix(in srgb,var(--accent2) 25%,transparent); }
         .badge-indigo { background: color-mix(in srgb,var(--accent) 10%,transparent); color: var(--accent); border: 1px solid color-mix(in srgb,var(--accent) 25%,transparent); }
         .badge-cyan   { background: color-mix(in srgb,var(--accent3) 10%,transparent); color: var(--accent3); border: 1px solid color-mix(in srgb,var(--accent3) 25%,transparent); }
-        .badge-green  { background: color-mix(in srgb,var(--accent3) 10%,transparent); color: var(--accent3); border: 1px solid color-mix(in srgb,var(--accent3) 25%,transparent); }
+        .badge-green  { background: color-mix(in srgb,#10B981 10%,transparent); color: #10B981; border: 1px solid color-mix(in srgb,#10B981 25%,transparent); }
         .badge-amber  { background: color-mix(in srgb,var(--gold) 12%,transparent); color: var(--gold); border: 1px solid color-mix(in srgb,var(--gold) 28%,transparent); }
         .badge-red    { background: color-mix(in srgb,#ef4444 10%,transparent); color: #ef4444; border: 1px solid color-mix(in srgb,#ef4444 25%,transparent); }
 
@@ -343,40 +349,99 @@
             transition: width 1.2s cubic-bezier(.4,0,.2,1);
         }
 
-        /* ═══ PAGE HEADER ═══ */
+        /* ═══ PAGE HEADER — Same editorial style as student dashboard hero ═══ */
         .page-header {
-            display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; gap: 1rem; margin-bottom: 2.5rem;
+            position: relative;
+            background: var(--cream);
+            border: 1px solid var(--ink10);
+            border-radius: 20px;
+            padding: 3rem 3rem 2.5rem;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            animation: headerFadeUp .9s var(--ease) both;
+        }
+        @keyframes headerFadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+
+        /* Decorative orb inside header */
+        .page-header-orb {
+            position: absolute; border-radius: 50%;
+            width: 380px; height: 380px;
+            background: radial-gradient(circle at 40% 40%,
+                color-mix(in srgb, var(--accent2) 10%, transparent),
+                color-mix(in srgb, var(--accent) 6%, transparent) 50%,
+                transparent 75%);
+            right: -2%; top: 50%; transform: translateY(-50%);
+            pointer-events: none;
+            animation: orbBreath 7s ease-in-out infinite;
+        }
+        @keyframes orbBreath { 0%,100%{transform:translateY(-50%) scale(1);} 50%{transform:translateY(-54%) scale(1.06);} }
+
+        /* Background editorial word */
+        .page-header-bgword {
+            position: absolute;
+            font-family: var(--font-serif); font-weight: 300; font-style: italic;
+            font-size: clamp(6rem, 14vw, 12rem);
+            color: transparent;
+            -webkit-text-stroke: 1px color-mix(in srgb, var(--ink) 5%, transparent);
+            line-height: 1; letter-spacing: -.05em;
+            right: 2%; top: 50%; transform: translateY(-50%);
+            pointer-events: none; user-select: none;
+        }
+
+        .page-header-inner {
+            position: relative; z-index: 2;
+            display: flex; align-items: flex-start; justify-content: space-between;
+            flex-wrap: wrap; gap: 1.5rem;
         }
         .page-header-eyebrow {
-            font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-            color: var(--accent2); margin-bottom: .35rem;
-            display: flex; align-items: center; gap: .45rem;
+            display: inline-flex; align-items: center; gap: .5rem;
+            font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+            color: var(--accent); margin-bottom: 1rem;
         }
-        .page-header-eyebrow::before { content: ''; width: 14px; height: 1px; background: var(--accent2); }
+        .page-header-eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--accent); }
+        .eyebrow-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--accent3);
+            animation: livePulse 2s ease-in-out infinite;
+        }
+        @keyframes livePulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 color-mix(in srgb,var(--accent3) 50%,transparent);} 50%{opacity:.6;box-shadow:0 0 0 6px transparent;} }
+
         .page-header-title {
             font-family: var(--font-serif);
-            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
             font-weight: 300; letter-spacing: -.04em; line-height: 1.1;
             color: var(--ink);
         }
-        .page-header-title em { font-style: italic; color: var(--accent2); }
+        .page-header-title em { font-style: italic; color: var(--accent); }
         .page-header-sub {
-            font-size: .8rem; color: var(--ink30); margin-top: .3rem; font-weight: 500;
+            font-size: .88rem; color: var(--ink60); margin-top: .5rem; line-height: 1.65;
+            max-width: 520px;
         }
+
+        /* Quick stat pills in header */
+        .page-header-stats {
+            display: flex; flex-wrap: wrap; gap: .625rem; margin-top: 1.5rem;
+        }
+        .ph-stat-pill {
+            display: flex; align-items: center; gap: .45rem;
+            padding: .45rem 1rem; border-radius: var(--rx);
+            background: var(--paper); border: 1px solid var(--ink10);
+            font-size: .78rem; font-weight: 500; color: var(--ink60);
+        }
+        .ph-stat-pill b { color: var(--ink); font-weight: 600; }
 
         /* System status pill */
         .status-pill {
             display: flex; align-items: center; gap: .4rem;
             padding: .3rem .85rem; border-radius: var(--rx);
-            background: color-mix(in srgb, var(--accent3) 10%, transparent);
-            border: 1px solid color-mix(in srgb, var(--accent3) 25%, transparent);
+            background: color-mix(in srgb, #10B981 10%, transparent);
+            border: 1px solid color-mix(in srgb, #10B981 25%, transparent);
             font-size: .72rem; font-weight: 700;
-            color: var(--accent3);
+            color: #10B981;
         }
         .status-dot {
             width: 6px; height: 6px; border-radius: 50%;
-            background: var(--accent3); animation: rolePulse 2s ease infinite;
+            background: #10B981; animation: rolePulse 2s ease infinite;
         }
 
         /* ─── Responsive ─── */
@@ -384,7 +449,11 @@
             .navbar-nav { display: none; }
             .burger-btn { display: flex; }
         }
-        @media (max-width: 768px) { .navbar { padding: 0 1rem; } }
+        @media (max-width: 768px) {
+            .navbar { padding: 0 1rem; }
+            .page-header { padding: 2rem 1.5rem; border-radius: var(--rl); }
+            .page-header-bgword { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -395,13 +464,13 @@
 
     <!-- ═══ NAVBAR ═══ -->
     <nav class="navbar">
-        <!-- Logo -->
+        <!-- Logo (same structure as student) -->
         <a href="{{ route('counselor.dashboard') }}" class="navbar-logo">
             <div class="navbar-logo-icon">
                 <img src="{{ asset('final.png') }}" alt="CapAvenir Logo">
             </div>
-            <span class="navbar-logo-text"><span>Avenir</span></span>
             <div>
+                <span class="navbar-logo-text"><span>Avenir</span></span>
                 <div class="navbar-logo-sub" style="padding: 2px 6px; background: rgba(11,12,16,0.04); border-radius: 4px;">Espace Conseiller</div>
             </div>
         </a>
@@ -409,27 +478,34 @@
         <!-- Nav links (desktop) -->
         <ul class="navbar-nav">
             <li><a href="{{ route('counselor.dashboard') }}" class="{{ request()->routeIs('counselor.dashboard') ? 'active' : '' }}">Tableau de bord</a></li>
-            <li><a href="#">Mes Étudiants</a></li>
-            <li><a href="#">Agenda</a></li>
+            <li><a href="{{ route('counselor.students') }}" class="{{ request()->routeIs('counselor.students') ? 'active' : '' }}">Mes Étudiants</a></li>
+            <li><a href="{{ route('counselor.agenda') }}" class="{{ request()->routeIs('counselor.agenda') ? 'active' : '' }}">Agenda</a></li>
             <li><a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">Messagerie</a></li>
-            <li><a href="#">Ressources IA</a></li>
+            <li><a href="{{ route('counselor.resources') }}" class="{{ request()->routeIs('counselor.resources') ? 'active' : '' }}">Ressources IA</a></li>
             <li><a href="{{ route('profile.edit') }}" class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">Mon Profil</a></li>
         </ul>
 
         <!-- Right controls -->
         <div class="navbar-right">
-            <button class="theme-toggle" id="themeToggle" title="Basculer le thème"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg></button>
+            <button class="theme-toggle" id="themeToggle" title="Basculer le thème"><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg></button>
             @include('partials.notifications')
 
-            <div class="role-badge">
-                <span class="role-dot"></span>
-                Conseiller
+            <div class="role-badge" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.25); color: #10b981;">
+                <svg style="width: 0.85rem; height: 0.85rem; flex-shrink: 0; margin-right: 0.2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4" />
+                </svg>
+                <span>Conseiller Vérifié</span>
             </div>
 
-            <div class="avatar-nav" title="{{ auth()->user()->name }}">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-            </div>
-
+            <a href="{{ route('profile.edit') }}" style="text-decoration:none;">
+                <div class="avatar-nav" title="{{ auth()->user()->name }}" style="overflow:hidden;">
+                    @if(auth()->user()->avatar)
+                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" style="width:100%; height:100%; object-fit:cover;">
+                    @else
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    @endif
+                </div>
+            </a>
 
             <form method="POST" action="{{ route('logout') }}" style="margin:0">
                 @csrf
@@ -453,10 +529,10 @@
         <div class="mobile-nav-overlay" id="navOverlay"></div>
         <div class="mobile-nav-drawer">
             <a href="{{ route('counselor.dashboard') }}" class="{{ request()->routeIs('counselor.dashboard') ? 'active' : '' }}">Tableau de bord</a>
-            <a href="#">Mes Étudiants</a>
-            <a href="#">Agenda</a>
+            <a href="{{ route('counselor.students') }}" class="{{ request()->routeIs('counselor.students') ? 'active' : '' }}">Mes Étudiants</a>
+            <a href="{{ route('counselor.agenda') }}" class="{{ request()->routeIs('counselor.agenda') ? 'active' : '' }}">Agenda</a>
             <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'active' : '' }}">Messagerie</a>
-            <a href="#">Ressources IA</a>
+            <a href="{{ route('counselor.resources') }}" class="{{ request()->routeIs('counselor.resources') ? 'active' : '' }}">Ressources IA</a>
             <a href="{{ route('profile.edit') }}" class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">Mon Profil</a>
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto">
                 @csrf
@@ -471,23 +547,40 @@
     <div class="page-content">
         <div style="max-width:1400px;margin:0 auto;padding:2.5rem 2rem;">
 
-            <!-- Page header -->
+            <!-- Page header — Editorial hero style matching student dashboard -->
             <div class="page-header">
-                <div>
-                    <p class="page-header-eyebrow">
-                        Bonjour {{ explode(' ', auth()->user()->name)[0] }}
-                    </p>
-                    <h1 class="page-header-title" style="font-style:italic;">
-                        @yield('title', 'Espace Conseiller')
-                    </h1>
-                    <p class="page-header-sub">
-                        Surveillance en temps réel · Plateforme CapAvenir 2026
-                    </p>
-                </div>
-                <div>
-                    <div class="status-pill">
-                        <span class="status-dot"></span>
-                        Système opérationnel
+                <div class="page-header-bgword">Conseil</div>
+                <div class="page-header-orb"></div>
+
+                <div class="page-header-inner">
+                    <div>
+                        <div class="page-header-eyebrow">
+                            <span class="eyebrow-dot"></span>
+                            Plateforme d'Orientation IA · {{ date('Y') }}
+                        </div>
+
+                        <h1 class="page-header-title">
+                            @hasSection('page-heading')
+                                @yield('page-heading')
+                            @else
+                                Bienvenue,<br><em>{{ explode(' ', auth()->user()->name)[0] }}.</em>
+                            @endif
+                        </h1>
+
+                        <p class="page-header-sub">
+                            @hasSection('page-subtitle')
+                                @yield('page-subtitle')
+                            @else
+                                Supervisez les parcours d'orientation de vos étudiants, analysez les profils psychométriques et pilotez les décisions stratégiques.
+                            @endif
+                        </p>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:.75rem;">
+                        <div class="status-pill">
+                            <span class="status-dot"></span>
+                            Système opérationnel
+                        </div>
                     </div>
                 </div>
             </div>
@@ -497,21 +590,21 @@
     </div>
 
     <script>
-        /* ── Theme toggle ── */
+        /* ── Theme toggle (IDENTICAL to student) ── */
         const themeToggle = document.getElementById('themeToggle');
         const html = document.documentElement;
 
         (function () {
             const saved = localStorage.getItem('cap-theme') || 'light';
             html.setAttribute('data-theme', saved);
-            if (themeToggle) themeToggle.innerHTML = saved === 'dark' ? `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg>` : `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z' /></svg>`;
+            if (themeToggle) themeToggle.innerHTML = saved === 'dark' ? `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg>` : `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z' /></svg>`;
         })();
 
         themeToggle?.addEventListener('click', () => {
             const isDark = html.getAttribute('data-theme') === 'dark';
             const next   = isDark ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
-            themeToggle.innerHTML = next === 'dark' ? `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg>` : `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z' /></svg>`;
+            themeToggle.innerHTML = next === 'dark' ? `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z' /></svg>` : `<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1rem;height:1rem;display:inline-block;vertical-align:middle;'><path stroke-linecap='round' stroke-linejoin='round' d='M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z' /></svg>`;
             localStorage.setItem('cap-theme', next);
         });
 

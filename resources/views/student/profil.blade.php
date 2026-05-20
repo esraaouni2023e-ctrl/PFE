@@ -3,7 +3,7 @@
 
 @section('content')
 <style>
-:root{--ink:#1E2937;--paper:#FFFFFF;--cream:#F8FAFC;--warm:#E2E8F0;--accent:#FF5E00;--accent2:#002D6B;--accent3:#FF7A1F;--gold:#FF7A1F;--ink60:rgba(30,41,55,.6);--ink30:rgba(30,41,55,.3);--ink15:rgba(30,41,55,.15);--ink10:rgba(30,41,55,.15);--ink06:rgba(30,41,55,.06);--r:8px;--rl:16px;--rx:999px;--ease:cubic-bezier(.16,1,.3,1)}
+:root{--ink:#1E293B;--paper:#FFFFFF;--cream:#F8FAFC;--warm:#E2E8F0;--accent:#EA580C;--accent2:#0A2540;--accent3:#F97316;--gold:#FBBF24;--ink60:rgba(30,41,59,.6);--ink30:rgba(30,41,59,.3);--ink15:rgba(30,41,59,.15);--ink10:rgba(30,41,59,.15);--ink06:rgba(30,41,59,.06);--r:8px;--rl:16px;--rx:999px;--ease:cubic-bezier(.16,1,.3,1)}
 .pr{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--cream);padding:2rem 2.5rem 5rem;max-width:1100px;margin:0 auto}
 .pr *,.pr *::before,.pr *::after{box-sizing:border-box;margin:0;padding:0}
 /* Layout */

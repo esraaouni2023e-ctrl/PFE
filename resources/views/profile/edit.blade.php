@@ -1,12 +1,27 @@
-@extends('layouts.student')
+@extends(
+    auth()->user()->isCounselor() 
+        ? 'layouts.counselor' 
+        : (auth()->user()->isSuperAdmin() || auth()->user()->role === 'admin' || auth()->user()->role === 'super_admin'
+            ? 'layouts.admin' 
+            : 'layouts.student')
+)
 
 @section('title', 'Mon Profil')
+
+@section('page-heading')
+Mon<br><em>Profil.</em>
+@endsection
+
+@section('page-subtitle')
+Mettez à jour vos informations personnelles, changez votre mot de passe ou modifiez les paramètres de sécurité de votre compte conseiller.
+@endsection
 
 @section('content')
 <div class="db" id="dbRoot">
     {{-- ════════════════════════════════
-         § 1 · HEADER
+         § 1 · HEADER (Étudiants seulement, les autres layouts ayant déjà un header intégré)
     ════════════════════════════════ --}}
+    @if(auth()->user()->isStudent())
     <section class="db-hero" style="padding: 3.5rem 4rem 3rem;">
         <div class="db-hero-bgword">Profil</div>
         <div class="db-hero-orb"></div>
@@ -44,6 +59,7 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- ════════════════════════════════
          § 2 · CONTENT
@@ -123,6 +139,19 @@
     font-family: 'DM Sans', sans-serif;
     color: var(--ink);
     padding: 2rem 3rem 5rem;
+}
+
+/* Dark mode overrides for profile */
+[data-theme="dark"] .db {
+    --ink:     #f0ede6;
+    --paper:   #10100d;
+    --cream:   #18170f;
+    --warm:    #1f1e14;
+    --ink60:   rgba(240,237,230,.6);
+    --ink30:   rgba(240,237,230,.3);
+    --ink15:   rgba(240,237,230,.15);
+    --ink10:   rgba(240,237,230,.08);
+    --ink06:   rgba(240,237,230,.04);
 }
 
 .db .rev { opacity: 0; transform: translateY(28px); transition: opacity .8s var(--ease), transform .8s var(--ease); }

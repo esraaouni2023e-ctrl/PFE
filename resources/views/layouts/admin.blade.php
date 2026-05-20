@@ -22,20 +22,20 @@
         ═══════════════════════════════════════════ */
         :root {
             /* ── Core palette ── */
-            --ink:     #0b0c10;
-            --paper:   #f7f5f0;
-            --cream:   #ede9e1;
-            --warm:    #e8e1d4;
-            --accent:  #d4622a;
-            --accent2: #1a4f6e;
-            --accent3: #4a7c59;
-            --gold:    #c8973a;
-            --red:     #c0392b;
-            --ink60:   rgba(11,12,16,.6);
-            --ink30:   rgba(11,12,16,.3);
-            --ink15:   rgba(11,12,16,.15);
-            --ink10:   rgba(11,12,16,.1);
-            --ink06:   rgba(11,12,16,.06);
+            --ink:     #1E293B;   /* Gris Anthracite */
+            --paper:   #FFFFFF;   /* Blanc Pur */
+            --cream:   #F8FAFC;   /* Blanc Gris Très Clair */
+            --warm:    #E2E8F0;   /* Gris Froid Moderne */
+            --accent:  #EA580C;   /* Orange Moderne Pro */
+            --accent2: #0A2540;   /* Bleu Profond Obsidian */
+            --accent3: #10B981;   /* Vert Émeraude Pro */
+            --gold:    #F59E0B;   /* Ambre Pro */
+            --red:     #EF4444;   /* Rouge Alerte Pro */
+            --ink60:   rgba(30, 41, 59, 0.6);
+            --ink30:   rgba(30, 41, 59, 0.3);
+            --ink15:   rgba(30, 41, 59, 0.15);
+            --ink10:   rgba(30, 41, 59, 0.1);
+            --ink06:   rgba(30, 41, 59, 0.06);
 
             /* ── Radii & easing ── */
             --r:    6px;
@@ -46,26 +46,31 @@
             /* ── Component tokens ── */
             --font-main:     'DM Sans', sans-serif;
             --font-serif:    'Fraunces', serif;
-            --navbar-bg:     rgba(247,245,240,.88);
-            --glass-border:  rgba(11,12,16,.10);
-            --shadow-card:   0 8px 40px rgba(0,0,0,.08);
+            --navbar-bg:     rgba(248, 250, 252, 0.88);
+            --glass-border:  rgba(30, 41, 59, 0.10);
+            --shadow-card:   0 8px 40px rgba(10, 37, 64, 0.08);
             --transition:    0.3s cubic-bezier(.4,0,.2,1);
         }
 
         /* ── Dark mode overrides ── */
         [data-theme="dark"] {
-            --ink:   #f0ede6;
-            --paper: #10100d;
-            --cream: #18170f;
-            --warm:  #1f1e14;
-            --ink60: rgba(240,237,230,.6);
-            --ink30: rgba(240,237,230,.3);
-            --ink15: rgba(240,237,230,.15);
-            --ink10: rgba(240,237,230,.08);
-            --ink06: rgba(240,237,230,.04);
-            --navbar-bg:     rgba(16,16,13,.88);
-            --glass-border:  rgba(240,237,230,.08);
-            --shadow-card:   0 8px 40px rgba(0,0,0,.35);
+            --ink:   #F1F5F9;
+            --paper: #0E1324;
+            --cream: #070A10;
+            --warm:  #1D2433;
+            --accent: #F97316;
+            --accent2: #38BDF8;
+            --accent3: #34D399;
+            --gold:    #FBBF24;
+            --red:     #F87171;
+            --ink60: rgba(241, 245, 249, 0.6);
+            --ink30: rgba(241, 245, 249, 0.3);
+            --ink15: rgba(241, 245, 249, 0.15);
+            --ink10: rgba(241, 245, 249, 0.08);
+            --ink06: rgba(241, 245, 249, 0.04);
+            --navbar-bg:     rgba(7, 10, 16, 0.88);
+            --glass-border:  rgba(241, 245, 249, 0.08);
+            --shadow-card:   0 8px 40px rgba(0, 0, 0, 0.45);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -385,11 +390,12 @@
         <!-- Desktop Nav -->
         <ul class="navbar-nav">
             <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Vue Générale</a></li>
-            <li><a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Utilisateurs</a></li>
+            <li><a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.index') && !request()->has('role') ? 'active' : '' }}">Utilisateurs</a></li>
+            <li><a href="{{ route('admin.users.index', ['role' => 'student']) }}" class="{{ request()->routeIs('admin.users.index') && request()->get('role') === 'student' ? 'active' : '' }}">Étudiants & Profils</a></li>
+            <li><a href="{{ route('admin.counselors.index') }}" class="{{ request()->routeIs('admin.counselors.*') ? 'active' : '' }}">Candidatures Conseillers</a></li>
             <li><a href="{{ route('admin.contacts.index') }}" class="{{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">Messages</a></li>
-            <li><a href="#">Étudiants & Profils</a></li>
-            <li><a href="#">Statistiques IA</a></li>
-            <li><a href="#">Paramètres</a></li>
+            <li><a href="{{ route('admin.riasec.dashboard') }}" class="{{ request()->routeIs('admin.riasec.*') ? 'active' : '' }}">Statistiques IA</a></li>
+            <li><a href="{{ route('admin.references.index') }}" class="{{ request()->routeIs('admin.references.*') || request()->routeIs('admin.filieres.*') ? 'active' : '' }}">Paramètres</a></li>
         </ul>
 
         <!-- Right controls -->
@@ -436,18 +442,19 @@
             <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
 
             <span class="mobile-section-label">Gestion</span>
-            <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Utilisateurs</a>
+            <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') && !request()->has('role') ? 'active' : '' }}">Utilisateurs</a>
+            <a href="{{ route('admin.counselors.index') }}" class="{{ request()->routeIs('admin.counselors.*') ? 'active' : '' }}">Candidatures Conseillers</a>
             <a href="{{ route('admin.contacts.index') }}" class="{{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">Messages</a>
-            <a href="#">Étudiants & Profils</a>
-            <a href="#">Conseillers</a>
+            <a href="{{ route('admin.users.index', ['role' => 'student']) }}" class="{{ request()->routeIs('admin.users.*') && request()->get('role') === 'student' ? 'active' : '' }}">Étudiants & Profils</a>
 
             <span class="mobile-section-label">Analytique & IA</span>
-            <a href="#">Statistiques Globales</a>
-            <a href="#">Recommandations IA</a>
+            <a href="{{ route('admin.riasec.dashboard') }}" class="{{ request()->routeIs('admin.riasec.dashboard') ? 'active' : '' }}">Statistiques Globales</a>
+            <a href="{{ route('admin.riasec.questions.index') }}" class="{{ request()->routeIs('admin.riasec.questions.*') ? 'active' : '' }}">Banque de Questions</a>
 
             <span class="mobile-section-label">Système</span>
-            <a href="#">Paramètres</a>
-            <a href="#">Logs & Sécurité</a>
+            <a href="{{ route('admin.references.index') }}" class="{{ request()->routeIs('admin.references.*') ? 'active' : '' }}">Paramètres Référentiel</a>
+            <a href="{{ route('admin.filieres.import') }}" class="{{ request()->routeIs('admin.filieres.import') ? 'active' : '' }}">Import des Filières</a>
+            <a href="{{ route('admin.audit.index') }}" class="{{ request()->routeIs('admin.audit.*') ? 'active' : '' }}">Logs & Sécurité</a>
 
             @auth
             <form method="POST" action="{{ route('logout') }}" style="margin-top:auto">

@@ -8,19 +8,19 @@
    NOVA — CapAvenir System
 ════════════════════════════════════════════ */
     .db {
-        --ink: #1E2937;   /* Gris Anthracite (texte principal) */
+        --ink: #1E293B;   /* Gris Anthracite (texte principal) */
         --paper: #FFFFFF;   /* Blanc Pur */
         --cream: #F8FAFC;   /* Blanc Gris Très Clair */
         --warm: #E2E8F0;   /* Gris Froid Moderne */
-        --accent: #FF5E00;   /* Orange Moderne Dynamique */
-        --accent2: #002D6B;   /* Bleu Profond Premium */
-        --accent3: #FF7A1F;   /* Orange Doux Corail */
-        --gold: #FF7A1F;
-        --ink60: rgba(30, 41, 55, .6);
-        --ink30: rgba(30, 41, 55, .3);
-        --ink15: rgba(30, 41, 55, .15);
-        --ink10: rgba(30, 41, 55, .15);
-        --ink06: rgba(30, 41, 55, .06);
+        --accent: #EA580C;   /* Orange Moderne Pro */
+        --accent2: #0A2540;   /* Bleu Profond Obsidian */
+        --accent3: #F97316;   /* Orange Corail Vibrant */
+        --gold: #FBBF24;
+        --ink60: rgba(30, 41, 59, .6);
+        --ink30: rgba(30, 41, 59, .3);
+        --ink15: rgba(30, 41, 59, .15);
+        --ink10: rgba(30, 41, 59, .15);
+        --ink06: rgba(30, 41, 59, .06);
         --r: 6px;
         --rl: 16px;
         --rx: 999px;
@@ -45,15 +45,15 @@
     }
 
     [data-theme="light"] .db {
-        --ink: #1E2937;
+        --ink: #1E293B;
         --paper: #FFFFFF;
         --cream: #F8FAFC;
         --warm: #E2E8F0;
-        --ink60: rgba(30, 41, 55, .6);
-        --ink30: rgba(30, 41, 55, .3);
-        --ink15: rgba(30, 41, 55, .15);
-        --ink10: rgba(30, 41, 55, .15);
-        --ink06: rgba(30, 41, 55, .06);
+        --ink60: rgba(30, 41, 59, .6);
+        --ink30: rgba(30, 41, 59, .3);
+        --ink15: rgba(30, 41, 59, .15);
+        --ink10: rgba(30, 41, 59, .15);
+        --ink06: rgba(30, 41, 59, .06);
     }
 
     .db *,

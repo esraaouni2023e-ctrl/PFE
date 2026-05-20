@@ -107,29 +107,23 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
         Route::post('/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot');
     });
 
-    Route::get('/counselor', [CounselorController::class, 'index'])
-        ->name('counselor.dashboard')
-        ->middleware('role:counselor');
+    // Page d'attente de validation (hors du middleware d'approbation pour éviter les redirections infinies)
+    Route::get('/counselor/pending', [CounselorController::class, 'pending'])
+        ->name('counselor.pending')
+        ->middleware(['auth', 'role:counselor,counselor_pending']);
 
-    Route::get('/counselor/student/{student}', [CounselorController::class, 'showStudent'])
-        ->name('counselor.student.show')
-        ->middleware('role:counselor');
-
-    Route::post('/counselor/student/{student}/update', [CounselorController::class, 'updateProfile'])
-        ->name('counselor.student.update')
-        ->middleware('role:counselor');
-
-    Route::post('/counselor/student/{student}/match', [CounselorController::class, 'approveMatch'])
-        ->name('counselor.student.match')
-        ->middleware('role:counselor');
-
-    Route::post('/counselor/student/{student}/appointments', [CounselorController::class, 'storeAppointment'])
-        ->name('counselor.appointments.store')
-        ->middleware('role:counselor');
-
-    Route::post('/counselor/student/{student}/message', [CounselorController::class, 'sendMessage'])
-        ->name('counselor.student.message')
-        ->middleware('role:counselor');
+    // Routes Conseiller approuvées
+    Route::middleware(['auth', 'role:counselor', 'counselor.approved'])->prefix('counselor')->name('counselor.')->group(function () {
+        Route::get('/', [CounselorController::class, 'index'])->name('dashboard');
+        Route::get('/student/{student}', [CounselorController::class, 'showStudent'])->name('student.show');
+        Route::post('/student/{student}/update', [CounselorController::class, 'updateProfile'])->name('student.update');
+        Route::post('/student/{student}/match', [CounselorController::class, 'approveMatch'])->name('student.match');
+        Route::post('/student/{student}/appointments', [CounselorController::class, 'storeAppointment'])->name('appointments.store');
+        Route::post('/student/{student}/message', [CounselorController::class, 'sendMessage'])->name('student.message');
+        Route::get('/students', [CounselorController::class, 'students'])->name('students');
+        Route::get('/agenda', [CounselorController::class, 'agenda'])->name('agenda');
+        Route::get('/resources', [CounselorController::class, 'resources'])->name('resources');
+    });
 
     // ── Messagerie Interne ──
     Route::get('/messages', [\App\Http\Controllers\UserMessageController::class, 'index'])->name('messages.index');
@@ -152,6 +146,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/users/promote/{user}', [UserController::class, 'promote'])->name('users.promote');
     Route::post('/users/demote/{user}', [UserController::class, 'demote'])->name('users.demote');
     Route::post('/users/block/{user}', [UserController::class, 'toggleBlock'])->name('users.block');
+
+    // Validation des Conseillers
+    Route::get('/counselors', [\App\Http\Controllers\Admin\AdminCounselorController::class, 'index'])->name('counselors.index');
+    Route::post('/counselors/approve/{user}', [\App\Http\Controllers\Admin\AdminCounselorController::class, 'approve'])->name('counselors.approve');
+    Route::post('/counselors/reject/{user}', [\App\Http\Controllers\Admin\AdminCounselorController::class, 'reject'])->name('counselors.reject');
 
     // References
     Route::get('/references', [\App\Http\Controllers\Admin\ReferenceController::class, 'index'])->name('references.index');

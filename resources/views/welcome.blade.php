@@ -15,17 +15,17 @@
   <style>
     /* ── TOKENS ── */
     :root {
-      --ink: #0b0c10;
-      --paper: #f7f5f0;
-      --cream: #ede9e1;
-      --warm: #e8e1d4;
-      --accent: #FF6A00;
-      --accent2: #0057B8;
-      --accent3: #4a7c59;
-      --gold: #FF8C1A;
-      --ink60: rgba(11, 12, 16, .6);
-      --ink30: rgba(11, 12, 16, .3);
-      --ink10: rgba(11, 12, 16, .1);
+      --ink: #0F172A;
+      --paper: #FFFFFF;
+      --cream: #F8FAFC;
+      --warm: #F1F5F9;
+      --accent: #EA580C;
+      --accent2: #0A2540;
+      --accent3: #10B981;
+      --gold: #F97316;
+      --ink60: rgba(15, 23, 42, .6);
+      --ink30: rgba(15, 23, 42, .3);
+      --ink10: rgba(15, 23, 42, .08);
       --r: 6px;
       --rl: 16px;
       --rx: 999px;
@@ -33,13 +33,13 @@
     }
 
     [data-theme="dark"] {
-      --ink: #f0ede6;
-      --paper: #10100d;
-      --cream: #18170f;
-      --warm: #1f1e14;
-      --ink60: rgba(240, 237, 230, .6);
-      --ink30: rgba(240, 237, 230, .3);
-      --ink10: rgba(240, 237, 230, .08);
+      --ink: #F8FAFC;
+      --paper: #0A0F1D;
+      --cream: #111827;
+      --warm: #1F2937;
+      --ink60: rgba(248, 250, 252, .6);
+      --ink30: rgba(248, 250, 252, .3);
+      --ink10: rgba(248, 250, 252, .08);
     }
 
     /* ── RESET ── */

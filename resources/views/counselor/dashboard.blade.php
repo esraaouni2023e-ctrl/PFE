@@ -554,16 +554,16 @@
     {{-- ═══ TABS NAV ═══ --}}
     <div class="cd-tabs-nav rev">
         <button class="cd-tab-btn active" data-tab="general">
-            💼 Centre Stratégique
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg> Centre Stratégique
         </button>
         <button class="cd-tab-btn" data-tab="directory">
-            👥 Répertoire Étudiants
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Répertoire Étudiants
         </button>
         <button class="cd-tab-btn" data-tab="benchmark">
-            🌍 Benchmark International (Axe 9)
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> Benchmark International (Axe 9)
         </button>
         <button class="cd-tab-btn" data-tab="reporting">
-            📈 Rapports Institutionnels (Axe 7)
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Rapports Institutionnels (Axe 7)
         </button>
     </div>
 
@@ -578,7 +578,7 @@
             <div class="glass-card cd-kpi">
                 <div class="cd-kpi-head">
                     <span class="cd-kpi-label">Étudiants Suivis</span>
-                    <div class="cd-kpi-icon">👥</div>
+                    <div class="cd-kpi-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
                 </div>
                 <div class="cd-kpi-val">{{ $students->count() }}</div>
                 <p class="cd-kpi-sub">
@@ -595,7 +595,7 @@
             <div class="glass-card cd-kpi">
                 <div class="cd-kpi-head">
                     <span class="cd-kpi-label">Dossiers Clôturés</span>
-                    <div class="cd-kpi-icon" style="color:var(--accent3); background:rgba(16,185,129,0.1)">✓</div>
+                    <div class="cd-kpi-icon" style="color:var(--accent3); background:rgba(16,185,129,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
                 </div>
                 <div class="cd-kpi-val">{{ $completedCount }}</div>
                 <p class="cd-kpi-sub">
@@ -607,7 +607,7 @@
             <div class="glass-card cd-kpi">
                 <div class="cd-kpi-head">
                     <span class="cd-kpi-label">Taux de Succès</span>
-                    <div class="cd-kpi-icon" style="color:var(--gold); background:rgba(255,140,26,0.1)">📈</div>
+                    <div class="cd-kpi-icon" style="color:var(--gold); background:rgba(255,140,26,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
                 </div>
                 <div class="cd-kpi-val">{{ $kpis['success_rate'] }}<sup>%</sup></div>
                 <p class="cd-kpi-sub">
@@ -619,7 +619,7 @@
             <div class="glass-card cd-kpi">
                 <div class="cd-kpi-head">
                     <span class="cd-kpi-label">Cas Prioritaires</span>
-                    <div class="cd-kpi-icon" style="color:#ef4444; background:rgba(239,68,68,0.1)">🚨</div>
+                    <div class="cd-kpi-icon" style="color:#ef4444; background:rgba(239,68,68,0.1)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></div>
                 </div>
                 <div class="cd-kpi-val" style="color:#ef4444;">{{ $students->filter(fn($s) => ($s->profile->ai_score ?? rand(55,95)) < 65)->count() }}</div>
                 <p class="cd-kpi-sub">
@@ -646,7 +646,7 @@
                                 </div>
                                 <p class="cd-alert-desc">"{{ $insight['explanation'] }}"</p>
                                 <div class="cd-alert-action">
-                                    <span>➔ Action recommandée : <strong>{{ $insight['action'] }}</strong></span>
+                                    <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> Action recommandée : <strong>{{ $insight['action'] }}</strong></span>
                                 </div>
                             </div>
                         </div>
@@ -745,17 +745,17 @@
 
                             <div class="cd-stud-meta-grid">
                                 <div class="cd-stud-meta-item">
-                                    <span>🗓</span> Inscrit le {{ $student->created_at->format('d/m/Y') }}
+                                    <span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></span> Inscrit le {{ $student->created_at->format('d/m/Y') }}
                                 </div>
                                 <div class="cd-stud-meta-item">
-                                    <span>💡</span> {{ $student->careerRoadmaps->count() }} Pistes
+                                    <span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span> {{ $student->careerRoadmaps->count() }} Pistes
                                 </div>
                             </div>
                         </div>
                         <div class="cd-stud-card-footer">
                             <span class="cd-stud-status {{ $status }}">{{ $status === 'completed' ? 'Certifié' : ($status === 'ongoing' ? 'Suivi actif' : 'En attente') }}</span>
                             @if($aiRisk)
-                                <span style="font-size: .65rem; font-weight:700; color:#ef4444; display:flex; align-items:center; gap:.2rem;">⚠️ Alerte Risque</span>
+                                <span style="font-size: .65rem; font-weight:700; color:#ef4444; display:flex; align-items:center; gap:.2rem;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg> Alerte Risque</span>
                             @endif
                             <a href="{{ route('counselor.student.show', $student) }}" class="cd-stud-link">Ouvrir le CRM →</a>
                         </div>
@@ -911,7 +911,7 @@
                     <div class="cd-report-options">
                         <div class="cd-report-card selected" data-report="pdf-premium">
                             <div>
-                                <span style="font-size: 1.5rem;">💎</span>
+                                <span style="font-size: 1.5rem; display:flex;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg></span>
                                 <div class="cd-report-card-title" style="margin-top: .5rem;">Bilan Cohorte PDF Premium</div>
                                 <div class="cd-report-card-desc">Rapport d'excellence consolidant les trajectoires de réussite, les risques d'incompatibilité et les recommandations de réorientation IA.</div>
                             </div>
@@ -919,7 +919,7 @@
 
                         <div class="cd-report-card" data-report="regional">
                             <div>
-                                <span style="font-size: 1.5rem;">🗺️</span>
+                                <span style="font-size: 1.5rem; display:flex;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" x2="8" y1="2" y2="18"/><line x1="16" x2="16" y1="6" y2="22"/></svg></span>
                                 <div class="cd-report-card-title" style="margin-top: .5rem;">Rapports Régionaux</div>
                                 <div class="cd-report-card-desc">Analyse démographique des flux d'orientation post-bac et adéquation universitaire par gouvernorat (Tunisie).</div>
                             </div>
@@ -927,7 +927,7 @@
 
                         <div class="cd-report-card" data-report="counselor">
                             <div>
-                                <span style="font-size: 1.5rem;">🏆</span>
+                                <span style="font-size: 1.5rem; display:flex;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></span>
                                 <div class="cd-report-card-title" style="margin-top: .5rem;">Performance Conseiller</div>
                                 <div class="cd-report-card-desc">Indicateurs de satisfaction, temps moyen d'accompagnement par fiche CRM et taux d'efficacité des interventions.</div>
                             </div>
@@ -935,7 +935,7 @@
 
                         <div class="cd-report-card" data-report="audit">
                             <div>
-                                <span style="font-size: 1.5rem;">🔒</span>
+                                <span style="font-size: 1.5rem; display:flex;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
                                 <div class="cd-report-card-title" style="margin-top: .5rem;">Registre d'Audit Qualité</div>
                                 <div class="cd-report-card-desc">Registre d'homologation des modifications de trajectoires, conformité avec le RGPD et historique des décisions.</div>
                             </div>
@@ -954,9 +954,9 @@
                             <div>
                                 <label style="display:block; font-size:.78rem; font-weight:700; color:var(--ink60); margin-bottom:.5rem;">Format d'exportation cible</label>
                                 <select id="exportFormat" style="width:100%; padding:.7rem; border-radius:var(--r); border:1px solid var(--ink10); background:var(--paper); color:var(--ink); font-family:var(--font-main); font-weight:600; cursor:pointer;">
-                                    <option value="pdf">📄 Fichier PDF Haute Résolution (.pdf)</option>
-                                    <option value="excel">📊 Tableur Microsoft Excel (.xlsx)</option>
-                                    <option value="dashboard">💻 Dashboard Interactif Exportable (.json)</option>
+                                    <option value="pdf">Fichier PDF Haute Résolution (.pdf)</option>
+                                    <option value="excel">Tableur Microsoft Excel (.xlsx)</option>
+                                    <option value="dashboard">Dashboard Interactif Exportable (.json)</option>
                                 </select>
                             </div>
 
@@ -970,7 +970,7 @@
                     <div>
                         <div style="display:flex; gap:1rem; align-items:center;">
                             <button class="cd-btn-export cd-btn-export-primary" id="btnExportSubmit" style="flex:1;">
-                                📥 Exporter le Rapport
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Exporter le Rapport
                             </button>
                             <div class="export-loader" id="exportLoader">
                                 <span class="spinner"></span> Génération...
@@ -1069,7 +1069,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 labels: ['Certifiés (Clôturés)', 'Suivi actif', 'En attente'],
                 datasets: [{
                     data: [{{ $completedCount }}, {{ $ongoingCount }}, {{ $pendingCount }}],
-                    backgroundColor: ['#10b981', '#0057B8', isDark ? 'rgba(240,237,230,.15)' : 'rgba(10,25,47,.12)'],
+                    backgroundColor: ['#10b981', isDark ? '#38bdf8' : '#0a2540', isDark ? 'rgba(240,237,230,.15)' : 'rgba(10,25,47,.12)'],
                     borderWidth: 0
                 }]
             },
@@ -1104,7 +1104,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     label: 'Pourcentage (%)',
                     data: cohortData,
-                    backgroundColor: ['#0057B8', '#10b981', '#FF8C1A', '#FF6A00', '#4a7c59', 'rgba(10,25,47,.25)'],
+                    backgroundColor: [isDark ? '#38bdf8' : '#0a2540', '#10b981', '#F59E0B', '#EA580C', '#8B5CF6', isDark ? 'rgba(240,237,230,.25)' : 'rgba(10,25,47,.25)'],
                     borderWidth: 0,
                     borderRadius: 4
                 }]

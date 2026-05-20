@@ -11,19 +11,19 @@
    DESIGN TOKENS — CapAvenir System
 ════════════════════════════════════════════ */
 .db {
-    --ink:     #1E2937;   /* Gris Anthracite (texte principal) */
+    --ink:     #1E293B;   /* Gris Anthracite (texte principal) */
     --paper:   #FFFFFF;   /* Blanc Pur */
     --cream:   #F8FAFC;   /* Blanc Gris Très Clair */
     --warm:    #E2E8F0;   /* Gris Froid Moderne */
-    --accent:  #FF5E00;   /* Orange Moderne Dynamique */
-    --accent2: #002D6B;   /* Bleu Profond Premium */
-    --accent3: #FF7A1F;   /* Orange Doux Corail */
-    --gold:    #FF7A1F;
-    --ink60:   rgba(30, 41, 55, 0.6);
-    --ink30:   rgba(30, 41, 55, 0.3);
-    --ink15:   rgba(30, 41, 55, 0.15);
-    --ink10:   rgba(30, 41, 55, 0.1);
-    --ink06:   rgba(30, 41, 55, 0.06);
+    --accent:  #EA580C;   /* Orange Moderne Pro */
+    --accent2: #0A2540;   /* Bleu Profond Obsidian */
+    --accent3: #F97316;   /* Orange Corail Vibrant */
+    --gold:    #FBBF24;
+    --ink60:   rgba(30, 41, 59, 0.6);
+    --ink30:   rgba(30, 41, 59, 0.3);
+    --ink15:   rgba(30, 41, 59, 0.15);
+    --ink10:   rgba(30, 41, 59, 0.1);
+    --ink06:   rgba(30, 41, 59, 0.06);
     --r:       6px;
     --rl:      16px;
     --rx:      999px;
@@ -37,7 +37,7 @@
 
 /* Dark mode */
 [data-theme="dark"]  .db { --ink:#F1F5F9;--paper:#1E293B;--cream:#0F172A;--warm:#334155;--ink60:rgba(241,245,249,.6);--ink30:rgba(241,245,249,.3);--ink15:rgba(241,245,249,.15);--ink10:rgba(241,245,249,.08);--ink06:rgba(241,245,249,.04); }
-[data-theme="light"] .db { --ink:#1E2937;--paper:#FFFFFF;--cream:#F8FAFC;--warm:#E2E8F0;--ink60:rgba(30, 41, 55, 0.6);--ink30:rgba(30, 41, 55, 0.3);--ink15:rgba(30, 41, 55, 0.15);--ink10:rgba(30, 41, 55, 0.1);--ink06:rgba(30, 41, 55, 0.06); }
+[data-theme="light"] .db { --ink:#1E293B;--paper:#FFFFFF;--cream:#F8FAFC;--warm:#E2E8F0;--ink60:rgba(30, 41, 59, 0.6);--ink30:rgba(30, 41, 59, 0.3);--ink15:rgba(30, 41, 59, 0.15);--ink10:rgba(30, 41, 59, 0.1);--ink06:rgba(30, 41, 59, 0.06); }
 
 .db *, .db *::before, .db *::after { box-sizing: border-box; margin: 0; padding: 0; }
 .db a { color: inherit; text-decoration: none; }
@@ -560,8 +560,8 @@
                 <svg width="200" height="200" viewBox="0 0 200 200">
                     <defs>
                         <linearGradient id="dbRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#FF6A00"/>
-                            <stop offset="100%" stop-color="#0057B8"/>
+                            <stop offset="0%" stop-color="#EA580C"/>
+                            <stop offset="100%" stop-color="#0A2540"/>
                         </linearGradient>
                     </defs>
                     <circle cx="100" cy="100" r="86" fill="none" stroke-width="8"
@@ -822,10 +822,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     label: 'Ton profil',
                     data: {!! json_encode($radarData) !!},
-                    backgroundColor: 'color-mix(in srgb, #FF6A00 12%, transparent)',
-                    borderColor: '#FF6A00',
+                    backgroundColor: 'color-mix(in srgb, #EA580C 12%, transparent)',
+                    borderColor: '#EA580C',
                     borderWidth: 2,
-                    pointBackgroundColor: '#FF6A00',
+                    pointBackgroundColor: '#EA580C',
                     pointBorderColor: isDark ? '#10100d' : '#f7f5f0',
                     pointBorderWidth: 2,
                     pointRadius: 5,

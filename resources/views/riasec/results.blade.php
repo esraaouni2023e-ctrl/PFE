@@ -133,8 +133,8 @@
     {{-- ── Trigram ── --}}
     @php
     $triColors = [
-        'R'=>'#FF6A00','I'=>'#0057B8','A'=>'#FF8C1A',
-        'S'=>'#003B8E','E'=>'#7c4a7c','C'=>'#4a6e6e'
+        'R'=>'#EA580C','I'=>'#2563EB','A'=>'#F59E0B',
+        'S'=>'#10B981','E'=>'#8B5CF6','C'=>'#0D9488'
     ];
     $letters = str_split($profil->code_holland);
     @endphp
@@ -179,7 +179,7 @@
         <div class="res-card">
             <p class="res-card-title">Scores par dimension</p>
             @php
-            $barColors = ['R'=>'#FF6A00','I'=>'#0057B8','A'=>'#FF8C1A','S'=>'#003B8E','E'=>'#7c4a7c','C'=>'#4a6e6e'];
+            $barColors = ['R'=>'#EA580C','I'=>'#2563EB','A'=>'#F59E0B','S'=>'#10B981','E'=>'#8B5CF6','C'=>'#0D9488'];
             $dimLabels = ['R'=>'Réaliste','I'=>'Investigateur','A'=>'Artistique','S'=>'Social','E'=>'Entreprenant','C'=>'Conventionnel'];
             $dimIcon  = [
                 'R'=>'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
@@ -329,10 +329,10 @@ new Chart(document.getElementById('radarChart'), {
         datasets: [{
             data: [{{ $scoresSorted['R']??0 }},{{ $scoresSorted['I']??0 }},{{ $scoresSorted['A']??0 }},
                    {{ $scoresSorted['S']??0 }},{{ $scoresSorted['E']??0 }},{{ $scoresSorted['C']??0 }}],
-            backgroundColor: 'rgba(255,106,0,.12)',
-            borderColor: 'rgba(255,106,0,.75)',
+            backgroundColor: 'rgba(234,88,12,.12)',
+            borderColor: 'rgba(234,88,12,.75)',
             borderWidth: 2,
-            pointBackgroundColor: ['#FF6A00','#0057B8','#FF8C1A','#003B8E','#7c4a7c','#4a6e6e'],
+            pointBackgroundColor: ['#EA580C','#2563EB','#F59E0B','#10B981','#8B5CF6','#0D9488'],
             pointRadius: 5,
         }]
     },

@@ -37,8 +37,8 @@
             z-index: -1;
             animation: pulse 10s infinite alternate;
         }
-        .glow-1 { top: -10%; right: -5%; background: #0057B8; }
-        .glow-2 { bottom: -10%; left: -5%; background: #FF6A00; }
+        .glow-1 { top: -10%; right: -5%; background: #0A2540; }
+        .glow-2 { bottom: -10%; left: -5%; background: #EA580C; }
 
         @keyframes pulse {
             from { transform: scale(1); opacity: 0.1; }
@@ -64,7 +64,7 @@
         }
 
         .auth-visual {
-            background: linear-gradient(135deg, rgba(0, 87, 184, 0.1), rgba(255, 106, 0, 0.05));
+            background: linear-gradient(135deg, rgba(10, 37, 64, 0.1), rgba(234, 88, 12, 0.05));
             padding: 4rem;
             display: flex;
             flex-direction: column;
@@ -79,7 +79,7 @@
         }
 
         .input-2026 {
-            @apply w-full bg-white/5 border border-white/10 rounded-[12px] px-4 py-3 text-sm transition-all focus:border-[#0057B8] focus:ring-1 focus:ring-[#0057B8] outline-none;
+            @apply w-full bg-white/5 border border-white/10 rounded-[12px] px-4 py-3 text-sm transition-all focus:border-[#EA580C] focus:ring-1 focus:ring-[#EA580C] outline-none;
         }
 
         @media (max-width: 768px) {
