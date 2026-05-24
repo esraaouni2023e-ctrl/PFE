@@ -1,0 +1,549 @@
+% @Author: Takwa Ben Aïcha Gader
+% @Date:   2026-02-20
+% @Last Modified by:   Takwa Ben Aïcha Gader
+% @Last Modified time: 2026-05-24
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPITRE 2 : ANALYSE ET CONCEPTION DU SYSTÈME    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Analyse et Conception du Système}
+\label{chap:analyse_conception}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+Le présent chapitre constitue la passerelle méthodologique essentielle entre l'expression brute des exigences fonctionnelles et leur traduction concrète sous forme d'architecture logicielle modulaire et évolutive. Son objectif fondamental est de formaliser les fondements structurels et dynamiques de la plateforme \textbf{CapAvenir} à travers une démarche de modélisation unifiée (UML) rigoureuse. 
+
+Cette analyse s'articule autour de trois dimensions complémentaires et indispensables à la compréhension globale du système :
+\begin{itemize}
+    \item \textbf{La modélisation fonctionnelle}, qui délimite la portée opérationnelle du système en détaillant l'ensemble des cas d'utilisation pour chaque acteur (Étudiant, Conseiller, Administrateur) et en explicitant les scénarios nominaux et d'exception des processus cardinaux ;
+    \item \textbf{La modélisation structurelle}, qui capture l'architecture de données statique et les relations logiques liant les entités fondamentales du domaine, préfigurant ainsi le schéma relationnel de la base de données et les modèles Eloquent de l'application Laravel ;
+    \item \textbf{La modélisation dynamique}, qui retrace la chronologie fine des échanges de messages entre les composants du système lors de l'exécution des cas d'utilisation critiques, notamment le test adaptatif (CAT IRT-2PL) et le moteur de recommandation hybride (SIAEPI v5.0).
+\end{itemize}
+
+Cette triple perspective garantit la robustesse, la flexibilité et la maintenabilité de la plateforme, tout en s'assurant d'un alignement parfait avec les exigences ministérielles d'orientation scolaire en Tunisie (seuils SDO et Score FG).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Modélisation fonctionnelle}
+\label{sec:modelisation_fonctionnelle}
+
+La modélisation fonctionnelle sert à définir de manière formelle et non ambiguë les limites opérationnelles du système et le rôle de chacun de ses acteurs. Elle garantit que les choix techniques ultérieurs soient guidés et justifiés par les besoins réels des utilisateurs.
+
+\subsection{Diagramme de cas d'utilisation global}
+Le diagramme de cas d'utilisation global synthétise les interactions clés entre les trois acteurs principaux — l'Étudiant (bénéficiaire du parcours d'orientation), le Conseiller (expert accompagnateur) et l'Administrateur (gestionnaire de la gouvernance) — et les services cardinaux de la plateforme. Les services sont regroupés en trois grands modules stratégiques : le pipeline d'orientation intelligent, le module de communication et de coaching, et enfin l'administration système.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/diagramme de cas d'utilisation -Page-1.drawio (3).png}
+\caption{Diagramme de cas d'utilisation global de la plateforme CapAvenir}
+\label{fig:diagramme_cas_utilisation_global}
+\end{figure} 
+
+Ce diagramme met en relief les frontières fonctionnelles du système, illustrant la manière dont les fonctionnalités algorithmiques avancées s'articulent avec les tâches d'accompagnement humain et de pilotage technique.
+
+\subsection{Cas d'utilisation par acteur}
+
+Chaque rôle utilisateur bénéficie d'un périmètre d'action strictement défini par des règles d'habilitation. Cette section présente d'abord une synthèse des cas d'utilisation sous forme de tableaux récapitulatifs, puis détaille de manière rigoureuse les cas d'utilisation clés et novateurs de chaque acteur.
+
+%% --- Définitions de style pour tableaux des Cas d'Utilisation ---
+\definecolor{headercolor}{RGB}{30, 80, 160}
+\definecolor{rowgray}{RGB}{240, 240, 245}
+\definecolor{bordergray}{RGB}{210, 215, 223}
+
+% Ajustement des colonnes pour un rendu optimal sans débordement
+\newcolumntype{L}{>{\raggedright\arraybackslash\bfseries\color{headercolor}}p{3.8cm}}
+\newcolumntype{R}{>{\raggedright\arraybackslash}p{11.2cm}}
+
+% --- 2.2.1 L'Étudiant ---
+\subsubsection{L'Étudiant}
+
+L'étudiant est au centre de l'expérience proposée par \textbf{CapAvenir}. Son parcours vise à lui fournir une orientation éclairée et scientifiquement validée par l'intelligence artificielle et l'expertise des conseillers.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/Diagramme de cas d'utilisation etudiant.pdf}
+\caption{Diagramme de cas d'utilisation de l'acteur Étudiant}
+\label{fig:diagramme_cas_utilisation_etudiant}
+\end{figure} 
+
+Le tableau~\ref{tab:synthese_uc_etudiant} synthétise l'ensemble des cas d'utilisation associés à l'acteur Étudiant, avant de détailler les trois processus clés qui forment le cœur innovant de son parcours.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{4cm}|p{8.5cm}|}
+\hline
+\rowcolor{headercolor}\textcolor{white}{\textbf{ID}} & \textcolor{white}{\textbf{Nom du cas d'utilisation}} & \textcolor{white}{\textbf{Description succincte}} \\
+\hline
+UC-E01 & S'authentifier (2FA OTP) & Connexion sécurisée de l'étudiant via un code OTP envoyé par courriel. \\
+\hline
+UC-E02 & Suivre le pipeline d'orientation unifié & Parcours guidé pas à pas : notes du BAC $\rightarrow$ test CAT $\rightarrow$ recommandations. \\
+\hline
+UC-E03 & Passer le test d'orientation intelligent & \textbf{Évaluation adaptative CAT IRT-2PL (Détaillée ci-après).} \\
+\hline
+UC-E04 & Consulter les recommandations & \textbf{Matching de filières universitaires SIAEPI v5.0 (Détaillée ci-après).} \\
+\hline
+UC-E05 & Gérer son profil académique & Saisie de la section du BAC tunisien et des notes pour le calcul du Score FG. \\
+\hline
+UC-E06 & Utiliser le comparateur de filières & Comparaison multicritère de 3 filières (seuils SDO, employabilité, RIASEC). \\
+\hline
+UC-E07 & Créer et gérer ses CV & Outil WYSIWYG de création et édition de CV avec export PDF et Word. \\
+\hline
+UC-E08 & Générer sa roadmap de carrière & \textbf{Itinéraire professionnel structuré par IA Gemini (Détaillée ci-après).} \\
+\hline
+UC-E09 & Utiliser le simulateur What-If & Simulation de notes hypothétiques pour analyser l'impact sur les seuils SDO. \\
+\hline
+UC-E10 & Interagir avec le chatbot Nova & Dialogue en langage naturel (RAG Gemini/Ollama) pour l'aide à l'orientation. \\
+\hline
+UC-E11 & Communiquer via la messagerie & Messagerie directe bidirectionnelle avec le conseiller d'orientation assigné. \\
+\hline
+\end{tabular}
+\caption{Synthèse des cas d'utilisation de l'acteur Étudiant}
+\label{tab:synthese_uc_etudiant}
+\end{table}
+
+\vspace{1em}
+
+\subsubsection*{Cas d'utilisation « Passer le test d'orientation intelligent (UC-E03) »}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{headercolor}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}ID de l'UC & UC-E03 \\
+\hline
+Nom du Cas & Passer le test d'orientation adaptatif (CAT IRT-2PL) \\
+\hline
+\rowcolor{rowgray}Acteur Principal & Étudiant \\
+\hline
+Préconditions & Session de test active générée au sein du pipeline d'orientation. \\
+\hline
+\rowcolor{rowgray}Postconditions & Profil RIASEC à 6 dimensions et aptitudes GATB enregistrés dans \texttt{ProfileRiasec} avec indicateurs comportementaux. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant accède au module d'évaluation interactive.
+  \item Le moteur adaptatif \texttt{AdaptiveTestEngine} sélectionne dynamiquement la question suivante du questionnaire selon la Théorie de Réponse aux Items (modèle IRT 2PL, paramètres de discrimination $a$ et de difficulté $b$).
+  \item L'étudiant répond à l'item selon le format approprié à la dimension évaluée : échelle de Likert (1 à 5) pour les dimensions RIASEC et Big Five, ou item à choix unique chronométré pour les aptitudes cognitives GATB.
+  \item Le service \texttt{BehavioralAnalyzer} évalue la cohérence de réponse et le temps de traitement de l'étudiant en temps réel.
+  \item Le système met à jour dynamiquement l'estimateur de capacité psychométrique ($\theta$) par la méthode itérative de Newton-Raphson.
+  \item Les étapes 2 à 5 se répètent jusqu'à ce que le critère d'arrêt précoce (\textit{Early Stopping}) soit atteint (erreur de mesure standard SEM $< 0{,}15$).
+  \item Le système compile et stocke le profil psychologique complet.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item \textbf{Comportement suspect :} Si le système détecte des réponses excessivement rapides (temps $<$ 1,5\,s par item) ou des patterns contradictoires, il active un indicateur d'anomalie (\texttt{fraud\_flag}), ajuste l'indice de fiabilité générale et notifie le conseiller.
+  \item \textbf{Interruption de l'évaluation :} L'état courant du test est figé et stocké en session pour permettre une reprise sans perte de données.
+\end{itemize} \\
+\hline
+\end{tabular}
+
+\vspace{1.5em}
+
+\subsubsection*{Cas d'utilisation « Consulter les recommandations personnalisées (UC-E04) »}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{headercolor}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}ID de l'UC & UC-E04 \\
+\hline
+Nom du Cas & Consulter les recommandations de filières (SIAEPI v5.0) \\
+\hline
+\rowcolor{rowgray}Acteur Principal & Étudiant \\
+\hline
+Préconditions & Données scolaires acquises (Score FG calculé) et test psychométrique complété avec succès. \\
+\hline
+\rowcolor{rowgray}Postconditions & Restitution visuelle et interactive du Top-12 des filières d'études optimales au sens de Pareto. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant accède à l'interface « Recommandations ».
+  \item Le moteur \texttt{SiaepiRecommendationEngine} extrait le profil RIASEC, les aptitudes GATB et les données scolaires du profil de l'utilisateur.
+  \item Le système applique un ensemble de filtres d'exclusion stricts (sections de Baccalauréat autorisées et seuils SDO).
+  \item Le moteur de matching estime le score de compatibilité pondéré (sur quatre axes : Vocationnel, Académique, Employabilité et Accessibilité).
+  \item Le système effectue une optimisation multicritère (front de Pareto) pour isoler les orientations maximisant la satisfaction professionnelle et la probabilité de réussite.
+  \item Le catalogue des 12 filières recommandées s'affiche à l'étudiant avec une Gap Analysis détaillée des compétences.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item \textbf{Absence de données académiques} : Le système interrompt le processus et redirige l'étudiant vers le formulaire de saisie de notes.
+  \item \textbf{Filtrage total des filières} : Si aucune formation ne remplit les critères d'accès, le système formule des orientations alternatives adaptées et propose la planification immédiate d'un rendez-vous avec un conseiller.
+\end{itemize} \\
+\hline
+\end{tabular}
+
+\vspace{1.5em}
+
+\subsubsection*{Cas d'utilisation « Générer sa roadmap de carrière (UC-E08) »}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{headercolor}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}ID de l'UC & UC-E08 \\
+\hline
+Nom du Cas & Générer sa roadmap de carrière (IA Gemini) \\
+\hline
+\rowcolor{rowgray}Acteur Principal & Étudiant \\
+\hline
+Préconditions & Profil psychométrique actif et filières d'orientation prioritaires définies. \\
+\hline
+\rowcolor{rowgray}Postconditions & Feuille de route chronologique modélisée et archivée dans \texttt{career\_roadmaps}. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'étudiant clique sur le bouton « Générer ma Roadmap ».
+  \item Le système extrait les données consolidées de son profil (RIASEC, GATB, notes et projet cible).
+  \item Le service \texttt{NovaOrientationService} orchestre un prompt enrichi et le transmet via une requête sécurisée à l'API Gemini.
+  \item L'intelligence artificielle élabore un itinéraire d'orientation structuré (étapes d'études académiques, compétences techniques à développer, certifications clés, opportunités professionnelles).
+  \item Le système enregistre l'itinéraire et restitue une frise temporelle interactive.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item \textbf{Indisponibilité de l'API Gemini :} Le service \texttt{OllamaService} prend le relais et génère un plan d'action de secours basé sur les modèles pré-configurés de la filière prioritaire numéro 1.
+\end{itemize} \\
+\hline
+\end{tabular}
+
+\vspace{2.5em}
+
+% --- 2.2.2 Le Conseiller d'Orientation ---
+\subsubsection{Le Conseiller d'Orientation}
+
+Le conseiller d'orientation utilise le système comme un outil CRM avancé de suivi pédagogique. Son interface privilégie l'accès aux données analytiques individuelles et collectives pour maximiser l'accompagnement humain.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/Diagramme de cas d'utilisation conseiller.drawio.png}
+\caption{Diagramme de cas d'utilisation de l'acteur Conseiller}
+\label{fig:diagramme_cas_utilisation_conseiller}
+\end{figure} 
+
+Le tableau~\ref{tab:synthese_uc_conseiller} regroupe les cas d'utilisation de l'acteur Conseiller, suivi de la spécification détaillée du cas d'évaluation clinique.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{4.5cm}|p{8cm}|}
+\hline
+\rowcolor{headercolor}\textcolor{white}{\textbf{ID}} & \textcolor{white}{\textbf{Nom du cas d'utilisation}} & \textcolor{white}{\textbf{Description succincte}} \\
+\hline
+UC-C01 & Consulter les profils assignés & Tableau de bord CRM de la cohorte avec indicateurs de progression et alertes. \\
+\hline
+UC-C02 & Analyser les recommandations & \textbf{Examen clinique du profil prédictif et des écarts (Détaillée ci-après).} \\
+\hline
+UC-C03 & Gérer les observations et plans & Rédaction des bilans de coaching et définition des compétences ciblées. \\
+\hline
+UC-C04 & Gérer les rendez-vous & Planification et notification d'entretiens via l'agenda partagé. \\
+\hline
+UC-C05 & Valider une décision d'orientation & Homologation officielle de la trajectoire avec note de motivation requise. \\
+\hline
+UC-C06 & Communiquer via la messagerie & Envoi de messages directs ou de modèles de relance aux étudiants suivis. \\
+\hline
+\end{tabular}
+\caption{Synthèse des cas d'utilisation de l'acteur Conseiller}
+\label{tab:synthese_uc_conseiller}
+\end{table}
+
+\vspace{1em}
+
+\subsubsection*{Cas d'utilisation « Analyser les recommandations et le profil prédictif (UC-C02) »}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{headercolor}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}ID de l'UC & UC-C02 \\
+\hline
+Nom du Cas & Analyser les recommandations et le profil prédictif \\
+\hline
+\rowcolor{rowgray}Acteur Principal & Conseiller d'orientation \\
+\hline
+Préconditions & Dossier individuel d'un étudiant chargé à l'écran. \\
+\hline
+\rowcolor{rowgray}Postconditions & Recommandations analysées et plan de suivi validé par le conseiller. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item Le conseiller accède à la section analytique d'orientation de l'étudiant sélectionné.
+  \item Le système affiche le classement des filières suggérées par le moteur de recommandation SIAEPI, l'analyse des écarts (Gap Analysis) et les estimations de réussite universitaire associées.
+  \item Le système propose une synthèse de diagnostic d'orientation rédigée automatiquement par l'IA pour étayer son analyse.
+  \item Le conseiller examine ces indicateurs afin de préparer son entretien d'orientation.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item \textbf{Drapeau de test suspect actif} : Le système affiche un bandeau rouge d'avertissement préconisant au conseiller d'invalider le test en ligne et de replanifier une session d'évaluation surveillée.
+\end{itemize} \\
+\hline
+\end{tabular}
+
+\vspace{2.5em}
+
+% --- 2.2.3 L'Administrateur ---
+\subsubsection{L'Administrateur}
+
+L'administrateur veille à la gouvernance globale de \textbf{CapAvenir}. Il pilote les référentiels académiques officiels tunisiens, gère les habilitations et audite l'ensemble des événements de sécurité.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/Diagramme de cas d'utilisation admin.drawio.png}
+\caption{Diagramme de cas d'utilisation de l'acteur Administrateur}
+\label{fig:diagramme_cas_utilisation_admin}
+\end{figure} 
+
+Le tableau~\ref{tab:synthese_uc_admin} résume les tâches de l'administrateur, suivies de ses deux cas d'utilisation les plus stratégiques.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{4.5cm}|p{8cm}|}
+\hline
+\rowcolor{headercolor}\textcolor{white}{\textbf{ID}} & \textcolor{white}{\textbf{Nom du cas d'utilisation}} & \textcolor{white}{\textbf{Description succincte}} \\
+\hline
+UC-A01 & Consulter les statistiques globales & KPIs d'activité de la plateforme, rapports de fraude, performances serveur. \\
+\hline
+UC-A02 & Gérer les comptes et les rôles & CRUD complet, modification des privilèges et révocation de sessions. \\
+\hline
+UC-A03 & Valider les inscriptions conseillers & Examen des justificatifs professionnels et activation officielle des comptes. \\
+\hline
+UC-A04 & Gérer les questions du test & \textbf{CRUD et calibration adaptative des items IRT (Détaillée ci-après).} \\
+\hline
+UC-A05 & Importer formations et seuils SDO & Importation Excel en bloc du catalogue et des seuils SDO tunisiens. \\
+\hline
+UC-A06 & Configurer les pondérations & \textbf{Calibration des axes du moteur SIAEPI v5.0 (Détaillée ci-après).} \\
+\hline
+UC-A07 & Consulter le journal d'audit & Journal de sécurité sécurisé et paginé des actions administratives. \\
+\hline
+UC-A08 & Gérer les messages de contact & Consultation, traitement et archivage des requêtes du formulaire public. \\
+\hline
+\end{tabular}
+\caption{Synthèse des cas d'utilisation de l'acteur Administrateur}
+\label{tab:synthese_uc_admin}
+\end{table}
+
+\vspace{1em}
+
+\subsubsection*{Cas d'utilisation « Gérer les questions du test d'orientation (UC-A04) »}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{headercolor}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}ID de l'UC & UC-A04 \\
+\hline
+Nom du Cas & Gérer les questions du test adaptatif (CRUD) \\
+\hline
+\rowcolor{rowgray}Acteur Principal & Administrateur \\
+\hline
+Préconditions & Accès au module de test dans l'espace d'administration. \\
+\hline
+\rowcolor{rowgray}Postconditions & Banque de questions mise à jour et calibration des coefficients adaptatifs persistée. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur ouvre l'interface de gestion du questionnaire adaptatif.
+  \item Le système présente la banque de questions avec leurs attributs (texte, dimension RIASEC associée, coefficient de discrimination $a$, coefficient de difficulté $b$, statut d'inversion).
+  \item L'administrateur effectue des actions de mise à jour (ajout de question, étalonnage des paramètres IRT ou désactivation).
+  \item Le système valide la cohérence des paramètres saisis ($a \in [0{,}5,\ 2{,}5]$, $b \in [-3,\ +3]$) et applique les nouveaux coefficients adaptatifs pour tous les tests futurs, sans modifier les historiques enregistrés.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item \textbf{Modification de question historique} : Si la question sélectionnée possède déjà des réponses enregistrées dans la base, le système recommande d'archiver la question en la désactivant plutôt que de la supprimer afin de préserver l'intégrité de l'historique d'orientation.
+\end{itemize} \\
+\hline
+\end{tabular}
+
+\vspace{1.5em}
+
+\subsubsection*{Cas d'utilisation « Configurer les pondérations de l'algorithme (UC-A06) »}
+
+\noindent
+\begin{tabular}{|L|R|}
+\hline
+\rowcolor{headercolor}\textcolor{white}{\textbf{Champ}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+\rowcolor{rowgray}ID de l'UC & UC-A06 \\
+\hline
+Nom du Cas & Configurer les pondérations de l'algorithme d'orientation \\
+\hline
+\rowcolor{rowgray}Acteur Principal & Administrateur \\
+\hline
+Préconditions & Accès aux paramètres du moteur de matching d'orientation. \\
+\hline
+\rowcolor{rowgray}Postconditions & Coefficients de l'algorithme SIAEPI v5.0 reconfigurés au niveau global. \\
+\hline
+Scénario nominal &
+\begin{enumerate}
+  \item L'administrateur accède au volet de calibration de l'algorithme.
+  \item Le système présente la liste des poids affectés aux quatre piliers d'évaluation (Vocationnel, Académique, Employabilité et Accessibilité).
+  \item L'administrateur modifie les pondérations numériques à l'aide de boutons.
+  \item Il valide le formulaire. Le système met à jour de façon dynamique les configurations pour les futurs calculs d'adéquation.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénario alternatif &
+\begin{itemize}
+  \item \textbf{Poids globaux non équilibrés} : Le système bloque la sauvegarde et signale une erreur de configuration si la somme totale des coefficients s'avère différente de 100 \%.
+\end{itemize} \\
+\hline
+\end{tabular}
+
+\vspace{1.5em}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Modélisation structurelle}
+\label{sec:modelisation_structurelle}
+
+La modélisation structurelle dresse le portrait statique du système en structurant l'organisation des données de la plateforme. Les classes métiers identifiées correspondent directement aux modèles \textbf{Eloquent ORM} implémentés au sein du framework Laravel.
+
+\subsection{Diagramme de classes}
+
+Le diagramme de classes illustre de manière claire les entités de données qui composent l'application \textbf{CapAvenir}, en détaillant leurs variables internes et leurs responsabilités fonctionnelles. Le modèle met en relief l'intégration de la classe de base \texttt{Utilisateur} et de ses spécialisations par rôle, ainsi que le couplage du système de profils (\texttt{Profil} académique, \texttt{ProfilRiasec} psychométrique adaptatif, \texttt{ProfilCV} et \texttt{FeuilleDeroute} de carrière) avec les microservices d'IA (\texttt{MoteurRecommandation}, \texttt{SimulateurDecision} et \texttt{Chatbot}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/diagramme des classes.jpg}
+\caption{Diagramme de classes détaillé du système CapAvenir}
+\label{fig:diagramme_classes}
+\end{figure}
+
+Chaque classe intègre des méthodes métier spécifiques participant à la logique algorithmique complexe :
+\begin{itemize}
+    \item \texttt{recalculerCodeHolland()} et \texttt{getScoresParDimension()} de la classe \texttt{ProfilRiasec} permettent d'actualiser les coefficients vocations en fonction des calculs adaptatifs issus de la classe \texttt{TestAdaptatif} ;
+    \item \texttt{calculerScoreCorrespondance()} et \texttt{verifierFaisabiliteGATB()} de la classe \texttt{MoteurRecommandation} intègrent les contraintes d'exclusion dures et font appel à la classe externe de microservice IA (\texttt{MicroservicePythonIA}) développée sous FastAPI ;
+    \item \texttt{simulerScoreFG()} et \texttt{comparerAdmissibilite()} de la classe \texttt{SimulateurDecision} appliquent des calculs matriciels en mémoire pour comparer les notes simulées avec la classe \texttt{Formation}.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Modélisation dynamique}
+\label{sec:modelisation_dynamique}
+
+La modélisation dynamique complète l'approche conceptuelle en traduisant les dimensions temporelles et séquentielles des flux d'informations. À travers des diagrammes de séquence unifiés, elle trace pas à pas le cheminement logique des requêtes au sein de l'architecture découplée, montrant comment le backend Laravel communique avec le serveur MySQL, le microservice IA sous Python et les API d'intelligence artificielle conversationnelle.
+
+\subsection{Diagrammes de séquence}
+
+Les diagrammes présentés ci-après retranscrivent de façon rigoureuse la dynamique comportementale des modules les plus novateurs de la plateforme.
+
+\subsubsection{Authentification et contrôle d'accès sécurisé (Double facteur)}
+
+Ce diagramme illustre le flux unifié de connexion et d'autorisation sécurisée. Il montre la double vérification logique : d'une part la correspondance du hachage du mot de passe en base de données, et d'autre part la génération et la validation d'un OTP expirable envoyé par email pour parer aux risques d'usurpation d'identifiants.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/authentification.jpg}
+\caption{Diagramme de séquence - Authentification multi-facteurs et contrôle d'accès}
+\label{fig:seq_authentification}
+\end{figure} 
+
+\textbf{Description détaillée du flux :}
+\begin{enumerate}
+    \item L'utilisateur renseigne ses identifiants qui transitent vers le contrôleur \texttt{AuthController}.
+    \item L'application charge le modèle utilisateur depuis la base de données et exécute la fonction de vérification cryptographique bcrypt (\texttt{Hash::check}).
+    \item En cas de succès d'identité, un code OTP à 6 chiffres est généré en mémoire et envoyé à l'utilisateur par courriel. Le contrôleur bascule l'interface utilisateur sur la vue de saisie OTP.
+    \item L'utilisateur soumet son code qui est confronté à la valeur en cache par \texttt{TwoFactorController}.
+    \item Si le code est conforme et valide, le système génère un jeton d'accès Sanctum et débloque le middleware \texttt{RoleGuard} pour orienter l'utilisateur vers son tableau de bord spécifique (\texttt{admin}, \texttt{counselor} ou \texttt{student}).
+\end{enumerate}
+
+\subsubsection{Test d'orientation intelligent (CAT adaptatif IRT-2PL)}
+
+Ce diagramme retrace la logique du test adaptatif RIASEC + GATB. Il met en lumière la nature adaptative du moteur CAT qui recalcule itérativement les traits psychologiques latents à chaque réponse de l'étudiant et recherche dans le pool la question maximisant l'information statistique.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/test d'orientation.jpg}
+\caption{Diagramme de séquence - Test adaptatif (CAT) et génération du profil IA}
+\label{fig:seq_test_orientation}
+\end{figure} 
+
+\textbf{Description détaillée du flux :}
+\begin{enumerate}
+    \item L'étudiant demande l'initialisation du test. \texttt{TestAdaptatifController} crée une session de test dotée d'un identifiant UUID unique en base MySQL.
+    \item Une boucle d'évaluation adaptative démarre : le système sollicite \texttt{TestAdaptatif} pour obtenir une question. Ce dernier sélectionne dynamiquement l'item le plus représentatif de la dimension recherchée.
+    \item L'étudiant renvoie sa valeur d'échelle Likert. Le service \texttt{BehavioralAnalyzer} enregistre le temps de saisie et met en œuvre l'analyse d'incohérence comportementale.
+    \item Le système applique la méthode de Newton-Raphson pour mettre à jour la valeur de theta ($\theta$, niveau latent) de l'étudiant.
+    \item Le système vérifie la condition d'arrêt précoce : dès que l'erreur type de mesure (SEM) de l'étudiant descend sous le seuil critique (SEM $<$ 0.15), la boucle prend fin pour éviter la fatigue cognitive.
+    \item Le service compile le profil RIASEC, calcule les scores d'aptitudes cognitives via \texttt{GatbCalculator} et persiste l'enregistrement dans la table \texttt{profil\_riasecs}.
+\end{enumerate}
+
+\subsubsection{Moteur de recommandation personnalisé (SIAEPI v5.0)}
+
+Ce diagramme décrit la synergie logicielle entre le framework Laravel et le microservice externe IA développé en Python FastAPI. Ce microservice gère le chargement des modèles de Deep Learning et l'algorithme de filtrage collaboratif hybride pour estimer les filières les plus compatibles.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/recommandation.jpg}
+\caption{Diagramme de séquence - Recommandations IA et matching de filières}
+\label{fig:seq_recommandations}
+\end{figure} 
+
+\textbf{Description détaillée du flux :}
+\begin{enumerate}
+    \item L'étudiant sollicite son espace de recommandations de filières.
+    \item Le contrôleur \texttt{RecommandationController} interroge \texttt{MoteurRecommandation} qui récupère le profil académique et psychométrique complet de l'étudiant depuis MySQL.
+    \item Laravel sérialise ces attributs dans un vecteur de caractéristiques JSON et le transmet via un appel d'API REST sécurisé au microservice Python FastAPI.
+    \item Le microservice Python charge le modèle de Deep Learning (TensorKeras/TensorFlow), effectue une normalisation, applique l'algorithme de prédiction, fusionne les résultats avec un modèle de filtrage collaboratif de profils similaires, puis retourne la liste ordonnée des scores d'adéquation.
+    \item Le service Laravel applique des filtres d'exclusion stricts (sélection de BAC, seuils de notes), vérifie la faisabilité cognitive par rapport au profil GATB, génère un diagnostic personnalisé de trajectoire, puis retourne le Top-12 final.
+\end{enumerate}
+
+\subsubsection{Simulateur décisionnel What-If}
+
+Ce diagramme retrace le fonctionnement dynamique du simulateur What-If, montrant comment l'application évalue en temps réel l'impact de notes hypothétiques d'orientation sans altérer le profil d'origine de l'étudiant.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/simulateur de choix.jpg}
+\caption{Diagramme de séquence - Simulateur What-If de notes du BAC}
+\label{fig:seq_simulateur_whatif}
+\end{figure} 
+
+\textbf{Description détaillée du flux :}
+\begin{enumerate}
+    \item L'étudiant saisit des notes hypothétiques sur l'interface graphique (ex. : Mathématiques à 18).
+    \item L'application transmet ces données simulées au contrôleur \texttt{SimulateurController}.
+    \item Le contrôleur fait appel à \texttt{SimulateurDecision} qui applique les formules officielles tunisiennes d'orientation sur le vecteur de notes hypothétiques pour en extraire le score FG simulé.
+    \item Le service interroge le catalogue des seuils SDO d'accès aux filières universitaires pour identifier les filières nouvellement débloquées et celles restant inaccessibles.
+    \item Les résultats comparatifs sont présentés graphiquement à l'étudiant et sauvegardés dans son historique personnel.
+\end{enumerate}
+
+\subsubsection{Interaction avec le Chatbot d'orientation (Nova RAG)}
+
+Ce diagramme illustre le flux d'aide à la décision par traitement du langage naturel. Il met en évidence la méthode RAG (Retrieval-Augmented Generation) : le système extrait le profil académique et psychologique de l'étudiant pour enrichir le prompt de l'API LLM afin de générer une réponse d'orientation personnalisée, avec bascule locale sur Ollama en cas de panne de réseau.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/interaction avec chatbot.jpg}
+\caption{Diagramme de séquence - Dialogue avec l'assistant d'orientation virtuel Nova}
+\label{fig:seq_chatbot}
+\end{figure} 
+
+\textbf{Description détaillée du flux :}
+\begin{enumerate}
+    \item L'étudiant formule sa question en langage naturel (ex. : « Quelle formation cibler avec mon profil RIASEC "ISA" ? ») dans la fenêtre de chat Nova.
+    \item Le contrôleur \texttt{ChatbotController} reçoit le message, extrait le profil consolidé de l'étudiant et assemble un prompt d'orientation contextuel et personnalisé.
+    \item Le service \texttt{Chatbot} tente de joindre l'API externe Gemini Flash avec ce prompt enrichi.
+    \item Si l'API renvoie un succès, la réponse structurée est renvoyée au contrôleur et présentée à l'étudiant.
+    \item Si l'API échoue ou signale un dépassement de quota (Erreur HTTP 429), le système sollicite immédiatement le service local de repli \texttt{OllamaService} pour obtenir une réponse locale à partir d'un modèle d'orientation hébergé en interne, assurant la résilience et la continuité de l'expérience d'accompagnement.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+En définitive, la phase d'analyse et de conception détaillée présentée tout au long de ce chapitre a permis de figer les choix architecturaux et conceptuels structurant la plateforme \textbf{CapAvenir}. 
+
+À travers l'élaboration de la modélisation fonctionnelle, le périmètre opérationnel de chaque acteur a été précisément cadré sous forme de cas d'utilisation formalisés et synthétisés, garantissant une réponse ciblée aux exigences métiers sans surcharger la structure du document. La modélisation structurelle a quant à elle jeté les bases relationnelles indispensables à l'implémentation de la persistance des données sous Laravel Eloquent ORM. Enfin, l'étude dynamique a décrit de manière granulaire les séquences temporelles d'exécution des modules les plus complexes, tels que la boucle adaptative CAT IRT-2PL, le pipeline de recommandation prédictif SIAEPI v5.0 interconnecté à FastAPI Python, et le module conversationnel résilient doté d'une stratégie de repli locale Ollama.
+
+Cette étape de conception rigoureuse établit les bases fiables indispensables au bon déroulement du développement de l'application. Elle ouvre tout naturellement la voie au chapitre suivant, consacré à la phase de réalisation pratique, de choix de l'environnement de développement et de déploiement effectif de la plateforme.

@@ -74,6 +74,8 @@
         <div class="tp-stat"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><strong>100%</strong> confidentiel</div>
     </div>
 
+    @if(session('success'))<div class="tp-alert" style="color:var(--accent3);border-color:color-mix(in srgb,var(--accent3) 22%,transparent);background:color-mix(in srgb,var(--accent3) 8%,transparent)">{{ session('success') }}</div>@endif
+    @if(session('warning'))<div class="tp-alert" style="color:#F59E0B;border-color:color-mix(in srgb,#F59E0B 22%,transparent);background:color-mix(in srgb,#F59E0B 8%,transparent)">{{ session('warning') }}</div>@endif
     @if(session('info'))<div class="tp-alert">{{ session('info') }}</div>@endif
     @if($errors->any())<div class="tp-alert error">{{ $errors->first() }}</div>@endif
 

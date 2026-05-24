@@ -1,0 +1,130 @@
+@startuml FLUX1_Authentification
+
+' ╔══════════════════════════════════════════════════════════════════╗
+' ║   E-CTRL — FLUX 1 : AUTHENTIFICATION & CONTRÔLE D'ACCÈS         ║
+' ╚══════════════════════════════════════════════════════════════════╝
+
+!theme plain
+skinparam shadowing false
+skinparam DefaultFontName "Segoe UI"
+skinparam DefaultFontSize 11
+skinparam dpi 150
+skinparam roundCorner 10
+skinparam BoxPadding 14
+skinparam ParticipantPadding 20
+skinparam SequenceMessageAlignment center
+
+skinparam ActorBackgroundColor #FFFFFF
+skinparam ActorBorderColor     #1A365D
+skinparam ActorFontColor       #1A365D
+skinparam ActorFontSize        12
+skinparam ActorFontStyle       bold
+
+skinparam ParticipantBackgroundColor #1A365D
+skinparam ParticipantBorderColor     #0D2137
+skinparam ParticipantFontColor       #FFFFFF
+skinparam ParticipantFontSize        11
+skinparam ParticipantFontStyle       bold
+
+skinparam DatabaseBackgroundColor #2C7A7B
+skinparam DatabaseBorderColor     #1D5151
+skinparam DatabaseFontColor       #FFFFFF
+skinparam DatabaseFontStyle       bold
+
+skinparam SequenceBoxBackgroundColor #EDF2F7
+skinparam SequenceBoxBorderColor     #CBD5E0
+skinparam SequenceBoxFontColor       #1A365D
+skinparam SequenceBoxFontSize        13
+skinparam SequenceBoxFontStyle       bold
+
+skinparam SequenceGroupBackgroundColor #EBF8FF
+skinparam SequenceGroupBorderColor     #3182CE
+skinparam SequenceGroupFontColor       #1A365D
+skinparam SequenceGroupHeaderFontColor #1A365D
+skinparam SequenceGroupFontSize        11
+skinparam SequenceGroupFontStyle       bold
+
+skinparam SequenceLifeLineBorderColor     #3182CE
+skinparam SequenceLifeLineBackgroundColor #EBF8FF
+
+skinparam ArrowColor     #2B6CB0
+skinparam ArrowFontName  "Segoe UI"
+skinparam ArrowFontSize  10
+skinparam ArrowFontColor #2D3748
+skinparam ArrowThickness 1.5
+
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor     #F9A825
+skinparam NoteFontName        "Segoe UI"
+skinparam NoteFontSize        10
+skinparam NoteFontColor       #37474F
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 1 — AUTHENTIFICATION & CONTRÔLE D'ACCÈS PAR RÔLE
+' ══════════════════════════════════════════════════════════════
+box "FLUX 1 — Authentification & Contrôle d'Accès par Rôle" #EDF2F7
+  actor "Utilisateur\n(Admin / Conseiller\n/ Étudiant)" as USER
+  participant "Interface Web\n(Blade / Vue)" as UI
+  participant "AuthController\n(Laravel)" as AUTH
+  participant "Middleware\nRoleGuard" as MW
+  participant "Utilisateur\n[Model]" as UMODEL
+  database "MySQL\nDatabase" as DB
+end box
+
+autonumber "<b>[1.#]</b>"
+
+USER  -> UI    : Saisir courriel + motDePasse\n→ Clic « Se Connecter »
+activate UI
+
+UI    -> AUTH  : POST /login\n{ courriel, motDePasse }
+activate AUTH
+
+AUTH  -> UMODEL : findByEmail(courriel)
+activate UMODEL
+UMODEL -> DB   : SELECT id, nom, motDePasse, role\nFROM utilisateurs\nWHERE courriel = ? LIMIT 1
+activate DB
+DB   --> UMODEL : Enregistrement trouvé
+deactivate DB
+UMODEL --> AUTH : Objet Utilisateur
+deactivate UMODEL
+
+AUTH  -> AUTH  : Hash::check(motDePasse, hash)
+note right of AUTH
+  <b>Vérification sécurisée</b>
+  bcrypt(motDePasse) comparé au
+  hash stocké en base de données.
+end note
+
+alt <b>Identifiants invalides</b>
+  AUTH --> UI   : 401 Unauthorized\n{ message: "Identifiants incorrects" }
+  UI   --> USER : ❌ Afficher message d'erreur
+else <b>Identifiants valides</b>
+  AUTH  -> UMODEL : createToken("auth-token")
+  activate UMODEL
+  UMODEL -> DB   : INSERT INTO personal_access_tokens\n(tokenable_id, token, name)
+  activate DB
+  DB   --> UMODEL : Bearer Token Sanctum créé
+  deactivate DB
+  UMODEL --> AUTH : Bearer Token
+  deactivate UMODEL
+
+  AUTH  -> MW   : checkRole(user.role)
+  activate MW
+
+  alt <b>role = "admin"</b>
+    MW --> AUTH : ✅ Accès → /admin/dashboard
+  else <b>role = "conseiller"</b>
+    MW --> AUTH : ✅ Accès → /conseiller/dashboard
+  else <b>role = "etudiant"</b>
+    MW --> AUTH : ✅ Accès → /etudiant/dashboard
+  end
+
+  deactivate MW
+  AUTH --> UI   : 200 OK\n{ token, role, redirect_url }
+  UI   --> USER : Redirection vers l'Espace approprié\n+ Affichage du Tableau de Bord
+end
+
+deactivate AUTH
+deactivate UI
+
+@enduml

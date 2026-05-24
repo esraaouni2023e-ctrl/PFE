@@ -1,0 +1,138 @@
+@startuml FLUX5_Recommandation_IA
+
+' ╔══════════════════════════════════════════════════════════════════╗
+' ║   E-CTRL — FLUX 5 : MOTEUR IA DE RECOMMANDATION DE FILIÈRES     ║
+' ╚══════════════════════════════════════════════════════════════════╝
+
+!theme plain
+skinparam shadowing false
+skinparam DefaultFontName "Segoe UI"
+skinparam DefaultFontSize 11
+skinparam dpi 150
+skinparam roundCorner 10
+skinparam BoxPadding 14
+skinparam ParticipantPadding 20
+skinparam SequenceMessageAlignment center
+
+skinparam ActorBackgroundColor #FFFFFF
+skinparam ActorBorderColor     #1A365D
+skinparam ActorFontColor       #1A365D
+skinparam ActorFontSize        12
+skinparam ActorFontStyle       bold
+
+skinparam ParticipantBackgroundColor #1A365D
+skinparam ParticipantBorderColor     #0D2137
+skinparam ParticipantFontColor       #FFFFFF
+skinparam ParticipantFontSize        11
+skinparam ParticipantFontStyle       bold
+
+skinparam DatabaseBackgroundColor #2C7A7B
+skinparam DatabaseBorderColor     #1D5151
+skinparam DatabaseFontColor       #FFFFFF
+skinparam DatabaseFontStyle       bold
+
+skinparam SequenceBoxBackgroundColor #FFF5F5
+skinparam SequenceBoxBorderColor     #FC8181
+skinparam SequenceBoxFontColor       #1A365D
+skinparam SequenceBoxFontSize        13
+skinparam SequenceBoxFontStyle       bold
+
+skinparam SequenceGroupBackgroundColor #EBF8FF
+skinparam SequenceGroupBorderColor     #3182CE
+skinparam SequenceGroupFontColor       #1A365D
+skinparam SequenceGroupHeaderFontColor #1A365D
+skinparam SequenceGroupFontSize        11
+skinparam SequenceGroupFontStyle       bold
+
+skinparam SequenceLifeLineBorderColor     #3182CE
+skinparam SequenceLifeLineBackgroundColor #EBF8FF
+
+skinparam ArrowColor     #2B6CB0
+skinparam ArrowFontName  "Segoe UI"
+skinparam ArrowFontSize  10
+skinparam ArrowFontColor #2D3748
+skinparam ArrowThickness 1.5
+
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor     #F9A825
+skinparam NoteFontName        "Segoe UI"
+skinparam NoteFontSize        10
+skinparam NoteFontColor       #37474F
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 5 — MOTEUR IA DE RECOMMANDATION DE FILIÈRES
+' ══════════════════════════════════════════════════════════════
+box "FLUX 5 — Recommandation IA de Filières (Deep Learning + Filtrage Collaboratif)" #FFF5F5
+  actor "Étudiant" as STU5
+  participant "Interface\nÉtudiant" as UI5
+  participant "RecommandationController\n(Laravel)" as RC
+  participant "MoteurRecommandation\n[Service Laravel]" as REC
+  participant "Microservice IA\n(FastAPI / Python)" as PYIA
+  database "MySQL\nDatabase" as DB5
+end box
+
+autonumber "<b>[5.#]</b>"
+
+STU5  -> UI5  : Clic « Voir mes recommandations de filières »
+activate UI5
+UI5   -> RC   : GET /etudiant/recommandations
+activate RC
+
+RC    -> REC  : calculerScoreCorrespondance(idUtilisateur)
+activate REC
+
+REC   -> DB5  : SELECT profils.*, profil_riasecs.*\nFROM profils\nJOIN profil_riasecs USING(idUtilisateur)\nWHERE idUtilisateur = ?
+activate DB5
+DB5  --> REC  : Profil complet\n(notes académiques + RIASEC + GATB)
+deactivate DB5
+
+note over REC
+  <b>Préparation du vecteur de caractéristiques :</b>
+  ─────────────────────────────────────────────────────
+  • scoreFG          (données académiques pondérées)
+  • scores RIASEC    [R, I, A, S, E, C]
+  • aptitudes GATB   [G, V, N, S]
+  • sectionBac, gouvernorat
+  → Sérialisé en JSON pour l'API Python FastAPI
+end note
+
+REC   -> PYIA : POST /predict\n{ profilJSON : vecteur de caractéristiques }
+activate PYIA
+
+note over PYIA
+  <b>Microservice Python (FastAPI) — Pipeline IA :</b>
+  ─────────────────────────────────────────────────────
+  1. Chargement du modèle Deep Learning (TensorFlow/Keras)
+  2. Normalisation du vecteur d'entrée (StandardScaler)
+  3. Prédiction multiclasse → scoreIA par filière
+  4. Filtrage collaboratif (profils similaires historiques)
+  5. Fusion pondérée : scoreIA_final = α·DL + β·Collaboratif
+end note
+
+PYIA --> REC  : [\n  { codeFiliere: "INFO01",\n    nomFiliere: "Informatique", scoreIA: 89.5 },\n  { codeFiliere: "MATH02",\n    nomFiliere: "Mathématiques", scoreIA: 76.3 },\n  ... Top N filières\n]
+deactivate PYIA
+
+REC   -> REC  : verifierFaisabiliteGATB(profilRiasec)\n→ Filtrer filières incompatibles\n   avec le profil cognitif GATB
+
+REC   -> REC  : genererDiagnostic(profil)\n→ Synthèse textuelle personnalisée
+
+REC   -> DB5  : UPDATE formations\nSET scoreCorrespondance = scoreIA\nWHERE codeFiliere IN (liste recommandées)
+activate DB5
+DB5  --> REC  : Scores IA enregistrés
+deactivate DB5
+
+REC   -> DB5  : SELECT f.codeFiliere, f.nomFiliere,\n  f.universite, f.sdo2025,\n  fm.debouches, fm.salaireMin, fm.salaireMax\nFROM filieres f\nJOIN formations fm ON f.codeFiliere = fm.codeFiliere\nORDER BY scoreCorrespondance DESC\nLIMIT 10
+activate DB5
+DB5  --> REC  : Top 10 filières recommandées
+deactivate DB5
+
+REC  --> RC   : { recommandations[], diagnostic }
+deactivate REC
+
+RC   --> UI5  : 200 OK\n{ filières triées par scoreIA, diagnostic }
+deactivate RC
+
+UI5  --> STU5 : Afficher les Recommandations IA :\n• 🥇 #1 Informatique        → 89.5%\n• 🥈 #2 Mathématiques       → 76.3%\n• 🥉 #3 Génie Civil         → 71.1%\n• Diagnostic personnalisé\n• Compatible RIASEC + GATB ✅
+deactivate UI5
+
+@enduml

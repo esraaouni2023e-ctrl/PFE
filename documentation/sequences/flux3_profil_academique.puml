@@ -1,0 +1,119 @@
+@startuml FLUX3_Profil_Academique
+
+' ╔══════════════════════════════════════════════════════════════════╗
+' ║   E-CTRL — FLUX 3 : PROFIL ACADÉMIQUE & CALCUL DU SCORE FG      ║
+' ╚══════════════════════════════════════════════════════════════════╝
+
+!theme plain
+skinparam shadowing false
+skinparam DefaultFontName "Segoe UI"
+skinparam DefaultFontSize 11
+skinparam dpi 150
+skinparam roundCorner 10
+skinparam BoxPadding 14
+skinparam ParticipantPadding 20
+skinparam SequenceMessageAlignment center
+
+skinparam ActorBackgroundColor #FFFFFF
+skinparam ActorBorderColor     #1A365D
+skinparam ActorFontColor       #1A365D
+skinparam ActorFontSize        12
+skinparam ActorFontStyle       bold
+
+skinparam ParticipantBackgroundColor #1A365D
+skinparam ParticipantBorderColor     #0D2137
+skinparam ParticipantFontColor       #FFFFFF
+skinparam ParticipantFontSize        11
+skinparam ParticipantFontStyle       bold
+
+skinparam DatabaseBackgroundColor #2C7A7B
+skinparam DatabaseBorderColor     #1D5151
+skinparam DatabaseFontColor       #FFFFFF
+skinparam DatabaseFontStyle       bold
+
+skinparam SequenceBoxBackgroundColor #FFFAF0
+skinparam SequenceBoxBorderColor     #F6AD55
+skinparam SequenceBoxFontColor       #1A365D
+skinparam SequenceBoxFontSize        13
+skinparam SequenceBoxFontStyle       bold
+
+skinparam SequenceGroupBackgroundColor #EBF8FF
+skinparam SequenceGroupBorderColor     #3182CE
+skinparam SequenceGroupFontColor       #1A365D
+skinparam SequenceGroupHeaderFontColor #1A365D
+skinparam SequenceGroupFontSize        11
+skinparam SequenceGroupFontStyle       bold
+
+skinparam SequenceLifeLineBorderColor     #3182CE
+skinparam SequenceLifeLineBackgroundColor #EBF8FF
+
+skinparam ArrowColor     #2B6CB0
+skinparam ArrowFontName  "Segoe UI"
+skinparam ArrowFontSize  10
+skinparam ArrowFontColor #2D3748
+skinparam ArrowThickness 1.5
+
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor     #F9A825
+skinparam NoteFontName        "Segoe UI"
+skinparam NoteFontSize        10
+skinparam NoteFontColor       #37474F
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 3 — SAISIE DU PROFIL ACADÉMIQUE & CALCUL DU SCORE FG
+' ══════════════════════════════════════════════════════════════
+box "FLUX 3 — Saisie du Profil Académique & Calcul du Score FG" #FFFAF0
+  actor "Étudiant" as STU3
+  participant "Interface\nÉtudiant" as UI3
+  participant "ProfilController\n(Laravel)" as PC
+  participant "Profil\n[Model]" as PMOD
+  database "MySQL\nDatabase" as DB3
+end box
+
+autonumber "<b>[3.#]</b>"
+
+STU3  -> UI3  : Remplir le formulaire académique :\n• Section Bac (Math / Sciences / Lettres…)\n• Moyenne Générale\n• Année du Bac\n• Gouvernorat\n• Notes par matière (JSON)
+activate UI3
+
+UI3   -> PC   : POST /etudiant/profil\n{ sectionBac, moyenneGenerale,\n  anneeBac, gouvernorat, notesMatieres }
+activate PC
+
+PC    -> PMOD : updateOrCreate({ idUtilisateur })\n  → sectionBac, moyenneGenerale,\n    anneeBac, gouvernorat, notesMatieres
+activate PMOD
+
+PMOD  -> DB3  : INSERT / UPDATE profils\n(idUtilisateur, sectionBac, moyenneGenerale,\n anneeBac, gouvernorat, notesMatieres)
+activate DB3
+DB3  --> PMOD : Profil persisté (id confirmé)
+deactivate DB3
+
+note over PMOD
+  <b>calculerScoreFG() — Formule différenciée par section :</b>
+  ─────────────────────────────────────────────────────────
+  • Section Math/Sciences : pondération forte Maths & Sciences
+  • Section Lettres       : pondération forte Arabe & Français
+  • Section Technique     : pondération Techno & Sciences Ap.
+  ─────────────────────────────────────────────────────────
+  Score FG ∈ [0 ; 20] — Indice d'admissibilité universel
+  comparable entre toutes les sections du Bac tunisien.
+end note
+
+PMOD  -> PMOD : calculerScoreFG(notesMatieres, sectionBac)
+PMOD  -> DB3  : UPDATE profils\nSET score_fg = {valeur calculée}\nWHERE idUtilisateur = ?
+activate DB3
+DB3  --> PMOD : Score FG enregistré
+deactivate DB3
+
+PMOD  -> PMOD : getNiveauFG()\n→ "Excellent" / "Bien" / "Passable"
+PMOD  -> PMOD : getProgression()\n→ % de complétion du profil (0–100%)
+PMOD  -> PMOD : estAcademiqueComplet()\n→ true / false
+
+PMOD --> PC   : { scoreFG, niveauFG,\n  progression, estComplet }
+deactivate PMOD
+
+PC   --> UI3  : 200 OK\n{ scoreFG, niveauFG, progression }
+deactivate PC
+
+UI3  --> STU3 : Afficher tableau de bord académique :\n• Score FG calculé (ex: 15.8 / 20)\n• Niveau : « Bien »\n• Barre de progression : 65%\n• ✅ Profil académique complet
+deactivate UI3
+
+@enduml

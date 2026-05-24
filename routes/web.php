@@ -82,6 +82,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
         Route::prefix('comparateur')->name('comparateur.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Student\ComparateurController::class, 'index'])->name('index');
             Route::post('/data', [\App\Http\Controllers\Student\ComparateurController::class, 'comparer'])->name('data');
+            Route::get('/search', [\App\Http\Controllers\Student\ComparateurController::class, 'search'])->name('search');
         });
 
         // ── Portfolio & Roadmap (existants) ──

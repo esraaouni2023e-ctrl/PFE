@@ -1,0 +1,257 @@
+@startuml DiagrammeClasses_E-CTRL
+
+' ============================================================
+' ARCHITECTURE ET INTEGRATION DES FLÈCHES (UML PROFESSIONNEL)
+' ============================================================
+skinparam linetype ortho
+skinparam groupInheritance 2
+skinparam nodesep 60
+skinparam ranksep 60
+
+hide circle
+hide empty members
+
+' ============================================================
+' CLASSES PRINCIPALES
+' ============================================================
+
+class Utilisateur {
+  + id : Integer
+  + nom : String
+  + courriel : String
+  + motDePasse : String
+  + role : String
+  + createdAt : DateTime
+  --
+  + seConnecter() : void
+  + seDeconnecter() : void
+}
+
+class Administrateur {
+  --
+  + gererUtilisateurs() : void
+  + gererFilieres() : void
+  + consulterJournalAudit() : void
+  + configurerReferences() : void
+}
+
+class Conseiller {
+  --
+  + consulterProfil(idEtudiant : Integer) : Profil
+  + envoyerMessage(idEtudiant : Integer) : void
+  + homologuerTrajectoire(idEtudiant : Integer) : void
+  + voirSimulations(idEtudiant : Integer) : void
+}
+
+class Etudiant {
+  --
+  + calculerScoreFG() : void
+  + passerTestRIASEC() : void
+  + simulerScenariosWhatIf() : void
+  + genererCV() : void
+  + dialoguerAvecChatbot() : void
+}
+
+class Profil {
+  + id : Integer
+  + idUtilisateur : Integer
+  + sectionBac : String
+  + moyenneGenerale : Float
+  + anneeBac : Integer
+  + gouvernorat : String
+  + notesMatieres : JSON
+  + scoreFG : Float
+  + competences : String
+  + interets : String
+  + pointsForts : String
+  + scoreIA : Float
+  + observationsConseiller : String
+  + planCoaching : String
+  + statut : String
+  --
+  + estAcademiqueComplet() : Boolean
+  + getProgression() : Integer
+  + getNiveauFG() : String
+}
+
+class ProfilRiasec {
+  + id : Integer
+  + idSession : String
+  + idUtilisateur : Integer
+  + score_R : Integer
+  + score_I : Integer
+  + score_A : Integer
+  + score_S : Integer
+  + score_E : Integer
+  + score_C : Integer
+  + codeHolland : String
+  + scoreGATB_G : Integer
+  + scoreGATB_V : Integer
+  + scoreGATB_N : Integer
+  + scoreGATB_S : Integer
+  + scoreResilience : Integer
+  + scoreCoherence : Integer
+  + indiceConfiance : Float
+  + interpretation : JSON
+  + statut : String
+  + estSignale : Boolean
+  + arretPrecoce : Boolean
+  + dateCompletion : DateTime
+  --
+  + recalculerCodeHolland() : void
+  + getScoresParDimension() : Map<String, Integer>
+  + getDimensionDominante() : String
+  + getFilieresCompatibles() : List<Filiere>
+}
+
+class TestAdaptatif {
+  - idSession : String
+  - questions : List<QuestionRiasec>
+  --
+  + getQuestionSuivante() : QuestionRiasec
+  + traiterReponse(idQ : Integer, val : Integer) : void
+  + evaluerArretPrecoce() : Boolean
+}
+
+class QuestionRiasec {
+  + id : Integer
+  + texte : String
+  + dimension : String
+  + echelleMax : Integer
+}
+
+class Filiere {
+  + codeFiliere : String
+  + nomFiliere : String
+  + universite : String
+  + etablissement : String
+  + domaine : String
+  + sdo2023 : Float
+  + sdo2024 : Float
+  + sdo2025 : Float
+}
+
+class Formation {
+  + id : Integer
+  + nom : String
+  + etablissement : String
+  + ville : String
+  + duree : Integer
+  + niveau : String
+  + description : String
+  + debouches : String
+  + conditionsAcces : String
+  + salaireMin : Float
+  + salaireMax : Float
+  + secteur : String
+  + scoreCorrespondance : Float
+}
+
+class ElementPortfolio {
+  + id : Integer
+  + idUtilisateur : Integer
+  + titre : String
+  + description : String
+  + type : String
+  + cheminFichier : String
+  + dateAjout : DateTime
+}
+
+class FeuilleDeroute {
+  + id : Integer
+  + idUtilisateur : Integer
+  + filiereCible : String
+  + etapes : JSON
+  + statut : String
+  + dateCreation : DateTime
+}
+
+class ProfilCV {
+  + id : Integer
+  + idUtilisateur : Integer
+  + titre : String
+  + designation : String
+  + resume : String
+  + experiences : JSON
+  + formationCV : JSON
+  + competences : JSON
+}
+
+class MoteurRecommandation {
+  - poidsCriteres : Map<String, Float>
+  --
+  + calculerScoreCorrespondance(profil : Profil) : Float
+  + verifierFaisabiliteGATB(r : ProfilRiasec) : Boolean
+  + genererDiagnostic(profil : Profil) : String
+}
+
+class MicroservicePythonIA {
+  - urlApi : String
+  --
+  + analyserTexte(texte : String) : Map<String, Float>
+  + recommanderFilieres(profil : JSON) : List<Filiere>
+}
+
+class Chatbot {
+  - idBot : String
+  - promptContexte : String
+  --
+  + genererReponse(requete : String) : String
+}
+
+class SimulateurDecision {
+  --
+  + simulerScoreFG(notes : Map<String, Float>) : Float
+  + comparerAdmissibilite(scoreFG : Float) : List<Filiere>
+}
+
+' ============================================================
+' SYSTEME D'HERITAGE FUSIONNE (Pro et Propre)
+' ============================================================
+' groupInheritance 2 fusionne les branches d'héritage en une ligne commune
+Utilisateur <|-- Administrateur
+Utilisateur <|-- Conseiller
+Utilisateur <|-- Etudiant
+
+' ============================================================
+' RELATIONS DE GESTION ET SUPERVISION
+' ============================================================
+Administrateur "1" --> "1..*" Conseiller : gère
+Administrateur "1" --> "1..*" Etudiant : gère
+Conseiller "1" --> "0..*" Etudiant : supervise
+
+' ============================================================
+' RELATIONS COMPOSITION ET LIENS ÉTUDIANT
+' ============================================================
+Etudiant "1" *-- "1" Profil : possède
+Etudiant "1" *-- "0..*" ProfilRiasec : possède
+Etudiant "1" --> "0..*" ElementPortfolio : possède
+Etudiant "1" --> "0..*" FeuilleDeroute : possède
+Etudiant "1" --> "0..*" ProfilCV : possède
+
+' ============================================================
+' TEST ADAPTATIF
+' ============================================================
+Etudiant "1" --> "0..*" TestAdaptatif : passe
+TestAdaptatif "1" --> "1" ProfilRiasec : produit
+TestAdaptatif "1" o-- "0..*" QuestionRiasec : compose
+
+' ============================================================
+' FEUILLE DE ROUTE
+' ============================================================
+FeuilleDeroute "0..*" --> "1" Filiere : cible
+
+' ============================================================
+' IA ET RECOMMANDATIONS
+' ============================================================
+MoteurRecommandation "1" --> "0..*" Filiere : recommande
+MoteurRecommandation "1" --> "0..*" Formation : evalue
+MoteurRecommandation ..> MicroservicePythonIA : utilise
+
+' ============================================================
+' SIMULATION ET CHATBOT
+' ============================================================
+SimulateurDecision "1" --> "0..*" Formation : simule
+Chatbot "1" --> "0..*" Etudiant : assiste
+
+@enduml

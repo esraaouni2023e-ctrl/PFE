@@ -49,7 +49,7 @@ class RiasecTestController extends Controller
 
     public function initialize(Request $request): RedirectResponse
     {
-        $forceRestart = $request->boolean('restart', false);
+        $forceRestart = $request->boolean('restart', false) || $request->has('restart');
         $existingSession = session('riasec_session_id');
 
         if ($forceRestart || ! $existingSession) {
@@ -71,13 +71,20 @@ class RiasecTestController extends Controller
             $userId = Auth::id();
             if ($userId) {
                 ProfileRiasec::pourUser($userId)
-                    ->complets()
+                    ->whereIn('statut', [ProfileRiasec::STATUT_COMPLET, ProfileRiasec::STATUT_EN_COURS])
                     ->update(['statut' => ProfileRiasec::STATUT_EXPIRE]);
+            } else {
+                $guestId = session()->getId();
+                if ($guestId) {
+                    ProfileRiasec::where('session_guest_id', $guestId)
+                        ->whereIn('statut', [ProfileRiasec::STATUT_COMPLET, ProfileRiasec::STATUT_EN_COURS])
+                        ->update(['statut' => ProfileRiasec::STATUT_EXPIRE]);
+                }
             }
         }
 
         return redirect()->route('riasec.question', ['step' => 1, 't' => time()])
-            ->with('info', 'Votre test a demarre. Repondez honnetement a chaque question.');
+            ->with('info', 'Votre test a démarré. Répondez honnêtement à chaque question.');
     }
 
     public function showQuestion(Request $request, int $step = 1): View|RedirectResponse
@@ -251,6 +258,13 @@ class RiasecTestController extends Controller
         if (!session('riasec_profile_id')) {
             $profil = $this->testManager->saveProfile($userId, $sessionId, $guestId);
             
+            // Forcer le statut à complet et complete_at, car la méthode complete()
+            // n'est appelée que lorsque le test est effectivement terminé (au bout ou par arrêt anticipé)
+            $profil->update([
+                'statut' => ProfileRiasec::STATUT_COMPLET,
+                'complete_at' => now(),
+            ]);
+
             if (session('riasec_stopped_early')) {
                 $profil->update([
                     'stopped_early' => true,
@@ -284,6 +298,20 @@ class RiasecTestController extends Controller
     {
         $profileId = session('riasec_profile_id');
         $userId = Auth::id();
+        $sessionId = session('riasec_session_id');
+
+        // ── Guard : si un test est en cours (session active) mais pas encore finalisé,
+        //    rediriger vers les questions plutôt que montrer d'anciens résultats ──
+        if ($sessionId && !$profileId) {
+            $progress = $this->testManager->getProgress($userId, $sessionId);
+            if (!$progress->isCompleted) {
+                $nextStep = max(1, $progress->answered + 1);
+                return redirect()
+                    ->route('riasec.question', ['step' => $nextStep, 't' => time()])
+                    ->with('info', 'Vous avez un test en cours. Répondez aux questions pour voir vos résultats.');
+            }
+        }
+
         $profil = $profileId ? ProfileRiasec::find($profileId) : null;
 
         if (! $profil && $userId) {
@@ -292,11 +320,10 @@ class RiasecTestController extends Controller
 
         if (! $profil) {
             return redirect()
-                ->route('riasec.question.entry')
-                ->with('warning', 'Aucun resultat disponible. Veuillez passer le test.');
+                ->route('student.pipeline')
+                ->with('warning', 'Aucun résultat disponible. Veuillez passer le test.');
         }
 
-        $sessionId = session('riasec_session_id');
         $scores = null;
 
         if ($sessionId) {

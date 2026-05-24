@@ -1,0 +1,161 @@
+@startuml FLUX2_Administration
+
+' ╔══════════════════════════════════════════════════════════════════╗
+' ║   E-CTRL — FLUX 2 : ADMINISTRATION & CONFIGURATION SYSTÈME      ║
+' ╚══════════════════════════════════════════════════════════════════╝
+
+!theme plain
+skinparam shadowing false
+skinparam DefaultFontName "Segoe UI"
+skinparam DefaultFontSize 11
+skinparam dpi 150
+skinparam roundCorner 10
+skinparam BoxPadding 14
+skinparam ParticipantPadding 20
+skinparam SequenceMessageAlignment center
+
+skinparam ActorBackgroundColor #FFFFFF
+skinparam ActorBorderColor     #1A365D
+skinparam ActorFontColor       #1A365D
+skinparam ActorFontSize        12
+skinparam ActorFontStyle       bold
+
+skinparam ParticipantBackgroundColor #1A365D
+skinparam ParticipantBorderColor     #0D2137
+skinparam ParticipantFontColor       #FFFFFF
+skinparam ParticipantFontSize        11
+skinparam ParticipantFontStyle       bold
+
+skinparam DatabaseBackgroundColor #2C7A7B
+skinparam DatabaseBorderColor     #1D5151
+skinparam DatabaseFontColor       #FFFFFF
+skinparam DatabaseFontStyle       bold
+
+skinparam SequenceBoxBackgroundColor #F0FFF4
+skinparam SequenceBoxBorderColor     #9AE6B4
+skinparam SequenceBoxFontColor       #1A365D
+skinparam SequenceBoxFontSize        13
+skinparam SequenceBoxFontStyle       bold
+
+skinparam SequenceGroupBackgroundColor #EBF8FF
+skinparam SequenceGroupBorderColor     #3182CE
+skinparam SequenceGroupFontColor       #1A365D
+skinparam SequenceGroupHeaderFontColor #1A365D
+skinparam SequenceGroupFontSize        11
+skinparam SequenceGroupFontStyle       bold
+
+skinparam SequenceLifeLineBorderColor     #3182CE
+skinparam SequenceLifeLineBackgroundColor #EBF8FF
+
+skinparam ArrowColor     #2B6CB0
+skinparam ArrowFontName  "Segoe UI"
+skinparam ArrowFontSize  10
+skinparam ArrowFontColor #2D3748
+skinparam ArrowThickness 1.5
+
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor     #F9A825
+skinparam NoteFontName        "Segoe UI"
+skinparam NoteFontSize        10
+skinparam NoteFontColor       #37474F
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 2 — ADMINISTRATION & CONFIGURATION DU SYSTÈME
+' ══════════════════════════════════════════════════════════════
+box "FLUX 2 — Administration & Configuration du Système" #F0FFF4
+  actor "Administrateur" as ADMIN
+  participant "Interface\nAdministrateur" as UI2
+  participant "UserController\n(Laravel)" as UC
+  participant "FiliereController\n(Laravel)" as FC
+  participant "JournalAudit\n[Service]" as AUD
+  database "MySQL\nDatabase" as DB2
+end box
+
+autonumber "<b>[2.#]</b>"
+
+== Gestion des Utilisateurs ==
+
+ADMIN -> UI2  : Naviguer vers « Gestion Utilisateurs »
+activate UI2
+UI2   -> UC   : GET /admin/utilisateurs
+activate UC
+UC    -> DB2  : SELECT * FROM utilisateurs\nORDER BY role
+activate DB2
+DB2  --> UC   : Liste des utilisateurs\n(admins, conseillers, étudiants)
+deactivate DB2
+UC   --> UI2  : Collection d'utilisateurs
+deactivate UC
+UI2  --> ADMIN : Afficher tableau de gestion
+deactivate UI2
+
+ADMIN -> UI2  : Clic « Ajouter Conseiller »\n(nom, courriel, motDePasse, role="conseiller")
+activate UI2
+UI2   -> UC   : POST /admin/utilisateurs\n{ nom, courriel, motDePasse, role }
+activate UC
+UC    -> DB2  : INSERT INTO utilisateurs\n(nom, courriel, motDePasse_hash, role)
+activate DB2
+DB2  --> UC   : Utilisateur créé (id généré)
+deactivate DB2
+UC    -> AUD  : logAction("CREATE_USER", admin.id, user.id)
+activate AUD
+AUD   -> DB2  : INSERT INTO logs_audit\n(action, acteur_id, cible_id, date)
+activate DB2
+DB2  --> AUD  : Log enregistré
+deactivate DB2
+deactivate AUD
+UC   --> UI2  : 201 Created
+deactivate UC
+UI2  --> ADMIN : ✅ Notification « Utilisateur créé »
+deactivate UI2
+
+== Configuration des Seuils d'Orientation (SDO) ==
+
+ADMIN -> UI2  : Naviguer vers « Gestion des Filières »
+activate UI2
+UI2   -> FC   : GET /admin/filieres
+activate FC
+FC    -> DB2  : SELECT codeFiliere, nomFiliere,\nsdo2023, sdo2024, sdo2025\nFROM filieres
+activate DB2
+DB2  --> FC   : Catalogue complet des filières
+deactivate DB2
+FC   --> UI2  : Liste des filières
+deactivate FC
+UI2  --> ADMIN : Afficher le tableau des seuils SDO
+deactivate UI2
+
+ADMIN -> UI2  : Modifier seuil SDO 2025\nd'une filière (ex: 14.75)
+activate UI2
+UI2   -> FC   : PUT /admin/filieres/{code}\n{ sdo2025: 14.75 }
+activate FC
+FC    -> DB2  : UPDATE filieres\nSET sdo2025 = 14.75\nWHERE codeFiliere = ?
+activate DB2
+DB2  --> FC   : Seuil mis à jour
+deactivate DB2
+FC    -> AUD  : logAction("UPDATE_SDO", admin.id, filiere.code)
+activate AUD
+AUD   -> DB2  : INSERT INTO logs_audit (...)
+activate DB2
+DB2  --> AUD  : Log enregistré
+deactivate DB2
+deactivate AUD
+FC   --> UI2  : 200 OK
+deactivate FC
+UI2  --> ADMIN : ✅ Confirmation de mise à jour
+deactivate UI2
+
+== Consultation du Journal d'Audit ==
+
+ADMIN -> UI2  : Naviguer vers « Journal d'Audit »
+activate UI2
+UI2   -> AUD  : consulterJournalAudit(filters)
+activate AUD
+AUD   -> DB2  : SELECT action, acteur_id, cible_id, date\nFROM logs_audit\nORDER BY date DESC
+activate DB2
+DB2  --> AUD  : Historique complet des événements système
+deactivate DB2
+AUD  --> UI2  : Événements paginés
+deactivate AUD
+UI2  --> ADMIN : Afficher le journal d'audit complet\navec filtres (date, action, acteur)
+deactivate UI2
+
+@enduml

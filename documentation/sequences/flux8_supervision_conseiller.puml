@@ -1,0 +1,190 @@
+@startuml FLUX8_Supervision_Conseiller
+
+' ╔══════════════════════════════════════════════════════════════════╗
+' ║   E-CTRL — FLUX 8 : SUPERVISION & COACHING PAR LE CONSEILLER    ║
+' ╚══════════════════════════════════════════════════════════════════╝
+
+!theme plain
+skinparam shadowing false
+skinparam DefaultFontName "Segoe UI"
+skinparam DefaultFontSize 11
+skinparam dpi 150
+skinparam roundCorner 10
+skinparam BoxPadding 14
+skinparam ParticipantPadding 20
+skinparam SequenceMessageAlignment center
+
+skinparam ActorBackgroundColor #FFFFFF
+skinparam ActorBorderColor     #1A365D
+skinparam ActorFontColor       #1A365D
+skinparam ActorFontSize        12
+skinparam ActorFontStyle       bold
+
+skinparam ParticipantBackgroundColor #1A365D
+skinparam ParticipantBorderColor     #0D2137
+skinparam ParticipantFontColor       #FFFFFF
+skinparam ParticipantFontSize        11
+skinparam ParticipantFontStyle       bold
+
+skinparam DatabaseBackgroundColor #2C7A7B
+skinparam DatabaseBorderColor     #1D5151
+skinparam DatabaseFontColor       #FFFFFF
+skinparam DatabaseFontStyle       bold
+
+skinparam SequenceBoxBackgroundColor #F9F5FF
+skinparam SequenceBoxBorderColor     #9F7AEA
+skinparam SequenceBoxFontColor       #1A365D
+skinparam SequenceBoxFontSize        13
+skinparam SequenceBoxFontStyle       bold
+
+skinparam SequenceGroupBackgroundColor #EBF8FF
+skinparam SequenceGroupBorderColor     #3182CE
+skinparam SequenceGroupFontColor       #1A365D
+skinparam SequenceGroupHeaderFontColor #1A365D
+skinparam SequenceGroupFontSize        11
+skinparam SequenceGroupFontStyle       bold
+
+skinparam SequenceLifeLineBorderColor     #3182CE
+skinparam SequenceLifeLineBackgroundColor #EBF8FF
+
+skinparam ArrowColor     #2B6CB0
+skinparam ArrowFontName  "Segoe UI"
+skinparam ArrowFontSize  10
+skinparam ArrowFontColor #2D3748
+skinparam ArrowThickness 1.5
+
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor     #F9A825
+skinparam NoteFontName        "Segoe UI"
+skinparam NoteFontSize        10
+skinparam NoteFontColor       #37474F
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 8 — SUPERVISION, COACHING & VALIDATION PAR LE CONSEILLER
+' ══════════════════════════════════════════════════════════════
+box "FLUX 8 — Supervision, Coaching & Validation par le Conseiller" #F9F5FF
+  actor "Conseiller\nd'Orientation" as CONS
+  participant "Interface\nConseiller" as UI8
+  participant "ConseillerController\n(Laravel)" as CCT
+  participant "FeuilleDerouteController\n(Laravel)" as FDC
+  participant "MessagerieService\n(Laravel)" as MSG
+  database "MySQL\nDatabase" as DB8
+end box
+
+autonumber "<b>[8.#]</b>"
+
+== Étape 1 : Tableau de Supervision des Étudiants ==
+
+CONS  -> UI8  : Accéder au « Tableau de Supervision »
+activate UI8
+UI8   -> CCT  : GET /conseiller/etudiants
+activate CCT
+CCT   -> DB8  : SELECT u.id, u.nom, u.courriel,\n  p.scoreFG, p.statut, p.progression,\n  pr.codeHolland\nFROM utilisateurs u\nJOIN profils p ON u.id = p.idUtilisateur\nLEFT JOIN profil_riasecs pr\n  ON u.id = pr.idUtilisateur\nWHERE u.role = "etudiant"\nORDER BY p.progression DESC
+activate DB8
+DB8  --> CCT  : Liste des étudiants supervisés\navec indicateurs de progression
+deactivate DB8
+CCT  --> UI8  : Collection d'étudiants paginée
+deactivate CCT
+UI8  --> CONS : Tableau de bord de supervision :\n• Liste étudiants + Score FG + Code Holland\n• Barre de progression du profil\n• Statut de la feuille de route
+deactivate UI8
+
+== Étape 2 : Consultation du Dossier Complet d'un Étudiant ==
+
+CONS  -> UI8  : Clic sur un étudiant → « Voir le dossier »
+activate UI8
+UI8   -> CCT  : GET /conseiller/etudiants/{id}/dossier
+activate CCT
+
+CCT   -> DB8  : Profil académique\nSELECT * FROM profils\nWHERE idUtilisateur = ?
+activate DB8
+DB8  --> CCT  : Notes + Score FG + progression
+deactivate DB8
+
+CCT   -> DB8  : Résultats RIASEC\nSELECT * FROM profil_riasecs\nWHERE idUtilisateur = ?
+activate DB8
+DB8  --> CCT  : Code Holland + scores RIASEC + GATB
+deactivate DB8
+
+CCT   -> DB8  : Simulations What-If\nSELECT * FROM simulations\nWHERE idUtilisateur = ?
+activate DB8
+DB8  --> CCT  : Historique des scénarios simulés
+deactivate DB8
+
+CCT   -> DB8  : Recommandations IA\nSELECT * FROM formations\nWHERE idUtilisateur = ?\nORDER BY scoreCorrespondance DESC LIMIT 5
+activate DB8
+DB8  --> CCT  : Top 5 filières recommandées par l'IA
+deactivate DB8
+
+CCT  --> UI8  : Dossier complet de l'étudiant
+deactivate CCT
+UI8  --> CONS : Afficher le Dossier Complet :\n• Notes par matière + Score FG calculé\n• Graphique radar RIASEC (6 dimensions)\n• Aptitudes cognitives GATB\n• Historique simulations What-If\n• Top 5 recommandations IA
+deactivate UI8
+
+== Étape 3 : Saisie du Plan de Coaching & Observations ==
+
+CONS  -> UI8  : Rédiger le plan de coaching\net les observations personnalisées
+activate UI8
+UI8   -> CCT  : PUT /conseiller/etudiants/{id}/coaching\n{ observationsConseiller: "...",\n  planCoaching: "..." }
+activate CCT
+CCT   -> DB8  : UPDATE profils\nSET observationsConseiller = ?,\n    planCoaching = ?\nWHERE idUtilisateur = ?
+activate DB8
+DB8  --> CCT  : Mise à jour confirmée
+deactivate DB8
+CCT  --> UI8  : 200 OK
+deactivate CCT
+UI8  --> CONS : ✅ Plan de coaching enregistré\n(visible par l'étudiant dans son espace)
+deactivate UI8
+
+== Étape 4 : Homologation de la Feuille de Route ==
+
+CONS  -> UI8  : Clic « Valider la Trajectoire »\nde l'étudiant sélectionné
+activate UI8
+UI8   -> FDC  : PUT /conseiller/feuille-deroute/{id}/valider
+activate FDC
+
+FDC   -> DB8  : SELECT * FROM feuille_deroutes\nWHERE idEtudiant = ?
+activate DB8
+DB8  --> FDC  : Feuille de route en attente
+deactivate DB8
+
+FDC   -> DB8  : UPDATE feuille_deroutes\nSET statut = "Valide",\n    dateValidation = NOW()\nWHERE idEtudiant = ?
+activate DB8
+DB8  --> FDC  : Trajectoire homologuée
+deactivate DB8
+
+FDC  --> UI8  : 200 OK\n{ message: "Trajectoire homologuée" }
+deactivate FDC
+UI8  --> CONS : ✅ Confirmation de validation\n(Trajectoire de l'étudiant officielle)
+deactivate UI8
+
+== Étape 5 : Envoi d'un Message Direct à l'Étudiant ==
+
+CONS  -> UI8  : Rédiger et envoyer un message\nà l'étudiant (conseil, RDV, suivi…)
+activate UI8
+UI8   -> MSG  : POST /conseiller/messages\n{ idEtudiant, contenu,\n  canal="email", objet="..." }
+activate MSG
+
+MSG   -> DB8  : INSERT INTO messages\n(idExpediteur, idDestinataire,\n contenu, canal, objet,\n dateEnvoi=NOW(), statut="envoye")
+activate DB8
+DB8  --> MSG  : Message persisté en base
+deactivate DB8
+
+MSG   -> MSG  : notifier(idEtudiant)\n→ Envoi Email (SMTP Laravel Mail)\n→ Notification in-app (broadcast)
+
+note over MSG
+  <b>Canaux de notification :</b>
+  ─────────────────────────────────────────────
+  • Email SMTP      → Laravel Mail (Mailable)
+  • Notification    → Laravel Notifications
+  • Chat in-app     → enregistré dans messages
+  Le message est archivé et consultable
+  dans l'espace de messagerie des deux parties.
+end note
+
+MSG  --> UI8  : Message envoyé avec succès
+deactivate MSG
+
+UI8  --> CONS : ✅ Message délivré à l'étudiant\n(via email + notification in-app)
+deactivate UI8
+
+@enduml

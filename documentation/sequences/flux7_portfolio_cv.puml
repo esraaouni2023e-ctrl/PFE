@@ -1,0 +1,150 @@
+@startuml FLUX7_Portfolio_CV
+
+' ╔══════════════════════════════════════════════════════════════════╗
+' ║   E-CTRL — FLUX 7 : PORTFOLIO NUMÉRIQUE & GÉNÉRATION DE CV      ║
+' ╚══════════════════════════════════════════════════════════════════╝
+
+!theme plain
+skinparam shadowing false
+skinparam DefaultFontName "Segoe UI"
+skinparam DefaultFontSize 11
+skinparam dpi 150
+skinparam roundCorner 10
+skinparam BoxPadding 14
+skinparam ParticipantPadding 20
+skinparam SequenceMessageAlignment center
+
+skinparam ActorBackgroundColor #FFFFFF
+skinparam ActorBorderColor     #1A365D
+skinparam ActorFontColor       #1A365D
+skinparam ActorFontSize        12
+skinparam ActorFontStyle       bold
+
+skinparam ParticipantBackgroundColor #1A365D
+skinparam ParticipantBorderColor     #0D2137
+skinparam ParticipantFontColor       #FFFFFF
+skinparam ParticipantFontSize        11
+skinparam ParticipantFontStyle       bold
+
+skinparam DatabaseBackgroundColor #2C7A7B
+skinparam DatabaseBorderColor     #1D5151
+skinparam DatabaseFontColor       #FFFFFF
+skinparam DatabaseFontStyle       bold
+
+skinparam SequenceBoxBackgroundColor #FFFFF0
+skinparam SequenceBoxBorderColor     #ECC94B
+skinparam SequenceBoxFontColor       #1A365D
+skinparam SequenceBoxFontSize        13
+skinparam SequenceBoxFontStyle       bold
+
+skinparam SequenceGroupBackgroundColor #EBF8FF
+skinparam SequenceGroupBorderColor     #3182CE
+skinparam SequenceGroupFontColor       #1A365D
+skinparam SequenceGroupHeaderFontColor #1A365D
+skinparam SequenceGroupFontSize        11
+skinparam SequenceGroupFontStyle       bold
+
+skinparam SequenceLifeLineBorderColor     #3182CE
+skinparam SequenceLifeLineBackgroundColor #EBF8FF
+
+skinparam ArrowColor     #2B6CB0
+skinparam ArrowFontName  "Segoe UI"
+skinparam ArrowFontSize  10
+skinparam ArrowFontColor #2D3748
+skinparam ArrowThickness 1.5
+
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor     #F9A825
+skinparam NoteFontName        "Segoe UI"
+skinparam NoteFontSize        10
+skinparam NoteFontColor       #37474F
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 7 — PORTFOLIO NUMÉRIQUE & CV INTELLIGENT
+' ══════════════════════════════════════════════════════════════
+box "FLUX 7 — Portfolio Numérique & CV Intelligent" #FFFFF0
+  actor "Étudiant" as STU7
+  participant "Interface\nÉtudiant" as UI7
+  participant "PortfolioController\n(Laravel)" as PORT
+  participant "CVController\n(Laravel)" as CVC
+  participant "ElementPortfolio\n[Model]" as EPORT
+  participant "ProfilCV\n[Model]" as CVMOD
+  database "MySQL\nDatabase" as DB7
+end box
+
+autonumber "<b>[7.#]</b>"
+
+== Scénario A : Ajout d'un Élément au Portfolio ==
+
+STU7  -> UI7  : Clic « Ajouter un document au Portfolio »\n(Certificat / Diplôme / Projet / Attestation)
+activate UI7
+
+UI7   -> PORT : POST /etudiant/portfolio\n{ titre, description, type,\n  fichier (multipart/upload),\n  dateAjout }
+activate PORT
+
+PORT  -> PORT : Valider le fichier uploadé\n(type MIME, taille max, extension)
+
+alt <b>Fichier invalide</b>
+  PORT --> UI7  : 422 Unprocessable Entity\n{ errors: "Format non autorisé" }
+  UI7  --> STU7 : ❌ Afficher erreur de validation
+else <b>Fichier valide</b>
+  PORT  -> PORT : Stocker le fichier\n→ storage/portfolios/{idUser}/{fichier}
+
+  PORT  -> EPORT : create({\n  idUtilisateur,\n  titre,\n  description,\n  type,\n  cheminFichier,\n  dateAjout\n})
+  activate EPORT
+
+  EPORT -> DB7  : INSERT INTO element_portfolios\n(idUtilisateur, titre, description,\n type, cheminFichier, dateAjout)
+  activate DB7
+  DB7  --> EPORT : Élément enregistré (id attribué)
+  deactivate DB7
+
+  EPORT --> PORT : Élément de portfolio créé
+  deactivate EPORT
+
+  PORT --> UI7  : 201 Created\n{ message: "Document ajouté avec succès",\n  element: { id, titre, type } }
+  UI7  --> STU7 : ✅ Portfolio mis à jour\n(liste des documents affichée)
+end
+
+deactivate PORT
+deactivate UI7
+
+== Scénario B : Génération Automatique du CV Intelligent ==
+
+STU7  -> UI7  : Clic « Générer mon CV »
+activate UI7
+
+UI7   -> CVC  : GET /etudiant/cv/generer
+activate CVC
+
+CVC   -> CVMOD : findByUser(idUtilisateur)
+activate CVMOD
+
+CVMOD -> DB7  : SELECT pcv.titre, pcv.designation,\n  pcv.resume, pcv.experiences,\n  pcv.formationCV, pcv.competences,\n  ep.titre AS doc_titre, ep.type AS doc_type,\n  ep.cheminFichier\nFROM profil_cvs pcv\nLEFT JOIN element_portfolios ep\n  ON pcv.idUtilisateur = ep.idUtilisateur\nWHERE pcv.idUtilisateur = ?
+activate DB7
+DB7  --> CVMOD : Données CV + Documents du portfolio
+deactivate DB7
+
+CVMOD --> CVC : Données structurées du CV
+deactivate CVMOD
+
+note over CVC
+  <b>Génération du CV (PDF intelligent) :</b>
+  ─────────────────────────────────────────────────
+  Template professionnel compilé avec DomPDF :
+  • En-tête   : nom, désignation, résumé
+  • Section 1 : Expériences professionnelles
+  • Section 2 : Formations académiques
+  • Section 3 : Compétences (hard + soft skills)
+  • Section 4 : Projets & Certifications (depuis portfolio)
+  → Export final : fichier PDF téléchargeable
+end note
+
+CVC   -> CVC  : genererCV()\n→ Remplir le template PDF\n   avec les données agrégées
+
+CVC  --> UI7  : Fichier PDF prêt\n(Content-Type: application/pdf)
+deactivate CVC
+
+UI7  --> STU7 : ⬇ Bouton « Télécharger le CV »\n(PDF structuré et professionnel)
+deactivate UI7
+
+@enduml

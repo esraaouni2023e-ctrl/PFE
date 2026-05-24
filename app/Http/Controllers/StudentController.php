@@ -237,6 +237,17 @@ class StudentController extends Controller
             ->recents()
             ->first();
 
+        // ── Guard : les deux étapes doivent être complétées ──────────────
+        if (!$scoreFg || !$profilRiasec) {
+            $message = !$scoreFg
+                ? 'Veuillez d\'abord compléter votre profil académique et calculer votre score FG.'
+                : 'Veuillez d\'abord passer le test psychométrique RIASEC.';
+
+            return redirect()
+                ->route('student.pipeline')
+                ->with('warning', $message);
+        }
+
         $vecteurRiasec = ['R'=>0.5,'I'=>0.5,'A'=>0.5,'S'=>0.5,'E'=>0.5,'C'=>0.5];
         $codeHolland   = 'ISA';
 

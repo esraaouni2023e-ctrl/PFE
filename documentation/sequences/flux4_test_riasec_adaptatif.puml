@@ -1,0 +1,182 @@
+@startuml FLUX4_Test_RIASEC_Adaptatif
+
+' ╔══════════════════════════════════════════════════════════════════╗
+' ║   E-CTRL — FLUX 4 : TEST ADAPTATIF RIASEC / GATB                ║
+' ╚══════════════════════════════════════════════════════════════════╝
+
+!theme plain
+skinparam shadowing false
+skinparam DefaultFontName "Segoe UI"
+skinparam DefaultFontSize 11
+skinparam dpi 150
+skinparam roundCorner 10
+skinparam BoxPadding 14
+skinparam ParticipantPadding 20
+skinparam SequenceMessageAlignment center
+
+skinparam ActorBackgroundColor #FFFFFF
+skinparam ActorBorderColor     #1A365D
+skinparam ActorFontColor       #1A365D
+skinparam ActorFontSize        12
+skinparam ActorFontStyle       bold
+
+skinparam ParticipantBackgroundColor #1A365D
+skinparam ParticipantBorderColor     #0D2137
+skinparam ParticipantFontColor       #FFFFFF
+skinparam ParticipantFontSize        11
+skinparam ParticipantFontStyle       bold
+
+skinparam DatabaseBackgroundColor #2C7A7B
+skinparam DatabaseBorderColor     #1D5151
+skinparam DatabaseFontColor       #FFFFFF
+skinparam DatabaseFontStyle       bold
+
+skinparam SequenceBoxBackgroundColor #EEF2FF
+skinparam SequenceBoxBorderColor     #7C3AED
+skinparam SequenceBoxFontColor       #1A365D
+skinparam SequenceBoxFontSize        13
+skinparam SequenceBoxFontStyle       bold
+
+skinparam SequenceGroupBackgroundColor #EBF8FF
+skinparam SequenceGroupBorderColor     #3182CE
+skinparam SequenceGroupFontColor       #1A365D
+skinparam SequenceGroupHeaderFontColor #1A365D
+skinparam SequenceGroupFontSize        11
+skinparam SequenceGroupFontStyle       bold
+
+skinparam SequenceLifeLineBorderColor     #3182CE
+skinparam SequenceLifeLineBackgroundColor #EBF8FF
+
+skinparam ArrowColor     #2B6CB0
+skinparam ArrowFontName  "Segoe UI"
+skinparam ArrowFontSize  10
+skinparam ArrowFontColor #2D3748
+skinparam ArrowThickness 1.5
+
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor     #F9A825
+skinparam NoteFontName        "Segoe UI"
+skinparam NoteFontSize        10
+skinparam NoteFontColor       #37474F
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 4 — ÉVALUATION PSYCHOMÉTRIQUE ADAPTATIVE (RIASEC + GATB)
+' ══════════════════════════════════════════════════════════════
+box "FLUX 4 — Évaluation Psychométrique Adaptative (RIASEC + GATB)" #EEF2FF
+  actor "Étudiant" as STU4
+  participant "Interface\nÉtudiant" as UI4
+  participant "TestAdaptatifController\n(Laravel)" as TC
+  participant "TestAdaptatif\n[Service]" as TSVC
+  participant "QuestionRiasec\n[Model]" as QMOD
+  participant "ProfilRiasec\n[Model]" as RMOD
+  database "MySQL\nDatabase" as DB4
+end box
+
+autonumber "<b>[4.#]</b>"
+
+== Phase 1 : Initialisation de la Session de Test ==
+
+STU4  -> UI4  : Clic « Démarrer l'Évaluation Psychométrique »
+activate UI4
+UI4   -> TC   : POST /etudiant/test/demarrer
+activate TC
+TC    -> TSVC : demarrerSession(idUtilisateur)
+activate TSVC
+TSVC  -> DB4  : INSERT INTO sessions_test\n(idUtilisateur, statut="en_cours",\n dateDebut=NOW())
+activate DB4
+DB4  --> TSVC : idSession généré (UUID)
+deactivate DB4
+TSVC --> TC   : Session initialisée
+deactivate TSVC
+TC   --> UI4  : { idSession, instructions }
+deactivate TC
+UI4  --> STU4 : Afficher instructions + lancer le test
+deactivate UI4
+
+== Phase 2 : Passation Adaptative (Boucle Question-Réponse) ==
+
+loop <b>Tant que test non terminé</b> ET evaluerArretPrecoce() = FALSE
+
+  STU4  -> UI4  : Demander la question suivante
+  activate UI4
+  UI4   -> TC   : GET /etudiant/test/{idSession}/question
+  activate TC
+  TC    -> TSVC : getQuestionSuivante(idSession)
+  activate TSVC
+
+  TSVC  -> QMOD : Sélectionner la question optimale\n(dimension sous-représentée,\n non encore posée)
+  activate QMOD
+  QMOD  -> DB4  : SELECT id, texte, dimension, echelleMax\nFROM questions_riasec\nWHERE id NOT IN (répondues)\nORDER BY dimension_weight DESC\nLIMIT 1
+  activate DB4
+  DB4  --> QMOD : Question sélectionnée
+  deactivate DB4
+  QMOD --> TSVC : Question { id, texte, dimension, echelleMax }
+  deactivate QMOD
+
+  TSVC --> TC   : Question à afficher
+  deactivate TSVC
+  TC   --> UI4  : { question, progression_% }
+  deactivate TC
+  UI4  --> STU4 : Afficher question (Échelle Likert 1–5)
+  deactivate UI4
+
+  STU4  -> UI4  : Sélectionner réponse (valeur ∈ {1, 2, 3, 4, 5})
+  activate UI4
+  UI4   -> TC   : POST /etudiant/test/{idSession}/reponse\n{ idQuestion, valeur }
+  activate TC
+  TC    -> TSVC : traiterReponse(idSession, idQuestion, valeur)
+  activate TSVC
+  TSVC  -> DB4  : INSERT INTO reponses_test\n(idSession, idQuestion, valeur, timestamp)
+  activate DB4
+  DB4  --> TSVC : Réponse enregistrée
+  deactivate DB4
+
+  TSVC  -> TSVC : evaluerArretPrecoce()
+  note over TSVC
+    <b>Algorithme d'arrêt précoce :</b>
+    ─────────────────────────────────────────────
+    Si indiceConfiance > 0.85 (réponses cohérentes)
+    → Le test s'arrête pour éviter la fatigue cognitive.
+    Sinon → continuer jusqu'à épuisement des questions.
+  end note
+
+  TSVC --> TC   : { statut: "en_cours" | "termine",\n  progression_% }
+  deactivate TSVC
+  TC   --> UI4  : Statut du test
+  deactivate TC
+  UI4  --> STU4 : Barre de progression mise à jour
+  deactivate UI4
+
+end
+
+== Phase 3 : Finalisation & Génération du Profil RIASEC ==
+
+STU4  -> UI4  : (Dernier écran) Test complété
+activate UI4
+UI4   -> TC   : POST /etudiant/test/{idSession}/finaliser
+activate TC
+TC    -> TSVC : finaliserTest(idSession)
+activate TSVC
+
+TSVC  -> TSVC : recalculerCodeHolland()\n→ Score R, I, A, S, E, C par somme pondérée
+TSVC  -> TSVC : getScoresParDimension()
+TSVC  -> TSVC : getDimensionDominante()\n→ ex: "R" (Réaliste) dominant
+TSVC  -> TSVC : calculerScoresGATB()\n→ G (général), V (verbal),\n  N (numérique), S (spatial)
+TSVC  -> TSVC : calculerScoreResilience()\n+ scoreCoherence()\n+ indiceConfiance()
+
+TSVC  -> RMOD : create({ idSession, idUtilisateur,\n  scores_RIASEC, codeHolland,\n  scores_GATB, interpretation,\n  arretPrecoce, statut="complete" })
+activate RMOD
+RMOD  -> DB4  : INSERT INTO profil_riasecs\n(idSession, idUtilisateur,\n score_R, score_I, score_A,\n score_S, score_E, score_C,\n codeHolland, scoreGATB_G,\n scoreGATB_V, scoreGATB_N, scoreGATB_S,\n scoreResilience, scoreCoherence,\n indiceConfiance, interpretation,\n statut, dateCompletion)
+activate DB4
+DB4  --> RMOD : ProfilRiasec persisté
+deactivate DB4
+RMOD --> TSVC : ProfilRiasec créé
+deactivate RMOD
+TSVC --> TC   : Rapport complet RIASEC + GATB
+deactivate TSVC
+TC   --> UI4  : { codeHolland, scoresRIASEC,\n  scoresGATB, interpretation }
+deactivate TC
+UI4  --> STU4 : Afficher Rapport de Personnalité :\n• Code Holland : ex. « RIA »\n• Graphique radar des 6 dimensions\n• Aptitudes GATB (G, V, N, S)\n• Interprétation personnalisée
+deactivate UI4
+
+@enduml

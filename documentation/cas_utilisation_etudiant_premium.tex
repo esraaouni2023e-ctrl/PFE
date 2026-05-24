@@ -1,0 +1,448 @@
+% =========================================================================
+% CONFIGURATION PREAMBULE LATEX RECOMMANDÉE (À Insérer au début du document)
+% =========================================================================
+%
+% \usepackage{array}
+% \usepackage{tabularx}   % Indispensable pour des colonnes flexibles et auto-ajustées
+% \usepackage{booktabs}   % Pour des lignes de séparation professionnelles
+% \usepackage{colortbl}   % Pour les fonds colorés
+% \usepackage{xcolor}     % Gestion avancée des couleurs
+% \usepackage{enumitem}   % Pour éliminer les espaces verticaux des listes dans les cellules
+%
+% % Palette de couleurs Premium
+% \definecolor{primaryColor}{RGB}{30, 80, 160}      % Bleu Royal (En-tête)
+% \definecolor{accentColor}{RGB}{235, 90, 40}       % Orange (Alerte / Alternatif)
+% \definecolor{rowgray}{RGB}{245, 247, 250}         % Gris très doux (Alternance)
+% \definecolor{bordergray}{RGB}{210, 215, 223}      % Gris de bordure subtil
+%
+% % Types de colonnes personnalisés avec Tabularx
+% \newcolumntype{L}{>{\raggedright\arraybackslash\bfseries\color{primaryColor}}p{4.2cm}}
+% \newcolumntype{R}{>{\raggedright\arraybackslash}X}
+%
+% % Commande En-tête de Cas d'Utilisation
+% \newcommand{\ucheader}[2]{%
+%   \noindent\colorbox{primaryColor}{\parbox{\dimexpr\linewidth-2\fboxsep}{%
+%     \color{white}\bfseries\large\strut \ #1 \hfill Acteur principal : #2 \ %
+%   }}\\[2pt]
+% }
+
+\section{Modélisation des Cas d'Utilisation --- Acteur Étudiant}
+Cette section présente la modélisation fonctionnelle et technique détaillée des 10 cas d'utilisation majeurs de l'étudiant. Les scénarios intègrent les aspects algorithmiques (moteur CAT 2PL, moteur IA SIAEPI v4.1) et les composants MVC correspondants.
+
+% =========================================================================
+% UC 01 : S'AUTHENTIFIER (2FA INTÉGRÉ)
+% =========================================================================
+\subsection{S'authentifier (2FA Intégré)}
+\ucheader{UC-E01 : S'authentifier (Double facteur par OTP)}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E01 \\
+\hline
+Cas d'utilisation & S'authentifier avec double facteur (2FA OTP) \\
+\hline
+\rowcolor{rowgray}Préconditions & L'étudiant possède un compte actif et validé en base de données (\texttt{status = 'active'}). \\
+\hline
+Postconditions & Session utilisateur sécurisée active (Token Sanctum), redirection vers le tableau de bord. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant soumet le formulaire de connexion sur la page \texttt{/login}. \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item L'étudiant saisit ses identifiants (courriel et mot de passe).
+  \item Le système valide le format des données et vérifie les identifiants via \texttt{Hash::check()} (Bcrypt).
+  \item Le système identifie que la double authentification (2FA) est active pour ce compte.
+  \item Le système génère un code OTP (One-Time Password) à 6 chiffres cryptographiquement sûr, l'enregistre en session (\texttt{expires\_at = now()->addMinutes(10)}) et l'envoie par courriel via SMTP.
+  \item Le système redirige l'étudiant vers l'interface de saisie OTP.
+  \item L'étudiant saisit le code reçu.
+  \item Le système vérifie et valide le code OTP, initie la session, génère le token d'accès Sanctum et redirige vers \texttt{/student/dashboard}.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Identifiants erronés :} À l'étape 2, le système rejette la connexion et affiche un message d'erreur.
+  \item \textbf{Code OTP expiré ou incorrect :} À l'étape 7, le code est rejeté. Le système affiche une alerte en rouge et propose un bouton pour régénérer et renvoyer un nouvel OTP.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{AuthController}, \texttt{TwoFactorController}, middleware \texttt{two-factor}, \texttt{User} (Model), vue \texttt{auth/login.blade.php}. \\
+\hline
+\end{tabularx}
+
+\vspace{1.5em}
+
+% =========================================================================
+% UC 02 : PASSER LE TEST D'ORIENTATION INTÉLLIGENT (CAT v5.2)
+% =========================================================================
+\subsection{Passer un test d'orientation intelligent (CAT)}
+\ucheader{UC-E02 : Passer le test d'orientation adaptatif (CAT v5.2)}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E02 \\
+\hline
+Cas d'utilisation & Passer un test d'orientation intelligent (CAT v5.2) \\
+\hline
+\rowcolor{rowgray}Préconditions & Étudiant connecté~; aucun test actif ou en cours d'analyse. \\
+\hline
+Postconditions & Profil psychométrique complet enregistré (RIASEC 6 dimensions + GATB 8 aptitudes), avec indice de confiance et arrêt précoce documentés. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant clique sur « Commencer l'évaluation » depuis son espace. \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item Le système initialise une session de test avec un identifiant unique (UUID).
+  \item Le moteur adaptatif \texttt{AdaptiveTestEngine} sélectionne la première question du pool selon ses paramètres de difficulté ($b$) et de discrimination ($a$) (modèle IRT 2PL).
+  \item Le système affiche la question à l'écran.
+  \item L'étudiant répond sur une échelle de Likert de 1 (Pas du tout d'accord) à 5 (Tout à fait d'accord).
+  \item Le service \texttt{BehavioralAnalyzer} enregistre le temps de réponse et analyse le pattern de cohérence comportementale.
+  \item Le système recalcul le score latent provisoire de l'étudiant ($\theta$) par la méthode de Newton-Raphson.
+  \item Les étapes 2 à 6 se répètent.
+  \item L'algorithme d'arrêt précoce (\textit{Early Stopping}) détecte que l'erreur de mesure SEM (Standard Error of Measurement) est inférieure au seuil optimal ($SEM < 0.15$).
+  \item Le système met fin au test, compile le profil RIASEC, calcule les scores d'aptitudes cognitives GATB et enregistre le profil final en base de données.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Suspicion d'incohérence/fraude :} À l'étape 5, si le temps de réponse est anormalement rapide ($< 1.5$ seconde) ou si les réponses s'avèrent hautement contradictoires, le système lève le drapeau \texttt{fraud\_flag} et diminue l'indice de confiance du test.
+  \item \textbf{Interruption volontaire :} Si l'étudiant quitte le test en cours, l'état d'avancement est stocké temporairement pour lui permettre de le reprendre plus tard.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{TestManager}, \texttt{AdaptiveTestEngine}, \texttt{BehavioralAnalyzer}, \texttt{EarlyStoppingService}, \texttt{GatbCalculator}, \texttt{ProfileRiasec} (Model). \\
+\hline
+\end{tabularx}
+
+\vspace{1.5em}
+
+% =========================================================================
+% UC 03 : CONSULTER RECOMMANDATIONS (SIAEPI v4.1)
+% =========================================================================
+\subsection{Consulter les recommandations personnalisées}
+\ucheader{UC-E03 : Consulter les recommandations de filières (SIAEPI v4.1)}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E03 \\
+\hline
+Cas d'utilisation & Consulter les recommandations de filières (SIAEPI v4.1) \\
+\hline
+\rowcolor{rowgray}Préconditions & Profil académique complet (notes BAC) et test psychométrique CAT terminé. \\
+\hline
+Postconditions & Affichage ordonné des filières universitaires avec score d'adéquation, Gap Analysis et front de Pareto. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant clique sur l'onglet « Mes Recommandations ». \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item L'étudiant accède à l'espace de recommandations d'orientation.
+  \item Le moteur \texttt{SiaepiRecommendationEngine} extrait le profil RIASEC, les aptitudes GATB et la moyenne générale de l'étudiant.
+  \item Le système applique les filtres d'exclusion durs (BAC non accepté pour la filière, moyenne générale inférieure au score d'orientation SDO).
+  \item Le moteur calcule un score d'adéquation pondéré global (sur 100) pour chaque formation.
+  \item Le système filtre et extrait les filières optimales au sens de Pareto (meilleure adéquation psychométrique par rapport à l'accessibilité).
+  \item Les recommandations finales s'affichent sous forme de liste interactive (Top-12) avec une Gap Analysis (analyse visuelle des compétences à acquérir).
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Données scolaires absentes :} À l'étape 2, si les notes du BAC ne sont pas renseignées, le système redirige automatiquement l'étudiant vers le formulaire du profil académique.
+  \item \textbf{Aucun matching trouvé :} Si aucun choix ne correspond aux filtres durs, le système propose un parcours alternatif et suggère de planifier un entretien avec un conseiller.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{SiaepiRecommendationEngine}, \texttt{ScoreFGService}, \texttt{Filiere} (Model), vue \texttt{student/recommendations.blade.php}. \\
+\hline
+\end{tabularx}
+
+\vspace{1.5em}
+
+% =========================================================================
+% UC 04 : GÉRER PROFIL ACADÉMIQUE
+% =========================================================================
+\subsection{Gérer son profil académique (Notes du BAC)}
+\ucheader{UC-E04 : Gérer son profil académique (Notes & Score FG)}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E04 \\
+\hline
+Cas d'utilisation & Gérer son profil académique \\
+\hline
+\rowcolor{rowgray}Préconditions & Étudiant connecté. \\
+\hline
+Postconditions & Section du BAC et notes enregistrées~; score FG officiel calculé et enregistré en base de données. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant ouvre l'onglet « Profil Académique » depuis son espace personnel. \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item L'étudiant ouvre le formulaire du profil académique.
+  \item Il sélectionne sa section de Baccalauréat tunisien (Mathématiques, Sciences Expérimentales, Techniques, Économie-Gestion, Lettres, Informatique ou Sport).
+  \item Le système adapte le formulaire en affichant dynamiquement la liste des matières et les coefficients associés à la section sélectionnée.
+  \item L'étudiant saisit ses notes par matière ainsi que sa moyenne générale.
+  \item Le système valide la saisie (les notes doivent être numériques et comprises entre 0.00 et 20.00).
+  \item Le système exécute le calcul du Score de Formation Générale (score FG) selon les règles ministérielles et met à jour le modèle \texttt{Profile}.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Notes hors limites :} À l'étape 5, si une note est négative ou supérieure à 20, le système interrompt la sauvegarde, surligne le champ en rouge et affiche un message d'erreur explicatif.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{StudentProfileController}, \texttt{ScoreFGService}, \texttt{Profile} (Model), vue \texttt{student/profil.blade.php}. \\
+\hline
+\end{tabularx}
+
+\vspace{1.5em}
+
+% =========================================================================
+% UC 05 : COMPARATEUR DE FILIÈRES
+% =========================================================================
+\subsection{Utiliser le comparateur de filières}
+\ucheader{UC-E05 : Utiliser le comparateur de filières}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E05 \\
+\hline
+Cas d'utilisation & Utiliser le comparateur de filières \\
+\hline
+\rowcolor{rowgray}Préconditions & Étudiant connecté. \\
+\hline
+Postconditions & Matrice comparative multi-critères générée à l'écran, avec graphique radar et indicateurs colorés. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant sélectionne des filières et clique sur « Comparer ». \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item L'étudiant accède au module de comparaison.
+  \item Il sélectionne 2 ou 3 filières d'études dans le catalogue disponible.
+  \item Il valide pour lancer la comparaison.
+  \item Le système extrait les données associées (historique des seuils SDO, taux d'employabilité à 3 ans, salaire moyen de départ, adéquation RIASEC, situation géographique).
+  \item Le système génère et affiche un tableau comparatif avec des indicateurs de faisabilité colorés (Vert/Orange/Rouge) et un graphique radar interactif.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Sélection insuffisante :} À l'étape 2, si l'étudiant sélectionne moins de 2 filières, le système désactive le bouton de comparaison et affiche une infobulle d'aide.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{ComparateurController}, \texttt{Filiere} (Model), vue \texttt{student/comparateur/index.blade.php}. \\
+\hline
+\end{tabularx}
+
+\vspace{1.5em}
+
+% =========================================================================
+% UC 06 : CV BUILDER
+% =========================================================================
+\subsection{Créer et gérer ses CV (CV Builder)}
+\ucheader{UC-E06 : Créer et gérer ses CV (CV Builder)}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E06 \\
+\hline
+Cas d'utilisation & Créer et gérer ses CV \\
+\hline
+\rowcolor{rowgray}Préconditions & Étudiant connecté. \\
+\hline
+Postconditions & CV structuré enregistré en base de données, disponible en prévisualisation et exportable en PDF/DOCX. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant accède au « CV Builder » depuis son menu d'orientation. \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item L'étudiant se rend dans l'espace CV Builder.
+  \item Il choisit de créer un nouveau CV ou de modifier un modèle existant.
+  \item Il remplit les sections du formulaire (coordonnées, résumé professionnel, formations, expériences professionnelles ou associatives, compétences, langues parlées).
+  \item Il sélectionne un template graphique.
+  \item Le système génère une prévisualisation dynamique en temps réel.
+  \item L'étudiant clique sur « Exporter », et le système compile et télécharge le fichier (PDF via \texttt{PdfGeneratorService} ou DOCX).
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Clonage de CV :} L'étudiant peut dupliquer un CV existant pour l'adapter rapidement à une autre candidature~; le système copie l'intégralité des données dans un nouveau projet indépendant.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{CvBuilderController}, \texttt{PdfGeneratorService}, \texttt{DocxGeneratorService}, \texttt{CvProfile} (Model). \\
+\hline
+\end{tabularx}
+
+\vspace{1.5em}
+
+% =========================================================================
+% UC 07 : ROADMAP DE CARRIÈRE (IA GEMINI)
+% =========================================================================
+\subsection{Générer sa roadmap de carrière}
+\ucheader{UC-E07 : Générer sa roadmap de carrière (IA Gemini)}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E07 \\
+\hline
+Cas d'utilisation & Générer sa roadmap de carrière \\
+\hline
+\rowcolor{rowgray}Préconditions & Test psychologique RIASEC/CAT terminé et filières favorites ajoutées. \\
+\hline
+Postconditions & Frise chronologique et étapes de carrière (études, compétences, certifications) générées par l'IA et stockées en base. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant clique sur « Générer ma Roadmap ». \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item L'étudiant demande la génération de sa feuille de route de carrière.
+  \item Le système agrège les données de son profil (trigramme Holland RIASEC, notes du BAC, projet professionnel souhaité).
+  \item Le système prépare le prompt contextuel et l'envoie de manière sécurisée à l'API Gemini.
+  \item L'IA de Gemini génère un plan d'orientation structuré par étapes (années d'études, compétences cibles, certifications à passer, secteurs d'activité propices).
+  \item Le système enregistre les étapes générées dans \texttt{career\_roadmaps} et les affiche sous forme de frise interactive.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Indisponibilité du service IA :} Si l'API Gemini ne répond pas, le système applique un plan de repli (\textit{fallback}) en chargeant une feuille de route pré-modélisée correspondant à la filière favorite de l'étudiant.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{RoadmapController}, \texttt{ChatbotController}, \texttt{CareerRoadmap} (Model). \\
+\hline
+\end{tabularx}
+
+\vspace{1.5em}
+
+% =========================================================================
+% UC 08 : SIMULATEUR DE CHOIX (WHAT-IF)
+% =========================================================================
+\subsection{Utiliser le simulateur de choix (What-If)}
+\ucheader{UC-E08 : Utiliser le simulateur de choix (What-If)}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E08 \\
+\hline
+Cas d'utilisation & Utiliser le simulateur de choix (What-If) \\
+\hline
+\rowcolor{rowgray}Préconditions & Étudiant connecté. \\
+\hline
+Postconditions & Scénario simulé (nouveau score FG, filières débloquées, ROI) calculé et ajouté à l'historique des simulations. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant accède au « Simulateur What-If » depuis le menu de navigation. \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item L'étudiant ouvre le module de simulation.
+  \item Il choisit l'axe « Notes du BAC ».
+  \item Il fait glisser les curseurs interactifs pour ajuster virtuellement ses notes (par exemple, augmenter la note de mathématiques de 12 à 16).
+  \item Le service \texttt{FutureSimulatorService} recalcule instantanément le score FG théorique de l'étudiant.
+  \item Le système compare ce score simulé avec les seuils d'orientation réels SDO de l'année précédente.
+  \item Le système affiche le delta (nouvelles filières universitaires désormais accessibles, salaire prévisionnel de sortie) et l'étudiant enregistre la simulation.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Nettoyage de l'historique :} L'étudiant peut à tout moment supprimer une ancienne simulation obsolète via l'icône de corbeille (requête \texttt{DELETE}).
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{WhatIfController}, \texttt{FutureSimulatorService}, \texttt{SimulationHistory} (Model). \\
+\hline
+\end{tabularx}
+
+\vspace{1.5em}
+
+% =========================================================================
+% UC 09 : CHATBOT INTELLIGENT (NOVA)
+% =========================================================================
+\subsection{Interagir avec le chatbot intelligent (Nova)}
+\ucheader{UC-E09 : Interagir avec le chatbot intelligent (Nova)}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E09 \\
+\hline
+Cas d'utilisation & Interagir avec le chatbot intelligent (Nova) \\
+\hline
+\rowcolor{rowgray}Préconditions & Étudiant connecté. \\
+\hline
+Postconditions & Réponse contextuelle, personnalisée et fluide renvoyée instantanément et archivée en session. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant envoie une question dans la boîte de dialogue de l'assistant virtuel. \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item L'étudiant ouvre la fenêtre de discussion de l'assistant virtuel « Nova ».
+  \item Il formule sa question en langage naturel (ex. « Quelles options s'offrent à moi avec un code Holland IAS ? »).
+  \item Le système intercepte la requête et injecte les métadonnées de l'étudiant (notes majeures, profil RIASEC, score FG).
+  \item Le service \texttt{NovaOrientationService} envoie la requête enrichie à l'API Gemini (modèle Flash principal).
+  \item Le système reçoit la réponse formatée et l'affiche dans l'interface de chat.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Quota API dépassé (Erreur 429) :} À l'étape 4, si l'API Gemini échoue ou renvoie une erreur de limite de requêtes, le système bascule automatiquement vers le service de secours local (\texttt{OllamaService} hébergeant un modèle d'orientation dédié) pour garantir une réponse fluide sans interruption.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{NovaOrientationController}, \texttt{NovaOrientationService}, \texttt{OllamaService}, vue du chat Nova. \\
+\hline
+\end{tabularx}
+
+\vspace{1.5em}
+
+% =========================================================================
+% UC 10 : MESSAGERIE INTERNE
+% =========================================================================
+\subsection{Communiquer via la messagerie interne}
+\ucheader{UC-E10 : Communiquer via la messagerie interne}{Étudiant}
+
+\noindent
+\arrayrulecolor{bordergray}
+\begin{tabularx}{\linewidth}{|L|R|}
+\hline
+\rowcolor{rowgray}ID & UC-E10 \\
+\hline
+Cas d'utilisation & Communiquer via la messagerie interne \\
+\hline
+\rowcolor{rowgray}Préconditions & Étudiant connecté et affecté à un conseiller d'orientation. \\
+\hline
+Postconditions & Message enregistré en base de données, lié au fil de discussion et notifié au conseiller. \\
+\hline
+\rowcolor{rowgray}Déclencheur & L'étudiant souhaite envoyer un message ou une question de suivi à son encadreur. \\
+\hline
+Scénario nominal &
+\begin{enumerate}[nosep,leftmargin=*]
+  \item L'étudiant accède au module de messagerie.
+  \item Le système identifie et charge automatiquement le conseiller d'orientation assigné à son compte.
+  \item L'étudiant rédige le sujet et le message, puis clique sur « Envoyer ».
+  \item Le système valide la saisie, enregistre le message dans la table \texttt{messages} et envoie une notification visuelle immédiate sur le tableau de bord du conseiller.
+\end{enumerate} \\
+\hline
+\rowcolor{rowgray}Scénarios alternatifs et exceptions &
+\begin{itemize}[nosep,leftmargin=*]
+  \item \textbf{Aucun conseiller affecté :} À l'étape 2, si aucun conseiller n'est lié à son dossier, le système affiche un bouton permettant de soumettre une demande d'accompagnement officielle auprès des administrateurs.
+\end{itemize} \\
+\hline
+Composants impliqués & \texttt{UserMessageController}, \texttt{Message} (Model), vue de la boîte de réception. \\
+\hline
+\end{tabularx}
+
+\vspace{2em}
+\begin{center}
+{\color{primaryColor}\rule{\linewidth}{1.5pt}}\\[0.4em]
+{\small\textbf{Fin des Cas d'Utilisation --- Acteur Étudiant}}\\[0.2em]
+{\small Modélisation optimisée pour le Jury de Soutenance}\\[0.4em]
+{\color{primaryColor}\rule{\linewidth}{1.5pt}}
+\end{center}

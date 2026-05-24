@@ -1,0 +1,145 @@
+@startuml FLUX6_Simulation_WhatIf_Chatbot
+
+' ╔══════════════════════════════════════════════════════════════════╗
+' ║   E-CTRL — FLUX 6 : SIMULATION WHAT-IF & CHATBOT IA             ║
+' ╚══════════════════════════════════════════════════════════════════╝
+
+!theme plain
+skinparam shadowing false
+skinparam DefaultFontName "Segoe UI"
+skinparam DefaultFontSize 11
+skinparam dpi 150
+skinparam roundCorner 10
+skinparam BoxPadding 14
+skinparam ParticipantPadding 20
+skinparam SequenceMessageAlignment center
+
+skinparam ActorBackgroundColor #FFFFFF
+skinparam ActorBorderColor     #1A365D
+skinparam ActorFontColor       #1A365D
+skinparam ActorFontSize        12
+skinparam ActorFontStyle       bold
+
+skinparam ParticipantBackgroundColor #1A365D
+skinparam ParticipantBorderColor     #0D2137
+skinparam ParticipantFontColor       #FFFFFF
+skinparam ParticipantFontSize        11
+skinparam ParticipantFontStyle       bold
+
+skinparam DatabaseBackgroundColor #2C7A7B
+skinparam DatabaseBorderColor     #1D5151
+skinparam DatabaseFontColor       #FFFFFF
+skinparam DatabaseFontStyle       bold
+
+skinparam SequenceBoxBackgroundColor #F0FFF4
+skinparam SequenceBoxBorderColor     #68D391
+skinparam SequenceBoxFontColor       #1A365D
+skinparam SequenceBoxFontSize        13
+skinparam SequenceBoxFontStyle       bold
+
+skinparam SequenceGroupBackgroundColor #EBF8FF
+skinparam SequenceGroupBorderColor     #3182CE
+skinparam SequenceGroupFontColor       #1A365D
+skinparam SequenceGroupHeaderFontColor #1A365D
+skinparam SequenceGroupFontSize        11
+skinparam SequenceGroupFontStyle       bold
+
+skinparam SequenceLifeLineBorderColor     #3182CE
+skinparam SequenceLifeLineBackgroundColor #EBF8FF
+
+skinparam ArrowColor     #2B6CB0
+skinparam ArrowFontName  "Segoe UI"
+skinparam ArrowFontSize  10
+skinparam ArrowFontColor #2D3748
+skinparam ArrowThickness 1.5
+
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor     #F9A825
+skinparam NoteFontName        "Segoe UI"
+skinparam NoteFontSize        10
+skinparam NoteFontColor       #37474F
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 6 — SIMULATION WHAT-IF & ASSISTANCE CHATBOT IA
+' ══════════════════════════════════════════════════════════════
+box "FLUX 6 — Simulation What-If & Assistance Chatbot IA" #F0FFF4
+  actor "Étudiant" as STU6
+  participant "Interface\nÉtudiant" as UI6
+  participant "SimulateurController\n(Laravel)" as SC
+  participant "SimulateurDecision\n[Service]" as SIM
+  participant "ChatbotController\n(Laravel)" as CC
+  participant "Chatbot\n[Service LLM]" as BOT
+  database "MySQL\nDatabase" as DB6
+end box
+
+autonumber "<b>[6.#]</b>"
+
+== Scénario A : Simulation What-If des Notes du Bac ==
+
+STU6  -> UI6  : Ouvrir le « Simulateur What-If »\nModifier virtuellement ses notes\n(ex: Maths 16 → 18, Physique 14 → 17)
+activate UI6
+
+UI6   -> SC   : POST /etudiant/simulateur\n{ notesSimulees: { maths:18,\n  physique:17, français:14, … } }
+activate SC
+
+SC    -> SIM  : simulerScoreFG(notesSimulees)
+activate SIM
+SIM   -> SIM  : Appliquer la formule FG pondérée\nsur les notes hypothétiques saisies
+SIM  --> SC   : scoreFG_simule = 16.4
+deactivate SIM
+
+SC    -> SIM  : comparerAdmissibilite(scoreFG_simule=16.4)
+activate SIM
+SIM   -> DB6  : SELECT codeFiliere, nomFiliere,\n  universite, sdo2025\nFROM filieres\nORDER BY sdo2025 ASC
+activate DB6
+DB6  --> SIM  : Catalogue complet des filières\n+ seuils SDO 2025
+deactivate DB6
+
+SIM   -> SIM  : Filtrer filières :\n• Accessibles  → sdo2025 ≤ scoreFG_simule\n• Inaccessibles → sdo2025 >  scoreFG_simule
+
+SIM  --> SC   : {\n  scoreFG_actuel: 14.2,\n  scoreFG_simule: 16.4,\n  delta: +2.2,\n  filieres_accessibles[],\n  filieres_nouvellement_debloquees[],\n  filieres_inaccessibles[]\n}
+deactivate SIM
+
+SC   --> UI6  : Résultats de simulation
+deactivate SC
+
+UI6  --> STU6 : Afficher la comparaison :\n• Score actuel : 14.2 / Simulé : 16.4 (+2.2)\n• ✅ Nouvelles filières débloquées (ex: INFO01)\n• ❌ Filières toujours hors de portée\n• Tableau comparatif visuel interactif
+deactivate UI6
+
+== Scénario B : Assistance par Chatbot IA ==
+
+STU6  -> UI6  : Saisir une question dans le Chatbot :\n« Quelle filière choisir\navec un code Holland ISA\net un score FG de 15.8 ? »
+activate UI6
+
+UI6   -> CC   : POST /etudiant/chatbot\n{ requete: "...", contexte_profil: { scoreFG,\n  codeHolland, sectionBac, gouvernorat } }
+activate CC
+
+CC    -> BOT  : dialoguerAvecChatbot(requete, contexte)
+activate BOT
+
+BOT   -> BOT  : Construire le prompt contextuel :\n[Système] : Profil étudiant enrichi\n[Utilisateur] : Question posée\n[Instructions] : Périmètre orientation Tunisie
+
+note over BOT
+  <b>Intégration LLM (Large Language Model) :</b>
+  ─────────────────────────────────────────────────
+  Le chatbot utilise un modèle de langage avancé
+  dont le prompt système est enrichi avec :
+  • le profil académique de l'étudiant (scoreFG)
+  • son profil psychométrique (RIASEC / Code Holland)
+  • le catalogue des filières disponibles en Tunisie
+  Domaines couverts : orientation, filières, débouchés,
+  salaires moyens, conditions d'accès, marché de l'emploi.
+end note
+
+BOT   -> BOT  : genererReponse(prompt_contextuel)\n→ Appel API LLM → réponse en langage naturel
+
+BOT  --> CC   : Réponse personnalisée + suggestions
+deactivate BOT
+
+CC   --> UI6  : { reponse: "...",\n  suggestions_filieres: [INFO01, MATH02] }
+deactivate CC
+
+UI6  --> STU6 : Afficher la réponse du Chatbot IA\navec suggestions de filières compatibles\net liens vers les fiches détaillées
+deactivate UI6
+
+@enduml

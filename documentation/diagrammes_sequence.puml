@@ -1,0 +1,793 @@
+@startuml E-CTRL_Sequence_Diagrams
+
+' ╔══════════════════════════════════════════════════════════════════╗
+' ║         E-CTRL — DIAGRAMMES DE SÉQUENCE COMPLETS                ║
+' ║         Système Intelligent d'Orientation Académique             ║
+' ║         Architecture Laravel + Python FastAPI + LLM              ║
+' ╚══════════════════════════════════════════════════════════════════╝
+
+' ─────────────────────────────────────────────────────────────────
+'  THÈME VISUEL PREMIUM — PALETTE NAVY/TEAL PROFESSIONNELLE
+' ─────────────────────────────────────────────────────────────────
+!theme plain
+skinparam shadowing false
+skinparam DefaultFontName "Segoe UI"
+skinparam DefaultFontSize 11
+skinparam dpi 150
+skinparam roundCorner 10
+skinparam BoxPadding 14
+skinparam ParticipantPadding 20
+skinparam SequenceMessageAlignment center
+
+' ── Acteurs ────────────────────────────────────────────────────
+skinparam ActorBackgroundColor #FFFFFF
+skinparam ActorBorderColor     #1A365D
+skinparam ActorFontColor       #1A365D
+skinparam ActorFontSize        12
+skinparam ActorFontStyle       bold
+
+' ── Participants ───────────────────────────────────────────────
+skinparam ParticipantBackgroundColor #1A365D
+skinparam ParticipantBorderColor     #0D2137
+skinparam ParticipantFontColor       #FFFFFF
+skinparam ParticipantFontSize        11
+skinparam ParticipantFontStyle       bold
+
+' ── Bases de données ───────────────────────────────────────────
+skinparam DatabaseBackgroundColor #2C7A7B
+skinparam DatabaseBorderColor     #1D5151
+skinparam DatabaseFontColor       #FFFFFF
+skinparam DatabaseFontStyle       bold
+
+' ── Boîtes groupes ─────────────────────────────────────────────
+skinparam SequenceBoxBackgroundColor #F7FAFC
+skinparam SequenceBoxBorderColor     #CBD5E0
+skinparam SequenceBoxFontColor       #2D3748
+skinparam SequenceBoxFontSize        13
+skinparam SequenceBoxFontStyle       bold
+
+' ── Blocs alt/loop/opt ─────────────────────────────────────────
+skinparam SequenceGroupBackgroundColor #EBF8FF
+skinparam SequenceGroupBorderColor     #3182CE
+skinparam SequenceGroupFontColor       #1A365D
+skinparam SequenceGroupHeaderFontColor #1A365D
+skinparam SequenceGroupFontSize        11
+skinparam SequenceGroupFontStyle       bold
+
+' ── Lifelines ──────────────────────────────────────────────────
+skinparam SequenceLifeLineBorderColor     #3182CE
+skinparam SequenceLifeLineBackgroundColor #EBF8FF
+
+' ── Flèches ────────────────────────────────────────────────────
+skinparam ArrowColor     #2B6CB0
+skinparam ArrowFontName  "Segoe UI"
+skinparam ArrowFontSize  10
+skinparam ArrowFontColor #2D3748
+skinparam ArrowThickness 1.5
+
+' ── Notes ──────────────────────────────────────────────────────
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor     #F9A825
+skinparam NoteFontName        "Segoe UI"
+skinparam NoteFontSize        10
+skinparam NoteFontColor       #37474F
+
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 1 — AUTHENTIFICATION & CONTRÔLE D'ACCÈS
+'  Acteur : Tout utilisateur (Admin / Conseiller / Étudiant)
+' ══════════════════════════════════════════════════════════════
+box "FLUX 1 — Authentification & Contrôle d'Accès par Rôle" #EDF2F7
+  actor "Utilisateur\n(Admin / Conseiller\n/ Étudiant)" as USER
+  participant "Interface Web\n(Blade / Vue)" as UI
+  participant "AuthController\n(Laravel)" as AUTH
+  participant "Middleware\nRoleGuard" as MW
+  participant "Utilisateur\n[Model]" as UMODEL
+  database "MySQL\nDatabase" as DB
+end box
+
+autonumber "<b>[1.#]</b>"
+
+USER  -> UI    : Saisir courriel + motDePasse\n→ Clic « Se Connecter »
+activate UI
+
+UI    -> AUTH  : POST /login\n{ courriel, motDePasse }
+activate AUTH
+
+AUTH  -> UMODEL : findByEmail(courriel)
+activate UMODEL
+UMODEL -> DB   : SELECT id, nom, motDePasse, role\nFROM utilisateurs\nWHERE courriel = ? LIMIT 1
+activate DB
+DB   --> UMODEL : Enregistrement trouvé
+deactivate DB
+UMODEL --> AUTH : Objet Utilisateur
+deactivate UMODEL
+
+AUTH  -> AUTH  : Hash::check(motDePasse, hash)
+note right of AUTH
+  <b>Vérification sécurisée</b>
+  bcrypt(motDePasse) comparé au
+  hash stocké en base de données.
+end note
+
+alt <b>Identifiants invalides</b>
+  AUTH --> UI   : 401 Unauthorized\n{ message: "Identifiants incorrects" }
+  UI   --> USER : ❌ Afficher message d'erreur
+else <b>Identifiants valides</b>
+  AUTH  -> UMODEL : createToken("auth-token")
+  activate UMODEL
+  UMODEL -> DB   : INSERT INTO personal_access_tokens\n(tokenable_id, token, name)
+  activate DB
+  DB   --> UMODEL : Token Sanctum créé
+  deactivate DB
+  UMODEL --> AUTH : Bearer Token
+  deactivate UMODEL
+
+  AUTH  -> MW   : checkRole(user.role)
+  activate MW
+
+  alt <b>role = "admin"</b>
+    MW --> AUTH : ✅ Accès → /admin/dashboard
+  else <b>role = "conseiller"</b>
+    MW --> AUTH : ✅ Accès → /conseiller/dashboard
+  else <b>role = "etudiant"</b>
+    MW --> AUTH : ✅ Accès → /etudiant/dashboard
+  end
+
+  deactivate MW
+  AUTH --> UI   : 200 OK\n{ token, role, redirect_url }
+  UI   --> USER : Redirection vers l'Espace approprié\n+ Affichage du Tableau de Bord
+end
+
+deactivate AUTH
+deactivate UI
+
+' ──────────────────────────────────────────────────────────────
+newpage
+' ──────────────────────────────────────────────────────────────
+
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 2 — ADMINISTRATION DU SYSTÈME
+'  Acteur : Administrateur
+' ══════════════════════════════════════════════════════════════
+box "FLUX 2 — Administration & Configuration du Système" #F0FFF4
+  actor "Administrateur" as ADMIN
+  participant "Interface\nAdministrateur" as UI2
+  participant "UserController\n(Laravel)" as UC
+  participant "FiliereController\n(Laravel)" as FC
+  participant "JournalAudit\n[Service]" as AUD
+  database "MySQL\nDatabase" as DB2
+end box
+
+autonumber "<b>[2.#]</b>"
+
+== Gestion des Utilisateurs ==
+
+ADMIN -> UI2  : Naviguer vers « Gestion Utilisateurs »
+activate UI2
+UI2   -> UC   : GET /admin/utilisateurs
+activate UC
+UC    -> DB2  : SELECT * FROM utilisateurs ORDER BY role
+activate DB2
+DB2  --> UC   : Liste des utilisateurs (admins, conseillers, étudiants)
+deactivate DB2
+UC   --> UI2  : Collection d'utilisateurs
+deactivate UC
+UI2  --> ADMIN : Afficher tableau de gestion
+deactivate UI2
+
+ADMIN -> UI2  : Clic « Ajouter Conseiller »\n(nom, courriel, motDePasse, role="conseiller")
+activate UI2
+UI2   -> UC   : POST /admin/utilisateurs\n{ nom, courriel, motDePasse, role }
+activate UC
+UC    -> DB2  : INSERT INTO utilisateurs\n(nom, courriel, motDePasse_hash, role)
+activate DB2
+DB2  --> UC   : Utilisateur créé (id généré)
+deactivate DB2
+UC    -> AUD  : logAction("CREATE_USER", admin.id, user.id)
+activate AUD
+AUD   -> DB2  : INSERT INTO logs_audit\n(action, acteur_id, cible_id, date)
+activate DB2
+DB2  --> AUD  : Log enregistré
+deactivate DB2
+deactivate AUD
+UC   --> UI2  : 201 Created
+deactivate UC
+UI2  --> ADMIN : ✅ Notification « Utilisateur créé »
+deactivate UI2
+
+== Configuration des Seuils d'Orientation (SDO) ==
+
+ADMIN -> UI2  : Naviguer vers « Gestion des Filières »
+activate UI2
+UI2   -> FC   : GET /admin/filieres
+activate FC
+FC    -> DB2  : SELECT codeFiliere, nomFiliere,\nsdo2023, sdo2024, sdo2025 FROM filieres
+activate DB2
+DB2  --> FC   : Catalogue complet des filières
+deactivate DB2
+FC   --> UI2  : Liste des filières
+deactivate FC
+UI2  --> ADMIN : Afficher le tableau des seuils SDO
+deactivate UI2
+
+ADMIN -> UI2  : Modifier seuil SDO 2025 d'une filière
+activate UI2
+UI2   -> FC   : PUT /admin/filieres/{code}\n{ sdo2025: 14.75 }
+activate FC
+FC    -> DB2  : UPDATE filieres\nSET sdo2025 = 14.75\nWHERE codeFiliere = ?
+activate DB2
+DB2  --> FC   : Seuil mis à jour
+deactivate DB2
+FC    -> AUD  : logAction("UPDATE_SDO", admin.id, filiere.code)
+activate AUD
+AUD   -> DB2  : INSERT INTO logs_audit (...)
+activate DB2
+DB2  --> AUD  : Log enregistré
+deactivate DB2
+deactivate AUD
+FC   --> UI2  : 200 OK
+deactivate FC
+UI2  --> ADMIN : ✅ Confirmation de mise à jour
+deactivate UI2
+
+== Consultation du Journal d'Audit ==
+
+ADMIN -> UI2  : Naviguer vers « Journal d'Audit »
+activate UI2
+UI2   -> AUD  : consulterJournalAudit(filters)
+activate AUD
+AUD   -> DB2  : SELECT action, acteur_id, cible_id, date\nFROM logs_audit\nORDER BY date DESC
+activate DB2
+DB2  --> AUD  : Historique complet des événements système
+deactivate DB2
+AUD  --> UI2  : Événements paginés
+deactivate AUD
+UI2  --> ADMIN : Afficher le journal d'audit complet\navec filtres (date, action, acteur)
+deactivate UI2
+
+' ──────────────────────────────────────────────────────────────
+newpage
+' ──────────────────────────────────────────────────────────────
+
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 3 — PROFIL ACADÉMIQUE & CALCUL DU SCORE FG
+'  Acteur : Étudiant
+' ══════════════════════════════════════════════════════════════
+box "FLUX 3 — Saisie du Profil Académique & Calcul du Score FG" #FFFAF0
+  actor "Étudiant" as STU3
+  participant "Interface\nÉtudiant" as UI3
+  participant "ProfilController\n(Laravel)" as PC
+  participant "Profil\n[Model]" as PMOD
+  database "MySQL\nDatabase" as DB3
+end box
+
+autonumber "<b>[3.#]</b>"
+
+STU3  -> UI3  : Remplir le formulaire académique :\n• Section Bac (Math/Sciences/Lettres…)\n• Moyenne Générale\n• Année du Bac\n• Gouvernorat\n• Notes par matière (JSON)
+activate UI3
+
+UI3   -> PC   : POST /etudiant/profil\n{ sectionBac, moyenneGenerale,\n  anneeBac, gouvernorat, notesMatieres }
+activate PC
+
+PC    -> PMOD : updateOrCreate({ idUtilisateur })\n  → sectionBac, moyenneGenerale,\n    anneeBac, gouvernorat, notesMatieres
+activate PMOD
+
+PMOD  -> DB3  : INSERT / UPDATE profils\n(idUtilisateur, sectionBac, moyenneGenerale,\n anneeBac, gouvernorat, notesMatieres)
+activate DB3
+DB3  --> PMOD : Profil persisté (id confirmé)
+deactivate DB3
+
+note over PMOD
+  <b>calculerScoreFG()</b>
+  Formule différenciée par section :
+  ─────────────────────────────────────
+  • Math/Sciences : pondération forte Maths & Sciences
+  • Lettres       : pondération forte Arabe & Français
+  • Technique     : pondération Techno & Sciences Ap.
+  Score FG ∈ [0 ; 20] — Indice d'admissibilité universel
+end note
+
+PMOD  -> PMOD : calculerScoreFG(notesMatieres, sectionBac)
+PMOD  -> DB3  : UPDATE profils\nSET score_fg = {valeur calculée}\nWHERE idUtilisateur = ?
+activate DB3
+DB3  --> PMOD : Score FG enregistré
+deactivate DB3
+
+PMOD  -> PMOD : getNiveauFG()\n→ "Excellent" / "Bien" / "Passable"
+PMOD  -> PMOD : getProgression()\n→ % complétion du profil (0–100%)
+PMOD  -> PMOD : estAcademiqueComplet()\n→ true / false
+
+PMOD --> PC   : { scoreFG, niveauFG,\n  progression, estComplet }
+deactivate PMOD
+
+PC   --> UI3  : 200 OK\n{ scoreFG, niveauFG, progression }
+deactivate PC
+
+UI3  --> STU3 : Afficher tableau de bord académique :\n• Score FG calculé (ex: 15.8 / 20)\n• Niveau : « Bien »\n• Barre de progression : 65%\n• ✅ Profil académique complet
+deactivate UI3
+
+' ──────────────────────────────────────────────────────────────
+newpage
+' ──────────────────────────────────────────────────────────────
+
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 4 — TEST ADAPTATIF RIASEC / GATB (PSYCHOMÉTRIE)
+'  Acteur : Étudiant
+' ══════════════════════════════════════════════════════════════
+box "FLUX 4 — Évaluation Psychométrique Adaptative (RIASEC + GATB)" #EEF2FF
+  actor "Étudiant" as STU4
+  participant "Interface\nÉtudiant" as UI4
+  participant "TestAdaptatifController\n(Laravel)" as TC
+  participant "TestAdaptatif\n[Service]" as TSVC
+  participant "QuestionRiasec\n[Model]" as QMOD
+  participant "ProfilRiasec\n[Model]" as RMOD
+  database "MySQL\nDatabase" as DB4
+end box
+
+autonumber "<b>[4.#]</b>"
+
+== Phase 1 : Initialisation de la Session de Test ==
+
+STU4  -> UI4  : Clic « Démarrer l'Évaluation Psychométrique »
+activate UI4
+UI4   -> TC   : POST /etudiant/test/demarrer
+activate TC
+TC    -> TSVC : demarrerSession(idUtilisateur)
+activate TSVC
+TSVC  -> DB4  : INSERT INTO sessions_test\n(idUtilisateur, statut="en_cours",\n dateDebut=NOW())
+activate DB4
+DB4  --> TSVC : idSession généré (UUID)
+deactivate DB4
+TSVC --> TC   : Session initialisée
+deactivate TSVC
+TC   --> UI4  : { idSession, instructions }
+deactivate TC
+UI4  --> STU4 : Afficher instructions + lancer le test
+deactivate UI4
+
+== Phase 2 : Passation Adaptative (Boucle Question-Réponse) ==
+
+loop <b>Tant que test non terminé</b> ET evaluerArretPrecoce() = FALSE
+
+  STU4  -> UI4  : Demander la question suivante
+  activate UI4
+  UI4   -> TC   : GET /etudiant/test/{idSession}/question
+  activate TC
+  TC    -> TSVC : getQuestionSuivante(idSession)
+  activate TSVC
+
+  TSVC  -> QMOD : Sélectionner la question optimale\n(dimension sous-représentée, non déjà posée)
+  activate QMOD
+  QMOD  -> DB4  : SELECT id, texte, dimension, echelleMax\nFROM questions_riasec\nWHERE id NOT IN (répondues)\nORDER BY dimension_weight DESC\nLIMIT 1
+  activate DB4
+  DB4  --> QMOD : Question sélectionnée
+  deactivate DB4
+  QMOD --> TSVC : Question { id, texte, dimension, echelleMax }
+  deactivate QMOD
+
+  TSVC --> TC   : Question à afficher
+  deactivate TSVC
+  TC   --> UI4  : { question, progression }
+  deactivate TC
+  UI4  --> STU4 : Afficher question (échelle Likert 1–5)
+  deactivate UI4
+
+  STU4  -> UI4  : Sélectionner réponse (valeur ∈ {1,2,3,4,5})
+  activate UI4
+  UI4   -> TC   : POST /etudiant/test/{idSession}/reponse\n{ idQuestion, valeur }
+  activate TC
+  TC    -> TSVC : traiterReponse(idSession, idQuestion, valeur)
+  activate TSVC
+  TSVC  -> DB4  : INSERT INTO reponses_test\n(idSession, idQuestion, valeur, timestamp)
+  activate DB4
+  DB4  --> TSVC : Réponse enregistrée
+  deactivate DB4
+
+  TSVC  -> TSVC : evaluerArretPrecoce()
+  note over TSVC
+    <b>Algorithme d'arrêt précoce :</b>
+    Si indiceConfiance > 0.85 (réponses cohérentes)
+    → Le test s'arrête pour éviter la fatigue cognitive.
+    Sinon → continuer jusqu'à épuisement des questions.
+  end note
+
+  TSVC --> TC   : { statut: "en_cours" | "termine",\n  progression_% }
+  deactivate TSVC
+  TC   --> UI4  : Statut du test
+  deactivate TC
+  UI4  --> STU4 : Barre de progression mise à jour
+  deactivate UI4
+
+end
+
+== Phase 3 : Finalisation & Génération du Profil RIASEC ==
+
+STU4  -> UI4  : (Dernier écran) Test complété
+activate UI4
+UI4   -> TC   : POST /etudiant/test/{idSession}/finaliser
+activate TC
+TC    -> TSVC : finaliserTest(idSession)
+activate TSVC
+
+TSVC  -> TSVC : recalculerCodeHolland()\n→ Score R,I,A,S,E,C par somme pondérée
+TSVC  -> TSVC : getScoresParDimension()
+TSVC  -> TSVC : getDimensionDominante()\n→ ex: "R" (Réaliste) dominant
+TSVC  -> TSVC : calculerScoresGATB()\n→ G, V, N, S (aptitudes cognitives)
+TSVC  -> TSVC : calculerScoreResilience()\n+ scoreCoherence()\n+ indiceConfiance()
+
+TSVC  -> RMOD : create({ idSession, idUtilisateur,\n  scores_RIASEC, codeHolland,\n  scores_GATB, interprétation,\n  arretPrecoce, statut="complete" })
+activate RMOD
+RMOD  -> DB4  : INSERT INTO profil_riasecs\n(idSession, idUtilisateur, score_R, score_I,\n score_A, score_S, score_E, score_C,\n codeHolland, scoreGATB_G, scoreGATB_V,\n scoreGATB_N, scoreGATB_S, scoreResilience,\n scoreCoherence, indiceConfiance,\n interpretation, statut, dateCompletion)
+activate DB4
+DB4  --> RMOD : ProfilRiasec persisté
+deactivate DB4
+RMOD --> TSVC : ProfilRiasec créé
+deactivate RMOD
+TSVC --> TC   : Rapport complet RIASEC + GATB
+deactivate TSVC
+TC   --> UI4  : { codeHolland, scoresRIASEC,\n  scoresGATB, interpretation }
+deactivate TC
+UI4  --> STU4 : Afficher Rapport de Personnalité :\n• Code Holland : ex. « RIA »\n• Graphique radar des 6 dimensions\n• Aptitudes GATB (G, V, N, S)\n• Interprétation personnalisée
+deactivate UI4
+
+' ──────────────────────────────────────────────────────────────
+newpage
+' ──────────────────────────────────────────────────────────────
+
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 5 — MOTEUR IA DE RECOMMANDATION DE FILIÈRES
+'  Acteur : Étudiant
+' ══════════════════════════════════════════════════════════════
+box "FLUX 5 — Recommandation IA de Filières (Deep Learning + Filtrage)" #FFF5F5
+  actor "Étudiant" as STU5
+  participant "Interface\nÉtudiant" as UI5
+  participant "RecommandationController\n(Laravel)" as RC
+  participant "MoteurRecommandation\n[Service Laravel]" as REC
+  participant "Microservice IA\n(FastAPI / Python)" as PYIA
+  database "MySQL\nDatabase" as DB5
+end box
+
+autonumber "<b>[5.#]</b>"
+
+STU5  -> UI5  : Clic « Voir mes recommandations de filières »
+activate UI5
+UI5   -> RC   : GET /etudiant/recommandations
+activate RC
+
+RC    -> REC  : calculerScoreCorrespondance(idUtilisateur)
+activate REC
+
+REC   -> DB5  : SELECT profils.*, profil_riasecs.*\nFROM profils\nJOIN profil_riasecs USING(idUtilisateur)\nWHERE idUtilisateur = ?
+activate DB5
+DB5  --> REC  : Profil complet (notes + RIASEC + GATB)
+deactivate DB5
+
+note over REC
+  <b>Préparation du vecteur de caractéristiques :</b>
+  ─────────────────────────────────────────────────
+  • scoreFG (données académiques)
+  • scores RIASEC [R, I, A, S, E, C]
+  • aptitudes GATB [G, V, N, S]
+  • sectionBac, gouvernorat
+  → Sérialisé en JSON pour l'API Python
+end note
+
+REC   -> PYIA : POST /predict\n{ profilJSON : vecteur de caractéristiques }
+activate PYIA
+
+note over PYIA
+  <b>Microservice Python (FastAPI) :</b>
+  ─────────────────────────────────────────────────
+  1. Chargement du modèle Deep Learning (TensorFlow/Keras)
+  2. Normalisation du vecteur d'entrée
+  3. Prédiction multiclasse → scores par filière
+  4. Filtrage collaboratif (profils similaires historiques)
+  5. Fusion des deux scores → scoreIA final par filière
+end note
+
+PYIA --> REC  : [ { codeFiliere, nomFiliere, scoreIA },\n  { "INFO01", "Informatique", 89.5 },\n  { "MATH02", "Mathématiques", 76.3 }, … ]
+deactivate PYIA
+
+REC   -> REC  : verifierFaisabiliteGATB(profilRiasec)\n→ Filtrer les filières incompatibles\n   avec le profil cognitif GATB
+
+REC   -> REC  : genererDiagnostic(profil)\n→ Synthèse textuelle personnalisée
+
+REC   -> DB5  : UPDATE formations\nSET scoreCorrespondance = {scoreIA}\nWHERE codeFiliere IN (liste)
+activate DB5
+DB5  --> REC  : Scores IA enregistrés
+deactivate DB5
+
+REC   -> DB5  : SELECT filieres.*, formations.*\nFROM filieres\nJOIN formations ON codeFiliere\nORDER BY scoreCorrespondance DESC\nLIMIT 10
+activate DB5
+DB5  --> REC  : Top 10 filières recommandées
+deactivate DB5
+
+REC  --> RC   : { recommandations[], diagnostic }
+deactivate REC
+
+RC   --> UI5  : 200 OK\n{ filières triées, scoreIA, diagnostic }
+deactivate RC
+
+UI5  --> STU5 : Afficher les Recommandations IA :\n• 🥇 Filière #1 : Info (89.5%)\n• 🥈 Filière #2 : Maths (76.3%)\n• Diagnostic personnalisé\n• Filières compatibles RIASEC+GATB
+deactivate UI5
+
+' ──────────────────────────────────────────────────────────────
+newpage
+' ──────────────────────────────────────────────────────────────
+
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 6 — SIMULATEUR WHAT-IF & CHATBOT IA
+'  Acteur : Étudiant
+' ══════════════════════════════════════════════════════════════
+box "FLUX 6 — Simulation What-If & Assistance Chatbot IA" #F0FFF4
+  actor "Étudiant" as STU6
+  participant "Interface\nÉtudiant" as UI6
+  participant "SimulateurController\n(Laravel)" as SC
+  participant "SimulateurDecision\n[Service]" as SIM
+  participant "ChatbotController\n(Laravel)" as CC
+  participant "Chatbot\n[Service LLM]" as BOT
+  database "MySQL\nDatabase" as DB6
+end box
+
+autonumber "<b>[6.#]</b>"
+
+== Simulation What-If des Notes du Bac ==
+
+STU6  -> UI6  : Ouvrir le « Simulateur What-If »\nModifier virtuellement ses notes
+activate UI6
+UI6   -> SC   : POST /etudiant/simulateur\n{ notesSimulees: { maths:16, physique:15, … } }
+activate SC
+
+SC    -> SIM  : simulerScoreFG(notesSimulees)
+activate SIM
+SIM   -> SIM  : Appliquer la formule FG\nsur les notes hypothétiques
+SIM  --> SC   : scoreFG_simule = 16.4
+deactivate SIM
+
+SC    -> SIM  : comparerAdmissibilite(scoreFG_simule=16.4)
+activate SIM
+SIM   -> DB6  : SELECT codeFiliere, nomFiliere,\n universite, sdo2025\nFROM filieres\nORDER BY sdo2025 ASC
+activate DB6
+DB6  --> SIM  : Catalogue complet des filières + seuils
+deactivate DB6
+
+SIM   -> SIM  : Filtrer filières où\nsdo2025 ≤ scoreFG_simule\n(= filières accessibles)
+
+SIM  --> SC   : { filieres_accessibles[],\n  filieres_inaccessibles[],\n  scoreFG_actuel vs scoreFG_simule }
+deactivate SIM
+
+SC   --> UI6  : Résultats de simulation
+deactivate SC
+
+UI6  --> STU6 : Afficher la comparaison :\n• Score actuel : 14.2 → Simulé : 16.4\n• ✅ Nouvelles filières débloquées\n• ❌ Filières toujours hors de portée\n• Tableau comparatif visuel
+deactivate UI6
+
+== Assistance par Chatbot IA ==
+
+STU6  -> UI6  : Saisir une question dans le Chatbot :\n« Quelle filière choisir avec un code Holland ISA ? »
+activate UI6
+UI6   -> CC   : POST /etudiant/chatbot\n{ requete, contexte_profil }
+activate CC
+
+CC    -> BOT  : dialoguerAvecChatbot(requete, contexte)
+activate BOT
+
+BOT   -> BOT  : Construire le prompt contextuel :\n+ Profil étudiant (scoreFG, RIASEC, SDO)\n+ Question de l'utilisateur\n+ Instructions système
+
+note over BOT
+  <b>Intégration LLM (Large Language Model) :</b>
+  ─────────────────────────────────────────────
+  Le chatbot utilise un modèle de langage avancé
+  avec un prompt enrichi du profil académique
+  de l'étudiant pour des réponses personnalisées.
+  Domaines couverts : orientation, filières,
+  débouchés, salaires, conditions d'accès.
+end note
+
+BOT   -> BOT  : genererReponse(prompt_contextuel)\n→ Appel API LLM
+
+BOT  --> CC   : Réponse personnalisée générée
+deactivate BOT
+
+CC   --> UI6  : { reponse, suggestions_filieres }
+deactivate CC
+
+UI6  --> STU6 : Afficher la réponse du Chatbot IA\navec suggestions de filières compatibles
+deactivate UI6
+
+' ──────────────────────────────────────────────────────────────
+newpage
+' ──────────────────────────────────────────────────────────────
+
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 7 — PORTFOLIO NUMÉRIQUE & GÉNÉRATION DE CV
+'  Acteur : Étudiant
+' ══════════════════════════════════════════════════════════════
+box "FLUX 7 — Portfolio Numérique & CV Intelligent" #FFF5F5
+  actor "Étudiant" as STU7
+  participant "Interface\nÉtudiant" as UI7
+  participant "PortfolioController\n(Laravel)" as PORT
+  participant "CVController\n(Laravel)" as CVC
+  participant "ElementPortfolio\n[Model]" as EPORT
+  participant "ProfilCV\n[Model]" as CVMOD
+  database "MySQL\nDatabase" as DB7
+end box
+
+autonumber "<b>[7.#]</b>"
+
+== Ajout d'un Élément au Portfolio ==
+
+STU7  -> UI7  : Clic « Ajouter un document au Portfolio »\n(Certificat, Diplôme, Projet, Attestation…)
+activate UI7
+UI7   -> PORT : POST /etudiant/portfolio\n{ titre, description, type,\n  fichier (upload), dateAjout }
+activate PORT
+
+PORT  -> EPORT : create({ idUtilisateur, titre,\n  description, type, cheminFichier,\n  dateAjout })
+activate EPORT
+
+EPORT -> DB7  : INSERT INTO element_portfolios\n(idUtilisateur, titre, description,\n type, cheminFichier, dateAjout)
+activate DB7
+DB7  --> EPORT : Élément enregistré (id attribué)
+deactivate DB7
+EPORT --> PORT : Élément de portfolio créé
+deactivate EPORT
+
+PORT --> UI7  : 201 Created\n{ message: "Document ajouté avec succès" }
+deactivate PORT
+UI7  --> STU7 : ✅ Portfolio mis à jour\n(liste des documents affichée)
+deactivate UI7
+
+== Génération Automatique du CV Intelligent ==
+
+STU7  -> UI7  : Clic « Générer mon CV »
+activate UI7
+UI7   -> CVC  : GET /etudiant/cv/generer
+activate CVC
+
+CVC   -> CVMOD : findByUser(idUtilisateur)
+activate CVMOD
+CVMOD -> DB7  : SELECT profilcvs.*, element_portfolios.*\nFROM profil_cvs\nLEFT JOIN element_portfolios USING(idUtilisateur)\nWHERE idUtilisateur = ?
+activate DB7
+DB7  --> CVMOD : Données CV (titre, résumé,\n  expériences, formations, compétences)
+deactivate DB7
+CVMOD --> CVC : Données structurées du CV
+deactivate CVMOD
+
+note over CVC
+  <b>Génération du CV (PDF intelligent) :</b>
+  ─────────────────────────────────────────────
+  • Template LaTeX / DomPDF professionnel
+  • Intégration des données : profilCV + portfolio
+  • Sections : Résumé, Expériences, Formation,
+    Compétences, Projets (depuis portfolio)
+  • Export : PDF téléchargeable
+end note
+
+CVC   -> CVC  : genererCV()\n→ Compiler le template PDF\navec les données de l'étudiant
+
+CVC  --> UI7  : Fichier PDF généré
+deactivate CVC
+UI7  --> STU7 : ⬇ Bouton « Télécharger le CV »\n(fichier PDF structuré et professionnel)
+deactivate UI7
+
+' ──────────────────────────────────────────────────────────────
+newpage
+' ──────────────────────────────────────────────────────────────
+
+
+' ══════════════════════════════════════════════════════════════
+'  FLUX 8 — SUPERVISION & COACHING PAR LE CONSEILLER
+'  Acteur : Conseiller d'Orientation
+' ══════════════════════════════════════════════════════════════
+box "FLUX 8 — Supervision, Coaching & Validation par le Conseiller" #F9F5FF
+  actor "Conseiller\nd'Orientation" as CONS
+  participant "Interface\nConseiller" as UI8
+  participant "ConseillerController\n(Laravel)" as CCT
+  participant "FeuilleDerouteController\n(Laravel)" as FDC
+  participant "MessagerieService\n(Laravel)" as MSG
+  database "MySQL\nDatabase" as DB8
+end box
+
+autonumber "<b>[8.#]</b>"
+
+== Consultation du Tableau de Supervision ==
+
+CONS  -> UI8  : Accéder au « Tableau de Supervision »
+activate UI8
+UI8   -> CCT  : GET /conseiller/etudiants
+activate CCT
+CCT   -> DB8  : SELECT u.id, u.nom, u.courriel,\n  p.scoreFG, p.statut, p.progression,\n  pr.codeHolland\nFROM utilisateurs u\nJOIN profils p USING(id)\nLEFT JOIN profil_riasecs pr USING(idUtilisateur)\nWHERE u.role = "etudiant"\nORDER BY p.progression DESC
+activate DB8
+DB8  --> CCT  : Liste des étudiants supervisés\navec indicateurs de progression
+deactivate DB8
+CCT  --> UI8  : Collection d'étudiants
+deactivate CCT
+UI8  --> CONS : Tableau de bord de supervision :\n• Liste étudiants + Score FG + Code Holland\n• Indicateurs de complétion des profils
+deactivate UI8
+
+== Accès au Dossier Complet d'un Étudiant ==
+
+CONS  -> UI8  : Clic sur un étudiant → « Voir le dossier »
+activate UI8
+UI8   -> CCT  : GET /conseiller/etudiants/{id}/dossier
+activate CCT
+
+CCT   -> DB8  : Profil académique\n(SELECT * FROM profils WHERE idUtilisateur = ?)
+activate DB8
+DB8  --> CCT  : Données académiques
+deactivate DB8
+
+CCT   -> DB8  : Résultats RIASEC\n(SELECT * FROM profil_riasecs WHERE idUtilisateur = ?)
+activate DB8
+DB8  --> CCT  : Profil RIASEC + Code Holland + GATB
+deactivate DB8
+
+CCT   -> DB8  : Simulations What-If\n(SELECT * FROM simulations WHERE idUtilisateur = ?)
+activate DB8
+DB8  --> CCT  : Historique des scénarios simulés
+deactivate DB8
+
+CCT   -> DB8  : Recommandations IA\n(SELECT * FROM formations WHERE idUtilisateur = ?)
+activate DB8
+DB8  --> CCT  : Top filières recommandées par l'IA
+deactivate DB8
+
+CCT  --> UI8  : Dossier complet de l'étudiant
+deactivate CCT
+UI8  --> CONS : Afficher le Dossier :\n• Notes + Score FG\n• Graphique RIASEC\n• Simulations What-If\n• Top 5 Recommandations IA
+deactivate UI8
+
+== Saisie du Plan de Coaching & Observations ==
+
+CONS  -> UI8  : Rédiger le plan de coaching\net les observations personnalisées
+activate UI8
+UI8   -> CCT  : PUT /conseiller/etudiants/{id}/coaching\n{ observationsConseiller, planCoaching }
+activate CCT
+CCT   -> DB8  : UPDATE profils\nSET observationsConseiller = ?,\n    planCoaching = ?\nWHERE idUtilisateur = ?
+activate DB8
+DB8  --> CCT  : Mise à jour confirmée
+deactivate DB8
+CCT  --> UI8  : 200 OK
+deactivate CCT
+UI8  --> CONS : ✅ Plan de coaching enregistré
+deactivate UI8
+
+== Homologation de la Feuille de Route ==
+
+CONS  -> UI8  : Clic « Valider la Trajectoire »\nde l'étudiant sélectionné
+activate UI8
+UI8   -> FDC  : PUT /conseiller/feuille-deroute/{id}/valider
+activate FDC
+FDC   -> DB8  : UPDATE feuille_deroutes\nSET statut = "Valide"\nWHERE idEtudiant = ?
+activate DB8
+DB8  --> FDC  : Feuille de route validée (statut mis à jour)
+deactivate DB8
+FDC  --> UI8  : 200 OK\n{ message: "Trajectoire homologuée" }
+deactivate FDC
+UI8  --> CONS : ✅ Confirmation de validation\n(Trajectoire de l'étudiant officielle)
+deactivate UI8
+
+== Envoi d'un Message Direct à l'Étudiant ==
+
+CONS  -> UI8  : Rédiger et envoyer un message\nà l'étudiant (conseil, rendez-vous, etc.)
+activate UI8
+UI8   -> MSG  : POST /conseiller/messages\n{ idEtudiant, contenu, canal="email" }
+activate MSG
+MSG   -> DB8  : INSERT INTO messages\n(idExpediteur, idDestinataire,\n contenu, canal, dateEnvoi=NOW())
+activate DB8
+DB8  --> MSG  : Message enregistré
+deactivate DB8
+MSG   -> MSG  : notifier(idEtudiant)\n→ Email + Notification in-app
+MSG  --> UI8  : Message envoyé
+deactivate MSG
+UI8  --> CONS : ✅ Message délivré à l'étudiant\n(via email + notification)
+deactivate UI8
+
+@enduml

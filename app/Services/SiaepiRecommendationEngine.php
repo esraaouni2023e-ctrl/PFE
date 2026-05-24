@@ -141,6 +141,10 @@ class SiaepiRecommendationEngine
         $files = glob($basePath . '*.xlsx');
         $filieres = [];
 
+        // ── Déduplication : même code OU même (nom + établissement) = doublon ──
+        $seenCodes    = [];
+        $seenNameEtab = [];
+
         $bacMapping = [
             'INFO' => 'Informatique', 'INF' => 'Informatique',
             'ECO' => 'Économie et gestion', 'EGE' => 'Économie et gestion',
@@ -170,7 +174,17 @@ class SiaepiRecommendationEngine
                     if (count($row) < count($headers)) continue;
                     $f = array_combine($headers, array_slice($row, 0, count($headers)));
                     if (empty($f['Code_Filiere']) || empty($f['Nom_Filiere'])) continue;
-                    
+
+                    // ── Vérification unicité (même filière + même établissement = doublon) ──
+                    $code = trim($f['Code_Filiere']);
+                    $nameEtabKey = mb_strtolower(trim($f['Nom_Filiere'])) . '|' . mb_strtolower(trim($f['Etablissement'] ?? ''));
+
+                    if (isset($seenCodes[$code]) || isset($seenNameEtab[$nameEtabKey])) {
+                        continue; // Doublon détecté, on le saute
+                    }
+                    $seenCodes[$code]        = true;
+                    $seenNameEtab[$nameEtabKey] = true;
+
                     $f['Type_Bac'] = $typeBac;
                     $filieres[] = $f;
                 }
@@ -275,7 +289,18 @@ class SiaepiRecommendationEngine
         // Tri par score final décroissant
         usort($scored, fn($a, $b) => $b['Score_Final'] <=> $a['Score_Final']);
 
-        $top = array_slice($scored, 0, $topN);
+        // ── Déduplication finale : même (Nom_Filiere + Etablissement) = doublon ──
+        // Garde la version avec le meilleur Score_Final (elle est déjà en premier grâce au tri)
+        $uniqueScored = [];
+        $seenFinal = [];
+        foreach ($scored as $item) {
+            $key = mb_strtolower(trim($item['Nom_Filiere'] ?? '')) . '|' . mb_strtolower(trim($item['Etablissement'] ?? ''));
+            if (isset($seenFinal[$key])) continue;
+            $seenFinal[$key] = true;
+            $uniqueScored[] = $item;
+        }
+
+        $top = array_slice($uniqueScored, 0, $topN);
 
         // -- Algorithme du Front de Pareto (Maximisation Vocation vs Employabilité) --
         foreach ($top as &$f1) {
@@ -295,10 +320,23 @@ class SiaepiRecommendationEngine
         }
         unset($f1); // clean reference
 
-        // Numérotation rang
+        // ── Normalisation des pourcentages affichés (v5.1) ───────────────
+        // Le Score_Final brut est un produit de facteurs multiplicatifs (coherence ×
+        // confidence × (1-risk) × penalties) et descend souvent à 0.30–0.50 même pour
+        // la meilleure recommandation. On le re-scale linéairement pour que le #1
+        // affiche ~96 % et les suivants soient proportionnels, cohérents avec les
+        // sous-scores individuels (RIASEC, Académique, Marché, Accès SDO).
+        $maxRaw = 0.01;
+        foreach ($top as $item) {
+            if ($item['Score_Final'] > $maxRaw) $maxRaw = $item['Score_Final'];
+        }
+        $targetMax  = 0.96;
+        $scaleFactor = $targetMax / $maxRaw;
+
+        // Numérotation rang + re-scaling
         foreach ($top as $i => &$item) {
             $item['Rang'] = $i + 1;
-            $item['Score_Final_Contextuel'] = $item['Score_Final'];
+            $item['Score_Final_Contextuel'] = min(0.98, max(0.40, $item['Score_Final'] * $scaleFactor));
             $item['Compatibilite_Psychometrique'] = $item['Score_RIASEC'];
         }
 

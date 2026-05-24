@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             TestStudentSeeder::class,
             FilieresSeeder::class,
             PsychometricQuestionsSeeder::class,
+            FormationsSeeder::class,
         ]);
     }
 }
