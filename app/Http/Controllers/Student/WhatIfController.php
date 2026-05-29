@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
  * WhatIfController — Future Simulator / What-If Engine.
  *
  * Permet à l'étudiant de simuler différents scénarios académiques
- * et professionnels via 7 modules de simulation.
+ * et professionnels via 6 modules de simulation.
  */
 class WhatIfController extends Controller
 {
@@ -44,7 +44,6 @@ class WhatIfController extends Controller
             'profile'           => $profile,
             'historiqueRecent'  => $historiqueRecent,
             'formations'        => $formations,
-            'pays'              => $this->simulator->getPaysDisponibles(),
             'niveaux'           => $this->simulator->getNiveauxDisponibles(),
             'secteursData'      => $this->simulator->getSecteursEmployabilite(),
             'compatibilite'     => $this->simulator->calculerCompatibiliteCarriere($user),
@@ -124,16 +123,12 @@ class WhatIfController extends Controller
                 ),
                 'changement_specialite' => $this->simulator->simulerChangementSpecialite(
                     $request->input('section_actuelle'),
-                    (float) $request->input('moyenne_generale'),
-                    $request->input('notes', []),
+                    (float) $request->input('score_actuel'),
+                    $request->input('notes', $request->user()?->profile?->notes_matieres ?? []),
                     $request->input('nouvelle_section'),
                 ),
                 'filiere_alternative' => $this->simulator->simulerFiliereAlternative(
                     $request->input('formation_ids', []),
-                ),
-                'etudes_etranger' => $this->simulator->simulerEtudesEtranger(
-                    $request->input('pays', 'france'),
-                    (int) $request->input('duree', 3),
                 ),
                 'roi' => $this->simulator->calculerROI(
                     $request->input('formation_id'),

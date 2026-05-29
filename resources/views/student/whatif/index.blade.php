@@ -14,7 +14,7 @@
                 Future Simulator
             </div>
             <h1 class="fs-title">Simule tes <em>futurs</em> possibles</h1>
-            <p class="fs-sub">Explore 7 dimensions de ton avenir académique et professionnel. Change tes notes, compare des filières, découvre les salaires et l'employabilité.</p>
+            <p class="fs-sub">Explore 6 dimensions de ton avenir académique et professionnel. Change tes notes, compare des filières, découvre les salaires et l'employabilité.</p>
         </div>
     </section>
 
@@ -32,10 +32,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.85rem;height:.85rem"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"/></svg>
             Filière Alt.
         </button>
-        <button class="fs-tab" data-tab="etranger">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.85rem;height:.85rem"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
-            Étranger
-        </button>
+
         <button class="fs-tab" data-tab="secteurs">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:.85rem;height:.85rem"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
             Employabilité
@@ -89,6 +86,15 @@
                 <div class="fs-panel">
                     <div class="fs-panel-head"><h2>📈 Résultats</h2></div>
                     <div class="fs-panel-body">
+                        @if(!$compatibilite['has_profile'])
+                        <div class="fs-placeholder" style="padding: 2.5rem 1.5rem;">
+                            <div style="font-size:3rem;margin-bottom:1rem;filter: grayscale(1); opacity: 0.6;">🧭</div>
+                            <div style="font-size:.88rem;font-weight:600;color:var(--ink60);margin-bottom:1.25rem;line-height:1.6">
+                                Vous devez d'abord passer le test psychométrique pour débloquer ces résultats de simulation.
+                            </div>
+                            <a href="{{ route('student.pipeline') }}" class="fs-btn" style="max-width:240px;margin:0 auto;background:var(--accent);">Passer le test RIASEC</a>
+                        </div>
+                        @else
                         <div class="fs-placeholder" id="fs-result-placeholder">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <div style="font-size:.88rem;font-weight:500">Remplissez le formulaire et cliquez sur Simuler</div>
@@ -102,9 +108,10 @@
                             <div class="fs-label" style="margin-bottom:.5rem">Formations accessibles</div>
                             <div id="fs-formations-list"></div>
                         </div>
+                        @endif
                     </div>
                 </div>
-                @if($historiqueRecent->isNotEmpty())
+                @if($compatibilite['has_profile'] && $historiqueRecent->isNotEmpty())
                 <div class="fs-panel" style="margin-top:1.25rem">
                     <div class="fs-panel-head"><h2>🕐 Simulations récentes</h2></div>
                     <div class="fs-panel-body" style="padding:1rem">
@@ -148,13 +155,13 @@
                         </select>
                     </div>
                     <div class="fs-field">
-                        <label class="fs-label">Moyenne Générale</label>
-                        <input type="number" class="fs-input" id="fs-spec-mg" min="0" max="20" step="0.01" value="{{ $profile?->moyenne_generale ?? '' }}">
+                        <label class="fs-label">Score Actuel (FG)</label>
+                        <input type="number" class="fs-input" id="fs-spec-score" min="0" max="300" step="0.01" value="{{ $profile?->score_fg ?? '' }}" placeholder="Ex: 145.20">
                     </div>
                     <button class="fs-btn fs-btn-alt" id="fs-spec-btn">Comparer les spécialités</button>
                 </div>
             </div>
-            <div class="fs-panel">
+             <div class="fs-panel">
                 <div class="fs-panel-head"><h2>⚡ Résultat comparatif</h2></div>
                 <div class="fs-panel-body">
                     <div id="fs-result-spec" style="display:none"></div>
@@ -203,50 +210,7 @@
         </div>
     </div>
 
-    {{-- ════════════════════════════════════════════════════════════
-         MODULE 4 — ÉTUDES À L'ÉTRANGER
-    ════════════════════════════════════════════════════════════ --}}
-    <div class="fs-section" id="section-etranger">
-        <div class="fs-layout">
-            <div class="fs-panel">
-                <div class="fs-panel-head"><h2>🌍 Études à l'étranger</h2></div>
-                <div class="fs-panel-body">
-                    <div id="fs-alert4" class="fs-alert"></div>
-                    <input type="hidden" id="fs-pays-val" value="">
-                    <div class="fs-label">Choisissez un pays</div>
-                    <div class="fs-grid-2" style="margin-bottom:1rem">
-                        @foreach($pays as $code => $p)
-                        @if($code !== 'tunisie')
-                        <div class="fs-country-card" data-pays="{{ $code }}">
-                            <div class="fs-country-flag">{{ $p['flag'] }}</div>
-                            <div class="fs-country-name">{{ $p['label'] }}</div>
-                        </div>
-                        @endif
-                        @endforeach
-                    </div>
-                    <div class="fs-field">
-                        <label class="fs-label">Durée des études (années)</label>
-                        <select class="fs-select" id="fs-etranger-duree">
-                            <option value="2">2 ans</option>
-                            <option value="3" selected>3 ans</option>
-                            <option value="5">5 ans</option>
-                        </select>
-                    </div>
-                    <button class="fs-btn fs-btn-alt" id="fs-etranger-btn">Simuler le coût</button>
-                </div>
-            </div>
-            <div class="fs-panel">
-                <div class="fs-panel-head"><h2>💶 Analyse comparative</h2></div>
-                <div class="fs-panel-body">
-                    <div id="fs-result-etranger" style="display:none"></div>
-                    <div class="fs-placeholder" id="fs-placeholder-etranger">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3"/></svg>
-                        <div style="font-size:.88rem;font-weight:500">Sélectionnez un pays pour voir l'analyse</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     {{-- ════════════════════════════════════════════════════════════
          MODULE 5 — SECTEURS & EMPLOYABILITÉ

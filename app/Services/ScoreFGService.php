@@ -125,7 +125,9 @@ class ScoreFGService
             if ($matiere === 'mg') {
                 $score += $mg * $coef;
             } else {
-                $note = (float) ($notes[$matiere] ?? 0);
+                // Si la note d'une matière spécifique n'est pas fournie,
+                // on utilise la moyenne générale $mg comme valeur par défaut raisonnable.
+                $note = isset($notes[$matiere]) ? (float) $notes[$matiere] : $mg;
                 $score += $note * $coef;
             }
         }
@@ -173,7 +175,7 @@ class ScoreFGService
         $scorePct = min(100, round(($scoreFg / 200) * 100));
 
         return Formation::with('specialite')
-            ->where('score_matching', '<=', $scorePct + 15)
+            ->where('score_matching', '<=', $scorePct)
             ->orderBy('score_matching', 'desc')
             ->limit($limit)
             ->get();
@@ -185,5 +187,16 @@ class ScoreFGService
     public function getSections(): array
     {
         return array_keys(self::FORMULES);
+    }
+
+    /**
+     * Calcule la somme des coefficients d'une section.
+     */
+    public function getCoefficientsSum(string $section): float
+    {
+        if (!isset(self::FORMULES[$section])) {
+            return 10.0;
+        }
+        return array_sum(self::FORMULES[$section]);
     }
 }

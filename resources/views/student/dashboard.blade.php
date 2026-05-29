@@ -541,15 +541,15 @@
             <div class="db-hero-stats">
                 <div class="db-stat-pill">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                    <b>3</b> tests complétés
+                    <b>{{ $dashboardStats['tests_completed'] ?? 0 }}</b> tests complétés
                 </div>
                 <div class="db-stat-pill">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5A2.5 2.5 0 0 0 14.5 12a2.5 2.5 0 0 0-2.5-2.5A2.5 2.5 0 0 0 9.5 12a2.5 2.5 0 0 0 2.5 2.5Z"/><path d="M10 2 2.23 7.74a2 2 0 0 0 .81 3.52l1.63.45a3 3 0 0 1 2.14 2.14l.45 1.63a2 2 0 0 0 3.52.81L16.5 10.5"/><path d="m18 16 4 4"/><path d="m20 16-4 4"/></svg>
-                    <b>12</b> parcours suggérés
+                    <b>{{ $dashboardStats['suggested_paths'] ?? 0 }}</b> parcours suggérés
                 </div>
                 <div class="db-stat-pill">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-                    Top <b>15%</b> des profils
+                    Fiabilité <b>{{ $dashboardStats['reliability_score'] ?? 0 }}%</b>
                 </div>
             </div>
         </div>
@@ -570,12 +570,12 @@
                             stroke="url(#dbRingGrad)" stroke-width="8"
                             stroke-linecap="round"
                             stroke-dasharray="540.35"
-                            stroke-dashoffset="118.88"/>
+                            stroke-dashoffset="{{ $profilRingOffset ?? 540.35 }}"/>
                 </svg>
                 <div class="db-ring-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:0.5rem;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     <span class="db-ring-label">Profil IA</span>
-                    <span class="db-ring-val">{{ $profilIaScore ?? 78 }}%</span>
+                    <span class="db-ring-val">{{ $profilIaScore ?? 0 }}%</span>
                 </div>
             </div>
 
@@ -644,7 +644,7 @@
                 <div class="db-subsec-label">Points forts détectés</div>
                 <div class="db-tags">
                     @php
-                        $forces = ['Résolution de problèmes','Pensée analytique','Curiosité technique','Adaptabilité','Créativité numérique','Communication écrite'];
+                        $forces = ['Test RIASEC à compléter'];
                         if(isset($profilRiasec) && !empty($profilRiasec->interpretation['forces'])) {
                             $forces = array_slice($profilRiasec->interpretation['forces'], 0, 6);
                         }
@@ -658,17 +658,13 @@
             <div>
                 <div class="db-subsec-label">Progression du profil</div>
                 <div class="db-timeline">
-                    @foreach([
-                        ['Test Cognitif Global','12 Fév 2026','92%'],
-                        ['Intérêts Professionnels','10 Fév 2026','78%'],
-                        ['Compétences Techniques','5 Fév 2026','85%'],
-                    ] as $tl)
+                    @foreach($profileTimeline ?? [] as $tl)
                     <div class="db-tl-row">
                         <div>
-                            <div class="db-tl-title">{{ $tl[0] }}</div>
-                            <div class="db-tl-date">{{ $tl[1] }}</div>
+                            <div class="db-tl-title">{{ $tl['title'] }}</div>
+                            <div class="db-tl-date">{{ $tl['date'] }}</div>
                         </div>
-                        <div class="db-tl-score">{{ $tl[2] }}</div>
+                        <div class="db-tl-score">{{ $tl['score'] }}</div>
                     </div>
                     @endforeach
                 </div>
@@ -677,13 +673,134 @@
     </div>
 </section>
 
+{{-- ════════════════════════════════
+     § 3 · PARCOURS
+════════════════════════════════ --}}
+<section class="db-section rev" id="parcours-section">
+    <div class="db-section-header">
+        <div>
+            <p class="stag">Mon Espace d'Avenir</p>
+            <h2 class="sh">Construis ton <em>parcours</em></h2>
+        </div>
+    </div>
 
+    <div class="db-parcours-grid">
+        <!-- Featured Card: spans 2 rows -->
+        <div class="db-pc featured rev rev-d1" onclick="window.location='{{ route('student.pipeline') }}'">
+            <div class="db-pc-icon">🚀</div>
+            <div>
+                <div class="db-pc-score-num">{{ $profilIaScore ?? 0 }}%</div>
+                <div class="db-pc-score-label">Intégration profil</div>
+            </div>
+            <h3 class="db-pc-title">Mon Projet d'Orientation</h3>
+            <p class="db-pc-desc">
+                Suis l'avancement de ton profil, passe les tests psychométriques et découvre tes filières idéales.
+            </p>
+            <div class="db-pc-bottom">
+                <span class="db-pc-meta">IA Active</span>
+                <div class="db-pc-arrow">→</div>
+            </div>
+        </div>
 
+        <!-- Card 2: Chatbot Nova -->
+        <div class="db-pc rev rev-d2" onclick="window.location='{{ route('student.orientation.nova') }}'">
+            <div class="db-pc-icon">🤖</div>
+            <h3 class="db-pc-title">Nova (Chatbot Gemini)</h3>
+            <p class="db-pc-desc">
+                Une question sur ton orientation ou tes recommandations ? Discute avec Nova.
+            </p>
+            <div class="db-pc-bottom">
+                <span class="db-pc-meta">RAG Intégré</span>
+                <div class="db-pc-arrow">→</div>
+            </div>
+        </div>
+
+        <!-- Card 3: CV Builder -->
+        <div class="db-pc rev rev-d3" onclick="window.location='{{ route('student.cv.index') }}'">
+            <div class="db-pc-icon">📄</div>
+            <h3 class="db-pc-title">CV Builder</h3>
+            <p class="db-pc-desc">
+                Crée un CV professionnel avec tes compétences RIASEC et tes formations favorites.
+            </p>
+            <div class="db-pc-bottom">
+                <span class="db-pc-meta">PDF / DOCX</span>
+                <div class="db-pc-arrow">→</div>
+            </div>
+        </div>
+
+        <!-- Card 4: Comparateur -->
+        <div class="db-pc rev rev-d4" onclick="window.location='{{ route('student.comparateur.index') }}'">
+            <div class="db-pc-icon">📊</div>
+            <h3 class="db-pc-title">Comparateur</h3>
+            <p class="db-pc-desc">
+                Compare les taux d'employabilité et les scores SDO des filières tunisiennes.
+            </p>
+            <div class="db-pc-bottom">
+                <span class="db-pc-meta">2241 filières</span>
+                <div class="db-pc-arrow">→</div>
+            </div>
+        </div>
+
+        <!-- Card 5: Simulateur What-If -->
+        <div class="db-pc rev rev-d5" onclick="window.location='{{ route('student.whatif.index') }}'">
+            <div class="db-pc-icon">🔮</div>
+            <h3 class="db-pc-title">What-If</h3>
+            <p class="db-pc-desc">
+                Simule tes notes du BAC et calcule instantanément tes chances d'admission SDO.
+            </p>
+            <div class="db-pc-bottom">
+                <span class="db-pc-meta">6 modules</span>
+                <div class="db-pc-arrow">→</div>
+            </div>
+        </div>
+    </div>
+</section>
 
 {{-- ════════════════════════════════
      § 4 · MATCHING
 ════════════════════════════════ --}}
+<section class="db-section rev" id="matching-section">
+    <div class="db-section-header">
+        <div>
+            <p class="stag">Recommandations</p>
+            <h2 class="sh">Filières <em>recommandées</em> (Top 6)</h2>
+        </div>
+        <div>
+            <a href="{{ route('recommendations.show') }}" class="btn-ghost">Voir toutes les recommandations</a>
+        </div>
+    </div>
 
+    @if(!empty($predictions))
+    <div class="db-matching-grid">
+        @foreach($predictions as $p)
+        <div class="db-mcard rev rev-d{{ $loop->index + 1 }}" onclick="window.location='{{ route('recommendations.show') }}'">
+            <div class="db-mcard-head">
+                <div class="db-mcard-icon">{{ $p['icon'] ?? '🎯' }}</div>
+                <div>
+                    <div class="db-mcard-name" style="font-size:0.95rem; font-weight:700; color:var(--ink);">{{ $p['name'] }}</div>
+                    <div class="db-mcard-univ" style="font-size:0.75rem; color:var(--ink60);">{{ $p['univ'] }}</div>
+                </div>
+            </div>
+            <div style="margin-top: auto;">
+                <div class="db-bar-row">
+                    <span class="db-bar-label">Match global</span>
+                    <span class="db-bar-score" style="font-family:'Fraunces', serif; font-size:1.1rem; color:var(--accent);">{{ $p['score'] }}%</span>
+                </div>
+                <div class="db-bar-track">
+                    <div class="db-bar-fill match-bar-fill" style="width:{{ $p['score'] }}%;"></div>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    @else
+    <div style="padding:3rem; text-align:center; background:var(--paper); border:1px solid var(--ink10); border-radius:var(--rl); color:var(--ink60);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem; display:block; opacity:.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <p style="font-weight:600">Aucune recommandation disponible</p>
+        <p style="font-size:0.85rem; margin-top:0.4rem">Veuillez d'abord compléter votre profil académique et passer le test psychométrique.</p>
+    </div>
+    @endif
+</section>
 
 {{-- ════════════════════════════════
      § 5 · SIMULATEUR
@@ -801,7 +918,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         @php
             $radarLabels = ['Logique','Créativité','Social','Technique','Gestion','Communication'];
-            $radarData = [85, 92, 64, 89, 71, 78];
+            $radarData = [0, 0, 0, 0, 0, 0];
             if(isset($profilRiasec) && $profilRiasec) {
                 $radarLabels = ['Réaliste', 'Investigateur', 'Artistique', 'Social', 'Entreprenant', 'Conventionnel'];
                 $radarData = [

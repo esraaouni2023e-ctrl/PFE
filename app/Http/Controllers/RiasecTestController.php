@@ -318,10 +318,20 @@ class RiasecTestController extends Controller
             $profil = ProfileRiasec::pourUser($userId)->complets()->recents()->first();
         }
 
+        // ── Nouvelle Garde Robuste (v5.1) : protection contre les profils vides ou corrompus ──
+        // Si le profil trouvé a moins de 10 questions répondues, il s'agit d'un profil invalide,
+        // incomplet ou corrompu. On l'invalide (expire) et on redirige vers le test de départ.
+        if ($profil && $profil->nb_questions_repondues < 10) {
+            Log::warning("SIAEPI Guard: Profil RIASEC ID {$profil->id} incomplet ou vide détecté ({$profil->nb_questions_repondues} réponses) — Expire et redirige.");
+            $profil->update(['statut' => ProfileRiasec::STATUT_EXPIRE]);
+            session()->forget('riasec_profile_id');
+            $profil = null;
+        }
+
         if (! $profil) {
             return redirect()
                 ->route('student.pipeline')
-                ->with('warning', 'Aucun résultat disponible. Veuillez passer le test.');
+                ->with('warning', 'Aucun résultat valide disponible. Veuillez passer le test psychométrique RIASEC.');
         }
 
         $scores = null;

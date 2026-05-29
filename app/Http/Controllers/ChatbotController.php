@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Profile;
+use App\Models\ProfileRiasec;
+use App\Models\Recommendation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -21,6 +25,123 @@ class ChatbotController extends Controller
 
     private string $baseUrl = 'https://generativelanguage.googleapis.com/v1/models/';
 
+    /**
+     * Construit le contexte personnalisé de l'étudiant connecté.
+     *
+     * Charge le profil académique, le profil RIASEC et les recommandations
+     * SIAEPI cachées en BDD pour les injecter dans le prompt système.
+     * Retourne une chaîne vide si aucun utilisateur n'est authentifié
+     * ou si aucune donnée n'est disponible.
+     */
+    private function buildStudentContext(): string
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return '';
+        }
+
+        $userId = $user->id;
+
+        // ── Profil académique ───────────────────────────────────────────
+        $profile = Profile::where('user_id', $userId)->first();
+
+        // ── Dernier profil RIASEC complété ──────────────────────────────
+        $profilRiasec = ProfileRiasec::where('user_id', $userId)
+            ->where('statut', 'complet')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // ── Recommandations SIAEPI cachées ──────────────────────────────
+        $recommendation = Recommendation::where('user_id', $userId)
+            ->where('source', 'SIAEPI_v5')
+            ->first();
+
+        // Si aucune donnée n'est disponible, on ne génère pas de contexte
+        if (!$profile && !$profilRiasec && !$recommendation) {
+            return '';
+        }
+
+        // ── Construction du bloc contexte ────────────────────────────────
+        $context = "\n\n### Contexte de l'étudiant connecté :\n";
+        $context .= 'Nom: ' . ($user->name ?? 'Non renseigné') . "\n";
+
+        if ($profile) {
+            $context .= 'Section BAC: ' . ($profile->section_bac ?? 'Non renseignée') . "\n";
+            $context .= 'Score FG: ' . ($profile->score_fg !== null ? round($profile->score_fg, 2) : 'Non calculé') . "\n";
+            $context .= 'Moyenne générale: ' . ($profile->moyenne_generale !== null ? round($profile->moyenne_generale, 2) : 'Non renseignée') . "\n";
+        }
+
+        if ($profilRiasec) {
+            $context .= 'Code Holland: ' . ($profilRiasec->code_holland ?? 'Non déterminé') . "\n";
+            $context .= 'Scores RIASEC: '
+                . 'R=' . ($profilRiasec->score_r ?? 0) . ', '
+                . 'I=' . ($profilRiasec->score_i ?? 0) . ', '
+                . 'A=' . ($profilRiasec->score_a ?? 0) . ', '
+                . 'S=' . ($profilRiasec->score_s ?? 0) . ', '
+                . 'E=' . ($profilRiasec->score_e ?? 0) . ', '
+                . 'C=' . ($profilRiasec->score_c ?? 0) . "\n";
+
+            // Scores GATB si disponibles
+            $gatbScores = array_filter([
+                'G' => $profilRiasec->score_gatb_g,
+                'V' => $profilRiasec->score_gatb_v,
+                'N' => $profilRiasec->score_gatb_n,
+                'S' => $profilRiasec->score_gatb_s,
+            ], fn ($v) => $v !== null && $v > 0);
+
+            if (!empty($gatbScores)) {
+                $gatbParts = [];
+                foreach ($gatbScores as $key => $val) {
+                    $gatbParts[] = "{$key}={$val}";
+                }
+                $context .= 'Scores GATB: ' . implode(', ', $gatbParts) . "\n";
+            }
+
+            // Confiance / cohérence
+            if ($profilRiasec->confidence_score !== null) {
+                $context .= 'Confiance: ' . round($profilRiasec->confidence_score * 100, 1) . "%\n";
+            }
+            if ($profilRiasec->score_coherence !== null) {
+                $context .= 'Cohérence: ' . $profilRiasec->score_coherence . "%\n";
+            }
+        }
+
+        if ($recommendation && !empty($recommendation->data)) {
+            $data = $recommendation->data;
+            $recs = $data['recommandations'] ?? [];
+
+            if (!empty($recs)) {
+                $topRecs = array_slice($recs, 0, 5);
+                $context .= "Top " . count($topRecs) . " recommandations SIAEPI :\n";
+
+                foreach ($topRecs as $index => $rec) {
+                    $nom          = $rec['Nom_Filiere'] ?? 'Formation';
+                    $etablissement = $rec['Etablissement'] ?? '';
+                    $universite   = $rec['Universite'] ?? '';
+                    $scoreFinal   = isset($rec['Score_Final_Contextuel'])
+                        ? round($rec['Score_Final_Contextuel'] * 100, 1)
+                        : (isset($rec['Score_Final']) ? round($rec['Score_Final'] * 100, 1) : 'N/A');
+                    $lieu = trim($etablissement . ($universite ? ' – ' . $universite : ''));
+
+                    $context .= ($index + 1) . ". {$nom} - Score: {$scoreFinal}%"
+                        . ($lieu ? " - {$lieu}" : '') . "\n";
+                }
+            }
+
+            // Diagnostic résumé si disponible
+            $diagnostic = $data['diagnostic']['diagnostic'] ?? null;
+            if ($diagnostic) {
+                $context .= 'Diagnostic: ' . $diagnostic . "\n";
+            }
+        }
+
+        $context .= "\nSi l'étudiant te pose des questions sur ses recommandations ou son profil, utilise ces données pour lui donner des conseils personnalisés et contextuels.";
+        $context .= "\nTu peux mentionner que tu as accès à son profil pour enrichir tes réponses, mais ne récite pas toutes les données d'un coup : utilise-les naturellement quand c'est pertinent.\n";
+
+        return $context;
+    }
+
     private function getSystemPrompt(): string
     {
         $questions = \App\Models\QuestionRiasec::where('actif', true)->get()->groupBy('dimension');
@@ -33,6 +154,9 @@ class ChatbotController extends Controller
             'Conventional' => $questions->get('C', collect())->pluck('texte_fr')->toArray(),
         ];
         $jsonQuestions = json_encode($formattedQuestions, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        // Charge le contexte personnalisé de l'étudiant (vide si non authentifié)
+        $studentContext = $this->buildStudentContext();
 
         return <<<PROMPT
 Tu es ORIENTIA, l'assistant intelligent et conseiller d'orientation de la plateforme "CapAvenir" (une plateforme d'orientation académique et professionnelle pour les étudiants tunisiens).
@@ -50,7 +174,7 @@ La plateforme offre plusieurs outils pour aider les étudiants tunisiens dans le
 - **Portfolio & Roadmap** : Pour générer un plan de carrière et suivre ses compétences.
 - **Messagerie** : Pour contacter des conseillers d'orientation directement sur la plateforme.
 Si un étudiant pose une question sur ces fonctionnalités, explique-les clairement et de manière concise.
-
+{$studentContext}
 ### Règles pour le test RIASEC (si l'étudiant veut faire le test) :
 - Pose entre 12 et 15 questions en vague initiale (2 à 3 par dimension RIASEC).
 - Pose maximum 2 questions supplémentaires par dimension pertinente dans les vagues suivantes.
@@ -116,7 +240,7 @@ PROMPT;
                 'temperature' => 0.65,
                 'topK' => 40,
                 'topP' => 0.95,
-                'maxOutputTokens' => 500,
+                'maxOutputTokens' => 1200,
             ],
             'safetySettings' => [
                 ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],

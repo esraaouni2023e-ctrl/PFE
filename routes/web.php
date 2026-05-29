@@ -140,6 +140,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
 // Admin Routes (Secured)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/feedbacks', [\App\Http\Controllers\Admin\DashboardController::class, 'feedbacks'])->name('feedbacks.index');
 
     // Users
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -242,6 +243,8 @@ Route::prefix('riasec')
 Route::middleware(['auth'])->group(function () {
     Route::get('/recommendations', [\App\Http\Controllers\StudentController::class, 'showRecommendations'])
         ->name('recommendations.show');
+    Route::post('/recommendations/feedback', [\App\Http\Controllers\StudentController::class, 'storeFeedback'])
+        ->name('recommendations.feedback');
 });
 
 require __DIR__ . '/auth.php';

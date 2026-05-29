@@ -11,23 +11,8 @@ class OrientationController extends Controller
 {
     public function index(Request $request)
     {
-        // Si aucun paramètre de filtrage n'est présent (premier accès), on filtre par défaut sur le Bac de l'étudiant
-        if (!$request->hasAny(['domaine', 'recherche', 'etablissement', 'niveau'])) {
-            $user = auth()->user();
-            $sectionBac = $user?->profile?->section_bac ?? 'Informatique';
-            $mapBacDomaine = [
-                'Mathématiques'           => 'Mathématiques et Appliquées',
-                'Sciences expérimentales' => 'Sciences Expérimentales',
-                'Économie et gestion'     => 'Économie et Gestion',
-                'Technique'               => 'Technologie',
-                'Informatique'            => 'Informatique',
-                'Lettres'                 => 'Lettres et Sciences Humaines',
-                'Sport'                   => 'Sport',
-            ];
-            $domaine = $mapBacDomaine[$sectionBac] ?? 'Informatique';
-        } else {
-            $domaine = $request->get('domaine');
-        }
+        // Par défaut, pas de filtrage par domaine (on affiche toutes les filières, soit les 2241)
+        $domaine = $request->get('domaine', '');
 
         $etablissement  = $request->get('etablissement', '');
         $recherche      = $request->get('recherche', '');

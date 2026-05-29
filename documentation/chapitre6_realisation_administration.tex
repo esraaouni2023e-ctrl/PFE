@@ -1,0 +1,260 @@
+% @Author: Takwa Ben Aïcha Gader
+% @Date:   2026-02-20
+% @Last Modified time: 2026-05-25
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPITRE 6 : RÉALISATION — ESPACE ADMINISTRATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Réalisation — Espace Administration}
+\label{chap:realisation_administration}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+La pérennité et la fiabilité d'une plateforme d'orientation intelligente dépendent d'une gouvernance rigoureuse des accès et d'une mise à jour continue des référentiels académiques. Le module d'Administration constitue la tour de contrôle de \textbf{CapAvenir}, offrant aux gestionnaires les outils nécessaires pour superviser les cycles de vie des utilisateurs, administrer la structure des formations et piloter l'écosystème décisionnel. Ce chapitre décrit l'implémentation de l'Espace Administration. Nous détaillerons la gestion des habilitations basée sur les rôles, les processus CRUD d'importation et de mise à jour du catalogue de formations universitaires tunisiennes, ainsi que le tableau de bord de supervision analytique qui compile les indicateurs d'activité globaux de la plateforme.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Objectif du module Administration}
+
+L'Espace Administration sert de garant de la cohérence et de la sécurité du système. Ses objectifs fondamentaux s'articulent autour de trois responsabilités majeures :
+\begin{itemize}
+    \item \textbf{Gouvernance et habilitation des utilisateurs} : Réguler les droits d'accès à l'aide d'un contrôle d'accès basé sur les rôles (RBAC) pour s'assurer que seuls les utilisateurs autorisés accèdent aux fonctionnalités sensibles (notamment les dossiers d'évaluation psychométrique).
+    \item \textbf{Intégrité et mise à jour du catalogue} : Administrer le référentiel des universités, des filières d'études et des seuils d'adéquation nationaux (SDO), de manière à maintenir la précision des suggestions du moteur SIAEPI.
+    \item \textbf{Pilotage et analyse d'audience} : Suivre l'activité globale du serveur (nombre d'inscriptions, charge du service d'intelligence artificielle, taux d'utilisation de l'assistant virtuel Nova) afin d'anticiper les besoins d'infrastructure.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Gestion des utilisateurs et rôles}
+
+Le pilotage des comptes utilisateurs est opéré par le contrôleur backend \texttt{UserController.php} de l'espace d'administration.
+
+\subsection{Gestion dynamique des rôles (RBAC)}
+
+L'application implémente un contrôle d'accès basé sur les rôles (RBAC - \textit{Role-Based Access Control}) s'appuyant sur la table de jointure SQL \texttt{model_has_roles}. Trois rôles fondamentaux sont supportés par le système, comme illustré par la figure~\ref{fig:rbac_structure}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm and 1.5cm,
+    role/.style={rectangle, draw=headercolor, fill=rowgray, rounded corners=4pt, minimum width=3cm, minimum height=0.8cm, align=center, font=\scriptsize\bfseries, line width=1pt},
+    permission/.style={rectangle, draw=gray, fill=white, rounded corners=2pt, minimum width=2.8cm, minimum height=0.6cm, align=center, font=\tiny},
+    arrow/.style={-latex, thick, draw=gray!80}
+]
+    % Roles
+    \node[role] (admin) {Administrateur \\ (Gouvernance)};
+    \node[role, below=1.5cm of admin] (couns) {Conseiller \\ (Accompagnement)};
+    \node[role, below=1.5cm of couns] (stu) {Étudiant \\ (Auto-orientation)};
+
+    % Permissions Admin
+    \node[permission, right=1.5cm of admin] (p_admin1) {Calibration IRT \& SIAEPI};
+    \node[permission, above=0.3cm of p_admin1] (p_admin2) {Importation du catalogue SDO};
+    \node[permission, below=0.3cm of p_admin1] (p_admin3) {Modération \& Rôles CRUD};
+
+    % Permissions Counselor
+    \node[permission, right=1.5cm of couns] (p_couns1) {CRM de cohorte};
+    \node[permission, above=0.3cm of p_couns1] (p_couns2) {Homologation décisionnelle};
+    \node[permission, below=0.3cm of p_couns1] (p_couns3) {Agenda \& Messagerie};
+
+    % Permissions Student
+    \node[permission, right=1.5cm of stu] (p_stu1) {Test adaptatif (CAT)};
+    \node[permission, above=0.3cm of p_stu1] (p_stu2) {Recommandations (Pareto)};
+    \node[permission, below=0.3cm of p_stu1] (p_stu3) {What-If \& CV Builder};
+
+    % Links
+    \draw[arrow] (admin) -- (p_admin1);
+    \draw[arrow] (admin.east) -- (p_admin2.west);
+    \draw[arrow] (admin.east) -- (p_admin3.west);
+
+    \draw[arrow] (couns) -- (p_couns1);
+    \draw[arrow] (couns.east) -- (p_couns2.west);
+    \draw[arrow] (couns.east) -- (p_couns3.west);
+
+    \draw[arrow] (stu) -- (p_stu1);
+    \draw[arrow] (stu.east) -- (p_stu2.west);
+    \draw[arrow] (stu.east) -- (p_stu3.west);
+
+    % Inheritance arrows (Admin controls roles, etc.)
+    \draw[-latex, dashed, thick, draw=red!70] (admin) -- node[left, font=\tiny\color{red!70}] {Valide} (couns);
+\end{tikzpicture}
+\caption{Structure de contrôle d'accès basée sur les rôles (RBAC)}
+\label{fig:rbac_structure}
+\end{figure}
+
+Le tableau~\ref{tab:rbac_details} récapitule les privilèges et habilitations associés à chacun de ces trois rôles.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3cm}|p{4.5cm}|p{7.5cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Rôle}} & \textcolor{white}{\textbf{Habilitation système}} & \textcolor{white}{\textbf{Fonctionnalités associées}} \\
+\hline
+\textbf{Administrateur} & Accès total à la console de pilotage & CRUD Utilisateurs/Conseillers, calibration IRT, configuration SIAEPI, importations de fichiers SDO. \\
+\hline
+\rowcolor{rowgray}
+\textbf{Conseiller} & Accès limité à l'espace de suivi clinique & Gestion de cohorte d'étudiants, observations cliniques, planification d'agenda, validation de choix. \\
+\hline
+\textbf{Étudiant} & Accès personnel à l'espace d'auto-évaluation & Passation de test adaptatif, consultation de recommandations, simulateur What-If, CV Builder. \\
+\hline
+\end{tabular}
+\caption{Tableau détaillé des privilèges par rôle}
+\label{tab:rbac_details}
+\end{table}
+
+\subsection{Création, suspension et validation des professionnels}
+
+Le contrôleur expose des actions CRUD sécurisées par des middlewares d'authentification admin :
+\begin{itemize}
+    \item \textbf{Création manuelle} : Permet de générer des comptes pour de nouveaux conseillers d'orientation ou administrateurs.
+    \item \textbf{Suspension temporaire} : Offre la possibilité de geler l'activité d'un compte étudiant en cas de détection d'abus de ressources ou de violation des conditions d'utilisation, avec déconnexion forcée via l'invalidation de la session active en base de données.
+    \item \textbf{Validation réglementaire} : Traiter les comptes des nouveaux professionnels inscrits. Le compte est placé dans l'état \texttt{pending\_approval} jusqu'à validation manuelle des documents de certification par un administrateur.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Gestion du contenu et des calibrations}
+
+Le catalogue des formations constituant la matière première du moteur de recommandation SIAEPI, sa gestion requiert une attention particulière.
+
+\subsection{Importation en masse et mise à jour du catalogue SDO}
+
+Le catalogue universitaire tunisien est modélisé par la classe \texttt{Filiere.php}. Pour simplifier le travail de mise à jour annuelle lors de la parution du guide national de l'orientation tunisien, l'administrateur dispose d'une fonctionnalité d'importation en bloc à partir de fichiers Excel ou CSV via le contrôleur \texttt{FiliereImportController.php} utilisant la bibliothèque \texttt{Laravel-Excel}.
+
+Le tableau~\ref{tab:categories_import} présente les sept catégories d'importation prises en charge, qui correspondent aux sections nationales du baccalauréat tunisien.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|c|p{4.5cm}|p{8cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Catégorie}} & \textcolor{white}{\textbf{Section du Baccalauréat}} & \textcolor{white}{\textbf{Description du fichier d'importation}} \\
+\hline
+\textbf{INFO} & Informatique & Filières orientées technologies du numérique, génie logiciel, réseaux. \\
+\hline
+\rowcolor{rowgray}
+\textbf{TECH} & Technique & Formations de génie électrique, mécanique, génie civil. \\
+\hline
+\textbf{ECO} & Économie et gestion & Licences de commerce, gestion, finance, comptabilité. \\
+\hline
+\rowcolor{rowgray}
+\textbf{EXP} & Sciences expérimentales & Cursus de médecine, pharmacie, sciences de la vie et de la terre. \\
+\hline
+\textbf{SPORT} & Sport & Licences d'éducation physique et entraînement sportif. \\
+\hline
+\rowcolor{rowgray}
+\textbf{MAT} & Mathématiques & Licences fondamentales de mathématiques, physique, actuariat. \\
+\hline
+\textbf{LET} & Lettres & Formations en langues, droit, histoire, philosophie. \\
+\hline
+\end{tabular}
+\caption{Catégories d'importation Excel des filières universitaires}
+\label{tab:categories_import}
+\end{table}
+
+L'exécution de cet import déclenche automatiquement l'invalidation du cache applicatif afin que les recommandations futures intègrent instantanément les nouvelles données.
+
+\subsection{Administration des questions et calibration IRT}
+
+L'administrateur calibre les questions du test adaptatif RIASEC via le contrôleur \texttt{RiasecAdminController.php}. Ce composant permet de paramétrer finement chaque item pour ajuster l'estimation du trait latent de l'étudiant. Le tableau~\ref{tab:questions_fields} décrit les attributs d'une question.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3.5cm}|p{4.5cm}|p{7cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Attribut de l'item}} & \textcolor{white}{\textbf{Type / Plage de valeurs}} & \textcolor{white}{\textbf{Rôle dans l'évaluation adaptative}} \\
+\hline
+Dimension & $\text{R, I, A, S, E, C}$ & Réfère l'item à une dimension du modèle RIASEC. \\
+\hline
+\rowcolor{rowgray}
+Catégorie de question & loisirs, préférences, qualités & Catégorise le type d'activité pour l'évaluation. \\
+\hline
+Discrimination $a_i$ & $[0{,}5,\ 2{,}5]$ & Représente la capacité de l'item à distinguer finement les niveaux proches. \\
+\hline
+\rowcolor{rowgray}
+Difficulté/Seuil $b_i$ & $[-3{,}0,\ +3{,}0]$ & Indique le seuil d'adhésion pour la dimension d'intérêt. \\
+\hline
+Poids & $[1,\ 3]$ & Indice multiplicateur du score de l'item. \\
+\hline
+\end{tabular}
+\caption{Attributs de calibration des items de test adaptatif}
+\label{tab:questions_fields}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Supervision, Audit et Sécurité}
+
+Le tableau de bord d'administration est orchestré par le contrôleur \texttt{Admin/DashboardController.php}. Ce composant effectue des requêtes d'agrégation SQL pour dresser un bilan analytique de l'activité du serveur.
+
+\subsection{Journalisation des activités et sécurité (Audit Logs)}
+
+La traçabilité et la sécurité du système sont assurées par l'enregistrement de chaque action sensible au sein d'une table \texttt{audit_logs}, gérée par \texttt{AuditController.php}. Le tableau~\ref{tab:audit_logs_types} détaille les types d'événements journalisés.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{4cm}|p{3.5cm}|p{7.5cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Type d'événement}} & \textcolor{white}{\textbf{Niveau de sévérité}} & \textcolor{white}{\textbf{Exemple d'action journalisée}} \\
+\hline
+Configuration système & Moyen & Modification des coefficients globaux de l'algorithme SIAEPI. \\
+\hline
+\rowcolor{rowgray}
+Importation de données & Moyen & Téléversement d'un nouveau fichier Excel de seuils SDO. \\
+\hline
+Gestion des comptes & Élevé & Promotion d'un utilisateur au rôle Administrateur ou suppression d'un compte. \\
+\hline
+\rowcolor{rowgray}
+Sécurité et Authentification & Élevé & Échec de validation 2FA OTP ou tentatives de brute-force. \\
+\hline
+Validation d'orientation & Moyen & Homologation officielle d'une trajectoire par un conseiller. \\
+\hline
+\end{tabular}
+\caption{Journalisation des actions d'audit et de sécurité}
+\label{tab:audit_logs_types}
+\end{table}
+
+Ces informations permettent de garantir une totale traçabilité des opérations de gouvernance et de se conformer aux normes de protection des données.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Interfaces administratives}
+
+Cette section présente les captures d'écran des principales interfaces développées pour l'Espace Administrateur.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.45\textheight, keepaspectratio]{images/tableau de bord admin.png}
+\includegraphics[width=\textwidth, height=0.45\textheight, keepaspectratio]{images/tableau_de_bord2_admin.png}
+\caption{Tableau de bord de supervision administrative (Statistiques générales)}
+\label{fig:tableau_de_bord_admin}
+\end{figure} 
+
+Les deux vues de la figure~\ref{fig:tableau_de_bord_admin} illustrent la centralisation des statistiques d'utilisation du système, incluant le suivi temporel des inscriptions et la répartition des sections de baccalauréat.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, height=0.9\textheight, keepaspectratio]{images/gestion_utilisateur_admin.png}
+\caption{Interface de gestion des comptes utilisateurs et d'attribution des rôles}
+\label{fig:gestion_utilisateurs_admin}
+\end{figure} 
+
+L'interface présentée en figure~\ref{fig:gestion_utilisateurs_admin} permet de lister, rechercher et éditer les comptes utilisateurs tout en assurant le contrôle des privilèges d'accès.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Formulaire d'édition d'une filière d'études avec curseurs de pondération RIASEC et saisie du seuil SDO \vspace{1.5cm}}}
+    \caption{Interface de gestion du catalogue des formations et spécialités}
+    \label{fig:gestion_catalogue}
+\end{figure}
+
+La figure~\ref{fig:gestion_catalogue} montre le formulaire d'administration permettant de configurer finement les caractéristiques académiques et psychométriques de chaque programme d'études.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+La réalisation de l'Espace Administration dote la plateforme \textbf{CapAvenir} d'un cadre de gouvernance complet et sécurisé. Grâce à la combinaison de contrôles d'accès basés sur les rôles, de fonctionnalités d'importation en masse du catalogue universitaire et d'outils analytiques d'agrégation, les administrateurs peuvent maintenir la qualité du service à moindre effort. Une fois les trois espaces (Étudiant, Conseiller, Administrateur) modélisés et mis en œuvre, il convient de s'intéresser aux conditions réelles de leur déploiement et à l'évaluation finale du système, thèmes développés dans le chapitre suivant.

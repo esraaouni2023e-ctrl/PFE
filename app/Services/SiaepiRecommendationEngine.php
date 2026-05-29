@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 /**
- * SIAEPI v2.2 — Moteur de recommandation académique PHP-natif
+ * SIAEPI v5.0 — Moteur de recommandation académique PHP-natif
  *
  * Implémente :
  *   - Similarité cosinus pondérée (profil multidimensionnel × filière)
@@ -35,7 +35,8 @@ class SiaepiRecommendationEngine
     private array $transitionMatrix = [
         'Mathématiques' => [
             'lettres' => 0.20, 'social' => 0.15, 'arts' => 0.25,
-            'sante'   => 0.30, // Paretémédical non naturel pour Maths
+            // NOTE v5.1 : 'sante' retiré — Médecine/Pharmacie/Dentaire sont des débouchés
+            // naturels pour les bacheliers Maths excellents en Tunisie (accès par numerus clausus)
         ],
         'Sciences expérimentales' => [
             'lettres' => 0.15, 'social' => 0.10, 'arts' => 0.20,
@@ -90,10 +91,12 @@ class SiaepiRecommendationEngine
         'C' => ['comptabilite', 'finance', 'economie', 'administration', 'informatique'],
     ];
 
-    // ── Bonus section BAC → filières compatibles (v5.0) ────────────────────
-    // NOTE : Maths n'a PAS 'sante' dans ses bonus (Kiné/Infirmier ne sont PAS le débouché naturel)
+    // ── Bonus section BAC → filières compatibles (v5.1) ────────────────────
+    // NOTE v5.1 : Maths inclut maintenant 'sante', 'medecine', 'pharmacie'
+    // Les bacheliers Maths forts accèdent légitimement à Médecine/Pharmacie/Dentaire en Tunisie
+    // Le filtre paramedical ($paramedicKeywords) exclut déjà Kiné/Infirmier/Sage-femme
     private array $bacSectionBonus = [
-        'Mathématiques'          => ['informatique', 'ingenierie', 'math', 'technique', 'sciences', 'finance'],
+        'Mathématiques'          => ['informatique', 'ingenierie', 'math', 'technique', 'sciences', 'finance', 'sante', 'medecine', 'pharmacie', 'dentaire'],
         'Sciences expérimentales' => ['sante', 'sciences', 'biologie', 'chimie', 'pharmacie', 'medecine'],
         'Économie et gestion'    => ['economie', 'gestion', 'finance', 'commerce', 'droit', 'marketing'],
         'Technique'              => ['technique', 'ingenierie', 'architecture', 'mecanique', 'electrique'],
@@ -141,27 +144,32 @@ class SiaepiRecommendationEngine
         $files = glob($basePath . '*.xlsx');
         $filieres = [];
 
-        // ── Déduplication : même code OU même (nom + établissement) = doublon ──
-        $seenCodes    = [];
-        $seenNameEtab = [];
+        // ── Déduplication : chaque code_filiere est unique ──
+        $seenCodes = [];
 
+        // Mapping fichier → type BAC par défaut
+        // NOTE : Chaque fichier correspond à une section BAC spécifique.
         $bacMapping = [
-            'INFO' => 'Informatique', 'INF' => 'Informatique',
-            'ECO' => 'Économie et gestion', 'EGE' => 'Économie et gestion',
-            'EXP' => 'Sciences expérimentales', 'SXP' => 'Sciences expérimentales',
-            'TECH' => 'Technique', 'TEC' => 'Technique',
-            'SPORT' => 'Sport', 'SPO' => 'Sport',
-            'LET' => 'Lettres', 'LTR' => 'Lettres',
-            'MATH' => 'Mathématiques', 'MAT' => 'Mathématiques'
+            'ECO_FILIERES.XLSX'              => 'Économie et gestion',
+            'EXP_FILIERES.XLSX'              => 'Sciences expérimentales',
+            'FILIERES_DATA.XLSX'             => 'Mathématiques',
+            'INFO_FILIERES.XLSX'             => 'Informatique',
+            'TECH_FILIERES.XLSX'             => 'Technique',
+            'SPORT_FILIERES.XLSX'            => 'Sport',
+            // ⚠️ FIX CRITIQUE : ce fichier contient les filières du BAC Lettres (LET)
+            'DONNEES_FILIERE_ENRICHIES.XLSX' => 'Lettres',
         ];
 
         foreach ($files as $path) {
             try {
                 $filename = basename($path);
-                if (str_starts_with($filename, 'donnees_filiere')) continue; // Skip generic file if there are specialized ones, or we can load it as 'Général'
+                $filenameUpper = strtoupper($filename);
 
-                $prefix = strtoupper(explode('_', $filename)[0]);
-                $typeBac = $bacMapping[$prefix] ?? 'Général';
+                if (!isset($bacMapping[$filenameUpper])) {
+                    continue; // Sauter les fichiers non mappés
+                }
+
+                $defaultTypeBac = $bacMapping[$filenameUpper];
 
                 $spreadsheet = IOFactory::load($path);
                 $ws = $spreadsheet->getActiveSheet();
@@ -170,22 +178,29 @@ class SiaepiRecommendationEngine
                 $headers = array_shift($rows);
                 if (!$headers) continue;
 
+                // Détecter si le fichier a une colonne Type_Bac propre
+                $hasTypeBacColumn = in_array('Type_Bac', $headers);
+
                 foreach ($rows as $row) {
                     if (count($row) < count($headers)) continue;
                     $f = array_combine($headers, array_slice($row, 0, count($headers)));
                     if (empty($f['Code_Filiere']) || empty($f['Nom_Filiere'])) continue;
 
-                    // ── Vérification unicité (même filière + même établissement = doublon) ──
                     $code = trim($f['Code_Filiere']);
-                    $nameEtabKey = mb_strtolower(trim($f['Nom_Filiere'])) . '|' . mb_strtolower(trim($f['Etablissement'] ?? ''));
 
-                    if (isset($seenCodes[$code]) || isset($seenNameEtab[$nameEtabKey])) {
-                        continue; // Doublon détecté, on le saute
+                    if (isset($seenCodes[$code])) {
+                        continue; // Doublon détecté sur le code
                     }
-                    $seenCodes[$code]        = true;
-                    $seenNameEtab[$nameEtabKey] = true;
+                    $seenCodes[$code] = true;
 
-                    $f['Type_Bac'] = $typeBac;
+                    // ── FIX CRITIQUE : utiliser la colonne Type_Bac du fichier si elle existe ──
+                    // Sinon utiliser le type par défaut du fichier
+                    if ($hasTypeBacColumn && !empty(trim($f['Type_Bac'] ?? ''))) {
+                        $f['Type_Bac'] = trim($f['Type_Bac']);
+                    } else {
+                        $f['Type_Bac'] = $defaultTypeBac;
+                    }
+
                     $filieres[] = $f;
                 }
             } catch (\Throwable $e) {
@@ -217,11 +232,32 @@ class SiaepiRecommendationEngine
         }
 
         $scoreFg      = (float) ($profilEtudiant['score_fg'] ?? 120);
+        // ── Auto-correction : si score_fg reçu sur /20 (moyenne brute), rescaler sur /200 ──
+        // Le moteur travaille sur une échelle 0-200 (formule FG officielle).
+        // Si quelqu'un passe 18 au lieu de 180, on détecte et corrige.
+        if ($scoreFg > 0 && $scoreFg <= 20) {
+            Log::warning('SIAEPI: score_fg reçu sur échelle /20 (' . $scoreFg . ') — rescalé x10 vers ' . ($scoreFg * 10));
+            $scoreFg = $scoreFg * 10;
+        }
         $sectionBac   = $profilEtudiant['section_bac'] ?? $profilEtudiant['filiere_etudiant_actuelle'] ?? '';
         $riasecVec    = $profilEtudiant['vecteur_psychometrique'] ?? ['R'=>0.5,'I'=>0.5,'A'=>0.5,'S'=>0.5,'E'=>0.5,'C'=>0.5];
         $gatbRaw      = $profilEtudiant['gatb_scores'] ?? ['G'=>50,'V'=>50,'N'=>50,'S'=>50];
         $codeHolland  = $profilEtudiant['code_holland'] ?? $this->getHollandFromVec($riasecVec);
         $textePsycho  = $profilEtudiant['texte_psycho'] ?? '';
+        
+        // Charger les feedbacks utilisateur pour ajustement dynamique
+        $feedbacks = [];
+        if (isset($profilEtudiant['id'])) {
+            try {
+                $feedbacks = \App\Models\RecommendationFeedback::where('user_id', $profilEtudiant['id'])
+                    ->get()
+                    ->keyBy('filiere_code')
+                    ->toArray();
+            } catch (\Throwable $e) {
+                Log::warning("SIAEPI: No feedback table: " . $e->getMessage());
+            }
+        }
+        $profilEtudiant['feedbacks'] = $feedbacks;
         
         // Dimensions v4.0
         $bigFive      = $profilEtudiant['big_five'] ?? ['O'=>0.5,'C'=>0.5,'E'=>0.5,'A'=>0.5,'N'=>0.5];
@@ -229,11 +265,25 @@ class SiaepiRecommendationEngine
         $interests    = $profilEtudiant['interests'] ?? [];
 
         // Normalise GATB sur 0–1 (Échelle 0-100)
+        // Détection de test GATB non complété (tous les scores à 0 ou non renseignés)
+        $scoreG = $gatbRaw['GATB_G'] ?? $gatbRaw['G'] ?? null;
+        $scoreV = $gatbRaw['GATB_V'] ?? $gatbRaw['V'] ?? null;
+        $scoreN = $gatbRaw['GATB_N'] ?? $gatbRaw['N'] ?? null;
+        $scoreS = $gatbRaw['GATB_S'] ?? $gatbRaw['S'] ?? null;
+
+        $isGatbEmpty = (
+            (is_null($scoreG) || (float)$scoreG === 0.0) &&
+            (is_null($scoreV) || (float)$scoreV === 0.0) &&
+            (is_null($scoreN) || (float)$scoreN === 0.0) &&
+            (is_null($scoreS) || (float)$scoreS === 0.0)
+        );
+
+        // Si le test GATB n'est pas complété, on utilise une valeur neutre de 0.6 (60%) pour ne pas pénaliser indûment l'étudiant
         $gatbNorm = [
-            'G' => min(1.0, max(0.0, ((float) ($gatbRaw['GATB_G'] ?? $gatbRaw['G'] ?? 50.0)) / 100.0)),
-            'V' => min(1.0, max(0.0, ((float) ($gatbRaw['GATB_V'] ?? $gatbRaw['V'] ?? 50.0)) / 100.0)),
-            'N' => min(1.0, max(0.0, ((float) ($gatbRaw['GATB_N'] ?? $gatbRaw['N'] ?? 50.0)) / 100.0)),
-            'S' => min(1.0, max(0.0, ((float) ($gatbRaw['GATB_S'] ?? $gatbRaw['S'] ?? 50.0)) / 100.0)),
+            'G' => $isGatbEmpty ? 0.6 : min(1.0, max(0.0, ((float) ($scoreG ?? 50.0)) / 100.0)),
+            'V' => $isGatbEmpty ? 0.6 : min(1.0, max(0.0, ((float) ($scoreV ?? 50.0)) / 100.0)),
+            'N' => $isGatbEmpty ? 0.6 : min(1.0, max(0.0, ((float) ($scoreN ?? 50.0)) / 100.0)),
+            'S' => $isGatbEmpty ? 0.6 : min(1.0, max(0.0, ((float) ($scoreS ?? 50.0)) / 100.0)),
         ];
 
         // Bonus section BAC
@@ -242,18 +292,33 @@ class SiaepiRecommendationEngine
         // Fonction pour normaliser le nom de la section du Bac (minuscules, sans accents)
         $normalizeBac = function ($str) {
             $str = mb_strtolower(trim($str ?? ''));
-            return str_replace(['é', 'è', 'ê', 'à'], ['e', 'e', 'e', 'a'], $str);
+            $str = str_replace(['é', 'è', 'ê', 'à', 'â', 'î', 'ô', 'û'], ['e', 'e', 'e', 'a', 'a', 'i', 'o', 'u'], $str);
+            return $str;
         };
-        $normEtuBac = explode(' ', $normalizeBac($sectionBac))[0]; // Prendre le premier mot
+        // Comparaison sur la chaîne COMPLÈTE normalisée (pas juste le premier mot)
+        $normEtuBac = $normalizeBac($sectionBac);
+
+        // Map strict : Section BAC étudiant → Type_Bac attendu dans les fichiers Excel
+        $bacTypeMap = [
+            'mathematiques'          => 'mathematiques',
+            'sciences experimentales'=> 'sciences experimentales',
+            'economie et gestion'    => 'economie et gestion',
+            'technique'              => 'technique',
+            'informatique'           => 'informatique',
+            'lettres'                => 'lettres',
+            'sport'                  => 'sport',
+        ];
+        $normEtuBacMapped = $bacTypeMap[$normEtuBac] ?? $normEtuBac;
 
         $scored = [];
         foreach ($filieres as $f) {
-            // Filtrage strict par Section Baccalauréat
-            $fBac = $normalizeBac($f['Type_Bac'] ?? 'Général');
-            $fBacFirstWord = explode(' ', $fBac)[0];
+            // Filtrage UNIQUEMENT basé sur les données Excel (source de vérité).
+            // Principe : un étudiant voit les filières de SON type de BAC + les filières 'Général'.
+            // Aucune exclusion algorithmique par domaine n'est appliquée ici.
+            $fBac = $normalizeBac($f['Type_Bac'] ?? 'General');
 
-            if ($f['Type_Bac'] !== 'Général' && $normEtuBac !== '' && $fBacFirstWord !== $normEtuBac) {
-                continue; // La filière n'est pas accessible pour ce type de bac
+            if ($fBac !== 'general' && $normEtuBac !== '' && $fBac !== $normEtuBacMapped) {
+                continue; // La filière n'est pas dans le fichier Excel de ce BAC
             }
 
             $score = $this->scoreFiliere($f, $scoreFg, $riasecVec, $gatbNorm, $codeHolland, $bacDomains, $textePsycho, $interests, $bigFive, $valeurs, $sectionBac, $profilEtudiant);
@@ -377,39 +442,26 @@ class SiaepiRecommendationEngine
         $sdo         = $this->getSDO($filiere);
         $domain      = $this->detectDomain($nomFiliere, $codeRiasec);
 
-        // ── FILTRE DUR : Exclusion paramédicale pour Bac Maths (v5.0) ────────────
-        // Un étudiant Maths très fort ne devrait PAS se retrouver en Kiné/Infirmier
-        // sauf si son code RIASEC est dominé par S (soins/social)
-        if ($sectionBac === 'Mathématiques') {
-            $isParamedical = false;
-            foreach ($this->paramedicKeywords as $kw) {
-                if (str_contains($nomFiliere, $kw)) {
-                    $isParamedical = true;
-                    break;
-                }
-            }
-            // Bloquer si paramédical ET que le profil n'est pas fortement S-dominant
-            $sScore = $riasecVec['S'] ?? 0;
-            if ($isParamedical && $sScore < 0.70) {
-                return null; // Exclusion dure
-            }
-        }
-
-        // ── FILTRE DUR : Score FG excellent mais SDO très bas = gaspillage (v5.0) ──
-        // Si l'étudiant a 18/20 (scoreFg ≈ 180) et que le SDO de la filière est < 120
-        // c'est un gaspillage manifeste : on exclut sauf si c'est sa passion
-        if ($scoreFg >= 170 && $sdo > 0 && $sdo < 120) {
-            $riasecMatch = $this->cosineSimilarityRiasec($riasecVec, $codeRiasec, $codeHolland);
-            if ($riasecMatch < 0.65) {
-                return null; // Gaspillage manifeste sans passion = exclusion
-            }
-        }
+        // ── Seul filtre d'exclusion légitime : SDO trop élevé vs score étudiant ──
+        // (l'étudiant n'a pas le niveau académique requis pour cette filière)
+        // Tous les autres filtres sont des pénalités DOUCES dans le score final.
 
         $accessProb = $this->logisticAdmissionProbability($scoreFg, $sdo);
         
         $academicPenalty = 1.0;
         if ($accessProb < 0.25 && $scoreFg < ($sdo - 20)) return null; // Exclusion si trop éloigné
-        elseif ($accessProb < 0.35) $academicPenalty = 0.65; // Soft Penalty
+        elseif ($accessProb < 0.35) {
+            // Pénalité plus douce (15% au lieu de 35%) pour les excellents profils sur les filières sélectives/médicales
+            $isPrestige = ($sdo >= 160) || 
+                str_contains($nomFiliere, 'médecine') || str_contains($nomFiliere, 'medecine') || 
+                str_contains($nomFiliere, 'pharmacie') || 
+                str_contains($nomFiliere, 'dentaire');
+            if ($scoreFg >= 160 && $isPrestige) {
+                $academicPenalty = 0.85; // Pénalité réduite à 15% pour encourager les vocations d'excellence
+            } else {
+                $academicPenalty = 0.65;
+            }
+        }
 
         // ── Étape 2 : Score Vocation Composite & Confidence (v4.1) ─────────
         $riasecMatch = $this->cosineSimilarityRiasec($riasecVec, $codeRiasec, $codeHolland);
@@ -473,7 +525,7 @@ class SiaepiRecommendationEngine
         }
         $gatbScore = $totalGatbW > 0 ? $gatbScore / $totalGatbW : 0.5;
         
-        $academicScore = (0.6 * $accessProb) * $academicPenalty + (0.4 * $gatbScore);
+        $academicScore = (0.6 * $accessProb) + (0.4 * $gatbScore);
 
         $difficulty = $sdo > 0 ? $sdo : 100.0;
         $aptitudeReelle = ($scoreFg + ($gatbScore * 200)) / 2; // Mixte Score FG et Aptitudes
@@ -503,14 +555,24 @@ class SiaepiRecommendationEngine
             }
         }
 
-        // Transition Matrix Malus
+        // Transition Matrix Malus (pénalité DOUCE uniquement — jamais une exclusion)
+        // La source de vérité pour l'accès est le fichier Excel, pas cet algorithme.
         $transitionMalus = 0.0;
         if (isset($this->transitionMatrix[$sectionBac][$domain])) {
             $transitionMalus = $this->transitionMatrix[$sectionBac][$domain];
+            // Jamais une exclusion dure : le malus réduit le score mais ne bloque pas
         }
 
         // Prestige & Pareto Bonus
-        $prestigeBonus = ($scoreFg >= 165 && $sdo >= 165) ? 0.15 : 0.0;
+        // Un étudiant excellent (scoreFg >= 160) qui s'oriente vers des filières d'excellence (médecine, pharmacie, dentaire ou SDO >= 160)
+        // reçoit un bonus de prestige car ce sont ses débouchés d'excellence naturels.
+        $isPrestigeFiliere = ($sdo >= 160) || 
+            str_contains($nomFiliere, 'médecine') || str_contains($nomFiliere, 'medecine') || 
+            str_contains($nomFiliere, 'pharmacie') || 
+            str_contains($nomFiliere, 'dentaire') || 
+            str_contains($nomFiliere, 'ingénieur') || str_contains($nomFiliere, 'ingenieur') || 
+            str_contains($nomFiliere, 'préparatoire') || str_contains($nomFiliere, 'preparatoire');
+        $prestigeBonus = ($scoreFg >= 160 && $isPrestigeFiliere) ? 0.18 : 0.0;
         
         // Waste Penalty renforcée (v5.0)
         // Si un étudiant fort (FG ≥ 150) postule à une filière bien en dessous de lui (SDO + 30)
@@ -520,8 +582,29 @@ class SiaepiRecommendationEngine
             $ecart = $scoreFg - $sdo;
             $wastePenalty = min(0.25, ($ecart - 30) / 200.0 + 0.10);
         }
+        // ── Pénalité SDO inconnu (v5.1) : filières sans seuil = risque de sous-orientation ──
+        // Pour un étudiant fort (FG ≥ 150), une filière sans SDO défini est pénalisée
+        // car elle est généralement ouverte sans sélection (niveau bas attendu)
+        if ($scoreFg >= 150 && $sdo === 0.0) {
+            $wastePenalty = max($wastePenalty, 0.12); // Pénalité minimale de 12% pour SDO inconnu
+        }
 
-        $total = $total + $bacBonus + $prestigeBonus - $transitionMalus - $wastePenalty - $penaliteCognitive;
+        // ── Ajustement Dynamique par Feedback Utilisateur (v5.0) ──
+        $codeFiliere = trim($filiere['Code_Filiere'] ?? '');
+        $feedbackBonus = 0.0;
+        if (isset($rawProfil['feedbacks'][$codeFiliere])) {
+            $fb = $rawProfil['feedbacks'][$codeFiliere];
+            $feedbackRating = (int) ($fb['rating'] ?? 5);
+            $isRelevant = (bool) ($fb['is_relevant'] ?? true);
+            
+            if ($isRelevant) {
+                $feedbackBonus = 0.05 + (($feedbackRating - 3) * 0.05);
+            } else {
+                $feedbackBonus = -0.10 - ((3 - $feedbackRating) * 0.075);
+            }
+        }
+
+        $total = $total + $bacBonus + $prestigeBonus - $transitionMalus - $wastePenalty - $penaliteCognitive + $feedbackBonus;
         $total = max(0.05, min(1.0, $total));
 
         return [
@@ -534,7 +617,7 @@ class SiaepiRecommendationEngine
             'confidence'  => $confidence,
             'risk'        => $risk,
             'transition'  => $this->classifyTransition($vocationScore, $academicScore, $accessProb),
-            'explication' => $this->buildExplication($vocationScore, $academicScore, $marcheScore, $domain, $penaliteCognitive, $scoreFg, $sdo, $risk),
+            'explication' => $this->buildExplication($vocationScore, $academicScore, $marcheScore, $domain, $penaliteCognitive, $scoreFg, $sdo, $risk, $riasecVec, $gatbNorm, $codeHolland, $filiere),
         ];
     }
 
@@ -647,17 +730,28 @@ class SiaepiRecommendationEngine
     private function detectDomain(string $nom, string $code): string
     {
         $nom = mb_strtolower($nom);
+        // Enlever les accents pour les comparaisons
+        $nomNorm = str_replace(
+            ['é','è','ê','à','â','î','ô','û','ù'],
+            ['e','e','e','a','a','i','o','u','u'],
+            $nom
+        );
 
-        if (preg_match('/inform|algorithme|réseau|systèm|logiciel|cyber/', $nom)) return 'informatique';
-        if (preg_match('/médecin|santé|pharmac|infirmier|kiné|dentair/', $nom)) return 'sante';
-        if (preg_match('/génie|ingénierie|mécanique|électrique|civil|industri/', $nom)) return 'technique';
-        if (preg_match('/biologie|chimie|physique|sciences/', $nom)) return 'sciences';
-        if (preg_match('/économ|gestion|commerc|finance|comptab|banque|marketing/', $nom)) return 'economie';
-        if (preg_match('/lettr|arabe|histoire|philosoph|géograph|socio/', $nom)) return 'lettres';
-        if (preg_match('/droit|juridique|notariat/', $nom)) return 'social';
-        if (preg_match('/art|design|music|archit|communication|journalisme/', $nom)) return 'arts';
-        if (preg_match('/sport|éducation physique/', $nom)) return 'social';
-        if (preg_match('/math|statistique/', $nom)) return 'sciences';
+        if (preg_match('/inform|algorithme|reseau|systeme|logiciel|cyber/', $nomNorm)) return 'informatique';
+        if (preg_match('/medecin|sante|pharmac|infirmier|kine|dentair/', $nomNorm)) return 'sante';
+        if (preg_match('/genie|ingenierie|mecanique|electrique|civil|industri/', $nomNorm)) return 'technique';
+        if (preg_match('/biologie|chimie|physique|sciences/', $nomNorm)) return 'sciences';
+        if (preg_match('/econom|gestion|commerc|finance|comptab|banque|marketing/', $nomNorm)) return 'economie';
+        if (preg_match('/math|statistique/', $nomNorm)) return 'sciences';
+        // ── FIX CRITIQUE : psychologie et sociologie classés en 'social', PAS 'lettres' ──
+        // Ils étaient capturés par 'socio' dans la regex lettres, ce qui les faisait tomber
+        // dans la catégorie lettres et échapper au filtre social.
+        if (preg_match('/psycho|sociolog/', $nomNorm)) return 'social';
+        if (preg_match('/droit|juridique|notariat/', $nomNorm)) return 'social';
+        if (preg_match('/sport|education physique/', $nomNorm)) return 'social';
+        // Filières littéraires et arts classés APRÈS les sciences/économie
+        if (preg_match('/lettr|arabe|anglais|francais|histoire|philosoph|geograph/', $nomNorm)) return 'lettres';
+        if (preg_match('/art|design|music|archit|communication|journalisme/', $nomNorm)) return 'arts';
 
         // Fallback basé sur le code RIASEC
         $first = substr($code, 0, 1);
@@ -727,30 +821,75 @@ class SiaepiRecommendationEngine
         return 'Nouvelle orientation';
     }
 
-    /** Construit une explication industrielle v4.1 */
-    private function buildExplication(float $riasec, float $acad, float $marche, string $domain, float $penalite, float $scoreFg, float $sdo, float $risk): array
-    {
+    /** Construit une explication industrielle v5.0 enrichie XAI */
+    private function buildExplication(
+        float $riasec, 
+        float $acad, 
+        float $marche, 
+        string $domain, 
+        float $penalite, 
+        float $scoreFg, 
+        float $sdo, 
+        float $risk,
+        array $riasecVec = [],
+        array $gatbNorm = [],
+        string $codeHolland = 'ISA',
+        array $filiere = []
+    ): array {
         $raisons = [];
-
-        if ($riasec >= 0.70) $raisons[] = "Adéquation psychométrique exceptionnelle.";
-        elseif ($riasec >= 0.50) $raisons[] = "Profil compatible avec vos intérêts.";
-        else $raisons[] = "Orientation de découverte (vocation modérée).";
-
-        if ($acad >= 0.75) $raisons[] = "Niveau académique très sécurisant.";
-        
-        $statutRisque = "Faible";
-        if ($risk > 0.40) $statutRisque = "Élevé";
-        elseif ($risk > 0.15) $statutRisque = "Modéré";
-
         $points_forts = [];
         $points_faibles = [];
 
-        if ($riasec >= 0.65) $points_forts[] = "Alignement passion.";
-        if ($acad >= 0.70) $points_forts[] = "Maîtrise académique.";
-        if ($marche >= 0.75) $points_forts[] = "Employabilité garantie.";
+        $targetCode = strtoupper(trim($filiere['Code_RIASEC'] ?? ''));
+        $nomF = $filiere['Nom_Filiere'] ?? 'cette filière';
 
-        if ($risk > 0.30) $points_faibles[] = "Exigence élevée.";
-        if ($penalite > 0.10) $points_faibles[] = "Décalage cognitif potentiel.";
+        // 1. Alignement RIASEC personnalisé
+        if ($riasec >= 0.70) {
+            $raisons[] = "Ton code RIASEC dominant ($codeHolland) s'aligne de manière exceptionnelle sur le profil requis ($targetCode) pour $nomF, avec " . round($riasec * 100) . "% d'adéquation psychométrique.";
+            $points_forts[] = "Adéquation RIASEC exceptionnelle ($codeHolland vs $targetCode).";
+        } elseif ($riasec >= 0.50) {
+            $raisons[] = "Ton profil psychométrique montre un bon alignement avec les exigences de cette formation (Adéquation : " . round($riasec * 100) . "%).";
+            $points_forts[] = "Bonne compatibilité d'intérêts.";
+        } else {
+            $raisons[] = "Orientation de découverte : cette filière ($nomF) est un pivot exploratoire par rapport à ton code RIASEC.";
+        }
+
+        // 2. Alignement GATB / Capacités
+        if ($acad >= 0.70) {
+            $points_forts[] = "Maîtrise académique (Score FG : " . round($scoreFg, 1) . ").";
+        }
+
+        // Ajout de gap cognitifs spécifiques GATB
+        $gScore = isset($gatbNorm['G']) ? round($gatbNorm['G'] * 100) : 50;
+        $nScore = isset($gatbNorm['N']) ? round($gatbNorm['N'] * 100) : 50;
+        
+        if (($domain === 'technique' || $domain === 'sciences' || $domain === 'informatique') && $nScore < 55) {
+            $points_faibles[] = "Aptitudes numériques à renforcer.";
+            $raisons[] = "Tu as besoin de renforcer tes aptitudes numériques (GATB-N : {$nScore}/100) pour réussir pleinement en ingénierie/sciences.";
+        }
+        if (($domain === 'lettres' || $domain === 'social') && (isset($gatbNorm['V']) && $gatbNorm['V'] < 0.55)) {
+            $vScore = round($gatbNorm['V'] * 100);
+            $points_faibles[] = "Aptitudes verbales à consolider.";
+            $raisons[] = "Il est recommandé de consolider tes aptitudes verbales (GATB-V : {$vScore}/100) pour cette filière littéraire ou sociale.";
+        }
+
+        // 3. Risques et résilience
+        $statutRisque = "Faible";
+        if ($risk > 0.40) {
+            $statutRisque = "Élevé";
+            $points_faibles[] = "Exigence de travail très élevée.";
+            if ($domain === 'sante') {
+                $raisons[] = "Le niveau de stress élevé de la médecine/santé (9/10) peut être particulièrement difficile avec ton score de résilience actuel.";
+            } else {
+                $raisons[] = "Cette formation exigeante présente un écart significatif (SDO : " . round($sdo, 1) . " vs ton score FG), ce qui nécessite un effort d'adaptation majeur.";
+            }
+        } elseif ($risk > 0.15) {
+            $statutRisque = "Modéré";
+        }
+
+        if ($marche >= 0.75) {
+            $points_forts[] = "Forte employabilité sur le marché tunisien.";
+        }
 
         return [
             'compatibilite' => round($riasec * 100, 0) . "%",
@@ -789,14 +928,31 @@ class SiaepiRecommendationEngine
         }
 
         $gatb = $profil['gatb_scores'] ?? [];
-        if (($gatb['G'] ?? 10) < 12) {
-            $result['axes_amelioration'][] = "Renforcer le raisonnement logique (exercices de logique, mathématiques)";
-        }
-        if (($gatb['V'] ?? 10) < 12) {
-            $result['axes_amelioration'][] = "Développer les compétences verbales (lecture, rédaction)";
-        }
-        if (($gatb['N'] ?? 10) < 12) {
-            $result['axes_amelioration'][] = "Améliorer les aptitudes numériques (calcul, statistiques)";
+        $scoreG = $gatb['GATB_G'] ?? $gatb['G'] ?? null;
+        $scoreV = $gatb['GATB_V'] ?? $gatb['V'] ?? null;
+        $scoreN = $gatb['GATB_N'] ?? $gatb['N'] ?? null;
+        $scoreS = $gatb['GATB_S'] ?? $gatb['S'] ?? null;
+
+        $isGatbEmpty = (
+            (is_null($scoreG) || (float)$scoreG === 0.0) &&
+            (is_null($scoreV) || (float)$scoreV === 0.0) &&
+            (is_null($scoreN) || (float)$scoreN === 0.0) &&
+            (is_null($scoreS) || (float)$scoreS === 0.0)
+        );
+
+        if ($isGatbEmpty) {
+            $result['axes_amelioration'][] = "Compléter le test d'aptitudes cognitives (GATB) pour affiner votre profil";
+        } else {
+            // Seuil d'amélioration : < 55/100
+            if ($scoreG !== null && (float)$scoreG < 55.0) {
+                $result['axes_amelioration'][] = "Renforcer le raisonnement logique (exercices de logique, mathématiques)";
+            }
+            if ($scoreV !== null && (float)$scoreV < 55.0) {
+                $result['axes_amelioration'][] = "Développer les compétences verbales (lecture, rédaction)";
+            }
+            if ($scoreN !== null && (float)$scoreN < 55.0) {
+                $result['axes_amelioration'][] = "Améliorer les aptitudes numériques (calcul, statistiques)";
+            }
         }
 
         return $result;

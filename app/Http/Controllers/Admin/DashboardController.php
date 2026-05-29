@@ -102,4 +102,22 @@ class DashboardController extends Controller
             'recentStudentsList'
         ));
     }
+
+    /**
+     * Display feedbacks page in admin panel.
+     */
+    public function feedbacks()
+    {
+        $feedbacks = \App\Models\RecommendationFeedback::with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        // Group by filiere code to see average ratings
+        $aggregated = \App\Models\RecommendationFeedback::selectRaw('filiere_code, AVG(rating) as avg_rating, COUNT(*) as total_count, SUM(is_relevant) as positive_count')
+            ->groupBy('filiere_code')
+            ->orderBy('total_count', 'desc')
+            ->get();
+
+        return view('admin.feedbacks.index', compact('feedbacks', 'aggregated'));
+    }
 }

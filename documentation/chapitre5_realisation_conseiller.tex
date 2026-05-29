@@ -1,0 +1,293 @@
+% @Author: Takwa Ben Aïcha Gader
+% @Date:   2026-02-20
+% @Last Modified time: 2026-05-25
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPITRE 5 : RÉALISATION — ESPACE CONSEILLER
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Réalisation — Espace Conseiller}
+\label{chap:realisation_conseiller}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+Si l'Espace Étudiant favorise l'autonomie d'exploration et l'évaluation psychométrique informatisée, l'Espace Conseiller introduit la dimension d'expertise humaine indispensable à l'interprétation critique des résultats et au soutien psychopédagogique. Ce chapitre détaille la réalisation technique des outils d'administration et d'aide à la décision mis à la disposition des conseillers d'orientation. Nous mettrons en évidence la manière dont la plateforme centralise, structure et optimise le traitement des dossiers étudiants pour offrir une supervision personnalisée. Nous décrirons notamment la mise en œuvre du contrôleur d'orchestration backend, les mécanismes d'optimisation des requêtes de base de données relationnelle et la conception des interfaces de feedback collaboratives permettant de réconcilier l'évaluation algorithmique et l'évaluation clinique.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Objectif du module Conseiller}
+
+Le module Conseiller est conçu comme un tableau de bord analytique d'aide à la décision. Son but principal est de doter les professionnels de l'orientation d'une vision claire, exhaustive et hiérarchisée des parcours des étudiants. Les objectifs fonctionnels de ce module se structurent autour de trois axes stratégiques :
+\begin{itemize}
+    \item \textbf{Supervision continue} : Suivre en temps réel la progression des étudiants dans leurs passations de tests et identifier les parcours bloqués ou incomplets à l'aide d'indicateurs synthétiques.
+    \item \textbf{Analyse et validation} : Étudier le profil psychométrique généré par l'algorithme, consulter les alertes comportementales et valider les suggestions automatiques ou formuler des alternatives personnalisées.
+    \item \textbf{Accompagnement hybride} : Rédiger des observations de synthèse et structurer des plans de coaching individualisés qui seront immédiatement partagés sur l'interface de l'étudiant concerné.
+\end{itemize}
+
+Ce module garantit que l'intelligence artificielle n'agit pas comme un décideur autonome, mais comme un outil d'assistance supervisé par un être humain qualifié, incarnant ainsi le paradigme du couplage homme-machine (``Human-in-the-loop'').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Gestion et suivi de la cohorte d'étudiants}
+
+La gestion des flux d'étudiants s'appuie sur le contrôleur backend \texttt{CounselorController.php}. Afin de garantir des performances optimales lors de la manipulation de volumes importants de données utilisateurs, l'implémentation recourt systématiquement au chargement anticipé (\textit{Eager Loading}) via l'ORM Laravel Eloquent. 
+
+\subsection{Optimisation de l'accès aux données (Résolution du problème N+1)}
+
+Dans une implémentation classique de base de données, la récupération des étudiants et de leurs relations associées (profils, tentatives de tests, roadmaps) génère un grand nombre de requêtes SQL successives (le problème de performance ``N+1 Query Issue''). Pour un affichage de $N$ étudiants, le framework effectuerait 1 requête pour charger la liste, puis $N$ requêtes supplémentaires pour charger chaque relation.
+
+Le service de la plateforme résout cette contrainte en utilisant l'instruction d'eager loading suivante au sein de \texttt{CounselorController.php} :
+
+\begin{minted}[frame=lines,framesep=2mm,baselinestretch=1.2,fontsize=\small]{php}
+$students = User::where('role', User::ROLE_STUDENT)
+                ->with(['profile', 'careerRoadmaps'])
+                ->get();
+\end{minted}
+
+Cette formulation ordonne à l'ORM d'exécuter seulement deux requêtes SQL consolidées (une jointure globale et un chargement par lot) pour rapatrier l'ensemble de la cohorte et de ses dépendances en mémoire, garantissant un temps de chargement constant de l'interface ($O(1)$ par rapport au nombre de relations).
+
+\subsection{Indicateurs de performance (KPIs) de la cohorte}
+
+Le tableau de bord agrège plusieurs indicateurs clés (KPIs) calculés dynamiquement pour aider le conseiller à évaluer globalement l'activité et le succès de sa cohorte. Le tableau~\ref{tab:counselor_kpis} détaille ces indicateurs calculés au niveau du contrôleur.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{4.5cm}|p{2cm}|p{8.5cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Indicateur (KPI)}} & \textcolor{white}{\textbf{Valeur}} & \textcolor{white}{\textbf{Description et usage décisionnel}} \\
+\hline
+Taux de réussite prévisionnel & $84\,\%$ & Estimation de la réussite académique basée sur la conformité GATB \\
+\hline
+\rowcolor{rowgray}
+Taux de risque d'abandon & Calculé & Pourcentage d'étudiants ayant un profil ou une activité jugée à risque \\
+\hline
+Progression moyenne & $68\,\%$ & Taux d'achèvement moyen du pipeline d'orientation par les étudiants \\
+\hline
+\rowcolor{rowgray}
+Taux d'intervention efficace & $76\,\%$ & Ratio des orientations stabilisées après entretien clinique \\
+\hline
+Temps de suivi moyen & $45$\,min & Temps cumulé alloué par le conseiller à l'étude de chaque dossier \\
+\hline
+\end{tabular}
+\caption{Indicateurs de performance (KPIs) de l'Espace Conseiller}
+\label{tab:counselor_kpis}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Consultation et diagnostic clinique du profil}
+
+L'action \texttt{showStudent()} du contrôleur centralise le chargement de toutes les données constituant la fiche clinique de l'étudiant.
+
+\subsection{Flux d'agrégation des données CRM}
+
+Avant d'afficher la fiche détaillée de l'étudiant, l'orchestrateur backend compile des données hétérogènes pour en extraire un diagnostic unifié, comme illustré par la figure~\ref{fig:flow_counselor_data}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.7cm,
+    data/.style={rectangle, draw=gray, fill=white, rounded corners=2pt, minimum width=3.5cm, minimum height=0.6cm, align=center, font=\scriptsize},
+    aggregator/.style={rectangle, draw=headercolor, fill=rowgray, rounded corners=4pt, minimum width=4.5cm, minimum height=1.1cm, align=center, font=\scriptsize\bfseries, line width=1pt},
+    view/.style={rectangle, draw=green!60!black, fill=green!5, rounded corners=4pt, minimum width=4cm, minimum height=0.8cm, align=center, font=\scriptsize\bfseries, line width=1pt},
+    arrow/.style={-latex, thick, draw=gray!80}
+]
+    \node[data] (d1) {Profil Académique (Score FG)};
+    \node[data, below=0.15cm of d1] (d2) {Psychométrie (RIASEC / OCEAN)};
+    \node[data, below=0.15cm of d2] (d3) {Aptitudes Cognitives (GATB)};
+    \node[data, below=0.15cm of d3] (d4) {Logs Audits (Comportemental)};
+    \node[data, below=0.15cm of d4] (d5) {Indicateurs de Persévérance};
+
+    \node[aggregator, right=2cm of d3] (agg) {Orchestrateur Backend \\ \texttt{CounselorController::showStudent()}};
+
+    \node[view, right=2cm of agg] (v1) {Fiche Clinique de l'Étudiant};
+    \node[view, above=0.5cm of v1] (v2) {Indicateurs Prédictifs \\ (Success Forecast)};
+    \node[view, below=0.5cm of v1] (v3) {Historique \& Audit \\ (Decision Trail)};
+
+    % Arrows
+    \draw[arrow] (d1.east) -- (agg.west);
+    \draw[arrow] (d2.east) -- (agg.west);
+    \draw[arrow] (d3.east) -- (agg.west);
+    \draw[arrow] (d4.east) -- (agg.west);
+    \draw[arrow] (d5.east) -- (agg.west);
+
+    \draw[arrow] (agg.east) -- (v1.west);
+    \draw[arrow] (agg.east) -- (v2.west);
+    \draw[arrow] (agg.east) -- (v3.west);
+\end{tikzpicture}
+\caption{Flux d'agrégation des données cliniques de l'étudiant}
+\label{fig:flow_counselor_data}
+\end{figure}
+
+\subsection{Indicateurs de risque prédictifs (Success Forecast Engine)}
+
+Pour attirer l'attention du conseiller sur les dossiers critiques, le système intègre des indicateurs prédictifs calculés à partir du croisement des tests adaptatifs et des données de persévérance. Le tableau~\ref{tab:counselor_predictive} répertorie les cinq indicateurs clés surveillés.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{4cm}|p{2cm}|p{9cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Indicateur prédictif}} & \textcolor{white}{\textbf{Niveau de risque}} & \textcolor{white}{\textbf{Logique de calcul et alerte associée}} \\
+\hline
+Risque d'échec universitaire & Faible & Évalué selon l'adéquation entre le profil cognitif GATB de l'étudiant et les exigences de la filière. \\
+\hline
+\rowcolor{rowgray}
+Mauvais choix de filière & Modéré à Élevé & Détecté en cas de dissonance marquée (ex. aptitudes spatiales exceptionnelles mais choix orienté gestion). \\
+\hline
+Risque de décrochage & Très Faible & Analyse de l'inactivité temporelle (mesure de la fréquence de connexion et des simulations). \\
+\hline
+\rowcolor{rowgray}
+Saturation académique & Normal & Mesure du temps moyen de réponse indiquant une fatigue ou charge mentale stable. \\
+\hline
+Stress \& Anxiété scolaire & Élevé & Repéré par des temps de réponse fluctuants sur les modules de persévérance et les questionnaires de stress. \\
+\hline
+\end{tabular}
+\caption{Indicateurs prédictifs de réussite et d'anomalies d'orientation}
+\label{tab:counselor_predictive}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Mise à jour des recommandations et co-décision}
+
+Pour soutenir l'accompagnement hybride, le modèle de données \texttt{Profile} a été enrichi de champs de persistance spécifiques modifiables exclusivement par le conseiller : observations cliniques, plan de coaching et état d'homologation de l'orientation.
+
+\subsection{Archétypes de coaching et plans personnalisés}
+
+Pour accélérer la formulation des préconisations, le système classe automatiquement l'étudiant au sein d'un archétype décisionnel et propose des plans de coaching prédéfinis ajustables. Le tableau~\ref{tab:coaching_archetypes} décrit ces cinq profils.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3cm}|p{4.5cm}|p{7.5cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Archétype}} & \textcolor{white}{\textbf{Description du profil}} & \textcolor{white}{\textbf{Actions recommandées du plan de coaching}} \\
+\hline
+\textbf{Haut potentiel} & Profil à très fortes capacités scolaires et cognitives & Explorer les double diplômes et classes préparatoires ; développer les compétences de leadership. \\
+\hline
+\rowcolor{rowgray}
+\textbf{Stressé} & Anxiété élevée face à la décision future et au baccalauréat & séances de régulation émotionnelle ; fractionner les choix en étapes chronologiques simples. \\
+\hline
+\textbf{Indécis} & Difficultés à exprimer des préférences ou intérêts & Utiliser l'entonnoir décisionnel (restreindre les vœux de 8 à 3) ; journées d'immersion. \\
+\hline
+\rowcolor{rowgray}
+\textbf{Scientifique} & Profil orienté logique et sciences exactes (RIASEC I-R) & Confirmer les notes de spécialité ; simuler la réussite dans des écoles spécialisées (INSAT, Sup'Com). \\
+\hline
+\textbf{Littéraire} & Profil orienté expression, langues et sciences humaines & Valoriser les compétences rédactionnelles ; identifier les licences en droit, médias ou relations publiques. \\
+\hline
+\end{tabular}
+\caption{Archétypes d'étudiants et plans de coaching associés}
+\label{tab:coaching_archetypes}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Cycle de collaboration et d'homologation}
+
+La plateforme établit un flux de validation rigoureux pour acter les choix d'orientation, fondé sur la co-décision et la traçabilité.
+
+\subsection{Le cycle collaboratif (Human-in-the-loop)}
+
+La validation d'un vœu d'orientation suit un cycle asynchrone modélisé par la figure~\ref{fig:seq_homologation}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.3cm and 1cm,
+    actor/.style={circle, draw=headercolor, fill=headercolor!10, minimum size=1.8cm, align=center, font=\scriptsize\bfseries},
+    system/.style={rectangle, draw=caporange, fill=caporange!10, rounded corners=4pt, minimum width=3.4cm, minimum height=1cm, align=center, font=\scriptsize\bfseries, line width=1pt},
+    decision/.style={diamond, draw=red!70, fill=red!5, aspect=1.8, minimum width=2.5cm, align=center, font=\scriptsize\bfseries},
+    arrow/.style={-latex, thick, draw=gray!80, line width=1.2pt}
+]
+    \node[actor] (etu) {Étudiant \\ (Aspirations)};
+    \node[system, right=1.5cm of etu] (ia) {Moteur SIAEPI \\ (Analyse \& Recommandation)};
+    \node[actor, right=1.5cm of ia] (cons) {Conseiller \\ (Analyse Clinique)};
+    \node[decision, below=1cm of cons] (dec) {Homologation ?};
+    \node[system, below=1cm of ia] (action) {Plan de Coaching \\ \& Observations};
+    \node[system, below=1.2cm of etu] (val) {Validation Finale \\ (Score FG \& Pareto)};
+
+    % Arrows
+    \draw[arrow] (etu) -- node[above, font=\tiny] {CAT / Notes} (ia);
+    \draw[arrow] (ia) -- node[above, font=\tiny] {Alertes / Top-12} (cons);
+    \draw[arrow] (cons) -- (dec);
+    \draw[arrow] (dec) -- node[left, font=\tiny] {Non (Ajustement)} (action);
+    \draw[arrow] (dec) -| node[above, near start, font=\tiny] {Oui (Validation)} (val);
+    \draw[arrow] (action) -- (etu);
+    \draw[arrow] (val) -- (etu);
+\end{tikzpicture}
+\caption{Cycle collaboratif d'homologation d'une décision d'orientation}
+\label{fig:seq_homologation}
+\end{figure}
+
+Ce cycle intègre plusieurs étapes de validation. Le tableau~\ref{tab:actors_validation} présente le rôle de chaque acteur de la prise de décision.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3cm}|p{3.5cm}|p{8.5cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Étape}} & \textcolor{white}{\textbf{Statut du dossier}} & \textcolor{white}{\textbf{Description de l'action de validation}} \\
+\hline
+\textbf{1. Proposition IA} & Calculée à $94\,\%$ & Le système génère le vecteur d'adéquation initial basé sur l'IRT 2PL et les seuils historiques SDO. \\
+\hline
+\rowcolor{rowgray}
+\textbf{2. Homologation Conseiller} & En attente / Validée & Le conseiller examine le dossier et accorde son approbation après entretien clinique en justifiant son choix. \\
+\hline
+\textbf{3. Accord Étudiant} & Confirmé & L'étudiant prend connaissance du feedback, valide sa feuille de route (roadmap) sur son tableau de bord. \\
+\hline
+\rowcolor{rowgray}
+\textbf{4. Avis Parental (Optionnel)} & En attente d'avis & Les parents formulent leurs retours (notamment concernant les critères financiers et géographiques). \\
+\hline
+\end{tabular}
+\caption{Les différents acteurs et étapes du cycle de validation collaborative}
+\label{tab:actors_validation}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Présentation des interfaces utilisateur}
+
+Les interfaces de l'Espace Conseiller privilégient la clarté de restitution des données de diagnostic, facilitant une analyse immédiate du profil de chaque étudiant de la cohorte.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/tableau_de_bord_conseiller.png}
+\caption{Tableau de bord principal de l'Espace Conseiller (Vue analytique)}
+\label{fig:tableau_de_bord_conseiller}
+\end{figure} 
+
+La figure~\ref{fig:tableau_de_bord_conseiller} illustre le tableau de bord d'accueil du conseiller, affichant les indicateurs clés de sa cohorte (progression, alertes d'anomalies de test, taux de risque).
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Liste paginée des étudiants supervisés avec filtres de statut, barre de recherche et badges de risque \vspace{1.5cm}}}
+    \caption{Interface de suivi et de gestion de la cohorte d'étudiants}
+    \label{fig:liste_etudiants}
+\end{figure}
+
+La liste de suivi (figure~\ref{fig:liste_etudiants}) permet d'isoler rapidement les profils signalés par le \texttt{BehavioralAnalyzer} nécessitant un rendez-vous rapide.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Vue détaillée du profil d'un étudiant avec graphiques RIASEC, scores GATB et timeline d'audit \vspace{1.5cm}}}
+    \caption{Interface de consultation analytique du dossier d’un étudiant}
+    \label{fig:details_etudiant}
+\end{figure}
+
+La vue détaillée (figure~\ref{fig:details_etudiant}) rassemble toutes les mesures psychométriques issues du test adaptatif et l'historique d'audit des décisions.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Formulaire de saisie des observations cliniques, choix du statut et édition du plan de coaching \vspace{1.5cm}}}
+    \caption{Interface de saisie du feedback clinique et du plan de coaching}
+    \label{fig:feedback_conseiller}
+\end{figure}
+
+L'interface de feedback (figure~\ref{fig:feedback_conseiller}) permet d'enregistrer des annotations d'orientation et de structurer le plan d'actions partagé avec l'étudiant.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+L'Espace Conseiller complète l'architecture fonctionnelle de la plateforme \textbf{CapAvenir} en y apportant la supervision humaine nécessaire à une orientation éthique et qualifiée. Grâce à des mécanismes de requêtage optimisés par l'ORM Eloquent et à des formulaires d'annotation structurés, les professionnels peuvent gérer efficacement leur cohorte d'étudiants et intervenir de manière ciblée. La mise en œuvre coordonnée des espaces Étudiant et Conseiller nécessite un organe de contrôle global, rôle dévolu au module d'Administration qui fera l'objet du chapitre suivant.

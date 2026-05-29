@@ -1,0 +1,163 @@
+% @Author: Takwa Ben Aïcha Gader
+% @Date:   2026-02-20
+% @Last Modified time: 2026-05-25
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPITRE 4               %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Réalisation — Espace Étudiant}
+\label{chap:realisation_etudiant}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+Après avoir exposé la modélisation fonctionnelle et le cadre théorique des algorithmes décisionnels de \textbf{CapAvenir}, ce chapitre détaille la phase d'implémentation physique et la présentation des interfaces utilisateur de l'Espace Étudiant, module principal de notre plateforme. Conçu pour offrir un accompagnement à la fois autonome, intuitif et scientifiquement fondé, cet espace matérialise l'interaction directe entre l'apprenant et le système d'orientation. Nous présenterons ici les choix architecturaux et de développement, notamment l'intégration du framework MVC Laravel pour l'orchestration backend, du framework Tailwind CSS pour l'ergonomie visuelle, ainsi que la mise en œuvre de la base de données relationnelle MySQL et l'interfaçage avec les services d'intelligence artificielle. Les différentes sous-sections décrivent la structure technique de chaque vue et laissent l'espace nécessaire pour y intégrer les captures d'écran correspondantes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Objectif du module Étudiant}
+
+L'Espace Étudiant est pensé comme un compagnon numérique d'orientation dont l'objectif premier est d'abaisser la surcharge cognitive et l'incertitude décisionnelle chez l'étudiant. Il structure un parcours utilisateur guidé s'appuyant sur l'auto-évaluation (via le test CAT adaptatif), l'exploration active (via le catalogue dynamique, le comparateur de filières et le simulateur d'avenirs What-If) et la consolidation (via le chatbot d'orientation Nova, le CV builder et la messagerie interne avec un conseiller). L'enjeu de cette interface est de traduire des données mathématiques et statistiques complexes (traits latents $\theta$, probabilités logistiques, fronts de Pareto) en informations visuelles simples, digestes et actionnables par un jeune bachelier.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Interfaces de l'Espace Étudiant}
+
+Cette section détaille la réalisation des différentes interfaces constituant le parcours de l'étudiant sur la plateforme.
+
+\subsection{Authentification et Double Facteur (2FA)}
+
+La sécurité d'accès à l'Espace Étudiant s'appuie sur le système d'authentification natif de Laravel Breeze, étendu pour intégrer une vérification forte à double facteur (2FA). Lors de la phase de connexion, après validation cryptographique du mot de passe (via l'algorithme \texttt{bcrypt}), un code OTP expirable à 6 chiffres est envoyé par courriel à l'utilisateur. La saisie conforme de ce code valide définitivement l'accès au tableau de bord.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Page d'authentification et interface de validation du code OTP (2FA) \vspace{1.5cm}}}
+    \caption{Interface d’authentification sécurisée (Laravel Breeze / Tailwind CSS)}
+    \label{fig:interface_authentification}
+\end{figure}
+
+\subsection{Tableau de bord personnalisé}
+
+Le tableau de bord constitue le centre nerveux de l'Espace Étudiant. Conçu selon les règles modernes de l'UI/UX (hiérarchie visuelle, contrastes équilibrés et design glassmorphism), il fournit une vue d'ensemble instantanée sur l'état d'avancement de l'étudiant. Il intègre des widgets d'activité (statut des évaluations, niveau de complétion) et des raccourcis d'action rapides pour reprendre le test ou solliciter le chatbot Nova. Un graphique radar (via Chart.js ou SVG dynamique) y est également affiché pour restituer visuellement son profil RIASEC dès que le test est complété.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Tableau de bord étudiant avec widgets d'activité, graphique radar et boutons d'action rapide \vspace{1.5cm}}}
+    \caption{Tableau de bord personnalisé de l’étudiant}
+    \label{fig:dashboard_etudiant}
+\end{figure}
+
+\subsection{Profil Académique et Saisie des Notes}
+
+Cette interface permet à l'étudiant de saisir et de mettre à jour son profil académique. Il y sélectionne sa section d'origine du baccalauréat tunisien (ex. Informatique, Mathématiques, Sciences Expérimentales) et renseigne ses notes détaillées pour chaque matière. Ces notes sont exploitées pour le calcul automatique du Score de Formule Globale (Score FG) de l'élève.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Formulaire de profil académique pour la saisie des notes du baccalauréat tunisien \vspace{1.5cm}}}
+    \caption{Interface de gestion du profil académique}
+    \label{fig:profil_academique}
+\end{figure}
+
+\subsection{Pipeline d'orientation unifié}
+
+Le pipeline d'orientation structure l'expérience utilisateur en un parcours linéaire et rassurant en trois étapes clés. L'étudiant est guidé pas à pas : de la saisie de ses notes scolaires (Etape 1) au passage du test psychométrique (Etape 2), jusqu'à la consultation de ses recommandations de filières (Etape 3), évitant toute dispersion cognitive.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Interface du pipeline d'orientation unifié montrant la progression de l'étudiant \vspace{1.5cm}}}
+    \caption{Pipeline d'orientation unifié}
+    \label{fig:pipeline_orientation}
+\end{figure}
+
+\subsection{Passage du test adaptatif CAT}
+
+L'interface du test adaptatif s'appuie sur la Théorie de Réponse aux Items (modèle IRT 2PL). Elle présente une unique question à la fois à l'écran pour canaliser l'attention de l'étudiant. La page intègre une jauge de certitude globale (mise à jour dynamiquement selon les estimations de $\theta$ et l'erreur type SEM) et gère l'évaluation adaptative sans rechargement de page grâce à des requêtes JavaScript asynchrones.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Vue du test adaptatif montrant un item sous échelle de Likert et la jauge de certitude \vspace{1.5cm}}}
+    \caption{Interface de passage d'un test d'orientation}
+    \label{fig:passage_test}
+\end{figure}
+
+\subsection{Résultats du Test RIASEC}
+
+Cette interface restitue de manière détaillée le profil vocationnel RIASEC de l'étudiant. Les scores normalisés obtenus sur les six dimensions (Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel) sont projetés sur un graphique radar interactif et accompagnés de descriptifs personnalisés pour aider l'étudiant à comprendre ses forces.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Page de résultats RIASEC avec radar interactif et explications des scores \vspace{1.5cm}}}
+    \caption{Visualisation des résultats du test RIASEC}
+    \label{fig:resultats_riasec}
+\end{figure}
+
+\subsection{Catalogue des formations et recommandations (SIAEPI)}
+
+Cette interface affiche le catalogue des formations recommandées à l'étudiant par le moteur de recommandation SIAEPI v5.0. Les filières sont ordonnées par score de pertinence et filtrables par domaine, établissement ou région. Des badges signalent les formations optimales au sens de Pareto. Une fiche détaillée pour chaque formation présente son taux d'insertion professionnelle et un radar d'adéquation.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Catalogue des formations avec scores d'adéquation, filtres multicritères et badges Pareto \vspace{1.5cm}}}
+    \caption{Catalogue personnalisé des formations et spécialités}
+    \label{fig:catalogue_formations}
+\end{figure}
+
+\subsection{Simulateur décisionnel What-If}
+
+Le simulateur What-If permet à l'étudiant d'entrer des notes théoriques pour son baccalauréat et d'en observer instantanément l'impact sur son admissibilité aux différentes filières universitaires. Cette interface dynamique recalcule en temps réel le Score FG simulé et confronte ce dernier aux seuils d'accès historiques (SDO) des formations tunisiennes.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Interface de simulation What-If avec curseurs de notes et liste des formations débloquées \vspace{1.5cm}}}
+    \caption{Interface du simulateur What-If}
+    \label{fig:simulateur_whatif}
+\end{figure}
+
+\subsection{Comparateur de filières}
+
+Pour affiner sa décision, l'étudiant dispose d'un outil de comparaison. Cette interface lui permet de sélectionner jusqu'à trois filières et de comparer côte à côte leurs statistiques d'employabilité, leurs débouchés professionnels, le niveau d'adéquation psychologique et les scores requis pour l'admission.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Tableau comparatif côte à côte présentant trois filières universitaires sélectionnées \vspace{1.5cm}}}
+    \caption{Interface du comparateur de formations}
+    \label{fig:comparateur_filieres}
+\end{figure}
+
+\subsection{CV Builder}
+
+Le module CV Builder met à disposition un éditeur structuré permettant à l'étudiant d'élaborer son curriculum vitæ. L'interface propose le choix parmi plusieurs modèles graphiques, un aperçu du rendu final en temps réel, et permet d'exporter le document édité sous formats PDF et Microsoft Word (DOCX).
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Interface du créateur de CV (CV Builder) avec volet de saisie et aperçu en temps réel \vspace{1.5cm}}}
+    \caption{Interface de création de CV (CV Builder)}
+    \label{fig:cv_builder}
+\end{figure}
+
+\subsection{Assistant conversationnel Nova (Chatbot)}
+
+L'assistant virtuel Nova offre un espace d'orientation conversationnel accessible en permanence. Cette interface interactive permet des requêtes textuelles fluides et sans rechargement de page. Les réponses du chatbot, générées par LLM et contextualisées par le profil de l'étudiant, l'aident à comprendre ses recommandations de formation.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Fenêtre de chat animée et interactive avec l'assistant virtuel Nova \vspace{1.5cm}}}
+    \caption{Interface conversationnelle avec l'assistant virtuel Nova}
+    \label{fig:chatbot_nova}
+\end{figure}
+
+\subsection{Messagerie interne de communication}
+
+Cette interface fournit à l'étudiant un moyen de communication asynchrone direct avec son conseiller d'orientation attitré. Elle permet d'échanger des messages, de poser des questions complémentaires et de conserver l'historique des discussions pour préparer efficacement les entretiens physiques.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Boîte de réception de la messagerie interne de l'étudiant \vspace{1.5cm}}}
+    \caption{Interface de la messagerie interne (Vue Étudiant)}
+    \label{fig:messagerie_etudiant}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+L'Espace Étudiant constitue le pilier utilisateur central de la plateforme \textbf{CapAvenir}. Son implémentation en Laravel et Tailwind CSS, associée à un schéma relationnel rigoureux, assure une expérience fluide et hautement personnalisée. En transformant des processus de calcul avancés (boucles adaptatives, recommandations multicritères, simulations dynamiques) en visualisations claires et en interactions conversationnelles riches, ce module dote l'étudiant d'un outil d'aide à la décision très efficace. Ce parcours autonome est ensuite complété par l'expertise humaine, via les outils dédiés de l'Espace Conseiller qui feront l'objet du chapitre suivant.

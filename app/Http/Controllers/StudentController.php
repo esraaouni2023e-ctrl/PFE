@@ -37,10 +37,63 @@ class StudentController extends Controller
             ->first();
 
         $dynamicSkills = [];
-        $profilIaScore = 78;
+        $profileTimeline = [];
+        $recommendationsGenerated = false;
+
+        $toPercent = function ($value): ?int {
+            if ($value === null || $value === '') {
+                return null;
+            }
+
+            $percent = (float) $value;
+            if ($percent > 0 && $percent <= 1) {
+                $percent *= 100;
+            }
+
+            return (int) round(max(0, min(100, $percent)));
+        };
+
+        $completedRiasecCount = ProfileRiasec::pourUser($user->id)->complets()->count();
+        $hasAcademicProfile = (bool) ($profile?->score_fg || $profile?->is_academique_complet);
+
+        $profilIaScore = 0;
+        $dashboardStats = [
+            'tests_completed' => $completedRiasecCount + ($hasAcademicProfile ? 1 : 0),
+            'suggested_paths' => 0,
+            'reliability_score' => 0,
+        ];
 
         if ($profilRiasec) {
-            $profilIaScore = round($profilRiasec->score_coherence ?? 85);
+            $qualityScores = array_filter([
+                $toPercent($profilRiasec->confidence_score),
+                $toPercent($profilRiasec->score_coherence),
+            ], fn ($score) => $score !== null);
+
+            $profilIaScore = !empty($qualityScores)
+                ? (int) round(array_sum($qualityScores) / count($qualityScores))
+                : 0;
+            $dashboardStats['reliability_score'] = $profilIaScore;
+
+            $profileTimeline[] = [
+                'title' => 'Test RIASEC adaptatif',
+                'date' => optional($profilRiasec->complete_at ?? $profilRiasec->created_at)->format('d/m/Y') ?? 'Date non disponible',
+                'score' => $profilIaScore . '%',
+            ];
+
+            $gatbTimelineScore = collect([
+                $profilRiasec->score_gatb_g,
+                $profilRiasec->score_gatb_v,
+                $profilRiasec->score_gatb_n,
+                $profilRiasec->score_gatb_s,
+            ])->filter(fn ($score) => $score !== null && $score > 0);
+
+            if ($gatbTimelineScore->isNotEmpty()) {
+                $profileTimeline[] = [
+                    'title' => 'Aptitudes cognitives GATB',
+                    'date' => optional($profilRiasec->complete_at ?? $profilRiasec->updated_at)->format('d/m/Y') ?? 'Date non disponible',
+                    'score' => round($gatbTimelineScore->avg()) . '%',
+                ];
+            }
 
             // Extraction des 3 meilleures dimensions RIASEC
             $scores = [
@@ -104,13 +157,30 @@ class StudentController extends Controller
                 }
             }
         } else {
-            // Valeurs par défaut si le test n'est pas encore passé
+            $academicProgress = $profile ? ($toPercent($profile->progression) ?? 0) : 0;
+            $scoreFgProgress = $profile?->score_fg ? (int) round(min(100, ($profile->score_fg / 200) * 100)) : 0;
+            $moyenneProgress = $profile?->moyenne_generale ? (int) round(min(100, ($profile->moyenne_generale / 20) * 100)) : 0;
+
             $dynamicSkills = [
-                ['label'=>'Créativité',  'val'=>92, 'color'=>'var(--accent)'],
-                ['label'=>'Logique',      'val'=>85, 'color'=>'var(--accent2)'],
-                ['label'=>'Intérêt Tech', 'val'=>89, 'color'=>'var(--accent)'],
-                ['label'=>'Social',       'val'=>64, 'color'=>'var(--accent3)'],
-                ['label'=>'Gestion',      'val'=>71, 'color'=>'var(--gold)'],
+                ['label'=>'Profil académique', 'val'=>$academicProgress, 'color'=>'var(--accent)'],
+                ['label'=>'Score FG normalisé', 'val'=>$scoreFgProgress, 'color'=>'var(--accent2)'],
+                ['label'=>'Moyenne BAC', 'val'=>$moyenneProgress, 'color'=>'var(--gold)'],
+            ];
+        }
+
+        if ($profile?->score_fg) {
+            $profileTimeline[] = [
+                'title' => 'Score FG académique',
+                'date' => optional($profile->score_fg_updated_at ?? $profile->updated_at)->format('d/m/Y') ?? 'Date non disponible',
+                'score' => round($profile->score_fg, 1),
+            ];
+        }
+
+        if (empty($profileTimeline)) {
+            $profileTimeline[] = [
+                'title' => 'Profil à compléter',
+                'date' => 'En attente',
+                'score' => '0%',
             ];
         }
 
@@ -178,6 +248,8 @@ class StudentController extends Controller
             );
 
             $profilEtudiant = [
+                'id'                       => $user->id,
+                'sem'                      => $profilRiasec ? (1.0 - (float)$profilRiasec->confidence_score) : 0.30,
                 'score_fg'                 => (float) $scoreFg,
                 'section_bac'              => $sectionBac,
                 'filiere_etudiant_actuelle'=> $sectionBac,
@@ -193,6 +265,7 @@ class StudentController extends Controller
                 $recs = $engine->recommend($profilEtudiant, 6);
                 
                 if (!isset($recs['error']) && !empty($recs['recommandations'])) {
+                    $recommendationsGenerated = true;
                     $predictions = [];
                     foreach ($recs['recommandations'] as $r) {
                         $predictions[] = [
@@ -210,6 +283,9 @@ class StudentController extends Controller
             }
         }
 
+        $dashboardStats['suggested_paths'] = $recommendationsGenerated ? count($predictions) : 0;
+        $profilRingOffset = round(540.35 - (540.35 * ($profilIaScore / 100)), 2);
+
         return view('student.dashboard', compact(
             'studentName',
             'profile',
@@ -218,7 +294,10 @@ class StudentController extends Controller
             'predictions',
             'profilRiasec',
             'dynamicSkills',
-            'profilIaScore'
+            'profilIaScore',
+            'profilRingOffset',
+            'dashboardStats',
+            'profileTimeline'
         ));
     }
 
@@ -252,23 +331,17 @@ class StudentController extends Controller
         $codeHolland   = 'ISA';
 
         if ($profilRiasec) {
-            $maxScore = max(1, $profilRiasec->score_r + $profilRiasec->score_i +
-                                  $profilRiasec->score_a + $profilRiasec->score_s +
-                                  $profilRiasec->score_e + $profilRiasec->score_c) / 6;
-            $maxScore = max($maxScore, 1);
-            // Normalise 0–1 basé sur le score max de l'étudiant
-            $allScores = [
-                'R' => (float)$profilRiasec->score_r,
-                'I' => (float)$profilRiasec->score_i,
-                'A' => (float)$profilRiasec->score_a,
-                'S' => (float)$profilRiasec->score_s,
-                'E' => (float)$profilRiasec->score_e,
-                'C' => (float)$profilRiasec->score_c,
+            // Normalise 0–1 : division par 100 (échelle max des scores RIASEC)
+            // ⚠ Même normalisation que dans index() pour garantir la cohérence des vecteurs
+            $maxScore = 100;
+            $vecteurRiasec = [
+                'R' => round((float)$profilRiasec->score_r / $maxScore, 4),
+                'I' => round((float)$profilRiasec->score_i / $maxScore, 4),
+                'A' => round((float)$profilRiasec->score_a / $maxScore, 4),
+                'S' => round((float)$profilRiasec->score_s / $maxScore, 4),
+                'E' => round((float)$profilRiasec->score_e / $maxScore, 4),
+                'C' => round((float)$profilRiasec->score_c / $maxScore, 4),
             ];
-            $maxVal = max(array_values($allScores)) ?: 100;
-            foreach ($allScores as $k => $v) {
-                $vecteurRiasec[$k] = round($v / $maxVal, 4);
-            }
             $codeHolland = $profilRiasec->code_holland;
         }
 
@@ -308,6 +381,8 @@ class StudentController extends Controller
         $catState = $adaptiveEngine->getSessionState($sessionId);
         
         $fullProfile = [
+            'id'                     => $userId,
+            'sem'                    => $profilRiasec ? (1.0 - (float)$profilRiasec->confidence_score) : 0.30,
             'score_fg'               => $scoreFg,
             'section_bac'            => $sectionBac,
             'filiere_etudiant_actuelle' => $sectionBac,
@@ -346,6 +421,32 @@ class StudentController extends Controller
 
         $result = $engine->recommend($fullProfile, (int) $request->input('top_n', 12));
 
+        if (!isset($result['error']) && !empty($result['recommandations'])) {
+            // Sauvegarde dans la table recommendations
+            try {
+                \App\Models\Recommendation::updateOrCreate(
+                    [
+                        'user_id' => $userId,
+                        'source'  => 'SIAEPI_v5',
+                    ],
+                    [
+                        'title'       => 'Recommandations SIAEPI ' . $codeHolland,
+                        'description' => 'Recommandations automatiques basées sur votre profil ' . $codeHolland . ' (Score FG : ' . $scoreFg . ')',
+                        'data'        => $result,
+                        'relevance'   => 1.0,
+                    ]
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("SIAEPI: Erreur sauvegarde recommandations: " . $e->getMessage());
+            }
+        } else {
+            // Recouvrement depuis le cache BDD si erreur (Excel absent ou vide)
+            $cached = \App\Models\Recommendation::where('user_id', $userId)->where('source', 'SIAEPI_v5')->first();
+            if ($cached && !empty($cached->data)) {
+                $result = $cached->data;
+            }
+        }
+
         // ── 5. Remap au format attendu par la vue ────────────────────────
         if (!isset($result['error']) && !empty($result['recommandations'])) {
             $recommendations = [
@@ -356,8 +457,13 @@ class StudentController extends Controller
                 'total_filieres_accessibles' => $result['total_scorees'] ?? 0,
             ];
         } else {
-            $recommendations = ['error' => $result['error'] ?? 'Erreur du moteur de recommandation.'];
+            $recommendations = ['error' => $result['error'] ?? 'Erreur du moteur de recommandation. Les fichiers Excel de données sont indisponibles et aucun historique n\'est enregistré.'];
         }
+
+        $feedbacks = \App\Models\RecommendationFeedback::where('user_id', $userId)
+            ->get()
+            ->keyBy('filiere_code')
+            ->toArray();
 
         return view('recommendations.show', [
             'recommendations' => $recommendations,
@@ -365,6 +471,7 @@ class StudentController extends Controller
             'codeHolland'     => $codeHolland,
             'scoreFg'         => $scoreFg,
             'gapAnalysis'     => $result['gap_analysis'] ?? [],
+            'feedbacks'       => $feedbacks,
         ]);
     }
 
@@ -439,5 +546,35 @@ class StudentController extends Controller
 
         return implode(' ', array_unique($keywords));
     }
-}
 
+    /**
+     * Store recommendation feedback from AJAX request.
+     */
+    public function storeFeedback(Request $request)
+    {
+        $validated = $request->validate([
+            'filiere_code' => 'required|string',
+            'rating' => 'required|integer|min:1|max:5',
+            'is_relevant' => 'required|boolean',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        $feedback = \App\Models\RecommendationFeedback::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                'filiere_code' => $validated['filiere_code'],
+            ],
+            [
+                'rating' => $validated['rating'],
+                'is_relevant' => $validated['is_relevant'],
+                'comment' => $validated['comment'] ?? null,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Feedback enregistré avec succès !',
+            'feedback' => $feedback
+        ]);
+    }
+}

@@ -138,11 +138,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is an admin (Super Admin only).
+     * Check if the user is an admin (Super Admin or is_admin = true).
      */
     public function isAdmin(): bool
     {
-        return $this->isSuperAdmin();
+        return $this->isSuperAdmin() || $this->is_admin;
     }
 
     /**

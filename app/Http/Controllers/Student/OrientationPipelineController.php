@@ -66,6 +66,12 @@ class OrientationPipelineController extends Controller
             ->recents()
             ->first();
 
+        // ── Nouvelle Garde (v5.1) : si le profil a moins de 10 questions répondues, il est invalide ──
+        if ($riasecProfil && $riasecProfil->nb_questions_repondues < 10) {
+            $riasecProfil->update(['statut' => ProfileRiasec::STATUT_EXPIRE]);
+            $riasecProfil = null;
+        }
+
         if ($hasScore && $riasecProfil) {
             // Tout est fait → résultats
             session(['riasec_profile_id' => $riasecProfil->id]);

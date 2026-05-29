@@ -1,0 +1,344 @@
+% @Author: Takwa Ben Aïcha Gader
+% @Date:   2026-02-20
+% @Last Modified time: 2026-05-25
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPITRE 4               %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Réalisation et Présentation des Espaces}
+\label{chap:realisation_plateforme}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+Après avoir exposé la modélisation fonctionnelle et le cadre théorique des algorithmes décisionnels de \textbf{CapAvenir}, ce chapitre détaille la phase d'implémentation physique et la présentation des interfaces utilisateur de notre plateforme. Conçu pour offrir un accompagnement à la fois autonome, intuitif et scientifiquement fondé, le système s'articule autour de trois espaces de travail distincts : l'Espace Étudiant, l'Espace Conseiller et l'Espace Administrateur. Nous présenterons ici les choix architecturaux et de développement, notamment l'intégration du framework MVC Laravel pour l'orchestration backend, du framework Tailwind CSS pour l'ergonomie visuelle, ainsi que la mise en œuvre de la base de données relationnelle MySQL et l'interfaçage avec les services d'intelligence artificielle. Les différentes sous-sections décrivent la structure technique des fonctionnalités majeures et présentent les maquettes visuelles de chaque interface.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Environnement de développement et technologies}
+
+La réalisation de la plateforme \textbf{CapAvenir} s'appuie sur une pile technologique moderne et robuste, garantissant la performance, la sécurité et la maintenabilité de l'application :
+\begin{itemize}
+    \item \textbf{Framework Backend (Laravel v10/v11)} : Utilisé pour l'orchestration MVC, la gestion des sessions sécurisées, l'ORM Eloquent et le routage de l'application.
+    \item \textbf{Styling et UI (Tailwind CSS)} : Implémenté pour concevoir une interface réactive, moderne (glassmorphism) et fluide, assurant une expérience utilisateur optimale sur tous les terminaux.
+    \item \textbf{Base de données (MySQL 8.0)} : Utilisée sous l'environnement de développement \textbf{Laragon} pour la persistance des données utilisateur, académiques et comportementales.
+    \item \textbf{Interfaçage IA (Gemini API \& Ollama)} : Services de traitement de langage naturel intégrés via des requêtes HTTP asynchrones pour le chatbot Nova et la génération de roadmaps de carrière, avec une redondance locale via Ollama.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Espace Étudiant}
+
+L'Espace Étudiant est conçu comme un compagnon numérique d'orientation dont l'objectif premier est d'accompagner l'étudiant dans ses choix académiques et professionnels. Il se compose de plusieurs interfaces interactives clés décrivant son parcours complet.
+
+\subsection{Authentification sécurisée et Double Facteur (2FA)}
+
+La sécurité d'accès s'appuie sur le système d'authentification natif de Laravel Breeze, renforcé par un système d'authentification à double facteur (2FA) avec envoi de code OTP par courriel. Le mot de passe fait l'objet d'un hachage cryptographique fort via l'algorithme \texttt{bcrypt} au sein de la table SQL \texttt{users}.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Interface de Connexion et de validation OTP (2FA) \vspace{1.5cm}}}
+    \caption{Interface de Connexion et Double Facteur (Espace Étudiant)}
+    \label{fig:interface_authentification_etudiant}
+\end{figure}
+
+\subsection{Tableau de bord personnalisé}
+
+Le tableau de bord constitue le centre nerveux de l'Espace Étudiant. Conçu selon les règles modernes de l'UI/UX (hiérarchie visuelle, contrastes équilibrés, styles de type glassmorphism), il fournit une vue d'ensemble instantanée sur l'état d'avancement de l'étudiant (tests effectués, recommandations débloquées) et affiche des graphiques de type radar (Chart.js ou composants SVG dynamiques) pour restituer visuellement le profil RIASEC de l'étudiant.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Tableau de bord de l'étudiant avec statistiques de progression et graphique radar RIASEC \vspace{1.5cm}}}
+    \caption{Tableau de bord personnalisé de l'Étudiant}
+    \label{fig:interface_dashboard_etudiant}
+\end{figure}
+
+\subsection{Profil Académique et Saisie des Notes}
+
+Cette interface permet à l'étudiant de renseigner sa section d'origine du baccalauréat tunisien (ex. Informatique, Mathématiques, Sciences Expérimentales) ainsi que son relevé de notes détaillé. Ces informations sont cruciales pour le calcul dynamique du Score de Formule Globale (Score FG) utilisé par le moteur d'admissibilité.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Formulaire de gestion du profil académique et relevé de notes du Baccalauréat \vspace{1.5cm}}}
+    \caption{Interface de gestion du profil académique de l'Étudiant}
+    \label{fig:interface_profil_academique}
+\end{figure}
+
+\subsection{Pipeline d'orientation unifié}
+
+Le pipeline d'orientation structure l'expérience utilisateur en un parcours linéaire et fluide en trois étapes clés. L'étudiant est guidé pas à pas : de la saisie de ses notes scolaires (Etape 1) au passage du test psychométrique (Etape 2), jusqu'à l'accès final au catalogue de recommandations adaptées (Etape 3).
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Interface du Pipeline d'orientation affichant l'étape courante et les instructions \vspace{1.5cm}}}
+    \caption{Pipeline d'orientation pas à pas}
+    \label{fig:interface_pipeline_orientation}
+\end{figure}
+
+\subsection{Passage du test adaptatif CAT}
+
+L'interface du test adaptatif s'appuie sur la Théorie de Réponse aux Items (modèle IRT 2PL). Elle présente une question à la fois afin de maximiser la concentration de l'étudiant. Une jauge de progression et de certitude globale est mise à jour dynamiquement selon les réponses de l'étudiant et l'erreur type de mesure (SEM).
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Interface de passation du test adaptatif CAT avec jauge de certitude \vspace{1.5cm}}}
+    \caption{Interface de passation du test d'orientation}
+    \label{fig:interface_passage_test}
+\end{figure}
+
+\subsection{Résultats du Test RIASEC}
+
+Une fois l'évaluation complétée, cette interface restitue à l'étudiant son profil psychologique détaillé. Les scores obtenus sur les six dimensions RIASEC (Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel) sont présentés sous forme de diagrammes radars et de fiches descriptives pour lui permettre de comprendre ses intérêts dominants.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Résultats du test RIASEC avec graphique radar et description des traits de personnalité \vspace{1.5cm}}}
+    \caption{Visualisation des résultats du test RIASEC}
+    \label{fig:interface_resultats_riasec}
+\end{figure}
+
+\subsection{Catalogue des formations et recommandations (SIAEPI)}
+
+Cette interface présente le catalogue dynamique des formations recommandées à l'étudiant, ordonnées par score de pertinence calculé par le moteur SIAEPI v5.0. Elle affiche des badges signalant les options optimales au sens de Pareto (compromis idéal entre intérêts, notes et employabilité), ainsi qu'une Gap Analysis identifiant les compétences clés à développer.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Catalogue des formations recommandées avec filtres, scores d'adéquation et badges Pareto \vspace{1.5cm}}}
+    \caption{Catalogue et suggestions de formations personnalisées}
+    \label{fig:interface_catalogue_recommandations}
+\end{figure}
+
+\subsection{Simulateur décisionnel What-If}
+
+Le simulateur What-If permet à l'étudiant de simuler des notes hypothétiques du Baccalauréat pour mesurer instantanément leur impact sur son Score FG et sur son admissibilité aux filières universitaires cibles, facilitant l'évaluation des alternatives académiques.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Interface du simulateur What-If avec réglettes de notes et tableau comparatif de faisabilité \vspace{1.5cm}}}
+    \caption{Interface de simulation What-If}
+    \label{fig:interface_whatif}
+\end{figure}
+
+\subsection{Comparateur de filières}
+
+Pour affiner sa décision, l'étudiant peut sélectionner jusqu'à trois filières universitaires et les comparer côte à côte sur cette interface. Le comparateur synthétise les seuils d'accès SDO historiques, le taux d'insertion professionnelle, le salaire moyen et l'adéquation psychologique.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Tableau de comparaison côte à côte de trois filières d'études \vspace{1.5cm}}}
+    \caption{Interface de comparaison de filières}
+    \label{fig:interface_comparateur}
+\end{figure}
+
+\subsection{CV Builder}
+
+Le module CV Builder propose un éditeur interactif WYSIWYG permettant aux étudiants de structurer leur profil professionnel. Ils peuvent choisir des modèles prédéfinis, saisir leurs expériences, formations et compétences, et exporter le rendu final directement sous formats PDF et Word (DOCX).
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Éditeur interactif de création de CV avec aperçu en temps réel \vspace{1.5cm}}}
+    \caption{Outil de création de CV (CV Builder)}
+    \label{fig:interface_cv_builder}
+\end{figure}
+
+\subsection{Assistant conversationnel Nova (Chatbot)}
+
+L'assistant virtuel Nova propose un conseil conversationnel personnalisé disponible en continu. L'interface de chat gère des requêtes asynchrones en JavaScript sans rechargement de page. Les réponses sont contextualisées grâce au profil de l'étudiant transmis de manière sécurisée aux APIs de traitement de langage naturel.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Boîte de dialogue asynchrone avec l'assistant virtuel Nova commentant les recommandations \vspace{1.5cm}}}
+    \caption{Interface de dialogue avec l'assistant Nova}
+    \label{fig:interface_chatbot_nova}
+\end{figure}
+
+\subsection{Messagerie interne et contact}
+
+L'étudiant dispose d'un espace de messagerie interne asynchrone pour échanger directement avec son conseiller d'orientation assigné. Cette interface de messagerie permet l'envoi et la réception de messages pour préparer les entretiens physiques ou virtuels.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Boîte de réception et d'envoi de messages de l'étudiant avec son conseiller \vspace{1.5cm}}}
+    \caption{Interface de messagerie interne (Vue Étudiant)}
+    \label{fig:interface_messagerie_etudiant}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Espace Conseiller}
+
+L'Espace Conseiller est conçu comme une plateforme CRM (Customer Relationship Management) d'accompagnement clinique. Il offre aux professionnels de l'orientation les outils nécessaires pour suivre et guider efficacement leur cohorte d'étudiants.
+
+\subsection{Tableau de bord du Conseiller}
+
+Cette vue synthétique permet au conseiller de piloter son activité quotidienne. Elle affiche les indicateurs clés de performance (KPIs) de sa cohorte, les notifications de nouveaux messages, les demandes de rendez-vous en attente, ainsi que les alertes automatiques (ex. détection de fraude ou incohérences de test signalées par l'analyseur comportemental).
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Tableau de bord du Conseiller avec statistiques de cohorte et alertes d'anomalies \vspace{1.5cm}}}
+    \caption{Tableau de bord de l'Espace Conseiller}
+    \label{fig:interface_dashboard_counselor}
+\end{figure}
+
+\subsection{Gestion de la cohorte d'étudiants}
+
+Cette interface fournit la liste complète des étudiants assignés au conseiller. Grâce à des filtres de recherche multicritères avancés (par état d'avancement du test, par section de baccalauréat, ou par niveau de certitude), le conseiller peut repérer rapidement les profils nécessitant une intervention urgente.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Table de gestion de la cohorte étudiante avec filtres d'avancement et barre de recherche \vspace{1.5cm}}}
+    \caption{Interface de suivi de la cohorte d'Étudiants}
+    \label{fig:interface_students_list}
+\end{figure}
+
+\subsection{Profil Étudiant Clinique}
+
+Le conseiller dispose d'une vue exhaustive et consolidée du profil de chaque étudiant. Cette fiche clinique regroupe les données scolaires, les résultats détaillés du test RIASEC, l'estimation des aptitudes GATB, et le classement des filières suggérées. C'est également ici que le conseiller saisit ses observations écrites et valide officiellement la trajectoire d'orientation finale.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Fiche détaillée de l'étudiant avec historique d'évaluation, zone d'observations cliniques et actions de validation \vspace{1.5cm}}}
+    \caption{Interface de profil étudiant détaillé (Vue Conseiller)}
+    \label{fig:interface_student_profile_counselor}
+\end{figure}
+
+\subsection{Messagerie Directe et Interne}
+
+Cette interface permet d'assurer une communication directe et bidirectionnelle avec les étudiants. Elle intègre un éditeur de texte simple et permet de conserver l'historique complet des échanges afin d'alimenter le diagnostic global lors des entretiens de suivi.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Boîte de dialogue de messagerie instantanée avec les étudiants \vspace{1.5cm}}}
+    \caption{Messagerie interne de l'Espace Conseiller}
+    \label{fig:interface_messaging_counselor}
+\end{figure}
+
+\subsection{Gestion de l'Agenda et des Rendez-vous}
+
+L'agenda intégré permet au conseiller de gérer son emploi du temps en programmant des entretiens individuels. Il affiche les rendez-vous pris sous forme de calendrier mensuel/hebdomadaire et envoie des rappels par courriel aux étudiants concernés.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Calendrier interactif de planification des rendez-vous et entretiens \vspace{1.5cm}}}
+    \caption{Interface de gestion de l'agenda}
+    \label{fig:interface_agenda}
+\end{figure}
+
+\subsection{Centre de ressources}
+
+Cette section met à disposition du conseiller des documents de référence nationaux, des guides méthodologiques d'orientation universitaire et des liens utiles pour l'accompagner dans sa démarche de diagnostic.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Bibliothèque de ressources pédagogiques et guides méthodologiques \vspace{1.5cm}}}
+    \caption{Centre de ressources professionnelles}
+    \label{fig:interface_resources}
+\end{figure}
+
+\subsection{Page d'attente d'approbation (Pending)}
+
+Lorsqu'un conseiller s'inscrit sur la plateforme, son compte est placé dans un état temporaire « en attente de validation ». Cette vue spécifique lui est présentée tant qu'un administrateur n'a pas vérifié ses justificatifs professionnels et activé manuellement son accès.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Interface d'attente d'approbation réglementaire pour les comptes conseillers \vspace{1.5cm}}}
+    \caption{Interface de compte en attente de validation}
+    \label{fig:interface_pending_counselor}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Espace Administrateur}
+
+L'Espace Administrateur offre une suite d'outils de gouvernance et de contrôle technique permettant de piloter la configuration système et de gérer les référentiels de la plateforme.
+
+\subsection{Tableau de bord d'administration}
+
+Cette interface fournit une vue d'ensemble sur l'activité de la plateforme : nombre d'inscriptions actives par rôle, taux d'achèvement des tests d'orientation, charge serveur et volume d'appels aux APIs d'IA.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Dashboard administrateur affichant les KPIs système globaux et les graphiques de fréquentation \vspace{1.5cm}}}
+    \caption{Tableau de bord de l'Espace Administrateur}
+    \label{fig:interface_dashboard_admin}
+\end{figure}
+
+\subsection{Gestion des utilisateurs et rôles}
+
+Cette vue permet aux administrateurs de lister et de gérer l'ensemble des comptes (Étudiants, Conseillers, Administrateurs). Elle propose des fonctions de filtrage par rôle, de blocage/déblocage temporaire de comptes, ainsi que de promotion ou de rétrogradation de droits d'accès.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Table CRUD de gestion des comptes utilisateurs avec actions de modération \vspace{1.5cm}}}
+    \caption{Interface de gestion des utilisateurs}
+    \label{fig:interface_users_management}
+\end{figure}
+
+\subsection{Validation des inscriptions conseillers}
+
+Cette file d'attente dédiée centralise les inscriptions des nouveaux conseillers. L'administrateur y examine les documents fournis et valide ou rejette la demande d'accès au système.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : File d'attente d'approbation des professionnels de l'orientation avec prévisualisation des justificatifs \vspace{1.5cm}}}
+    \caption{Interface de validation des inscriptions Conseillers}
+    \label{fig:interface_counselors_approvals}
+\end{figure}
+
+\subsection{Gestion des questions RIASEC (Calibration IRT)}
+
+Cette interface avancée permet à l'administrateur d'ajouter, modifier ou désactiver des questions du test d'orientation adaptatif. Il y configure les paramètres psychométriques de la Théorie de Réponse aux Items (discrimination $a$, difficulté $b$) et active ou non l'inversion Likert pour chaque item.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Banque de questions RIASEC avec champs de saisie pour les coefficients IRT et indicateurs d'inversion \vspace{1.5cm}}}
+    \caption{Interface de gestion de la banque de questions}
+    \label{fig:interface_questions_calibration}
+\end{figure}
+
+\subsection{Configuration de l'algorithme SIAEPI}
+
+Cette vue offre à l'administrateur la possibilité d'ajuster dynamiquement les pondérations des quatre axes d'évaluation (Vocationnel, Académique, Employabilité, Accessibilité) du moteur SIAEPI v5.0. Le système valide automatiquement que la somme des pondérations reste égale à 100\,\% avant d'appliquer les nouveaux critères.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Paramétrage des pondérations de l'algorithme SIAEPI et contrôle de validation \vspace{1.5cm}}}
+    \caption{Interface de configuration algorithmique}
+    \label{fig:interface_references_weighting}
+\end{figure}
+
+\subsection{Importation du catalogue et des seuils SDO}
+
+Pour maintenir le catalogue universitaire à jour, cette vue permet d'importer en masse les filières d'études ainsi que leurs seuils SDO officiels à partir de fichiers Excel standardisés.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Formulaire de téléversement et de validation des fichiers d'importation Excel de filières et seuils \vspace{1.5cm}}}
+    \caption{Interface d'importation des données universitaires}
+    \label{fig:interface_import_filieres}
+\end{figure}
+
+\subsection{Journal d'audit et de sécurité}
+
+Destiné à assurer la traçabilité des opérations sensibles, cette interface répertorie l'historique complet des actions administratives (modifications d'algorithmes, suppressions de comptes, imports de données). Les logs y sont paginés et triés par niveau de sévérité.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Table de consultation des journaux d'audit sécurité et de traçabilité technique \vspace{1.5cm}}}
+    \caption{Interface du Journal d'Audit Système}
+    \label{fig:interface_audit_logs}
+\end{figure}
+
+\subsection{Gestion des contacts publics}
+
+Cette vue liste et archive les messages de réclamation, de partenariat ou d'assistance technique soumis par les visiteurs via le formulaire de contact de la landing page publique.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{1.5cm} Capture d'écran : Gestionnaire des messages reçus depuis la Landing Page avec options de réponse \vspace{1.5cm}}}
+    \caption{Interface de gestion des messages de contact}
+    \label{fig:interface_contacts_management}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+En somme, ce chapitre a présenté les différentes interfaces physiques de la plateforme \textbf{CapAvenir}, structurées au sein de ses trois espaces fondamentaux. L'Espace Étudiant favorise l'auto-évaluation et l'exploration de filières adaptées grâce à des algorithmes décisionnels traduits en vues claires et interactives. L'Espace Conseiller fait office d'outil d'accompagnement pédagogique, tandis que l'Espace Administrateur assure le pilotage technique, algorithmique et de sécurité du système. La synergie visuelle et fonctionnelle de ces trois modules constitue le pilier applicatif sur lequel repose la promesse d'orientation individualisée de \textbf{CapAvenir}.

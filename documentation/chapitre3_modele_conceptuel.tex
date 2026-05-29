@@ -1,0 +1,412 @@
+% @Author: Takwa Ben Aïcha Gader
+% @Date:   2026-05-25
+% @Last Modified time: 2026-05-25
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPITRE 3 : MODÈLE CONCEPTUEL D'AIDE À L'ORIENTATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Modèle Conceptuel d'Aide à l'Orientation}
+\label{chap:ai_recommendation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+L'orientation universitaire constitue une étape décisive dans le parcours de tout bachelier tunisien. Pourtant, les dispositifs institutionnels existants se bornent généralement à une affectation administrative basée uniquement sur les résultats scolaires. Cette approche quantitative occulte les aspirations personnelles, les traits de personnalité et les aptitudes cognitives des apprenants, ce qui conduit fréquemment à des erreurs d'orientation aux conséquences lourdes : décrochage universitaire, inadéquation formation-emploi et frustration personnelle.
+
+Pour répondre à cette problématique, la plateforme \textbf{CapAvenir} intègre un modèle d'aide à la décision original, baptisé \textbf{SIAEPI} (Système Intelligent d'Aide à l'Évaluation et à la Personnalisation de l'Insertion). Ce modèle repose sur un constat fondamental : une orientation pertinente ne peut se réduire à un unique critère. Elle doit croiser plusieurs dimensions — psychologique, cognitive, académique, économique et réglementaire — pour proposer à chaque étudiant un parcours adapté à son profil singulier.
+
+L'élaboration de ce modèle a suivi une démarche d'ingénierie rigoureuse. Plusieurs approches courantes ont été testées et écartées avant d'aboutir à la solution retenue :
+\begin{itemize}
+    \item \textbf{L'évaluation linéaire standardisée} impose à tous les étudiants le même questionnaire statique, sans tenir compte de leurs réponses en temps réel. Cette rigidité génère une lassitude de l'utilisateur et des biais de réponse par désintérêt.
+    \item \textbf{L'orientation par agent conversationnel autonome direct} ignore les spécificités réglementaires du système tunisien (formules officielles de calcul des scores, seuils d'admissibilité historiques). Ses recommandations sont donc trop génériques, voire erronées et irréalistes d'un point de vue administratif.
+    \item \textbf{L'évaluation monocritère (RIASEC seul)} produit des recommandations théoriquement attractives sur le plan psychologique mais scolairement irréalistes, car déconnectées des capacités cognitives et des résultats académiques réels de l'étudiant.
+\end{itemize}
+
+Ces limites ont conduit à la conception d'un modèle hybride et multidimensionnel basé sur l'Aide à la Décision Multicritère (MCDA) et la psychométrie adaptative. Ce chapitre en détaille les fondements méthodologiques. La première section présente l'architecture générale du dispositif. La seconde section décrit les six services fonctionnels qui le composent. La troisième section, enfin, synthétise les apports et les innovations conceptuelles du modèle.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Architecture générale du dispositif d'orientation}
+\label{sec:architecture}
+
+Le dispositif d'accompagnement proposé par \textbf{CapAvenir} s'organise autour de six services interconnectés. Chacun remplit une fonction précise et complémentaire dans le parcours de diagnostic de l'étudiant.
+
+\subsection{Vue d'ensemble des services}
+
+Le tableau~\ref{tab:modules_ia} présente ces six services, leurs objectifs et leur rôle dans le processus d'orientation.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{4cm}|p{5.5cm}|p{5cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Service}} & \textcolor{white}{\textbf{Objectif}} & \textcolor{white}{\textbf{Rôle dans le parcours}} \\
+\hline
+\textbf{1. Évaluation adaptative} & Cartographier les intérêts, la personnalité et les aptitudes & Diagnostic psychologique et cognitif personnalisé \\
+\hline
+\rowcolor{rowgray}
+\textbf{2. Contrôle de cohérence} & Détecter les réponses inattentives ou frauduleuses & Garantir la fiabilité et l'intégrité du profil \\
+\hline
+\textbf{3. Calcul du score FG} & Appliquer les formules officielles tunisiennes & Évaluer l'éligibilité réglementaire initiale \\
+\hline
+\rowcolor{rowgray}
+\textbf{4. Moteur SIAEPI} & Associer le profil étudiant aux exigences des filières & Aide à la décision multicritère et matching \\
+\hline
+\textbf{5. Assistant Nova} & Dialoguer, expliquer et justifier les recommandations & Accompagnement conversationnel continu (RAG) \\
+\hline
+\rowcolor{rowgray}
+\textbf{6. Simulateur de futurs} & Explorer des scénarios alternatifs (What-If) & Projection professionnelle et académique \\
+\hline
+\end{tabular}
+\caption{Les six services du système d'orientation CapAvenir}
+\label{tab:modules_ia}
+\end{table}
+
+\subsection{Le parcours de l'étudiant}
+
+Le parcours de l'utilisateur au sein de la plateforme suit un enchaînement logique et progressif, conçu pour minimiser la fatigue cognitive et maximiser la pertinence des résultats. La figure~\ref{fig:parcours_orientation} illustre ce cheminement.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm and 1cm,
+    block/.style={rectangle, draw=headercolor, fill=rowgray, rounded corners=4pt, minimum width=3.8cm, minimum height=1.1cm, align=center, font=\small\bfseries, line width=1pt},
+    arrow/.style={-latex, thick, draw=headercolor!80, line width=1.2pt}
+]
+    \node[block] (etape1) {1. Saisie des notes \\ (Profil Académique)};
+    \node[block, right=1.2cm of etape1] (etape2) {2. Évaluation adaptative \\ (Test psychométrique CAT)};
+    \node[block, right=1.2cm of etape2] (etape3) {3. Recommandations \\ (Moteur hybride SIAEPI)};
+    \node[block, below=1.2cm of etape2] (etape4) {4. Simulation What-If \\ (Analyse de sensibilité)};
+    \node[block, right=1.2cm of etape4] (etape5) {5. Assistant Nova \\ (Explication \& RAG Chatbot)};
+    \node[block, left=1.2cm of etape4] (etape6) {6. CV Builder \\ (Valorisation du profil)};
+
+    \draw[arrow] (etape1) -- (etape2);
+    \draw[arrow] (etape2) -- (etape3);
+    \draw[arrow] (etape3) |- (etape4);
+    \draw[arrow] (etape4) -- (etape5);
+    \draw[arrow] (etape4) -- (etape6);
+\end{tikzpicture}
+\caption{Schéma synoptique du parcours d'orientation de l'étudiant}
+\label{fig:parcours_orientation}
+\end{figure}
+
+Concrètement, l'étudiant commence par saisir ses résultats scolaires officiels. Cette première étape permet de calculer son score d'éligibilité réglementaire selon les règles officielles du baccalauréat tunisien. Il réalise ensuite une évaluation adaptative interactive qui mesure ses dimensions psychologiques et cognitives. Le système croise alors ces sources d'information — scolaires, psychométriques et cognitives — pour générer une sélection personnalisée de filières. L'étudiant peut enfin affiner et consolider son projet d'avenir en effectuant des simulations de notes, en dialoguant avec l'assistant conversationnel Nova, ou en structurant son premier CV professionnel.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Les services du modèle d'orientation}
+\label{sec:services}
+
+Cette section présente en détail la modélisation conceptuelle et mathématique des six services fondamentaux du système.
+
+\subsection{Service 1 : L'évaluation adaptative (CAT)}
+
+\subsubsection{Principe du questionnaire adaptatif}
+
+Les tests d'orientation traditionnels imposent à tous les étudiants un nombre fixe et identique de questions, qu'ils soient passionnés ou indifférents par un domaine. Cette approche est inefficiente et lassante. \textbf{CapAvenir} met en œuvre un questionnaire adaptatif informatisé (CAT — \textit{Computerized Adaptive Testing}) basé sur la \textbf{Théorie de Réponse aux Items} (IRT — \textit{Item Response Theory}).
+
+Le système ajuste dynamiquement le choix de l'item suivant en fonction des réponses précédentes. Si l'étudiant manifeste un intérêt pour un domaine, le test lui propose des questions plus précises (discriminantes) pour affiner sa capacité latente. Inversement, si un domaine ne suscite aucun intérêt, le questionnaire en réduit rapidement la couverture, évitant ainsi une fatigue inutile.
+
+\subsubsection{Modélisation mathématique du modèle adaptatif (IRT 2PL)}
+
+La probabilité $P_i(\theta)$ qu'un étudiant ayant un trait de personnalité ou d'intérêt latent $\theta$ réponde positivement (ou fortement) à un item $i$ est modélisée par la courbe logistique à deux paramètres (2PL) :
+
+\begin{equation}
+P(X_{ij} = 1 \mid \theta_j, a_i, b_i) = \frac{1}{1 + e^{-a_i(\theta_j - b_i)}}
+\label{eq:irt_2pl}
+\end{equation}
+
+Où :
+\begin{itemize}
+    \item $\theta_j \in [-3, +3]$ représente le niveau latent de l'étudiant $j$ sur une dimension donnée (ex. intérêt Artistique ou aptitude Verbale).
+    \item $a_i \in [0.5, 2.5]$ est le paramètre de \textbf{discrimination} de l'item $i$. Plus $a_i$ est élevé, plus l'item permet de distinguer finement les individus de niveaux proches.
+    \item $b_i \in [-3, +3]$ est le paramètre de \textbf{difficulté} (ou de seuil d'adhésion) de l'item $i$.
+\end{itemize}
+
+À chaque étape du test, le trait latent $\theta_j$ est réestimé en utilisant la méthode itérative de **Newton-Raphson** pour maximiser la vraisemblance des réponses observées. L'item suivant choisi est celui qui maximise l'information de Fisher $I_i(\theta)$ au point de l'estimation courante :
+
+\begin{equation}
+I_i(\theta) = a_i^2 \, P_i(\theta) \, (1 - P_i(\theta))
+\label{eq:fisher_info}
+\end{equation}
+
+\subsubsection{Les dimensions évaluées}
+
+Pour dresser un portrait complet de l'étudiant, l'évaluation mesure cinq familles de dimensions :
+\begin{enumerate}
+    \item \textbf{Les intérêts professionnels (modèle RIASEC)} : Six dimensions fondamentales (Réaliste, Investigateur, Artistique, Social, Entreprenant, Conventionnel).
+    \item \textbf{La personnalité (modèle OCEAN / Big Five)} : Cinq traits stables de personnalité (Ouverture d'esprit, Conscience professionnelle, Extraversion, Agréabilité et Gestion du stress/Névrosisme).
+    \item \textbf{Les aptitudes cognitives (GATB)} : Quatre aptitudes clés requises par les cursus académiques (Raisonnement général [G], Compréhension verbale [V], Aptitudes numériques [N], Repérage spatial [S]).
+    \item \textbf{La résilience} : Mesure de la capacité d'adaptation face aux difficultés et à la pression académique.
+    \item \textbf{Les affinités sectorielles} : Préférences explicites pour 11 grands secteurs d'activité (médecine, ingénierie, informatique, etc.).
+\end{enumerate}
+
+\subsubsection{Critères d'arrêt du test}
+
+Le questionnaire s'arrête dès qu'une précision statistique suffisante est obtenue. Trois critères conjoints régissent l'arrêt de la boucle adaptative :
+\begin{itemize}
+    \item Un nombre minimal de questions a été traité ($N \ge 18$) pour assurer la représentativité minimale des dimensions.
+    \item La marge d'incertitude statistique, représentée par l'Erreur Type de Mesure (SEM), descend sous un seuil critique de précision :
+    \begin{equation}
+    \text{SEM}(\theta_j) = \frac{1}{\sqrt{\sum_{i=1}^{N} I_i(\theta_j)}} < 0{,}15
+    \label{eq:sem}
+    \end{equation}
+    \item Une limite de sécurité absolue ($N \le 50$) pour prévenir la fatigue cognitive de l'utilisateur.
+\end{itemize}
+
+\subsection{Service 2 : Le contrôle de cohérence comportemental}
+
+La qualité des recommandations générées dépend directement de la sincérité et de la concentration avec lesquelles l'étudiant répond. Pour garantir la fiabilité des données d'entrée, un module d'audit comportemental analyse en temps réel les réponses de l'étudiant.
+
+Le tableau~\ref{tab:alertes} présente les sept indicateurs comportementaux surveillés par le système.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|c|p{5cm}|p{7.5cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{\#}} & \textcolor{white}{\textbf{Indicateur surveillé}} & \textcolor{white}{\textbf{Biais ou anomalie détectée}} \\
+\hline
+1 & Temps de réponse trop court ($t < 1{,}5$\,s) & Clics impulsifs ou aléatoires sans lecture réelle \\
+\hline
+\rowcolor{rowgray}
+2 & Réponses uniformes & Répétition mécanique systématique de la même valeur (ex. tout à 3) \\
+\hline
+3 & Contradictions logiques & Incohérences majeures entre des items fortement corrélés positivement \\
+\hline
+\rowcolor{rowgray}
+4 & Séquences cycliques & Choix de réponses suivant un schéma prévisible (ex. 1, 2, 3, 1, 2, 3) \\
+\hline
+5 & Échec aux questions pièges & Inattention sur des items de contrôle évidents (ex. « Répondez 2 ici ») \\
+\hline
+\rowcolor{rowgray}
+6 & Déviation statistique extrême & Profil de réponse trop parfait ou biais marqué de désirabilité sociale \\
+\hline
+7 & Temps de réponse trop long ($t > 60$\,s) & Distraction prolongée ou hésitation extrême face à un concept \\
+\hline
+\end{tabular}
+\caption{Indicateurs comportementaux d'incohérence et de fiabilité du profil}
+\label{tab:alertes}
+\end{table}
+
+À la fin du test, un score de fiabilité globale $Score_{fiabilite} \in [0, 1]$ est calculé. Si plusieurs indicateurs sont enfreints et que ce score descend sous un seuil critique ($0{,}60$), un drapeau d'anomalie (\texttt{fraud\_flag}) est associé au profil. L'étudiant peut continuer, mais son conseiller d'orientation est alerté pour proposer, si besoin, un nouvel entretien de diagnostic dans des conditions contrôlées.
+
+\subsection{Service 3 : Le calcul du score académique officiel (Score FG)}
+
+En Tunisie, l'accès aux établissements d'enseignement supérieur est réglementé par le Ministère de l'Enseignement Supérieur à travers le calcul du Score de Formule Globale (Score FG). Ce score pondère différemment les matières officielles selon la section du baccalauréat d'origine de l'élève.
+
+Le tableau~\ref{tab:scorefg} présente les formules mathématiques officielles pour les sept sections nationales du baccalauréat tunisien.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{10.2cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Section du Baccalauréat}} & \textcolor{white}{\textbf{Formule officielle du Score FG}} \\
+\hline
+\textbf{Mathématiques} & $4 \times MG + 2 \times Math + 1{,}5 \times Phys + 0{,}5 \times SVT + 1 \times Fr + 1 \times Ang$ \\
+\hline
+\rowcolor{rowgray}
+\textbf{Sciences Expérimentales} & $4 \times MG + 1 \times Math + 1{,}5 \times Phys + 1{,}5 \times SVT + 1 \times Fr + 1 \times Ang$ \\
+\hline
+\textbf{Économie et Gestion} & $4 \times MG + 1{,}5 \times Eco + 1{,}5 \times Gest + 0{,}5 \times Math + 0{,}5 \times HG + 1 \times Fr + 1 \times Ang$ \\
+\hline
+\rowcolor{rowgray}
+\textbf{Technique} & $4 \times MG + 1{,}5 \times Tech + 1{,}5 \times Math + 1 \times Phys + 1 \times Fr + 1 \times Ang$ \\
+\hline
+\textbf{Informatique} & $4 \times MG + 1{,}5 \times Algo + 0{,}5 \times Phys + 0{,}5 \times STI + 1 \times Fr + 1 \times Ang$ \\
+\hline
+\rowcolor{rowgray}
+\textbf{Lettres} & $4 \times MG + 1{,}5 \times Arabe + 1{,}5 \times Philo + 1 \times HG + 1 \times Fr + 1 \times Ang$ \\
+\hline
+\textbf{Sport} & $4 \times MG + 1{,}5 \times Bio + 1 \times Sport + 0{,}5 \times EP + 0{,}5 \times Phys + 0{,}5 \times Philo + 1 \times Fr + 1 \times Ang$ \\
+\hline
+\end{tabular}
+\caption{Formules officielles du Score FG par section du baccalauréat tunisien}
+\label{tab:scorefg}
+\end{table}
+
+\noindent \textit{(MG = Moyenne Générale du baccalauréat ; les autres abréviations correspondent aux matières officielles tunisiennes)}
+
+Ce score FG sert de premier filtre d'admissibilité au sein de la plateforme : les filières universitaires pour lesquelles l'étudiant a un score très éloigné du seuil historique SDO sont écartées ou signalées comme très risquées.
+
+\subsection{Service 4 : Le modèle de recommandation multicritère (SIAEPI)}
+
+\subsubsection{Les quatre piliers de l'adéquation}
+
+Le moteur de matching **SIAEPI** calcule le score de compatibilité global d'une filière universitaire en agrégeant quatre axes de décision complémentaires :
+
+\begin{equation}
+Score_{SIAEPI} = w_V \cdot Score_{Vocation} + w_A \cdot Score_{Acad} + w_M \cdot Score_{Marche} + w_{Acc} \cdot P_{admission}
+\label{eq:score_siaepi}
+\end{equation}
+
+Avec les pondérations globales suivantes (configurables par l'administrateur) :
+\begin{itemize}
+    \item \textbf{La vocation ($w_V = 40\%$)} : Mesure l'adéquation psychologique. Le système compare le profil RIASEC de l'étudiant ($\vec{S}$) au vecteur d'exigences psychométriques de la filière ($\vec{F}$) par une mesure de similarité hybride (Cosinus + Distance Euclidienne normalisée) combinée à la personnalité Big Five et aux valeurs de travail :
+    \begin{equation}
+    Score_{hybride} = 0{,}6 \times \left( \frac{\vec{S} \cdot \vec{F}}{\|\vec{S}\| \|\vec{F}\|} \right) + 0{,}4 \times \left( 1 - \frac{d_{Euclidienne}(\vec{S}, \vec{F})}{\sqrt{6}} \right)
+    \label{eq:similarity}
+    \end{equation}
+    Un bonus ou malus de dominance est appliqué selon le chevauchement des codes Holland de l'étudiant et de la filière.
+    \item \textbf{La capacité académique ($w_A = 30\%$)} : Évalue l'adéquation cognitive. Le système calcule la moyenne pondérée des aptitudes GATB de l'étudiant selon le profil d'aptitudes requis pour le domaine de la filière (ex. fortes exigences numériques et logiques pour l'ingénierie).
+    \item \textbf{L'employabilité ($w_M = 15\%$)} : Analyse des perspectives d'insertion professionnelle dans le secteur ciblé (taux d'emploi à 1 et 3 ans et croissance annuelle du domaine).
+    \item \textbf{L'accessibilité réglementaire ($w_{Acc} = 15\%$)} : Probabilité d'admission modélisée par une courbe logistique (S-curve) à partir de l'écart entre le score FG de l'étudiant ($Score_{FG}$) et le seuil historique SDO de la formation ($SDO$) :
+    \begin{equation}
+    P_{admission} = \frac{1}{1 + e^{-k(Score_{FG} - SDO)}}
+    \label{eq:admission_prob}
+    \end{equation}
+    avec $k = 0{,}15$ comme constante de discrimination de la pente de sélection.
+\end{itemize}
+
+L'architecture globale de ce moteur de recommandation multicritère est modélisée par la figure~\ref{fig:moteur_siaepi}.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm and 0.6cm,
+    input/.style={rectangle, draw=gray, fill=white, rounded corners=2pt, minimum width=3.2cm, minimum height=0.8cm, align=center, font=\scriptsize},
+    process/.style={rectangle, draw=headercolor, fill=rowgray, rounded corners=4pt, minimum width=3.6cm, minimum height=1cm, align=center, font=\scriptsize\bfseries, line width=1pt},
+    synthesis/.style={circle, draw=caporange, fill=caporange!10, minimum size=2.2cm, align=center, font=\scriptsize\bfseries, line width=1.2pt},
+    output/.style={rectangle, draw=green!60!black, fill=green!5, rounded corners=4pt, minimum width=4cm, minimum height=1cm, align=center, font=\small\bfseries, line width=1pt},
+    arrow/.style={-latex, thick, draw=gray!80}
+]
+    % Inputs
+    \node[input] (in1) {Profil Académique \\ (Score FG)};
+    \node[input, below=0.3cm of in1] (in2) {Profil Psychologique \\ (RIASEC \& OCEAN)};
+    \node[input, below=0.3cm of in2] (in3) {Profil Cognitif \\ (Aptitudes GATB)};
+    \node[input, below=0.3cm of in3] (in4) {Données Marché \\ (Employabilité / SDO)};
+
+    % Processes (Pillars)
+    \node[process, right=1.8cm of in1] (p1) {1. Vocation (40\%) \\ Similarité Cosinus Hybride};
+    \node[process, right=1.8cm of in2] (p2) {2. Capacité Académique (30\%) \\ Pondération GATB};
+    \node[process, right=1.8cm of in3] (p3) {3. Employabilité (15\%) \\ Taux d'insertion};
+    \node[process, right=1.8cm of in4] (p4) {4. Accessibilité (15\%) \\ Probabilité Logistique};
+
+    % Synthesis
+    \node[synthesis, right=1.8cm of p2] (synth) {Score Global \\ SIAEPI \\ (Éq. \ref{eq:score_siaepi})};
+
+    % Filters (side box)
+    \node[process, fill=red!5, draw=red!70, above=0.6cm of synth, minimum width=3cm] (filters) {Filtres d'Exclusion \\ \& Pénalités};
+
+    % Output
+    \node[output, right=1.8cm of synth] (out) {Top-12 Recommandations \\ + Front de Pareto \\ + Gap Analysis};
+
+    % Connections
+    \draw[arrow] (in1) -- (p1);
+    \draw[arrow] (in2) -- (p2);
+    \draw[arrow] (in3) -- (p2);
+    \draw[arrow] (in2) -- (p1);
+    \draw[arrow] (in3) -- (p1);
+    \draw[arrow] (in4) -- (p3);
+    \draw[arrow] (in4) -- (p4);
+
+    \draw[arrow] (p1) -| (synth);
+    \draw[arrow] (p2) -- (synth);
+    \draw[arrow] (p3) -| (synth);
+    \draw[arrow] (p4) -| (synth);
+    
+    \draw[arrow] (filters) -- (synth);
+    \draw[arrow] (synth) -- (out);
+\end{tikzpicture}
+\caption{Architecture fonctionnelle du moteur de matching SIAEPI}
+\label{fig:moteur_siaepi}
+\end{figure}
+
+\subsubsection{L'arbitrage entre passion et raison (Front de Pareto)}
+
+L'un des apports majeurs du modèle est sa capacité à aider l'étudiant à résoudre le dilemme classique entre suivre sa passion (Vocation) et choisir la sécurité de l'emploi (Employabilité). En appliquant une technique d'optimisation multicritère (\textbf{front de Pareto}), le système identifie et signale par un badge spécifique les filières qui représentent des compromis optimaux : celles pour lesquelles on ne peut pas améliorer l'adéquation de passion sans pénaliser significativement les opportunités professionnelles.
+
+\subsubsection{Les filtres de conformité et pénalités}
+
+Afin de garantir le réalisme déontologique des recommandations, le moteur applique des filtres d'exclusion durs et des coefficients correctifs :
+\begin{itemize}
+    \item \textbf{Exclusions dures} : Une filière est totalement exclue si elle est incompatible avec la section de baccalauréat d'origine (ex. filières littéraires pures exclues pour un bachelier technique, ou filières paramédicales exclues pour un baccalauréat scientifique si le profil ne montre aucune appétence sociale $\text{S} < 0{,}70$).
+    \item \textbf{Pénalité de transition} : Un malus matriciel est soustrait du score si l'étudiant opte pour un changement radical de domaine par rapport à la vocation naturelle de sa section de baccalauréat.
+    \item \textbf{Pénalité de gaspillage (Waste Penalty)} : Si un étudiant au score FG très élevé ($Score_{FG} \ge 150$) choisit une filière dont le seuil d'accès historique est excessivement bas ($Score_{FG} - SDO > 30$), le système applique une pénalité progressive, sauf si le score de vocation confirme une réelle passion pour cette filière.
+\end{itemize}
+
+\subsubsection{L'analyse des écarts (Gap Analysis)}
+
+Pour chaque filière suggérée, le système propose une Gap Analysis pour évaluer l'effort d'ajustement requis de la part de l'étudiant. Le tableau~\ref{tab:gapanalysis} décrit la modélisation de ces trois états.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{3cm}|p{4.5cm}|p{7cm}|}
+\hline
+\rowcolor{headercolor} 
+\textcolor{white}{\textbf{Statut}} & \textcolor{white}{\textbf{Condition sur l'écart}} & \textcolor{white}{\textbf{Plan d'accompagnement suggéré}} \\
+\hline
+\textbf{Accessible} & $Gap = SDO - Score_{FG} \le 0$ & Parcours réaliste. L'étudiant possède les prérequis requis. \\
+\hline
+\rowcolor{rowgray}
+\textbf{Effort requis} & $0 < Gap \le 15$ & Admissibilité possible. L'étudiant devra suivre des modules de soutien ou de remise à niveau. \\
+\hline
+\textbf{Difficile} & $Gap > 15$ & Risque académique élevé. Nécessité de réévaluer le choix ou de prévoir un parcours de transition intensif. \\
+\hline
+\end{tabular}
+\caption{Modélisation des statuts de la Gap Analysis}
+\label{tab:gapanalysis}
+\end{table}
+
+\subsection{Service 5 : L'assistant personnel conversationnel Nova}
+
+L'assistant virtuel **Nova** est le compagnon interactif de l'étudiant. Il évite l'effet « boîte noire » en expliquant en langage naturel les résultats du moteur.
+
+Nova s'appuie sur une architecture de génération augmentée par récupération (**RAG** — \textit{Retrieval-Augmented Generation}). Au lieu de répondre librement, ce qui provoquerait des hallucinations d'orientation, l'assistant extrait le profil académique et psychométrique de l'étudiant connecté et l'injecte avec les documents du guide officiel de l'orientation tunisienne dans le prompt soumis au modèle de langage (LLM). 
+
+Les trois rôles clés de Nova sont :
+\begin{enumerate}
+    \item \textbf{Expliquer} : Justifier pourquoi une filière est recommandée en reliant ses caractéristiques (matières enseignées, débouchés) aux scores RIASEC et aptitudes GATB de l'étudiant.
+    \item \textbf{Décrire} : Restituer les fiches techniques des universités, les taux d'insertion réels et les conditions d'admission.
+    \item \textbf{Réorienter} : Aider l'étudiant à explorer des pistes alternatives en cas d'admissibilité insuffisante.
+\end{enumerate}
+
+Le système intègre une redondance locale via **Ollama** : en cas d'interruption d'accès à l'API LLM cloud principale (Gemini), le serveur bascule automatiquement sur un modèle d'orientation local hébergé sur le serveur de la plateforme, garantissant la résilience du service.
+
+\subsection{Service 6 : Le simulateur de futurs (Sensibilité What-If)}
+
+Le simulateur permet à l'étudiant de projeter son parcours et d'évaluer l'élasticité de ses options d'orientation à travers une analyse de sensibilité "si-alors" :
+
+\begin{itemize}
+    \item \textbf{Simulation de notes} : L'étudiant ajuste ses notes cibles du baccalauréat (ex. viser 17 en mathématiques au lieu de 14) et observe instantanément le déverrouillage de nouvelles filières d'accès dans le catalogue.
+    \item \textbf{Simulation de réorientation} : Analyse de l'impact d'un changement de section de baccalauréat (ex. passage de Sciences Expérimentales à Informatique) sur son score FG.
+    \item \textbf{Simulation de carrière} : Projection financière estimant la trajectoire de rémunération sur 10 ans selon la filière choisie, à partir de données réelles d'insertion du marché.
+\end{itemize}
+
+Ce module aide à dédramatiser la phase de révision et encourage l'étudiant en lui montrant concrètement le gain d'accès universitaire que représente chaque point gagné au baccalauréat.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Synthèse et apports du modèle}
+\label{sec:synthese}
+
+Le modèle conceptuel d'orientation SIAEPI se distingue par quatre apports majeurs pour l'accompagnement des bacheliers.
+
+\subsection{Une approche multidimensionnelle intégrée}
+
+Contrairement aux dispositifs traditionnels qui isolent l'évaluation psychologique des réalités académiques et économiques, SIAEPI unifie ces dimensions au sein d'un formalisme mathématique rigoureux. Cette approche évite les recommandations déconnectées de la réalité scolaire ou professionnelle de l'étudiant.
+
+\subsection{Un parcours progressif structurant}
+
+Le dispositif structure un flux logique d'accompagnement : l'étudiant progresse de la saisie de ses données vers l'évaluation de sa personnalité, puis vers la recommandation automatisée, avant d'affiner ses choix via la simulation prospective et le dialogue avec l'assistant virtuel.
+
+\subsection{Des mécanismes de contrôle éthique}
+
+L'intégration d'un audit comportemental en temps réel protège l'étudiant contre les biais d'inattention et évite la formulation de vœux irréalisables, garantissant ainsi la responsabilité déontologique et la fiabilité du système.
+
+\subsection{Une transparence décisionnelle}
+
+Le modèle rejette l'effet « boîte noire » grâce à l'analyse des écarts (Gap Analysis) et à la justification textuelle via Nova. Cela favorise l'appropriation par l'étudiant et facilite le travail de médiation et de coaching mené par le conseiller d'orientation.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+Ce chapitre a détaillé les fondements théoriques et méthodologiques du modèle d'orientation SIAEPI. En conjuguant l'aide à la décision multicritère (MCDA), la psychométrie adaptative (CAT/IRT) et les architectures de génération de langage ancrées (RAG), ce modèle propose un cadre rigoureux pour accompagner le bachelier tunisien dans son choix d'orientation.
+
+L'architecture structurée en six services interconnectés assure la collecte fiable des profils, le calcul strict de l'éligibilité réglementaire, la génération de recommandations équilibrées entre vocation et employabilité, et la projection dans des trajectoires de carrière simulées.
+
+Le chapitre suivant présente la réalisation concrète de la plateforme, décrivant la traduction de ces modèles conceptuels en composants logiciels, l'architecture logicielle MVC et l'ergonomie des interfaces utilisateur développées.

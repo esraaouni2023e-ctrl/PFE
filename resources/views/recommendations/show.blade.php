@@ -48,6 +48,11 @@
 .rec-tag.transition{color:var(--accent2);border-color:color-mix(in srgb,var(--accent2) 30%,transparent);background:color-mix(in srgb,var(--accent2) 8%,transparent)}
 .rec-tag.emploi{color:var(--accent3);border-color:color-mix(in srgb,var(--accent3) 30%,transparent);background:color-mix(in srgb,var(--accent3) 8%,transparent)}
 .rec-tag.warn{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 30%,transparent);background:color-mix(in srgb,var(--gold) 8%,transparent)}
+.rec-tag.confidence{display:inline-flex;align-items:center;gap:.35rem}
+.rec-tag.confidence::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 13%,transparent)}
+.rec-tag.confidence.high{color:var(--accent3);border-color:color-mix(in srgb,var(--accent3) 30%,transparent);background:color-mix(in srgb,var(--accent3) 8%,transparent)}
+.rec-tag.confidence.medium{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 32%,transparent);background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.rec-tag.confidence.low{color:#ef4444;border-color:color-mix(in srgb,#ef4444 32%,transparent);background:color-mix(in srgb,#ef4444 8%,transparent)}
 
 /* Explication */
 .rec-expliq{font-size:.74rem;color:var(--ink60);line-height:1.5;margin-bottom:.85rem;font-style:italic}
@@ -72,10 +77,54 @@
 .rec-stats-bar{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem}
 .rec-stat{display:flex;align-items:center;gap:.4rem;padding:.38rem .8rem;border-radius:var(--rx);background:var(--ink06);border:1px solid var(--glass-border);font-size:.74rem;font-weight:600;color:var(--ink60)}
 .rec-stat strong{color:var(--ink)}
+/* Feedback buttons */
+.feedback-btn {
+    border: 1px solid var(--glass-border);
+    background: var(--ink06);
+    border-radius: var(--rx);
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+}
+.feedback-btn:hover {
+    background: var(--ink10);
+    border-color: var(--ink30);
+    transform: scale(1.05);
+}
+.feedback-btn.active.like-btn {
+    background: color-mix(in srgb, var(--accent3) 15%, transparent);
+    border-color: var(--accent3);
+    color: var(--accent3);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent3) 20%, transparent);
+}
+.feedback-btn.active.dislike-btn {
+    background: color-mix(in srgb, #ef4444 15%, transparent);
+    border-color: #ef4444;
+    color: #ef4444;
+    box-shadow: 0 0 10px color-mix(in srgb, #ef4444 20%, transparent);
+}
+.feedback-stars {
+    display: inline-flex;
+    gap: 0.15rem;
+}
+.feedback-star {
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--ink30);
+    transition: color 0.15s ease;
+}
+.feedback-star:hover, .feedback-star.active {
+    color: var(--gold);
+}
 </style>
 
 <div class="rec">
-    <p class="rec-eye">Moteur SIAEPI v2.2 · Recommandations</p>
+    <p class="rec-eye">Moteur SIAEPI v5.0 · Recommandations</p>
     <h1 class="rec-title">Vos filières <em>recommandées</em></h1>
     <p class="rec-sub">Analyse multidimensionnelle combinant votre profil RIASEC, vos aptitudes cognitives GATB, votre score académique FG et les données du marché de l'emploi tunisien.</p>
 
@@ -139,6 +188,25 @@
             $marchePct = round(($f['Score_Marche'] ?? 0) * 100);
             $accessPct = round(($f['Score_Accessibilite'] ?? 0) * 100);
             $matchColor = $matchPct >= 75 ? 'var(--accent3)' : ($matchPct >= 55 ? 'var(--accent)' : 'var(--gold)');
+            $confidenceRaw = $f['Confidence'] ?? $f['confidence'] ?? null;
+            $confidenceScore = is_numeric($confidenceRaw) ? (float) $confidenceRaw : null;
+            if ($confidenceScore !== null && $confidenceScore > 1) {
+                $confidenceScore = $confidenceScore / 100;
+            }
+            $confidencePct = $confidenceScore !== null ? (int) round(max(0, min(1, $confidenceScore)) * 100) : null;
+            $confidenceLevel = $confidenceScore === null ? null : ($confidenceScore < 0.55 ? 'low' : ($confidenceScore < 0.75 ? 'medium' : 'high'));
+            $confidenceLabel = match($confidenceLevel) {
+                'low' => 'Confiance faible',
+                'medium' => 'Confiance modérée',
+                'high' => 'Confiance élevée',
+                default => null,
+            };
+            $confidenceHelp = match($confidenceLevel) {
+                'low' => 'Recommandation exploratoire : certaines dimensions du profil restent incertaines ou contrastées.',
+                'medium' => 'Recommandation plausible : le profil est globalement cohérent, avec quelques zones à confirmer.',
+                'high' => 'Recommandation fiable : votre profil psychométrique et académique est cohérent avec cette filière.',
+                default => null,
+            };
         @endphp
         <div class="rec-card">
             <div class="rec-card-top">
@@ -167,16 +235,23 @@
             </div>
 
             @if(!empty($f['Explication']) && is_array($f['Explication']))
-            <div class="rec-expliq" style="font-size: 0.85rem;">
+            <div class="rec-expliq" style="font-size: 0.82rem; margin-bottom:1rem;">
+                @if(!empty($f['Explication']['raisons']))
+                    <div style="color:var(--ink60); font-style:normal; margin-bottom: 8px; line-height:1.45;">
+                        @foreach($f['Explication']['raisons'] as $raison)
+                            <p style="margin-bottom: 4px;">{{ $raison }}</p>
+                        @endforeach
+                    </div>
+                @endif
                 @if(!empty($f['Explication']['points_forts']))
-                    <ul style="margin:0; padding-left:1.2rem; color: #10b981;">
+                    <ul style="margin:0; padding-left:1.2rem; color: #10b981; font-style:normal;">
                         @foreach($f['Explication']['points_forts'] as $fort)
                             <li style="margin-bottom: 2px;">{{ $fort }}</li>
                         @endforeach
                     </ul>
                 @endif
                 @if(!empty($f['Explication']['points_faibles']))
-                    <ul style="margin-top:4px; margin-bottom:0; padding-left:1.2rem; color: #ef4444;">
+                    <ul style="margin-top:4px; margin-bottom:0; padding-left:1.2rem; color: #ef4444; font-style:normal;">
                         @foreach($f['Explication']['points_faibles'] as $faible)
                             <li style="margin-bottom: 2px;">{{ $faible }}</li>
                         @endforeach
@@ -217,12 +292,47 @@
                 @if(!empty($f['Taux_Employabilite']))
                 <span class="rec-tag emploi">{{ $f['Taux_Employabilite'] }}</span>
                 @endif
+                @if($confidencePct !== null)
+                <span class="rec-tag confidence {{ $confidenceLevel }}" title="{{ $confidenceHelp }}">
+                    {{ $confidenceLabel }} · {{ $confidencePct }}%
+                </span>
+                @endif
                 @if(($f['Penalite_Cognitive'] ?? 0) > 0.15)
                 <span class="rec-tag warn">Aptitudes à renforcer</span>
                 @endif
                 @if(!empty($f['Code_RIASEC']))
                 <span class="rec-tag transition" style="font-family:var(--font-serif);font-style:italic">{{ $f['Code_RIASEC'] }}</span>
                 @endif
+            </div>
+
+            {{-- Feedback UI --}}
+            @php
+                $codeF = $f['Code_Filiere'] ?? $f['code_filiere'] ?? '';
+                $existingFb = $feedbacks[$codeF] ?? null;
+                $isLikeActive = $existingFb && $existingFb['is_relevant'] == true;
+                $isDislikeActive = $existingFb && $existingFb['is_relevant'] == false;
+                $ratingVal = $existingFb ? $existingFb['rating'] : 0;
+            @endphp
+            <div class="rec-feedback-container" data-filiere="{{ $codeF }}" style="margin-top:1.1rem; padding-top:1rem; border-top:1px solid var(--glass-border);">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">
+                    <span style="font-size:0.72rem; font-weight:600; color:var(--ink60);">Recommandation pertinente ?</span>
+                    <div style="display:flex; align-items:center; gap:0.4rem;">
+                        <button type="button" class="feedback-btn like-btn {{ $isLikeActive ? 'active' : '' }}" onclick="submitFeedback(this, '{{ $codeF }}', true)" title="Oui, pertinent">
+                            👍 Oui
+                        </button>
+                        <button type="button" class="feedback-btn dislike-btn {{ $isDislikeActive ? 'active' : '' }}" onclick="submitFeedback(this, '{{ $codeF }}', false)" title="Non, non pertinent">
+                            👎 Non
+                        </button>
+                    </div>
+                </div>
+                <div class="feedback-stars-container" style="display:{{ $existingFb ? 'flex' : 'none' }}; align-items:center; justify-content:space-between; gap:0.5rem; margin-top:0.75rem;">
+                    <span style="font-size:0.7rem; font-weight:500; color:var(--ink30);">Note d'adéquation :</span>
+                    <div class="feedback-stars" data-rating="{{ $ratingVal }}">
+                        @for($star = 1; $star <= 5; $star++)
+                            <span class="feedback-star {{ $star <= $ratingVal ? 'active' : '' }}" onclick="rateFeedback(this, '{{ $codeF }}', {{ $star }})">★</span>
+                        @endfor
+                    </div>
+                </div>
             </div>
         </div>
         @empty
@@ -291,7 +401,7 @@
     </div>
 
     <p style="font-size:.7rem;color:var(--ink30);margin-top:1.5rem;line-height:1.6">
-        Recommandations générées par le moteur SIAEPI v2.2 · Similarité cosinus pondérée · GATB + RIASEC + Score FG · Données SDO 2023–2025
+        Recommandations générées par le moteur SIAEPI v5.0 · Similarité cosinus pondérée · GATB + RIASEC + Score FG · Données SDO 2023–2025
     </p>
 </div>
 
@@ -305,5 +415,65 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { f.style.width = target; }, 200);
     });
 });
+
+// Submit binary relevance feedback
+function submitFeedback(btn, filiereCode, isRelevant) {
+    const container = btn.closest('.rec-feedback-container');
+    const starsContainer = container.querySelector('.feedback-stars-container');
+    
+    // Toggle active classes
+    container.querySelectorAll('.feedback-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Show stars rating if feedback is sent
+    starsContainer.style.display = 'flex';
+    
+    // Send feedback via fetch API
+    sendFeedbackRequest(filiereCode, isRelevant, isRelevant ? 5 : 1);
+}
+
+// Submit star rating feedback
+function rateFeedback(starSpan, filiereCode, rating) {
+    const starsContainer = starSpan.closest('.feedback-stars');
+    const container = starSpan.closest('.rec-feedback-container');
+    const isRelevant = container.querySelector('.like-btn').classList.contains('active');
+    
+    // Update star active states
+    starsContainer.querySelectorAll('.feedback-star').forEach((star, idx) => {
+        if (idx < rating) {
+            star.classList.add('active');
+        } else {
+            star.classList.remove('active');
+        }
+    });
+    
+    sendFeedbackRequest(filiereCode, isRelevant, rating);
+}
+
+function sendFeedbackRequest(filiereCode, isRelevant, rating) {
+    fetch("{{ route('recommendations.feedback') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({
+            filiere_code: filiereCode,
+            is_relevant: isRelevant ? 1 : 0,
+            rating: rating
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            console.log("Feedback enregistré !", data);
+        } else {
+            console.error("Erreur lors de l'enregistrement", data);
+        }
+    })
+    .catch(err => {
+        console.error("Erreur réseau :", err);
+    });
+}
 </script>
 @endsection

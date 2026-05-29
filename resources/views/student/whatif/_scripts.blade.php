@@ -2,6 +2,7 @@
 (function(){
 const CSRF=document.querySelector('meta[name="csrf-token"]')?.content??'';
 const COLORS=['#EA580C','#0A2540','#F97316','#1E293B'];
+const HAS_PROFILE=@json($compatibilite['has_profile'] ?? false);
 let chartInstances={};
 
 // ── Tab switching ──
@@ -23,6 +24,7 @@ const simBtn=document.getElementById('fs-sim-btn');
 secSel?.addEventListener('change',async function(){
     const sec=this.value;
     if(!sec){notesGrid.innerHTML='<div style="padding:1rem;text-align:center;color:var(--ink30);font-size:.82rem">Sélectionnez une section</div>';simBtn.disabled=true;return;}
+    if(!HAS_PROFILE){notesGrid.innerHTML='<div style="padding:1rem;text-align:center;color:color-mix(in srgb, var(--accent) 70%, transparent);font-size:.82rem;font-weight:600">Veuillez d\'abord passer le test RIASEC pour activer cette simulation.</div>';simBtn.disabled=true;return;}
     notesGrid.innerHTML='<div style="padding:.75rem;text-align:center;color:var(--ink30)">Chargement…</div>';
     const r=await fetch(`{{ route('student.whatif.matieres') }}?section=${encodeURIComponent(sec)}`);
     const d=await r.json();
@@ -37,6 +39,7 @@ secSel?.addEventListener('change',async function(){
 if(secSel?.value) secSel.dispatchEvent(new Event('change'));
 
 simBtn?.addEventListener('click',async()=>{
+    if(!HAS_PROFILE){showAlert('fs-alert1','Vous devez d\'abord passer le test psychométrique.','error');return;}
     const sec=secSel.value, mg=parseFloat(mgIn.value);
     if(!sec||isNaN(mg)){showAlert('fs-alert1','Remplissez tous les champs.','error');return;}
     const notes={};let ok=true;
@@ -72,11 +75,11 @@ function renderNotesResult(d){
 document.getElementById('fs-spec-btn')?.addEventListener('click',async()=>{
     const secA=document.getElementById('fs-spec-actuelle')?.value;
     const secN=document.getElementById('fs-spec-nouvelle')?.value;
-    const mg=parseFloat(document.getElementById('fs-spec-mg')?.value);
-    if(!secA||!secN||secA===secN||isNaN(mg)){showAlert('fs-alert2','Sélectionnez 2 sections différentes.','error');return;}
+    const score=parseFloat(document.getElementById('fs-spec-score')?.value);
+    if(!secA||!secN||secA===secN||isNaN(score)){showAlert('fs-alert2','Sélectionnez 2 sections différentes et entrez un score valide.','error');return;}
     const btn=document.getElementById('fs-spec-btn');btn.disabled=true;
     try{
-        const r=await fetch('{{ route("student.whatif.simuler-avance") }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF},body:JSON.stringify({type:'changement_specialite',section_actuelle:secA,nouvelle_section:secN,moyenne_generale:mg,notes:{}})});
+        const r=await fetch('{{ route("student.whatif.simuler-avance") }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF},body:JSON.stringify({type:'changement_specialite',section_actuelle:secA,nouvelle_section:secN,score_actuel:score,notes:{}})});
         const d=await r.json();
         if(d.success) renderSpecResult(d.data);
     }catch(e){}finally{btn.disabled=false;}
@@ -91,7 +94,7 @@ function renderSpecResult(d){
         <div class="fs-score-box"><div class="fs-score-label">${d.section_nouvelle}</div><span class="fs-score-num" style="font-size:2.4rem">${d.score_nouveau.toFixed(1)}</span><div class="fs-badge ${d.niveau_nouveau==='excellent'?'fs-badge-green':'fs-badge-gold'}">${d.niveau_nouveau}</div></div>
     </div>
     <div style="text-align:center;margin-top:.75rem"><span class="fs-delta ${d.delta>=0?'fs-delta-up':'fs-delta-down'}">${d.delta>=0?'▲':'▼'} ${Math.abs(d.delta).toFixed(1)} pts (${d.delta_pct>0?'+':''}${d.delta_pct}%)</span></div>
-    <div class="fs-grid-2" style="margin-top:1rem"><div class="fs-stat"><div class="fs-stat-num">${d.formations_actuelles}</div><div class="fs-stat-label">Formations actuelles</div></div><div class="fs-stat"><div class="fs-stat-num">${d.formations_nouvelles}</div><div class="fs-stat-label">Formations nouvelles</div></div></div>`;
+    <div class="fs-grid-2" style="margin-top:1rem"><div class="fs-stat"><div class="fs-stat-num">${d.formations_actuelles}</div><div class="fs-stat-label">Filières accessibles</div></div><div class="fs-stat"><div class="fs-stat-num">${d.formations_nouvelles}</div><div class="fs-stat-label">Filières nouvelles</div></div></div>`;
 }
 
 // ── Module 3: Filière Alternative ──
@@ -119,42 +122,7 @@ function renderFiliereResult(formations){
     });
 }
 
-// ── Module 4: Études Étranger ──
-document.querySelectorAll('.fs-country-card').forEach(card=>{
-    card.addEventListener('click',()=>{
-        document.querySelectorAll('.fs-country-card').forEach(c=>c.classList.remove('selected'));
-        card.classList.add('selected');
-        document.getElementById('fs-pays-val').value=card.dataset.pays;
-    });
-});
-document.getElementById('fs-etranger-btn')?.addEventListener('click',async()=>{
-    const pays=document.getElementById('fs-pays-val')?.value;
-    const duree=parseInt(document.getElementById('fs-etranger-duree')?.value)||3;
-    if(!pays){showAlert('fs-alert4','Choisissez un pays.','error');return;}
-    const btn=document.getElementById('fs-etranger-btn');btn.disabled=true;
-    try{
-        const r=await fetch('{{ route("student.whatif.simuler-avance") }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF},body:JSON.stringify({type:'etudes_etranger',pays,duree})});
-        const d=await r.json();
-        if(d.success) renderEtrangerResult(d.data);
-    }catch(e){}finally{btn.disabled=false;}
-});
 
-function renderEtrangerResult(d){
-    const el=document.getElementById('fs-result-etranger');el.style.display='block';
-    el.innerHTML=`
-    <div class="fs-row-compare">
-        <div class="fs-score-box"><div class="fs-score-label">${d.pays.flag} ${d.pays.label}</div><span class="fs-score-num" style="font-size:2rem;color:var(--accent2)">${(d.cout_net).toLocaleString()} €</span><div class="fs-stat-label">Coût net (${d.duree} ans)</div></div>
-        <div class="fs-vs">VS</div>
-        <div class="fs-score-box"><div class="fs-score-label">${d.tunisie.flag} Tunisie</div><span class="fs-score-num" style="font-size:2rem;color:var(--accent3)">${d.cout_tunisie.toLocaleString()} €</span><div class="fs-stat-label">Coût total</div></div>
-    </div>
-    <div class="fs-grid-2">
-        <div class="fs-stat"><div class="fs-stat-num" style="color:var(--accent2)">${d.salaire_debut_etr.toLocaleString()} €</div><div class="fs-stat-label">Salaire/an ${d.pays.label}</div></div>
-        <div class="fs-stat"><div class="fs-stat-num" style="color:var(--accent3)">${d.salaire_debut_tn.toLocaleString()} €</div><div class="fs-stat-label">Salaire/an Tunisie</div></div>
-        <div class="fs-stat"><div class="fs-stat-num">${d.taux_insertion_etr}%</div><div class="fs-stat-label">Insertion ${d.pays.label}</div></div>
-        <div class="fs-stat"><div class="fs-stat-num">${d.breakeven_ans} ans</div><div class="fs-stat-label">Retour investissement</div></div>
-    </div>
-    <div style="margin-top:1rem">${d.pays.avantages.map(a=>'<span class="fs-badge fs-badge-blue" style="margin:.15rem">'+a+'</span>').join('')}</div>`;
-}
 
 // ── Module 5: Secteurs (pre-rendered) ──
 function initSecteurs(){

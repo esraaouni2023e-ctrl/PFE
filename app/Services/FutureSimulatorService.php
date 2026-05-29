@@ -8,14 +8,13 @@ use App\Models\User;
 /**
  * FutureSimulatorService — Moteur du simulateur de futurs académiques.
  *
- * Fournit les calculs pour les 7 modules :
+ * Fournit les calculs pour les modules :
  * 1. Variation de notes (Score FG)
  * 2. Changement de spécialité
  * 3. Filière alternative
- * 4. Études à l'étranger
- * 5. Secteurs & Employabilité
- * 6. Salaires & ROI
- * 7. Compatibilité Carrière
+ * 4. Secteurs & Employabilité
+ * 5. Salaires & ROI
+ * 6. Compatibilité Carrière
  */
 class FutureSimulatorService
 {
@@ -25,57 +24,7 @@ class FutureSimulatorService
     //  CONSTANTES — Données de référence tunisiennes
     // ══════════════════════════════════════════════════════════════
 
-    /** Coûts annuels études à l'étranger (EUR) */
-    private const ETUDES_ETRANGER = [
-        'france' => [
-            'label'      => 'France',
-            'flag'       => '🇫🇷',
-            'scolarite'  => 2770,
-            'vie'        => 10800,
-            'bourse'     => 5000,
-            'duree_visa' => '2-3 mois',
-            'langue'     => 'Français',
-            'avantages'  => ['Proximité culturelle', 'Diplômes reconnus', 'Campus France'],
-            'salaire_debut' => 28000,
-            'taux_insertion' => 78,
-        ],
-        'canada' => [
-            'label'      => 'Canada',
-            'flag'       => '🇨🇦',
-            'scolarite'  => 8500,
-            'vie'        => 12000,
-            'bourse'     => 6000,
-            'duree_visa' => '3-5 mois',
-            'langue'     => 'Français / Anglais',
-            'avantages'  => ['Immigration facilitée', 'Marché dynamique', 'Qualité de vie'],
-            'salaire_debut' => 38000,
-            'taux_insertion' => 82,
-        ],
-        'allemagne' => [
-            'label'      => 'Allemagne',
-            'flag'       => '🇩🇪',
-            'scolarite'  => 500,
-            'vie'        => 9600,
-            'bourse'     => 7000,
-            'duree_visa' => '2-4 mois',
-            'langue'     => 'Allemand / Anglais',
-            'avantages'  => ['Quasi-gratuit', 'Industrie forte', 'DAAD bourses'],
-            'salaire_debut' => 42000,
-            'taux_insertion' => 85,
-        ],
-        'tunisie' => [
-            'label'      => 'Tunisie',
-            'flag'       => '🇹🇳',
-            'scolarite'  => 200,
-            'vie'        => 3600,
-            'bourse'     => 1200,
-            'duree_visa' => '-',
-            'langue'     => 'Français / Arabe',
-            'avantages'  => ['Coût très bas', 'Réseau local', 'Famille proche'],
-            'salaire_debut' => 8400,
-            'taux_insertion' => 62,
-        ],
-    ];
+
 
     /** Secteurs tunisiens — taux insertion, saturation, croissance */
     private const SECTEURS = [
@@ -139,14 +88,41 @@ class FutureSimulatorService
     //  MODULE 2 — Changement de spécialité
     // ══════════════════════════════════════════════════════════════
 
-    public function simulerChangementSpecialite(string $sectionActuelle, float $mg, array $notes, string $nouvelleSection): array
+    public function simulerChangementSpecialite(string $sectionActuelle, float $scoreActuel, array $notes, string $nouvelleSection): array
     {
-        $scoreActuel  = $this->scoreFg->calculer($sectionActuelle, $mg, $notes);
+        // 1. Calculer la moyenne générale équivalente à partir du score actuel saisi par l'utilisateur
+        $coefSumActuel = $this->scoreFg->getCoefficientsSum($sectionActuelle);
+        $mg = min(20.0, max(0.0, $scoreActuel / $coefSumActuel));
+
+        // 2. Calculer le score pour la nouvelle section avec cette moyenne générale et les notes
         $scoreNouveau = $this->scoreFg->calculer($nouvelleSection, $mg, $notes);
         $delta = round($scoreNouveau - $scoreActuel, 2);
 
-        $formationsActuelles = $this->scoreFg->getFormationsAccessibles($scoreActuel, 5);
-        $formationsNouvelles = $this->scoreFg->getFormationsAccessibles($scoreNouveau, 5);
+        // 3. Compter le nombre de filières accessibles dans le domaine propre à chaque section (SDO <= score)
+        $mapBacDomaine = [
+            'Mathématiques'           => 'Mathématiques et Appliquées',
+            'Sciences expérimentales' => 'Sciences Expérimentales',
+            'Économie et gestion'     => 'Économie et Gestion',
+            'Technique'               => 'Technologie',
+            'Informatique'            => 'Informatique',
+            'Lettres'                 => 'Lettres et Sciences Humaines',
+            'Sport'                   => 'Sport',
+        ];
+
+        $domaineActuel = $mapBacDomaine[$sectionActuelle] ?? null;
+        $domaineNouveau = $mapBacDomaine[$nouvelleSection] ?? null;
+
+        $queryActuel = \App\Models\Filiere::where('sdo_2025', '<=', $scoreActuel);
+        if ($domaineActuel) {
+            $queryActuel->where('domaine', $domaineActuel);
+        }
+        $formationsActuellesCount = $queryActuel->count();
+
+        $queryNouveau = \App\Models\Filiere::where('sdo_2025', '<=', $scoreNouveau);
+        if ($domaineNouveau) {
+            $queryNouveau->where('domaine', $domaineNouveau);
+        }
+        $formationsNouvellesCount = $queryNouveau->count();
 
         return [
             'section_actuelle' => $sectionActuelle,
@@ -157,8 +133,8 @@ class FutureSimulatorService
             'delta_pct'        => $scoreActuel > 0 ? round(($delta / $scoreActuel) * 100, 1) : 0,
             'niveau_actuel'    => $this->getNiveauScore($scoreActuel),
             'niveau_nouveau'   => $this->getNiveauScore($scoreNouveau),
-            'formations_actuelles' => $formationsActuelles->count(),
-            'formations_nouvelles' => $formationsNouvelles->count(),
+            'formations_actuelles' => $formationsActuellesCount,
+            'formations_nouvelles' => $formationsNouvellesCount,
             'verdict' => $delta > 0 ? 'favorable' : ($delta < 0 ? 'défavorable' : 'neutre'),
         ];
     }
@@ -203,40 +179,7 @@ class FutureSimulatorService
         })->toArray();
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  MODULE 4 — Études à l'étranger
-    // ══════════════════════════════════════════════════════════════
 
-    public function simulerEtudesEtranger(string $pays, int $dureeAns = 3): array
-    {
-        $data   = self::ETUDES_ETRANGER[$pays] ?? self::ETUDES_ETRANGER['france'];
-        $ref    = self::ETUDES_ETRANGER['tunisie'];
-
-        $coutTotal    = ($data['scolarite'] + $data['vie']) * $dureeAns;
-        $coutTunisie  = ($ref['scolarite'] + $ref['vie']) * $dureeAns;
-        $boursePotentielle = $data['bourse'] * $dureeAns;
-
-        $roiEtranger  = $data['salaire_debut'] * 12;
-        $roiTunisie   = $ref['salaire_debut'] * 12;
-        $breakeven    = $coutTotal > 0 ? ceil($coutTotal / max(1, ($roiEtranger - $roiTunisie))) : 0;
-
-        return [
-            'pays'              => $data,
-            'tunisie'           => $ref,
-            'duree'             => $dureeAns,
-            'cout_total'        => $coutTotal,
-            'cout_tunisie'      => $coutTunisie,
-            'bourse_potentielle'=> $boursePotentielle,
-            'cout_net'          => $coutTotal - $boursePotentielle,
-            'salaire_debut_etr' => $data['salaire_debut'],
-            'salaire_debut_tn'  => $ref['salaire_debut'],
-            'roi_annuel'        => $roiEtranger - $roiTunisie,
-            'breakeven_ans'     => max(0, min(15, $breakeven)),
-            'taux_insertion_etr'=> $data['taux_insertion'],
-            'taux_insertion_tn' => $ref['taux_insertion'],
-            'score_global'      => round(($data['taux_insertion'] * 0.4 + min(100, ($data['salaire_debut'] / 500)) * 0.3 + (100 - min(100, $coutTotal / 500)) * 0.3)),
-        ];
-    }
 
     // ══════════════════════════════════════════════════════════════
     //  MODULE 5 — Secteurs & Employabilité
@@ -320,8 +263,8 @@ class FutureSimulatorService
 
     public function calculerCompatibiliteCarriere(User $user): array
     {
-        $profile = $user->profile;
-        $riasecScores = $profile?->riasec_scores ?? null;
+        $dernierProfil = $user->dernierProfilRiasec;
+        $riasecScores = $dernierProfil ? $dernierProfil->scores_par_dimension : null;
 
         if (!$riasecScores || !is_array($riasecScores)) {
             return ['has_profile' => false, 'message' => 'Passez le test psychométrique pour débloquer cette analyse.'];
@@ -393,11 +336,7 @@ class FutureSimulatorService
         return min(95, $base);
     }
 
-    /** Expose la liste des pays pour la vue */
-    public function getPaysDisponibles(): array
-    {
-        return array_map(fn($p) => ['label' => $p['label'], 'flag' => $p['flag']], self::ETUDES_ETRANGER);
-    }
+
 
     /** Expose les niveaux pour le ROI */
     public function getNiveauxDisponibles(): array
