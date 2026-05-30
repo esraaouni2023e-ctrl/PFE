@@ -651,4 +651,48 @@ class SiaepiRecommendationEngineTest extends TestCase
             }
         }
     }
+
+    /**
+     * Teste que si un étudiant a uniquement déclaré un intérêt de niveau médecin (ex: Médecine),
+     * les filières paramédicales (Kiné, Infirmier, Sage-femme) sont exclues,
+     * alors que les filières docteur (Médecine, Pharmacie, Dentaire) restent autorisées.
+     */
+    public function test_doctor_interest_excludes_paramedical_tracks()
+    {
+        $engine = new SiaepiRecommendationEngine();
+        $profil = [
+            'score_fg'                  => 185.8,
+            'section_bac'               => 'Sciences expérimentales',
+            'filiere_etudiant_actuelle' => 'Sciences expérimentales',
+            'vecteur_psychometrique'    => ['R'=>0.8,'I'=>0.9,'A'=>0.2,'S'=>0.2,'E'=>0.3,'C'=>0.7],
+            'gatb_scores'               => ['G'=>95, 'V'=>85, 'N'=>95, 'S'=>90],
+            'code_holland'              => 'IEC',
+            'big_five'                  => ['O'=>0.7, 'C'=>0.9, 'E'=>0.5, 'A'=>0.4, 'N'=>0.1],
+            'valeurs'                   => ['Sec'=>0.6, 'Ach'=>0.9, 'Ben'=>0.4, 'Aut'=>0.8],
+            // Contient uniquement "Médecine" -> donc seulement doctor
+            'interests'                 => ['declared' => 'Médecine']
+        ];
+
+        $res = $engine->recommend($profil, 10);
+        $this->assertNotEmpty($res['recommandations']);
+
+        $allFiliere = array_merge(
+            $res['recommandations'] ?? [],
+            $res['accessibles'] ?? [],
+            $res['securite'] ?? [],
+            $res['ambitieuses'] ?? []
+        );
+
+        $hasMedecine = false;
+        foreach ($allFiliere as $f) {
+            $name = mb_strtolower($f['Nom_Filiere']);
+            if (str_contains($name, 'médecin') || str_contains($name, 'médecine') || str_contains($name, 'pharmacie') || str_contains($name, 'dentaire')) {
+                $hasMedecine = true;
+            }
+            $this->assertStringNotContainsString('kiné', $name, 'La kinésithérapie doit être exclue car il n\'y a pas d\'intérêt paramédical.');
+            $this->assertStringNotContainsString('infirmier', $name, 'Les soins infirmiers doivent être exclus car il n\'y a pas d\'intérêt paramédical.');
+            $this->assertStringNotContainsString('sage-femme', $name, 'L\'obstétrique/sage-femme doit être exclue car il n\'y a pas d\'intérêt paramédical.');
+        }
+        $this->assertTrue($hasMedecine, 'La médecine doit être présente car le profil a un intérêt docteur valide.');
+    }
 }

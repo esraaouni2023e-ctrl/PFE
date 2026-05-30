@@ -712,7 +712,8 @@ class SiaepiRecommendationEngine
         ];
 
         $codeHolland = $profil['code_holland'] ?? $this->getHollandFromVec($riasecVec);
-        $hasMedicalInterest = $this->hasMedicalInterest($interests) || $this->isHealthAcademicPath($profil);
+        $healthInterests = $this->resolveHealthInterests($interests);
+        $isHealthAcademic = $this->isHealthAcademicPath($profil);
         $studentDomainVector = $this->getStudentDomainVector($profil, $riasecStudentNorm, $gatbRaw);
 
         $results = [];
@@ -758,11 +759,28 @@ class SiaepiRecommendationEngine
 
             $isSanteFiliere = (
                 $domain === 'sante' ||
-                preg_match('/medecin|pharmac|dentair|kine|infirmier|sage.femm|soins|paramedi|veterin|nutrition/', $nomFilNorm)
+                preg_match('/medecin|pharmac|dentair|kine|infirmier|sage.femm|soins|paramedi|veterin|nutrition|ergother|reanimat|pediatr|puericult|audiolog|orthophon/', $nomFilNorm)
             );
 
-            if ($isSanteFiliere && !$hasMedicalInterest) {
-                continue; // Exclude health tracks for students sans intérêt médical explicite
+            if ($isSanteFiliere) {
+                $isDoctorFiliere = preg_match('/medecin|pharmac|dentair/i', $nomFilNorm) === 1;
+                $isParamedicalFiliere = preg_match('/kine|infirmier|sage.femm|soins|paramedi|ergother|reanimat|pediatr|puericult|audiolog|orthophon|nutrition|veterin/i', $nomFilNorm) === 1;
+
+                $allowed = false;
+                if ($isDoctorFiliere && ($healthInterests['doctor'] || $isHealthAcademic)) {
+                    $allowed = true;
+                }
+                if ($isParamedicalFiliere && ($healthInterests['paramedical'] || $isHealthAcademic)) {
+                    $allowed = true;
+                }
+                // If it's a general health track or unknown health type
+                if (!$isDoctorFiliere && !$isParamedicalFiliere && ($healthInterests['doctor'] || $healthInterests['paramedical'] || $isHealthAcademic)) {
+                    $allowed = true;
+                }
+
+                if (!$allowed) {
+                    continue; // Exclude health tracks for students sans intérêt médical explicite
+                }
             }
 
             $healthPenalty = 1.0;
