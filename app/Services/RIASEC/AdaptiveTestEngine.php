@@ -325,10 +325,11 @@ class AdaptiveTestEngine
      */
     private function applyStoppingRules(array $state, int $numAnswered, string $sessionId): array
     {
+        $minQuestions = config('adaptive_test.min_questions', 28);
         $maxQuestions = config('adaptive_test.max_questions', 50);
 
-        // Règle 1 : couverture RIASEC suffisante
-        if ($numAnswered >= 18 && $sessionId) {
+        // Règle 1 : couverture RIASEC suffisante ET nombre minimum de questions atteint pour permettre l'adaptatif
+        if ($numAnswered >= $minQuestions && $sessionId) {
             $counts     = $this->countRiasecAnswersByDim($sessionId);
             $allCovered = true;
             foreach (self::RIASEC_DIMS as $dim) {
