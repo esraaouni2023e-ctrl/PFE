@@ -100,7 +100,11 @@ class ChatbotController extends Controller
 
             // Confiance / cohérence
             if ($profilRiasec->confidence_score !== null) {
-                $context .= 'Confiance: ' . round($profilRiasec->confidence_score * 100, 1) . "%\n";
+                $confVal = (float)$profilRiasec->confidence_score;
+                if ($confVal > 1.0) {
+                    $confVal = $confVal / 100.0;
+                }
+                $context .= 'Confiance: ' . round($confVal * 100, 1) . "%\n";
             }
             if ($profilRiasec->score_coherence !== null) {
                 $context .= 'Cohérence: ' . $profilRiasec->score_coherence . "%\n";

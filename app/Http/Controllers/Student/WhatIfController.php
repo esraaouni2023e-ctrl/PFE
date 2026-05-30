@@ -62,6 +62,7 @@ class WhatIfController extends Controller
         try {
             $scoreFg = $this->scoreFgService->calculer($section, $mg, $notes);
             $formations = $this->scoreFgService->getFormationsAccessibles($scoreFg, 8);
+            $advices = $this->calculateOptimizationAdvice($section, $scoreFg, $notes);
 
             // Sauvegarde dans l'historique
             $simulation = SimulationHistory::create([
@@ -98,6 +99,7 @@ class WhatIfController extends Controller
                     'salaire_max'   => $f->salaire_max,
                     'domaine'       => $f->specialite?->domaine ?? '',
                 ]),
+                'optimization_advices' => $advices,
             ]);
 
         } catch (\InvalidArgumentException $e) {
@@ -181,5 +183,76 @@ class WhatIfController extends Controller
         $simulation->delete();
 
         return back()->with('success', 'Simulation supprimée.');
+    }
+
+    /**
+     * Analyse les écarts de score pour les filières cibles et génère des conseils d'optimisation proactifs.
+     */
+    private function calculateOptimizationAdvice(string $section, float $scoreFg, array $notes): array
+    {
+        $advices = [];
+
+        // 1. Récupérer les filières dont le SDO est légèrement supérieur au score FG
+        $targetFilieres = \App\Models\Filiere::where(function($query) {
+                $query->whereNotNull('sdo_2025')->where('sdo_2025', '>', 0);
+            })
+            ->where('sdo_2025', '>', $scoreFg)
+            ->where('sdo_2025', '<=', $scoreFg + 20)
+            ->orderBy('sdo_2025', 'asc')
+            ->limit(3)
+            ->get();
+
+        // Fallback si pas de filières dans cette marge
+        if ($targetFilieres->isEmpty()) {
+            $targetFilieres = \App\Models\Filiere::where(function($query) {
+                    $query->whereNotNull('sdo_2025')->where('sdo_2025', '>', 0);
+                })
+                ->where('sdo_2025', '>', $scoreFg)
+                ->orderBy('sdo_2025', 'asc')
+                ->limit(2)
+                ->get();
+        }
+
+        $matieresSection = $this->scoreFgService->getMatieresSection($section);
+
+        foreach ($targetFilieres as $filiere) {
+            $sdo = (float) $filiere->sdo_2025;
+            $gap = $sdo - $scoreFg;
+
+            foreach ($matieresSection as $code => $info) {
+                $coef = (float) $info['coef'];
+                $label = $info['label'];
+                $currentNote = isset($notes[$code]) ? (float)$notes[$code] : $scoreFg/10; // approximation
+
+                // Augmentation requise
+                $requiredIncrease = round($gap / $coef, 2);
+
+                if ($currentNote + $requiredIncrease <= 20.0 && $requiredIncrease > 0) {
+                    $probBefore = 1.0 / (1.0 + exp(-0.15 * ($scoreFg - $sdo)));
+                    $probAfter = 1.0 / (1.0 + exp(-0.15 * (($scoreFg + ($requiredIncrease * $coef)) - $sdo)));
+                    $pctIncrease = round(($probAfter - $probBefore) * 100);
+
+                    if ($pctIncrease > 0) {
+                        $advices[] = [
+                            'filiere' => $filiere->nom_filiere,
+                            'etablissement' => $filiere->etablissement,
+                            'sdo' => $sdo,
+                            'matiere' => $label,
+                            'increase' => $requiredIncrease,
+                            'target_note' => $currentNote + $requiredIncrease,
+                            'pct_increase' => $pctIncrease,
+                            'prob_before' => round($probBefore * 100),
+                            'prob_after' => round($probAfter * 100),
+                            'text' => "Augmenter la note de <strong>{$label}</strong> de <strong>+{$requiredIncrease}</strong> points (pour atteindre " . ($currentNote + $requiredIncrease) . ") augmenterait tes chances d'admission en <em>{$filiere->nom_filiere}</em> de <strong>+{$pctIncrease}%</strong>."
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Trier par pourcentage d'amélioration
+        usort($advices, fn($a, $b) => $b['pct_increase'] <=> $a['pct_increase']);
+
+        return array_slice($advices, 0, 5);
     }
 }

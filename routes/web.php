@@ -50,6 +50,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
         Route::get('/pipeline', [\App\Http\Controllers\Student\OrientationPipelineController::class, 'start'])
             ->name('pipeline');
         Route::post('/pipeline/step1', [\App\Http\Controllers\Student\OrientationPipelineController::class, 'storeStep1'])
+            ->middleware('throttle:10,1')
             ->name('pipeline.storeStep1');
 
         // ── Orientation (filières) ──
@@ -103,6 +104,14 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
             Route::get('/{cvProfile}/docx', [\App\Http\Controllers\Student\CvBuilderController::class, 'downloadDocx'])->name('docx');
             Route::get('/{cvProfile}/preview', [\App\Http\Controllers\Student\CvBuilderController::class, 'preview'])->name('preview');
         });
+
+        // ── Recommandations IA ──
+        Route::get('/recommendations', [\App\Http\Controllers\StudentController::class, 'showRecommendations'])
+            ->name('recommendations');
+        Route::post('/recommendations/feedback', [\App\Http\Controllers\StudentController::class, 'storeFeedback'])
+            ->name('recommendations.feedback');
+        Route::post('/recommendations/interaction', [\App\Http\Controllers\StudentController::class, 'storeInteraction'])
+            ->name('interaction');
 
         // ── Chatbot IA ──
         Route::post('/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot');
@@ -239,13 +248,7 @@ Route::prefix('riasec')
         });
     });
 
-// ── Recommandations de filières (API Python) ──────────────────────────────
-Route::middleware(['auth'])->group(function () {
-    Route::get('/recommendations', [\App\Http\Controllers\StudentController::class, 'showRecommendations'])
-        ->name('recommendations.show');
-    Route::post('/recommendations/feedback', [\App\Http\Controllers\StudentController::class, 'storeFeedback'])
-        ->name('recommendations.feedback');
-});
+
 
 require __DIR__ . '/auth.php';
 

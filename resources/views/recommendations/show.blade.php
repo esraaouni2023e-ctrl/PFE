@@ -121,12 +121,172 @@
 .feedback-star:hover, .feedback-star.active {
     color: var(--gold);
 }
+
+/* Accordion styles */
+.career-acc {
+    margin-top: 1rem;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--rx);
+    overflow: hidden;
+    background: var(--paper);
+}
+.career-acc-trigger {
+    width: 100%;
+    background: var(--ink06);
+    border: none;
+    padding: 0.65rem 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.career-acc-trigger:hover {
+    background: var(--ink10);
+}
+.career-acc-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+.career-acc-inner {
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    border-top: 1px solid var(--glass-border);
+}
+.career-domain-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent2);
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+.career-item {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed var(--glass-border);
+}
+.career-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+.career-item-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+}
+.career-item-desc {
+    font-size: 0.74rem;
+    color: var(--ink60);
+    line-height: 1.4;
+    margin-bottom: 0.4rem;
+}
+.career-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+.career-meta-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-weight: 600;
+    background: var(--ink06);
+    color: var(--ink60);
+    border: 1px solid var(--glass-border);
+}
+.career-meta-badge.salary {
+    color: var(--accent3);
+    border-color: color-mix(in srgb, var(--accent3) 30%, transparent);
+    background: color-mix(in srgb, var(--accent3) 6%, transparent);
+}
+.career-meta-badge.employability {
+    color: var(--gold);
+    border-color: color-mix(in srgb, var(--gold) 30%, transparent);
+    background: color-mix(in srgb, var(--gold) 6%, transparent);
+}
+.career-skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.3rem;
+}
+.career-skill-tag {
+    font-size: 0.6rem;
+    padding: 0.08rem 0.35rem;
+    border-radius: 3px;
+    background: var(--ink06);
+    color: var(--ink40);
+    font-weight: 600;
+}
+
+/* Tabs UI styling */
+.rec-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.5rem;
+}
+.rec-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0.65rem 1.25rem;
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink60);
+    cursor: pointer;
+    border-radius: var(--r);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.rec-tab-btn:hover {
+    color: var(--ink);
+    background: var(--ink06);
+}
+.rec-tab-btn.active {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    font-weight: 700;
+}
+.rec-tab-count {
+    font-size: 0.7rem;
+    background: var(--ink10);
+    color: var(--ink60);
+    padding: 0.1rem 0.45rem;
+    border-radius: 10px;
+    font-weight: 700;
+}
+.rec-tab-btn.active .rec-tab-count {
+    background: var(--accent);
+    color: #fff;
+}
+.tab-panel {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out;
+}
+.tab-panel.active {
+    display: block;
+    opacity: 1;
+}
 </style>
 
 <div class="rec">
-    <p class="rec-eye">Moteur SIAEPI v5.0 · Recommandations</p>
+    <p class="rec-eye">Moteur SIAEPI v8.0 · Ranking multi-objectif déterministe</p>
     <h1 class="rec-title">Vos filières <em>recommandées</em></h1>
-    <p class="rec-sub">Analyse multidimensionnelle combinant votre profil RIASEC, vos aptitudes cognitives GATB, votre score académique FG et les données du marché de l'emploi tunisien.</p>
+    <p class="rec-sub">Système expert hybride multicritère optimisant vos forces cognitives GATB, votre adéquation RIASEC, vos performances académiques FG et les indicateurs du marché de l'emploi tunisien.</p>
 
     {{-- Stats rapides --}}
     <div class="rec-stats-bar">
@@ -176,173 +336,82 @@
     </div>
     @endif
 
-    {{-- Grid des recommandations --}}
-    <div class="rec-grid">
-        @forelse($recommendations['recommandations'] ?? [] as $f)
-        @php
-            $rang = $f['Rang'] ?? ($loop->index + 1);
-            $rankClass = $rang === 1 ? 'top1' : ($rang === 2 ? 'top2' : ($rang === 3 ? 'top3' : ''));
-            $matchPct = round(($f['Score_Final_Contextuel'] ?? $f['Score_Final'] ?? 0) * 100);
-            $riasecPct = round(($f['Compatibilite_Psychometrique'] ?? $f['Score_RIASEC'] ?? 0) * 100);
-            $acadPct = round(($f['Score_Academique'] ?? 0) * 100);
-            $marchePct = round(($f['Score_Marche'] ?? 0) * 100);
-            $accessPct = round(($f['Score_Accessibilite'] ?? 0) * 100);
-            $matchColor = $matchPct >= 75 ? 'var(--accent3)' : ($matchPct >= 55 ? 'var(--accent)' : 'var(--gold)');
-            $confidenceRaw = $f['Confidence'] ?? $f['confidence'] ?? null;
-            $confidenceScore = is_numeric($confidenceRaw) ? (float) $confidenceRaw : null;
-            if ($confidenceScore !== null && $confidenceScore > 1) {
-                $confidenceScore = $confidenceScore / 100;
-            }
-            $confidencePct = $confidenceScore !== null ? (int) round(max(0, min(1, $confidenceScore)) * 100) : null;
-            $confidenceLevel = $confidenceScore === null ? null : ($confidenceScore < 0.55 ? 'low' : ($confidenceScore < 0.75 ? 'medium' : 'high'));
-            $confidenceLabel = match($confidenceLevel) {
-                'low' => 'Confiance faible',
-                'medium' => 'Confiance modérée',
-                'high' => 'Confiance élevée',
-                default => null,
-            };
-            $confidenceHelp = match($confidenceLevel) {
-                'low' => 'Recommandation exploratoire : certaines dimensions du profil restent incertaines ou contrastées.',
-                'medium' => 'Recommandation plausible : le profil est globalement cohérent, avec quelques zones à confirmer.',
-                'high' => 'Recommandation fiable : votre profil psychométrique et académique est cohérent avec cette filière.',
-                default => null,
-            };
-        @endphp
-        <div class="rec-card">
-            <div class="rec-card-top">
-                <div class="rec-rank {{ $rankClass }}">#{{ $rang }}</div>
-                <div class="rec-match">
-                    <div class="rec-match-num" style="color:{{ $matchColor }}">{{ $matchPct }}<span style="font-size:1rem">%</span></div>
-                    <div class="rec-match-lbl">Match global</div>
-                </div>
-            </div>
+    {{-- Onglets de Navigation --}}
+    <div class="rec-tabs">
+        <button type="button" class="rec-tab-btn active" onclick="switchRecTab('ambitieuses')">
+            🚀 Choix Ambitieux
+            <span class="rec-tab-count">{{ count($recommendations['ambitieuses'] ?? []) }}</span>
+        </button>
+        <button type="button" class="rec-tab-btn" onclick="switchRecTab('optimal')">
+            🎯 Top Recommandations
+            <span class="rec-tab-count">{{ count($recommendations['recommandations'] ?? []) }}</span>
+        </button>
+        <button type="button" class="rec-tab-btn" onclick="switchRecTab('accessible')">
+            ⚡ Opportunités Accessibles
+            <span class="rec-tab-count">{{ count($recommendations['accessibles'] ?? []) }}</span>
+        </button>
+        <button type="button" class="rec-tab-btn" onclick="switchRecTab('securite')">
+            🛡️ Filières de repli si besoin
+            <span class="rec-tab-count">{{ count($recommendations['securite'] ?? []) }}</span>
+        </button>
+    </div>
 
-            <div class="rec-nom">
-                {{ $f['Nom_Filiere'] ?? 'Filière' }}
-                @if(!empty($f['is_pareto_optimal']))
-                    <span style="font-size: 0.7rem; background: var(--gold); color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;">⭐ Choix Optimal</span>
-                @endif
-            </div>
-            <div class="rec-eta">
-                <span class="rec-eta-ic">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    {{ $f['Etablissement'] ?? '' }}
-                </span>
-                <span class="rec-eta-ic" style="opacity:.7">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {{ $f['Universite'] ?? '' }}
-                </span>
-            </div>
-
-            @if(!empty($f['Explication']) && is_array($f['Explication']))
-            <div class="rec-expliq" style="font-size: 0.82rem; margin-bottom:1rem;">
-                @if(!empty($f['Explication']['raisons']))
-                    <div style="color:var(--ink60); font-style:normal; margin-bottom: 8px; line-height:1.45;">
-                        @foreach($f['Explication']['raisons'] as $raison)
-                            <p style="margin-bottom: 4px;">{{ $raison }}</p>
-                        @endforeach
-                    </div>
-                @endif
-                @if(!empty($f['Explication']['points_forts']))
-                    <ul style="margin:0; padding-left:1.2rem; color: #10b981; font-style:normal;">
-                        @foreach($f['Explication']['points_forts'] as $fort)
-                            <li style="margin-bottom: 2px;">{{ $fort }}</li>
-                        @endforeach
-                    </ul>
-                @endif
-                @if(!empty($f['Explication']['points_faibles']))
-                    <ul style="margin-top:4px; margin-bottom:0; padding-left:1.2rem; color: #ef4444; font-style:normal;">
-                        @foreach($f['Explication']['points_faibles'] as $faible)
-                            <li style="margin-bottom: 2px;">{{ $faible }}</li>
-                        @endforeach
-                    </ul>
-                @endif
-            </div>
-            @elseif(!empty($f['Explication']) && is_string($f['Explication']))
-            <div class="rec-expliq">{{ $f['Explication'] }}</div>
-            @endif
-
-            <div class="rec-bars">
-                <div class="rec-bar-row">
-                    <div class="rec-bar-lbl">RIASEC</div>
-                    <div class="rec-bar-track"><div class="rec-bar-fill" style="width:{{ $riasecPct }}%;background:var(--accent)"></div></div>
-                    <div class="rec-bar-val" style="color:var(--accent)">{{ $riasecPct }}%</div>
+    {{-- Onglet 1 : Choix Ambitieux --}}
+    <div id="panel-ambitieuses" class="tab-panel active">
+        <div class="rec-grid">
+            @forelse($recommendations['ambitieuses'] ?? [] as $f)
+                @include('recommendations.card', ['f' => $f, 'loop' => $loop])
+            @empty
+                <div style="grid-column:1/-1;text-align:center;padding:3rem;background:var(--ink06);border:1px solid var(--glass-border);border-radius:var(--rl);color:var(--ink30);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem;display:block;opacity:.3"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                    <p style="font-size:.9rem;font-weight:600">Aucune filière ambitieuse (sélectivité légèrement supérieure à votre FG) dans cette catégorie.</p>
                 </div>
-                <div class="rec-bar-row">
-                    <div class="rec-bar-lbl">Académique</div>
-                    <div class="rec-bar-track"><div class="rec-bar-fill" style="width:{{ $acadPct }}%;background:var(--accent2)"></div></div>
-                    <div class="rec-bar-val" style="color:var(--accent2)">{{ $acadPct }}%</div>
-                </div>
-                <div class="rec-bar-row">
-                    <div class="rec-bar-lbl">Marché</div>
-                    <div class="rec-bar-track"><div class="rec-bar-fill" style="width:{{ $marchePct }}%;background:var(--accent3)"></div></div>
-                    <div class="rec-bar-val" style="color:var(--accent3)">{{ $marchePct }}%</div>
-                </div>
-                <div class="rec-bar-row">
-                    <div class="rec-bar-lbl">Accès SDO</div>
-                    <div class="rec-bar-track"><div class="rec-bar-fill" style="width:{{ $accessPct }}%;background:var(--gold)"></div></div>
-                    <div class="rec-bar-val" style="color:var(--gold)">{{ $accessPct }}%</div>
-                </div>
-            </div>
-
-            <div class="rec-tags">
-                @if(!empty($f['Type_Transition']))
-                <span class="rec-tag transition">{{ $f['Type_Transition'] }}</span>
-                @endif
-                @if(!empty($f['Taux_Employabilite']))
-                <span class="rec-tag emploi">{{ $f['Taux_Employabilite'] }}</span>
-                @endif
-                @if($confidencePct !== null)
-                <span class="rec-tag confidence {{ $confidenceLevel }}" title="{{ $confidenceHelp }}">
-                    {{ $confidenceLabel }} · {{ $confidencePct }}%
-                </span>
-                @endif
-                @if(($f['Penalite_Cognitive'] ?? 0) > 0.15)
-                <span class="rec-tag warn">Aptitudes à renforcer</span>
-                @endif
-                @if(!empty($f['Code_RIASEC']))
-                <span class="rec-tag transition" style="font-family:var(--font-serif);font-style:italic">{{ $f['Code_RIASEC'] }}</span>
-                @endif
-            </div>
-
-            {{-- Feedback UI --}}
-            @php
-                $codeF = $f['Code_Filiere'] ?? $f['code_filiere'] ?? '';
-                $existingFb = $feedbacks[$codeF] ?? null;
-                $isLikeActive = $existingFb && $existingFb['is_relevant'] == true;
-                $isDislikeActive = $existingFb && $existingFb['is_relevant'] == false;
-                $ratingVal = $existingFb ? $existingFb['rating'] : 0;
-            @endphp
-            <div class="rec-feedback-container" data-filiere="{{ $codeF }}" style="margin-top:1.1rem; padding-top:1rem; border-top:1px solid var(--glass-border);">
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; flex-wrap:wrap;">
-                    <span style="font-size:0.72rem; font-weight:600; color:var(--ink60);">Recommandation pertinente ?</span>
-                    <div style="display:flex; align-items:center; gap:0.4rem;">
-                        <button type="button" class="feedback-btn like-btn {{ $isLikeActive ? 'active' : '' }}" onclick="submitFeedback(this, '{{ $codeF }}', true)" title="Oui, pertinent">
-                            👍 Oui
-                        </button>
-                        <button type="button" class="feedback-btn dislike-btn {{ $isDislikeActive ? 'active' : '' }}" onclick="submitFeedback(this, '{{ $codeF }}', false)" title="Non, non pertinent">
-                            👎 Non
-                        </button>
-                    </div>
-                </div>
-                <div class="feedback-stars-container" style="display:{{ $existingFb ? 'flex' : 'none' }}; align-items:center; justify-content:space-between; gap:0.5rem; margin-top:0.75rem;">
-                    <span style="font-size:0.7rem; font-weight:500; color:var(--ink30);">Note d'adéquation :</span>
-                    <div class="feedback-stars" data-rating="{{ $ratingVal }}">
-                        @for($star = 1; $star <= 5; $star++)
-                            <span class="feedback-star {{ $star <= $ratingVal ? 'active' : '' }}" onclick="rateFeedback(this, '{{ $codeF }}', {{ $star }})">★</span>
-                        @endfor
-                    </div>
-                </div>
-            </div>
+            @endforelse
         </div>
-        @empty
-        @if(!isset($recommendations['error']))
-        <div style="grid-column:1/-1;text-align:center;padding:3rem;background:var(--ink06);border:1px solid var(--glass-border);border-radius:var(--rl);color:var(--ink30);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem;display:block;opacity:.3"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-            <p style="font-size:.9rem;font-weight:600">Aucune filière trouvée. Complétez votre profil académique et psychométrique.</p>
+    </div>
+
+    {{-- Onglet 2 : Top Recommandations --}}
+    <div id="panel-optimal" class="tab-panel">
+        <div class="rec-grid">
+            @forelse($recommendations['recommandations'] ?? [] as $f)
+                @include('recommendations.card', ['f' => $f, 'loop' => $loop])
+            @empty
+                @if(!isset($recommendations['error']))
+                <div style="grid-column:1/-1;text-align:center;padding:3rem;background:var(--ink06);border:1px solid var(--glass-border);border-radius:var(--rl);color:var(--ink30);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem;display:block;opacity:.3"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                    <p style="font-size:.9rem;font-weight:600">Aucune filière recommandée dans cette catégorie.</p>
+                </div>
+                @endif
+            @endforelse
         </div>
-        @endif
-        @endforelse
+    </div>
+
+    {{-- Onglet 3 : Opportunités Accessibles --}}
+    <div id="panel-accessible" class="tab-panel">
+        <div class="rec-grid">
+            @forelse($recommendations['accessibles'] ?? [] as $f)
+                @include('recommendations.card', ['f' => $f, 'loop' => $loop])
+            @empty
+                <div style="grid-column:1/-1;text-align:center;padding:3rem;background:var(--ink06);border:1px solid var(--glass-border);border-radius:var(--rl);color:var(--ink30);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem;display:block;opacity:.3"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                    <p style="font-size:.9rem;font-weight:600">Aucune opportunité accessible détectée.</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- Onglet 4 : Filières de repli si besoin --}}
+    <div id="panel-securite" class="tab-panel">
+        <div class="rec-grid">
+            @forelse($recommendations['securite'] ?? [] as $f)
+                @include('recommendations.card', ['f' => $f, 'loop' => $loop])
+            @empty
+                <div style="grid-column:1/-1;text-align:center;padding:3rem;background:var(--ink06);border:1px solid var(--glass-border);border-radius:var(--rl);color:var(--ink30);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 1rem;display:block;opacity:.3"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                    <p style="font-size:.9rem;font-weight:600">Aucune filière de repli requise.</p>
+                </div>
+            @endforelse
+        </div>
     </div>
 
     {{-- Gap Analysis --}}
@@ -360,11 +429,11 @@
             </div>
             <div class="rec-gap-stat">
                 @php $ecart = $gapAnalysis['ecart_fg'] ?? 0; $ec = $ecart <= 0 ? 'var(--accent3)' : ($ecart <= 15 ? 'var(--gold)' : '#ef4444'); @endphp
-                <div class="rec-gap-stat-num" style="color:{{ $ec }}">{{ $ecart <= 0 ? '✓' : '+'.round(abs($ecart), 1) }}</div>
+                <div class="rec-gap-stat-num" style="color:{{ $ec }}">{{ $ecart <= 0 ? '✓ (+'.round(abs($ecart), 1).')' : '+'.round(abs($ecart), 1) }}</div>
                 <div class="rec-gap-stat-lbl">Écart FG</div>
             </div>
             <div class="rec-gap-stat">
-                @php $statut = $gapAnalysis['statut'] ?? ''; $sc = match($statut){'Accessible'=>'var(--accent3)','Effort requis'=>'var(--gold)',default=>'#ef4444'}; @endphp
+                @php $statut = $gapAnalysis['statut'] ?? ''; $sc = match($statut){'Accès Sécurisé','Accessible'=>'var(--accent3)','Effort requis'=>'var(--gold)',default=>'#ef4444'}; @endphp
                 <div class="rec-gap-stat-num" style="font-size:1rem;color:{{ $sc }}">{{ $statut }}</div>
                 <div class="rec-gap-stat-lbl">Statut</div>
             </div>
@@ -401,19 +470,55 @@
     </div>
 
     <p style="font-size:.7rem;color:var(--ink30);margin-top:1.5rem;line-height:1.6">
-        Recommandations générées par le moteur SIAEPI v5.0 · Similarité cosinus pondérée · GATB + RIASEC + Score FG · Données SDO 2023–2025
+        Recommandations générées par SIAEPI v8.0 · FinalScore unique · Pareto Fit/Market/Access · MMR déterministe · Données SDO 2023–2025
     </p>
 </div>
 
 <script>
-// Animate bars on load
-document.addEventListener('DOMContentLoaded', () => {
-    const fills = document.querySelectorAll('.rec-bar-fill');
-    fills.forEach(f => {
-        const target = f.style.width;
-        f.style.width = '0%';
-        setTimeout(() => { f.style.width = target; }, 200);
+// Switch between recommendation tabs dynamically
+function switchRecTab(tabId) {
+    document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.remove('active');
     });
+    document.querySelectorAll('.rec-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    const activePanel = document.getElementById('panel-' + tabId);
+    if (activePanel) {
+        activePanel.classList.add('active');
+        // Re-trigger progress bar animations inside the active panel
+        const fills = activePanel.querySelectorAll('.rec-bar-fill');
+        fills.forEach(f => {
+            const target = f.style.width;
+            f.style.width = '0%';
+            setTimeout(() => { f.style.width = target; }, 100);
+        });
+    }
+
+    const clickedBtn = Array.from(document.querySelectorAll('.rec-tab-btn')).find(btn => btn.getAttribute('onclick').includes(tabId));
+    if (clickedBtn) {
+        clickedBtn.classList.add('active');
+    }
+}
+
+// Animate bars on load & handle default active tab if ambitious is empty
+document.addEventListener('DOMContentLoaded', () => {
+    const hasAmbitious = {{ count($recommendations['ambitieuses'] ?? []) }};
+    if (hasAmbitious === 0) {
+        switchRecTab('optimal');
+    } else {
+        // Initial animation for active tab
+        const activePanel = document.querySelector('.tab-panel.active');
+        if (activePanel) {
+            const fills = activePanel.querySelectorAll('.rec-bar-fill');
+            fills.forEach(f => {
+                const target = f.style.width;
+                f.style.width = '0%';
+                setTimeout(() => { f.style.width = target; }, 200);
+            });
+        }
+    }
 });
 
 // Submit binary relevance feedback
@@ -451,7 +556,7 @@ function rateFeedback(starSpan, filiereCode, rating) {
 }
 
 function sendFeedbackRequest(filiereCode, isRelevant, rating) {
-    fetch("{{ route('recommendations.feedback') }}", {
+    fetch("{{ route('student.recommendations.feedback') }}", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -473,6 +578,47 @@ function sendFeedbackRequest(filiereCode, isRelevant, rating) {
     })
     .catch(err => {
         console.error("Erreur réseau :", err);
+    });
+}
+
+function toggleCareerAccordion(btn) {
+    const content = btn.nextElementSibling;
+    const chevron = btn.querySelector('.chevron');
+    
+    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+        content.style.maxHeight = '0px';
+        chevron.style.transform = 'rotate(0deg)';
+    } else {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        chevron.style.transform = 'rotate(180deg)';
+        
+        // Log interaction (view)
+        const container = btn.closest('.rec-card').querySelector('.rec-feedback-container');
+        const codeFiliere = container.dataset.filiere;
+        logStudentInteraction(codeFiliere, 'view');
+    }
+}
+
+function logStudentInteraction(filiereCode, action) {
+    fetch("{{ route('student.interaction') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({
+            filiere_code: filiereCode,
+            action: action
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            console.log("Interaction enregistrée !", data.interaction);
+        }
+    })
+    .catch(err => {
+        console.error("Erreur réseau interaction :", err);
     });
 }
 </script>

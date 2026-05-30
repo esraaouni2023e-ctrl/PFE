@@ -53,6 +53,7 @@ class ScoreFGService
         ],
         'Informatique' => [
             'mg'   => 4,
+            'math' => 1.5,
             'algo' => 1.5,
             'sp'   => 0.5,
             'sti'  => 0.5,

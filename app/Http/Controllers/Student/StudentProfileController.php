@@ -62,7 +62,8 @@ class StudentProfileController extends Controller
                 'score_fg_updated_at' => now(),
             ]);
         } catch (\Exception $e) {
-            // Score FG non recalculé — non bloquant
+            \Illuminate\Support\Facades\Log::warning('Score FG non recalculé pour user #' . $user->id . ': ' . $e->getMessage());
+            session()->flash('warning', 'Profil mis à jour, mais le score FG n\'a pas pu être recalculé automatiquement. Vous pouvez réessayer via le pipeline d\'orientation.');
         }
 
         if (session('from_pipeline')) {

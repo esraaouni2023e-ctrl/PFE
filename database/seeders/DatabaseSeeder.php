@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             PsychometricQuestionsSeeder::class,
             FormationsSeeder::class,
             FiliereProfilesSeeder::class,
+            SiaePiTaxonomySeeder::class,
         ]);
     }
 }

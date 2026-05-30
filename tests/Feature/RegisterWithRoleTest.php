@@ -21,14 +21,18 @@ class RegisterWithRoleTest extends TestCase
             'email' => 'register-role@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
-            'role' => User::ROLE_COUNSELOR,
+            'role' => 'counselor',
+            'phone' => '+21699999999',
+            'specialty' => 'Orientation scolaire',
+            'experience_years' => 5,
+            'bio' => 'Ceci est une biographie professionnelle.',
         ]);
 
-        $response->assertRedirect(route('counselor.dashboard'));
+        $response->assertRedirect(route('counselor.pending'));
 
         $this->assertDatabaseHas('users', [
             'email' => 'register-role@example.com',
-            'role' => User::ROLE_COUNSELOR,
+            'role' => User::ROLE_COUNSELOR_PENDING,
         ]);
 
         $user = User::where('email', 'register-role@example.com')->first();

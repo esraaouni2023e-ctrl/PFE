@@ -252,7 +252,7 @@
                 Filières recommandées
             </p>
             <div class="pills-row">
-                <a href="{{ route('recommendations.show') }}" class="pill-filiere" style="text-decoration:none; display:inline-block;">
+                <a href="{{ route('student.recommendations') }}" class="pill-filiere" style="text-decoration:none; display:inline-block;">
                     ✨ Voir mes recommandations IA →
                 </a>
             </div>
@@ -284,7 +284,7 @@
         <p style="font-size:.95rem;color:var(--ink60);max-width:600px;margin:0 auto 1.5rem;line-height:1.6;">
             Notre nouveau moteur d'intelligence artificielle croise vos résultats psychométriques complets (RIASEC, Big Five, GATB, Schwartz) avec vos performances académiques pour vous proposer les meilleures filières d'orientation en Tunisie.
         </p>
-        <a href="{{ route('recommendations.show') }}" class="btn-fill" style="font-size: 1rem; padding: 1rem 2.5rem; box-shadow: 0 4px 20px rgba(212,98,42,0.4);">
+        <a href="{{ route('student.recommendations') }}" class="btn-fill" style="font-size: 1rem; padding: 1rem 2.5rem; box-shadow: 0 4px 20px rgba(212,98,42,0.4);">
             ✨ Générer mes recommandations IA
         </a>
     </div>

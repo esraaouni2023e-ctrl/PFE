@@ -500,9 +500,174 @@
     .db-matching-grid  { grid-template-columns: 1fr; }
     .db-hero-ctas      { flex-direction: column; }
 }
+
+/* ─── PORTFOLIO & ROADMAP STYLES ─── */
+.db-portfolio-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+.db-portfolio-card {
+    background: var(--paper);
+    border: 1px solid var(--ink10);
+    border-radius: var(--rl);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.db-portfolio-card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.db-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+.db-form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink60);
+}
+.db-portfolio-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+.db-portfolio-item {
+    border: 1px solid var(--ink10);
+    border-radius: var(--r);
+    padding: 1rem;
+    background: var(--cream);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: relative;
+    transition: all 0.25s;
+}
+.db-portfolio-item:hover {
+    border-color: var(--accent);
+}
+.db-portfolio-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.db-portfolio-item-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--ink);
+}
+.db-portfolio-item-meta {
+    font-size: 0.75rem;
+    color: var(--ink30);
+    margin-top: 0.15rem;
+}
+.db-portfolio-item-ai {
+    font-size: 0.8rem;
+    color: var(--ink60);
+    background: var(--paper);
+    padding: 0.75rem;
+    border-left: 2px solid var(--accent);
+    border-radius: 4px;
+    line-height: 1.5;
+}
+.db-portfolio-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+.db-portfolio-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: color-mix(in srgb, var(--accent2) 10%, transparent);
+    color: var(--accent2);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--rx);
+}
+.db-roadmap-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: relative;
+    padding-left: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+.db-roadmap-timeline::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--ink10);
+}
+.db-roadmap-step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.db-roadmap-step::before {
+    content: '';
+    position: absolute;
+    left: -19px;
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--paper);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+.db-roadmap-step-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+.db-roadmap-step-duration {
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 600;
+}
+.db-roadmap-step-desc {
+    font-size: 0.82rem;
+    color: var(--ink60);
+    line-height: 1.5;
+}
+@media (max-width: 900px) {
+    .db-portfolio-section {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
 
 <div class="db" id="dbRoot">
+
+    @if(session('success'))
+    <div class="rev vis" style="background: color-mix(in srgb, #10b981 10%, transparent); border: 1px solid color-mix(in srgb, #10b981 30%, transparent); color: #10b981; padding: 1rem; border-radius: var(--r); margin-bottom: 2rem; text-align: center; font-weight: 500;">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="rev vis" style="background: color-mix(in srgb, #ef4444 10%, transparent); border: 1px solid color-mix(in srgb, #ef4444 30%, transparent); color: #ef4444; padding: 1rem; border-radius: var(--r); margin-bottom: 2rem; text-align: center; font-weight: 500;">
+        {{ session('error') }}
+    </div>
+    @endif
 
 {{-- ════════════════════════════════
      § 1 · HERO
@@ -703,7 +868,7 @@
         </div>
 
         <!-- Card 2: Chatbot Nova -->
-        <div class="db-pc rev rev-d2" onclick="window.location='{{ route('student.orientation.nova') }}'">
+        <div class="db-pc rev rev-d2" onclick="if(window.openChat) { window.openChat(); } else { document.getElementById('floatingChat')?.click(); }">
             <div class="db-pc-icon">🤖</div>
             <h3 class="db-pc-title">Nova (Chatbot Gemini)</h3>
             <p class="db-pc-desc">
@@ -753,6 +918,19 @@
                 <div class="db-pc-arrow">→</div>
             </div>
         </div>
+
+        <!-- Card 6: Calculateur FG -->
+        <div class="db-pc rev rev-d6" onclick="window.location='{{ route('student.orientation.nova') }}'">
+            <div class="db-pc-icon">🧮</div>
+            <h3 class="db-pc-title">Calculateur FG</h3>
+            <p class="db-pc-desc">
+                Calculez officiellement votre Formule Globale (FG) selon votre section de baccalauréat.
+            </p>
+            <div class="db-pc-bottom">
+                <span class="db-pc-meta">Officiel</span>
+                <div class="db-pc-arrow">→</div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -766,14 +944,14 @@
             <h2 class="sh">Filières <em>recommandées</em> (Top 6)</h2>
         </div>
         <div>
-            <a href="{{ route('recommendations.show') }}" class="btn-ghost">Voir toutes les recommandations</a>
+            <a href="{{ route('student.recommendations') }}" class="btn-ghost">Voir toutes les recommandations</a>
         </div>
     </div>
 
     @if(!empty($predictions))
     <div class="db-matching-grid">
         @foreach($predictions as $p)
-        <div class="db-mcard rev rev-d{{ $loop->index + 1 }}" onclick="window.location='{{ route('recommendations.show') }}'">
+        <div class="db-mcard rev rev-d{{ $loop->index + 1 }}" onclick="window.location='{{ route('student.recommendations') }}'">
             <div class="db-mcard-head">
                 <div class="db-mcard-icon">{{ $p['icon'] ?? '🎯' }}</div>
                 <div>
@@ -800,6 +978,155 @@
         <p style="font-size:0.85rem; margin-top:0.4rem">Veuillez d'abord compléter votre profil académique et passer le test psychométrique.</p>
     </div>
     @endif
+</section>
+
+{{-- ════════════════════════════════
+     § PORTFOLIO & ROADMAP
+════════════════════════════════ --}}
+<section class="db-section rev" id="portfolio-roadmap-section">
+    <div class="db-section-header">
+        <div>
+            <p class="stag">Insertion professionnelle</p>
+            <h2 class="sh">Mon <em>Portfolio</em> & <em>Plan de Carrière</em></h2>
+        </div>
+    </div>
+
+    <div class="db-portfolio-section">
+        <!-- PORTFOLIO -->
+        <div class="db-portfolio-card rev rev-d1">
+            <div>
+                <h3 class="db-portfolio-card-title">💼 Mon Portfolio Numérique</h3>
+                <p style="font-size:0.85rem; color:var(--ink60)">
+                    Téléversez vos certifications et documents pour que notre IA en extraie automatiquement vos compétences clés.
+                </p>
+            </div>
+
+            <form action="{{ route('student.portfolio.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="db-form-group">
+                    <label class="db-form-label" for="title">Titre du document</label>
+                    <input type="text" name="title" id="title" class="input-field" placeholder="ex: Certificat Python, Projet Fin d'Études..." required>
+                </div>
+                <div class="db-form-group">
+                    <label class="db-form-label" for="type">Type de réalisation</label>
+                    <select name="type" id="type" class="input-field" required>
+                        <option value="document">Document Académique</option>
+                        <option value="certificate">Certification / Diplôme</option>
+                        <option value="project">Projet Personnel</option>
+                    </select>
+                </div>
+                <div class="db-form-group">
+                    <label class="db-form-label" for="file">Fichier (PDF ou image, max 5 Mo)</label>
+                    <input type="file" name="file" id="file" class="input-field" accept=".pdf,.jpg,.jpeg,.png" required>
+                </div>
+                <button type="submit" class="btn-fill" style="width:100%; justify-content:center; padding: 0.8rem;">
+                    Analyser & Ajouter au Portfolio
+                </button>
+            </form>
+
+            <hr style="border:none; border-top:1px solid var(--ink10)">
+
+            <h4 style="font-weight:700; font-size:0.95rem; color:var(--ink); margin-bottom:0.5rem">Mes Documents ({{ $portfolios->count() }})</h4>
+
+            @if($portfolios->isEmpty())
+                <div style="text-align:center; padding:2rem; background:var(--cream); border:1px dashed var(--ink10); border-radius:var(--r); color:var(--ink60); font-size:0.85rem">
+                    Aucun document téléversé. Commencez à construire votre portfolio !
+                </div>
+            @else
+                <div class="db-portfolio-list">
+                    @foreach($portfolios as $p)
+                        <div class="db-portfolio-item">
+                            <div class="db-portfolio-item-header">
+                                <div>
+                                    <span class="db-portfolio-item-title">{{ $p->title }}</span>
+                                    <div class="db-portfolio-item-meta">
+                                        Type : <span style="text-transform:capitalize; font-weight:600">{{ $p->type }}</span> · {{ $p->created_at->format('d/m/Y') }}
+                                    </div>
+                                </div>
+                                <form action="{{ route('student.portfolio.destroy', $p->id) }}" method="POST" onsubmit="return confirm('Supprimer ce document ?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem;" title="Supprimer">
+                                        🗑️
+                                    </button>
+                                </form>
+                            </div>
+
+                            @if($p->ai_analysis_summary)
+                                <div class="db-portfolio-item-ai">
+                                    <strong>Résumé IA :</strong> {{ $p->ai_analysis_summary }}
+                                </div>
+                            @endif
+
+                            @if(!empty($p->extracted_skills))
+                                <div class="db-portfolio-tags">
+                                    @foreach($p->extracted_skills as $skill)
+                                        <span class="db-portfolio-tag">{{ $skill }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div style="text-align:right">
+                                <a href="{{ asset('storage/' . $p->file_path) }}" target="_blank" style="font-size:0.8rem; font-weight:600; color:var(--accent); text-decoration:none;">
+                                    👁️ Voir le document
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
+        <!-- ROADMAP -->
+        <div class="db-portfolio-card rev rev-d2">
+            <div>
+                <h3 class="db-portfolio-card-title">🎯 Mon Plan de Carrière IA</h3>
+                <p style="font-size:0.85rem; color:var(--ink60)">
+                    Entrez le métier de vos rêves. Notre IA analysera votre profil pour tracer votre feuille de route personnalisée.
+                </p>
+            </div>
+
+            <form action="{{ route('student.roadmap.generate') }}" method="POST">
+                @csrf
+                <div class="db-form-group">
+                    <label class="db-form-label" for="target_job">Métier cible</label>
+                    <div style="display:flex; gap:0.5rem">
+                        <input type="text" name="target_job" id="target_job" class="input-field" placeholder="ex: Ingénieur DevOps, Data Scientist..." required style="flex:1">
+                        <button type="submit" class="btn-fill" style="padding: 0 1.5rem">Générer</button>
+                    </div>
+                </div>
+            </form>
+
+            <hr style="border:none; border-top:1px solid var(--ink10)">
+
+            @if($roadmaps->isEmpty())
+                <div style="text-align:center; padding:4rem 2rem; background:var(--cream); border:1px dashed var(--ink10); border-radius:var(--r); color:var(--ink60); font-size:0.85rem; flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                    <span>Aucune roadmap de carrière générée pour le moment.</span>
+                    <span style="font-size:0.8rem; margin-top:0.5rem; color:var(--ink30)">Saisissez un métier ci-dessus pour lancer la planification IA.</span>
+                </div>
+            @else
+                @php $latestRoadmap = $roadmaps->first(); @endphp
+                <div style="flex:1; display:flex; flex-direction:column; gap:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <h4 style="font-weight:700; font-size:1.05rem; color:var(--accent2)">
+                            Trajectoire : {{ $latestRoadmap->target_job }}
+                        </h4>
+                        <span class="pill pill-sage" style="font-size:0.7rem">Générée</span>
+                    </div>
+
+                    <div class="db-roadmap-timeline">
+                        @foreach($latestRoadmap->steps as $step)
+                            <div class="db-roadmap-step">
+                                <div class="db-roadmap-step-title">{{ $step['title'] }}</div>
+                                <div class="db-roadmap-step-duration">Durée estimée : {{ $step['duration'] }}</div>
+                                <div class="db-roadmap-step-desc">{{ $step['description'] }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
 </section>
 
 {{-- ════════════════════════════════

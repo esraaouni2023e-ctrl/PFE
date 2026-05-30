@@ -11,6 +11,8 @@ use App\Services\SiaepiRecommendationEngine;
 use App\Services\RIASEC\GatbCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
@@ -117,44 +119,21 @@ class StudentController extends Controller
 
             // Extraction des scores réels GATB (v5.0 : GATB_G/V/N/S + rétrocompat G/V/Num/Sp)
             $sessionId = $profilRiasec->test_session_id;
-            if ($sessionId) {
-                // Utilise les colonnes calculées si disponibles
-                $gScoreG = $profilRiasec->score_gatb_g ?? null;
-                $gScoreN = $profilRiasec->score_gatb_n ?? null;
+            $resolvedGatb = $this->resolveGatbScores($sessionId, $profilRiasec);
+            $gScoreG = $resolvedGatb['GATB_G'] ?? 0;
+            $gScoreN = $resolvedGatb['GATB_N'] ?? 0;
 
-                if (is_null($gScoreG)) {
-                    // Recalcul à la volée (rétrocompatibilité)
-                    $rawGatbAnswers = \App\Models\AnswerRiasec::where('test_session_id', $sessionId)
-                        ->whereHas('question', function ($q) {
-                            $q->whereIn('dimension', ['GATB_G', 'GATB_V', 'GATB_N', 'GATB_S', 'G', 'V', 'Num', 'Sp']);
-                        })
-                        ->with('question')
-                        ->get()
-                        ->map(fn ($ans) => [
-                            'dimension' => $ans->question->dimension,
-                            'score'     => $ans->valeur,
-                        ])->toArray();
-
-                    if (!empty($rawGatbAnswers)) {
-                        $gatbCalc = new \App\Services\RIASEC\GatbCalculator();
-                        $gScores  = $gatbCalc->calculateScores($rawGatbAnswers);
-                        $gScoreG  = $gScores['GATB_G'] ?? 0;
-                        $gScoreN  = $gScores['GATB_N'] ?? 0;
-                    }
-                }
-
-                if ($gScoreG > 0 || $gScoreN > 0) {
-                    $dynamicSkills[] = [
-                        'label' => 'Logique GATB (G)',
-                        'val'   => min(100, (int) $gScoreG),
-                        'color' => 'var(--accent2)'
-                    ];
-                    $dynamicSkills[] = [
-                        'label' => 'Calcul GATB (N)',
-                        'val'   => min(100, (int) $gScoreN),
-                        'color' => 'var(--accent)'
-                    ];
-                }
+            if ($gScoreG > 0 || $gScoreN > 0) {
+                $dynamicSkills[] = [
+                    'label' => 'Logique GATB (G)',
+                    'val'   => min(100, (int) $gScoreG),
+                    'color' => 'var(--accent2)'
+                ];
+                $dynamicSkills[] = [
+                    'label' => 'Calcul GATB (N)',
+                    'val'   => min(100, (int) $gScoreN),
+                    'color' => 'var(--accent)'
+                ];
             }
         } else {
             $academicProgress = $profile ? ($toPercent($profile->progression) ?? 0) : 0;
@@ -217,39 +196,18 @@ class StudentController extends Controller
             $textoKeywords = $this->buildTextoFromAnswers($sessionId, $codeHolland, $sectionBac);
 
             // v5.0 : Utilise les colonnes pré-calculées du profil en priorité
-            $gatbScores = [
-                'GATB_G' => $profilRiasec->score_gatb_g ?? 0,
-                'GATB_V' => $profilRiasec->score_gatb_v ?? 0,
-                'GATB_N' => $profilRiasec->score_gatb_n ?? 0,
-                'GATB_S' => $profilRiasec->score_gatb_s ?? 0,
-                'TOTAL'  => 0,
-            ];
-            if (array_sum(array_values($gatbScores)) === 0 && $sessionId) {
-                // Recalcul si colonnes vides (ancienne session)
-                $rawGatbAnswers = \App\Models\AnswerRiasec::where('test_session_id', $sessionId)
-                    ->whereHas('question', function ($q) {
-                        $q->whereIn('dimension', ['GATB_G', 'GATB_V', 'GATB_N', 'GATB_S', 'G', 'V', 'Num', 'Sp']);
-                    })
-                    ->with('question')
-                    ->get()
-                    ->map(fn ($ans) => [
-                        'dimension' => $ans->question->dimension,
-                        'score'     => $ans->valeur,
-                    ])->toArray();
-
-                if (!empty($rawGatbAnswers)) {
-                    $gatbCalc   = new \App\Services\RIASEC\GatbCalculator();
-                    $gatbScores = $gatbCalc->calculateScores($rawGatbAnswers);
-                }
-            }
+            $gatbScores = $this->resolveGatbScores($sessionId, $profilRiasec);
             $gatbScores['TOTAL'] = round(
                 (($gatbScores['GATB_G'] ?? 0) + ($gatbScores['GATB_V'] ?? 0) +
                  ($gatbScores['GATB_N'] ?? 0) + ($gatbScores['GATB_S'] ?? 0)) / 4, 1
             );
 
+            $adaptiveEngine = new \App\Services\RIASEC\AdaptiveTestEngine();
+            $catState = $adaptiveEngine->getSessionState($sessionId);
+
             $profilEtudiant = [
                 'id'                       => $user->id,
-                'sem'                      => $profilRiasec ? (1.0 - (float)$profilRiasec->confidence_score) : 0.30,
+                'sem'                      => $profilRiasec ? (1.0 - ((float)$profilRiasec->confidence_score > 1.0 ? (float)$profilRiasec->confidence_score / 100.0 : (float)$profilRiasec->confidence_score)) : 0.30,
                 'score_fg'                 => (float) $scoreFg,
                 'section_bac'              => $sectionBac,
                 'filiere_etudiant_actuelle'=> $sectionBac,
@@ -257,6 +215,21 @@ class StudentController extends Controller
                 'vecteur_psychometrique'   => $vecteurRiasec,
                 'gatb_scores'              => $gatbScores,
                 'code_holland'             => $codeHolland,
+                'notes_matieres'           => $profile?->notes_matieres ?? [],
+                'interests' => [
+                    'MED'      => $catState['dimensions']['MED']['score'] ?? 0.0,
+                    'ENG'      => $catState['dimensions']['ENG']['score'] ?? 0.0,
+                    'INFO'     => $catState['dimensions']['INFO']['score'] ?? 0.0,
+                    'DROIT'    => $catState['dimensions']['DROIT']['score'] ?? 0.0,
+                    'ECO'      => $catState['dimensions']['ECO']['score'] ?? 0.0,
+                    'EDU'      => $catState['dimensions']['EDU']['score'] ?? 0.0,
+                    'ART'      => $catState['dimensions']['ART']['score'] ?? 0.0,
+                    'LTR'      => $catState['dimensions']['LTR']['score'] ?? 0.0,
+                    'SOC'      => $catState['dimensions']['SOC']['score'] ?? 0.0,
+                    'SPO'      => $catState['dimensions']['SPO']['score'] ?? 0.0,
+                    'ARCHI'    => $catState['dimensions']['ARCHI']['score'] ?? 0.0,
+                    'declared' => $profile?->interests ?? '',
+                ]
             ];
 
             // On demande le Top 6 au moteur SIAEPI PHP-natif
@@ -349,29 +322,7 @@ class StudentController extends Controller
         $sessionId  = session('riasec_session_id') ?? $profilRiasec?->test_session_id;
 
         // Priorité aux colonnes pré-calculées du profil
-        $gatbScores = [
-            'GATB_G' => $profilRiasec?->score_gatb_g ?? 0,
-            'GATB_V' => $profilRiasec?->score_gatb_v ?? 0,
-            'GATB_N' => $profilRiasec?->score_gatb_n ?? 0,
-            'GATB_S' => $profilRiasec?->score_gatb_s ?? 0,
-        ];
-
-        if (array_sum(array_values($gatbScores)) === 0 && $sessionId) {
-            $rawGatbAnswers = AnswerRiasec::where('test_session_id', $sessionId)
-                ->whereHas('question', fn ($q) => $q->whereIn('dimension', [
-                    'GATB_G', 'GATB_V', 'GATB_N', 'GATB_S', 'G', 'V', 'Num', 'Sp'
-                ]))
-                ->with('question')->get()
-                ->map(fn ($ans) => [
-                    'dimension' => $ans->question->dimension,
-                    'score'     => $ans->valeur,
-                ])->toArray();
-
-            if (!empty($rawGatbAnswers)) {
-                $gatbCalc   = new GatbCalculator();
-                $gatbScores = $gatbCalc->calculateScores($rawGatbAnswers);
-            }
-        }
+        $gatbScores = $this->resolveGatbScores($sessionId, $profilRiasec);
 
         // ── 4. Appel au moteur SIAEPI PHP-natif ─────────────────────────
         $engine = new SiaepiRecommendationEngine();
@@ -382,13 +333,14 @@ class StudentController extends Controller
         
         $fullProfile = [
             'id'                     => $userId,
-            'sem'                    => $profilRiasec ? (1.0 - (float)$profilRiasec->confidence_score) : 0.30,
+            'sem'                    => $profilRiasec ? (1.0 - ((float)$profilRiasec->confidence_score > 1.0 ? (float)$profilRiasec->confidence_score / 100.0 : (float)$profilRiasec->confidence_score)) : 0.30,
             'score_fg'               => $scoreFg,
             'section_bac'            => $sectionBac,
             'filiere_etudiant_actuelle' => $sectionBac,
             'vecteur_psychometrique' => $vecteurRiasec,
             'gatb_scores'            => $gatbScores,
             'code_holland'           => $codeHolland,
+            'notes_matieres'         => $academicProfile?->notes_matieres ?? [],
             // SIAEPI v4.0 : Dimensions composites
             'big_five' => [
                 // v5.0 : clés B5_ en priorité, fallback ancienne notation
@@ -405,21 +357,22 @@ class StudentController extends Controller
                 'Aut' => $catState['dimensions']['Aut']['score'] ?? 0.0,
             ],
             'interests' => [
-                'MED'   => $catState['dimensions']['MED']['score'] ?? 0.0,
-                'ENG'   => $catState['dimensions']['ENG']['score'] ?? 0.0,
-                'INFO'  => $catState['dimensions']['INFO']['score'] ?? 0.0,
-                'DROIT' => $catState['dimensions']['DROIT']['score'] ?? 0.0,
-                'ECO'   => $catState['dimensions']['ECO']['score'] ?? 0.0,
-                'EDU'   => $catState['dimensions']['EDU']['score'] ?? 0.0,
-                'ART'   => $catState['dimensions']['ART']['score'] ?? 0.0,
-                'LTR'   => $catState['dimensions']['LTR']['score'] ?? 0.0,
-                'SOC'   => $catState['dimensions']['SOC']['score'] ?? 0.0,
-                'SPO'   => $catState['dimensions']['SPO']['score'] ?? 0.0,
-                'ARCHI' => $catState['dimensions']['ARCHI']['score'] ?? 0.0,
+                'MED'      => $catState['dimensions']['MED']['score'] ?? 0.0,
+                'ENG'      => $catState['dimensions']['ENG']['score'] ?? 0.0,
+                'INFO'     => $catState['dimensions']['INFO']['score'] ?? 0.0,
+                'DROIT'    => $catState['dimensions']['DROIT']['score'] ?? 0.0,
+                'ECO'      => $catState['dimensions']['ECO']['score'] ?? 0.0,
+                'EDU'      => $catState['dimensions']['EDU']['score'] ?? 0.0,
+                'ART'      => $catState['dimensions']['ART']['score'] ?? 0.0,
+                'LTR'      => $catState['dimensions']['LTR']['score'] ?? 0.0,
+                'SOC'      => $catState['dimensions']['SOC']['score'] ?? 0.0,
+                'SPO'      => $catState['dimensions']['SPO']['score'] ?? 0.0,
+                'ARCHI'    => $catState['dimensions']['ARCHI']['score'] ?? 0.0,
+                'declared' => $academicProfile?->interests ?? '',
             ]
         ];
 
-        $result = $engine->recommend($fullProfile, (int) $request->input('top_n', 12));
+        $result = $engine->recommend($fullProfile, (int) $request->input('top_n', 8));
 
         if (!isset($result['error']) && !empty($result['recommandations'])) {
             // Sauvegarde dans la table recommendations
@@ -448,9 +401,12 @@ class StudentController extends Controller
         }
 
         // ── 5. Remap au format attendu par la vue ────────────────────────
-        if (!isset($result['error']) && !empty($result['recommandations'])) {
+        if (!isset($result['error']) && (!empty($result['recommandations']) || !empty($result['ambitieuses']))) {
             $recommendations = [
                 'recommandations'  => $result['recommandations'],
+                'accessibles'      => $result['accessibles'] ?? [],
+                'securite'         => $result['securite'] ?? [],
+                'ambitieuses'      => $result['ambitieuses'] ?? [],
                 'diagnostic'       => $result['diagnostic'],
                 'gap_analysis'     => $result['gap_analysis'] ?? [],
                 'resume'           => $result['diagnostic']['diagnostic'] ?? '',
@@ -553,28 +509,122 @@ class StudentController extends Controller
     public function storeFeedback(Request $request)
     {
         $validated = $request->validate([
-            'filiere_code' => 'required|string',
+            'filiere_code' => 'required|string|max:50|exists:filieres,code_filiere',
             'rating' => 'required|integer|min:1|max:5',
             'is_relevant' => 'required|boolean',
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        $feedback = \App\Models\RecommendationFeedback::updateOrCreate(
-            [
-                'user_id' => auth()->id(),
-                'filiere_code' => $validated['filiere_code'],
-            ],
-            [
-                'rating' => $validated['rating'],
-                'is_relevant' => $validated['is_relevant'],
-                'comment' => $validated['comment'] ?? null,
-            ]
-        );
+        try {
+            $feedback = \App\Models\RecommendationFeedback::updateOrCreate(
+                [
+                    'user_id' => auth()->id(),
+                    'filiere_code' => $validated['filiere_code'],
+                ],
+                [
+                    'rating' => $validated['rating'],
+                    'is_relevant' => $validated['is_relevant'],
+                    'comment' => $validated['comment'] ?? null,
+                ]
+            );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Feedback enregistré avec succès !',
-            'feedback' => $feedback
+            return response()->json([
+                'success' => true,
+                'message' => 'Feedback enregistré avec succès !',
+                'feedback' => $feedback
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Erreur enregistrement feedback pour user " . auth()->id() . ": " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible d\'enregistrer le feedback.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Enregistre une interaction d'un étudiant avec une filière (clic, sauvegarde, etc.).
+     */
+    public function storeInteraction(Request $request)
+    {
+        $validated = $request->validate([
+            'filiere_code' => 'required|string|max:50|exists:filieres,code_filiere',
+            'action' => 'required|string|in:view,save,ignore',
         ]);
+
+        try {
+            $userId = auth()->id();
+            
+            // Calcul du poids
+            $weight = match($validated['action']) {
+                'save' => 0.08,
+                'view' => 0.03,
+                'ignore' => -0.10,
+                default => 0.0,
+            };
+
+            $interaction = \App\Models\StudentInteraction::create([
+                'user_id' => $userId,
+                'filiere_code' => $validated['filiere_code'],
+                'action' => $validated['action'],
+                'weight' => $weight,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Interaction enregistrée avec succès !',
+                'interaction' => $interaction
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Erreur enregistrement interaction pour user " . auth()->id() . ": " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible d\'enregistrer l\'interaction.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Resolve and recalculate GATB scores if missing from profile.
+     */
+    private function resolveGatbScores(?string $sessionId, ?ProfileRiasec $profilRiasec): array
+    {
+        $gatbScores = [
+            'GATB_G' => $profilRiasec?->score_gatb_g ?? 0,
+            'GATB_V' => $profilRiasec?->score_gatb_v ?? 0,
+            'GATB_N' => $profilRiasec?->score_gatb_n ?? 0,
+            'GATB_S' => $profilRiasec?->score_gatb_s ?? 0,
+        ];
+
+        $sum = (float)($gatbScores['GATB_G'] ?? 0) + 
+               (float)($gatbScores['GATB_V'] ?? 0) + 
+               (float)($gatbScores['GATB_N'] ?? 0) + 
+               (float)($gatbScores['GATB_S'] ?? 0);
+
+        if ($sum === 0.0 && $sessionId) {
+            $rawGatbAnswers = AnswerRiasec::where('test_session_id', $sessionId)
+                ->whereHas('question', function ($q) {
+                    $q->whereIn('dimension', ['GATB_G', 'GATB_V', 'GATB_N', 'GATB_S', 'G', 'V', 'Num', 'Sp']);
+                })
+                ->with('question')
+                ->get()
+                ->map(fn ($ans) => [
+                    'dimension' => $ans->question->dimension,
+                    'score'     => $ans->valeur,
+                ])->toArray();
+
+            if (!empty($rawGatbAnswers)) {
+                $gatbCalc = new GatbCalculator();
+                $calculated = $gatbCalc->calculateScores($rawGatbAnswers);
+                $gatbScores = [
+                    'GATB_G' => $calculated['GATB_G'] ?? 0,
+                    'GATB_V' => $calculated['GATB_V'] ?? 0,
+                    'GATB_N' => $calculated['GATB_N'] ?? 0,
+                    'GATB_S' => $calculated['GATB_S'] ?? 0,
+                ];
+            }
+        }
+
+        return $gatbScores;
     }
 }

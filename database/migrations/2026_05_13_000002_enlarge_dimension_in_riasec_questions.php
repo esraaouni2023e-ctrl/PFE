@@ -8,10 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('riasec_questions', function (Blueprint $table) {
-            // Agrandir dimension pour accepter les codes multi-blocs (ex: Num, Sp, Sec, Ach...)
-            $table->string('dimension', 10)->change();
-        });
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('riasec_questions', function (Blueprint $table) {
+                // Agrandir dimension pour accepter les codes multi-blocs (ex: Num, Sp, Sec, Ach...)
+                $table->string('dimension', 10)->change();
+            });
+        }
     }
 
     public function down(): void

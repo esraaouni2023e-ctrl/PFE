@@ -12,6 +12,7 @@ use App\Services\Cv\PdfGeneratorService;
 use App\Services\Cv\DocxGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CvBuilderController extends Controller
@@ -86,20 +87,22 @@ class CvBuilderController extends Controller
 
         $validated = $this->validateCvData($request);
 
-        $cvProfile->update([
-            'title'         => $validated['title'],
-            'template_name' => $validated['template_name'] ?? 'modern',
-            'summary'       => $validated['summary'] ?? null,
-            'target_job'    => $validated['target_job'] ?? null,
-        ]);
+        DB::transaction(function () use ($cvProfile, $validated) {
+            $cvProfile->update([
+                'title'         => $validated['title'],
+                'template_name' => $validated['template_name'] ?? 'modern',
+                'summary'       => $validated['summary'] ?? null,
+                'target_job'    => $validated['target_job'] ?? null,
+            ]);
 
-        // Supprimer les anciennes relations et recréer
-        $cvProfile->experiences()->delete();
-        $cvProfile->educations()->delete();
-        $cvProfile->skills()->delete();
-        $cvProfile->languages()->delete();
+            // Supprimer les anciennes relations et recréer
+            $cvProfile->experiences()->delete();
+            $cvProfile->educations()->delete();
+            $cvProfile->skills()->delete();
+            $cvProfile->languages()->delete();
 
-        $this->syncRelations($cvProfile, $validated);
+            $this->syncRelations($cvProfile, $validated);
+        });
 
         return redirect()
             ->route('student.cv.edit', $cvProfile)
@@ -242,6 +245,7 @@ class CvBuilderController extends Controller
             'experiences.*.end_date'      => 'nullable|date',
             'experiences.*.is_current'    => 'nullable|boolean',
             'experiences.*.description'   => 'nullable|string|max:3000',
+            'experiences.*.order'         => 'nullable|integer',
 
             // Formations
             'educations'                  => 'nullable|array|max:10',
@@ -252,16 +256,19 @@ class CvBuilderController extends Controller
             'educations.*.end_date'       => 'nullable|date',
             'educations.*.is_current'     => 'nullable|boolean',
             'educations.*.description'    => 'nullable|string|max:2000',
+            'educations.*.order'          => 'nullable|integer',
 
             // Compétences
             'skills'                      => 'nullable|array|max:30',
             'skills.*.name'              => 'required_with:skills|string|max:100',
             'skills.*.level'             => 'nullable|string|in:Débutant,Intermédiaire,Avancé,Expert',
+            'skills.*.order'             => 'nullable|integer',
 
             // Langues
             'languages'                   => 'nullable|array|max:10',
             'languages.*.name'           => 'required_with:languages|string|max:100',
             'languages.*.level'          => 'nullable|string|max:50',
+            'languages.*.order'          => 'nullable|integer',
         ], [
             'title.required'                    => 'Le titre du CV est obligatoire.',
             'experiences.*.company.required_with' => 'Le nom de l\'entreprise est requis pour chaque expérience.',

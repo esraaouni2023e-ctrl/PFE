@@ -82,6 +82,20 @@ class FiliereProfilesSeeder extends Seeder
             $difficulty = $sdo > 0 ? (int) round(($sdo / 200) * 10) : 5;
             $stress = ($domain === 'sante' || $domain === 'technique') ? 8 : 5;
 
+            // Market indicators based on Tunisian context (ANETI / INS Tunisia, May 2026)
+            $marketDataByDomain = [
+                'informatique' => ['demand' => 0.95, 'salary' => 0.90, 'internships' => 0.95],
+                'sante'        => ['demand' => 0.90, 'salary' => 0.85, 'internships' => 0.90],
+                'technique'    => ['demand' => 0.85, 'salary' => 0.80, 'internships' => 0.85],
+                'sciences'     => ['demand' => 0.70, 'salary' => 0.75, 'internships' => 0.75],
+                'economie'     => ['demand' => 0.80, 'salary' => 0.75, 'internships' => 0.80],
+                'lettres'      => ['demand' => 0.50, 'salary' => 0.55, 'internships' => 0.60],
+                'social'       => ['demand' => 0.60, 'salary' => 0.60, 'internships' => 0.70],
+                'arts'         => ['demand' => 0.55, 'salary' => 0.50, 'internships' => 0.65],
+                'default'      => ['demand' => 0.60, 'salary' => 0.60, 'internships' => 0.65],
+            ];
+            $m = $marketDataByDomain[$domain] ?? $marketDataByDomain['default'];
+
             FiliereProfile::updateOrCreate(
                 ['code_filiere' => $code],
                 [
@@ -103,6 +117,13 @@ class FiliereProfilesSeeder extends Seeder
                     'employability_index' => $empIdx,
                     'difficulty_level' => $difficulty,
                     'stress_tolerance' => $stress,
+
+                    'job_demand' => $m['demand'],
+                    'salary' => $m['salary'],
+                    'internships' => $m['internships'],
+                    'market_source' => 'ANETI / INS Tunisie',
+                    'market_date' => '2026-05',
+                    'market_region' => 'Tunisie',
                     
                     'big5_openness' => $b5['O'] ?? 0.0,
                     'big5_conscientiousness' => $b5['C'] ?? 0.0,

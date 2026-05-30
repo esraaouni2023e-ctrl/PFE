@@ -106,14 +106,20 @@
                                 <div><span class="fs-badge fs-badge-green" id="fs-niveau-badge">—</span></div>
                             </div>
                             <div class="fs-label" style="margin-bottom:.5rem">Formations accessibles</div>
-                            <div id="fs-formations-list"></div>
+                            <div id="fs-formations-list" style="margin-bottom: 1.5rem;"></div>
+
+                            <div class="fs-label" style="margin-bottom:.5rem; color:var(--accent2)">🎯 Conseils d'optimisation proactifs</div>
+                            <div id="fs-advices-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
                         </div>
                         @endif
                     </div>
                 </div>
                 @if($compatibilite['has_profile'] && $historiqueRecent->isNotEmpty())
                 <div class="fs-panel" style="margin-top:1.25rem">
-                    <div class="fs-panel-head"><h2>🕐 Simulations récentes</h2></div>
+                    <div class="fs-panel-head" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                        <h2>🕐 Simulations récentes</h2>
+                        <a href="{{ route('student.whatif.historique') }}" style="font-size:0.75rem; color:var(--accent); font-weight:600; text-decoration:none;">Historique complet →</a>
+                    </div>
                     <div class="fs-panel-body" style="padding:1rem">
                         @foreach($historiqueRecent as $h)
                         <div class="fs-hist-item">

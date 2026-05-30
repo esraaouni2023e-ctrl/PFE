@@ -17,13 +17,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('riasec_questions', function (Blueprint $table) {
-            $table->enum('categorie', [
-                'loisirs',
-                'preferences_professionnelles',
-                'qualites_personnelles',
-            ])->default('loisirs')
-              ->after('dimension')
-              ->comment('Famille thématique de la question');
+            if (Schema::getConnection()->getDriverName() === 'sqlite') {
+                $table->string('categorie', 50)->default('loisirs')
+                      ->after('dimension');
+            } else {
+                $table->enum('categorie', [
+                    'loisirs',
+                    'preferences_professionnelles',
+                    'qualites_personnelles',
+                ])->default('loisirs')
+                  ->after('dimension')
+                  ->comment('Famille thématique de la question');
+            }
 
             $table->index(['dimension', 'categorie'], 'idx_dim_cat');
         });

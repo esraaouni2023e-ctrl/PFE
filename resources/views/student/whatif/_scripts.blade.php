@@ -64,11 +64,33 @@ function renderNotesResult(d){
     document.getElementById('fs-score-val').style.color=c;
     document.getElementById('fs-niveau-badge').textContent=d.niveau.toUpperCase();
     document.getElementById('fs-niveau-badge').className='fs-badge '+(d.niveau==='excellent'?'fs-badge-green':d.niveau==='bon'?'fs-badge-gold':'fs-badge-red');
+    
     const list=document.getElementById('fs-formations-list');list.innerHTML='';
-    if(!d.formations?.length){list.innerHTML='<div style="text-align:center;padding:1rem;color:var(--ink30);font-size:.82rem">Aucune formation accessible.</div>';return;}
-    d.formations.forEach(f=>{
-        list.innerHTML+=`<div class="fs-card"><div class="fs-card-row"><div class="fs-card-icon">${f.icon||'📘'}</div><div class="fs-card-info"><div class="fs-card-title">${f.nom}</div><div class="fs-card-meta">${f.etablissement||''} · ${f.niveau||''} · ${f.duree||''}</div></div><div class="fs-card-val">${f.score_matching||0}%</div></div></div>`;
-    });
+    if(!d.formations?.length){list.innerHTML='<div style="text-align:center;padding:1rem;color:var(--ink30);font-size:.82rem">Aucune formation accessible.</div>';}
+    else {
+        d.formations.forEach(f=>{
+            list.innerHTML+=`<div class="fs-card"><div class="fs-card-row"><div class="fs-card-icon">${f.icon||'📘'}</div><div class="fs-card-info"><div class="fs-card-title">${f.nom}</div><div class="fs-card-meta">${f.etablissement||''} · ${f.niveau||''} · ${f.duree||''}</div></div><div class="fs-card-val">${f.score_matching||0}%</div></div></div>`;
+        });
+    }
+
+    const advicesList=document.getElementById('fs-advices-list');advicesList.innerHTML='';
+    if(!d.optimization_advices?.length){
+        advicesList.innerHTML='<div style="text-align:center;padding:1rem;color:var(--ink30);font-size:.82rem">Aucun conseil d\'optimisation disponible. Ton score actuel est peut-être déjà supérieur ou très proche de toutes les filières disponibles.</div>';
+    } else {
+        d.optimization_advices.forEach(adv=>{
+            advicesList.innerHTML+=`
+            <div class="fs-card" style="border-left:3px solid var(--accent2); background:color-mix(in srgb, var(--accent2) 4%, transparent); padding: 0.85rem; display: block; height: auto; text-align: left;">
+                <div style="font-size:0.76rem; font-weight:500; color:var(--ink); line-height:1.55;">
+                    💡 ${adv.text}
+                </div>
+                <div style="font-size:0.68rem; color:var(--ink40); font-weight:600; margin-top:0.35rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                    <span>Cible : <strong>${adv.filiere}</strong></span>
+                    <span>·</span>
+                    <span>Admission : <strong>${adv.prob_before}% ➜ ${adv.prob_after}%</strong></span>
+                </div>
+            </div>`;
+        });
+    }
 }
 
 // ── Module 2: Changement Spécialité ──

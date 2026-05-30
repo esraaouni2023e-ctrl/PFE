@@ -13,13 +13,13 @@ class FilieresSeeder extends Seeder
     public function run(): void
     {
         $mapping = [
-            'ECO_Filieres.xlsx'              => 'Économie et Gestion',
-            'EXP_Filieres.xlsx'              => 'Sciences Expérimentales',
-            'filieres_data.xlsx'             => 'Mathématiques et Appliquées',
-            'INFO_Filieres.xlsx'             => 'Informatique',
-            'TECH_Filieres.xlsx'             => 'Technologie',
-            'SPORT_Filieres.xlsx'            => 'Sport',
-            'donnees_filiere_enrichies.xlsx' => 'Lettres et Sciences Humaines',
+            'ECO_Filieres.xlsx'              => ['domaine' => 'Économie et Gestion', 'type_bac' => 'Économie et gestion'],
+            'EXP_Filieres.xlsx'              => ['domaine' => 'Sciences Expérimentales', 'type_bac' => 'Sciences expérimentales'],
+            'filieres_data.xlsx'             => ['domaine' => 'Mathématiques et Appliquées', 'type_bac' => 'Mathématiques'],
+            'INFO_Filieres.xlsx'             => ['domaine' => 'Informatique', 'type_bac' => 'Informatique'],
+            'TECH_Filieres.xlsx'             => ['domaine' => 'Technique', 'type_bac' => 'Technique'],
+            'SPORT_Filieres.xlsx'            => ['domaine' => 'Sport', 'type_bac' => 'Sport'],
+            'donnees_filiere_enrichies.xlsx' => ['domaine' => 'Lettres et Sciences Humaines', 'type_bac' => 'Lettres'],
         ];
 
         $directory = storage_path('app/excels');
@@ -30,8 +30,10 @@ class FilieresSeeder extends Seeder
             return;
         }
 
-        foreach ($mapping as $filename => $domaine) {
+        foreach ($mapping as $filename => $info) {
             $path = $directory . '/' . $filename;
+            $domaine = $info['domaine'];
+            $typeBac = $info['type_bac'];
 
             if (File::exists($path)) {
                 $this->command->info("Importing $filename ($domaine)...");
@@ -58,6 +60,10 @@ class FilieresSeeder extends Seeder
                                 'sdo_2024'      => $this->cleanDecimal($row[5]),
                                 'sdo_2025'      => $this->cleanDecimal($row[6]),
                                 'domaine'       => $domaine,
+                                'code_riasec'   => !empty($row[7]) ? trim($row[7]) : null,
+                                'taux_employabilite' => !empty($row[8]) ? trim($row[8]) : null,
+                                'croissance_domaine' => !empty($row[9]) ? trim($row[9]) : null,
+                                'type_bac'      => $typeBac,
                                 'g_requis'      => $gatbDefaults['G'],
                                 'v_requis'      => $gatbDefaults['V'],
                                 'n_requis'      => $gatbDefaults['N'],

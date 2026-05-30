@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('riasec_answers', function (Blueprint $table) {
-            $table->unsignedInteger('temps_reponse_ms')->nullable()->change();
-        });
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('riasec_answers', function (Blueprint $table) {
+                $table->unsignedInteger('temps_reponse_ms')->nullable()->change();
+            });
+        }
     }
 
     /**

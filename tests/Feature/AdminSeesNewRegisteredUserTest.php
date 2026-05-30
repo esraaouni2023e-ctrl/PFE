@@ -36,6 +36,6 @@ class AdminSeesNewRegisteredUserTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee($email);
-        $response->assertSee('New');
+        $response->assertSee('Nouveau');
     }
 }

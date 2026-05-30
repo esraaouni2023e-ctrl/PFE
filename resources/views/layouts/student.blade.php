@@ -476,6 +476,92 @@
 
     <!-- ═══ PAGE CONTENT ═══ -->
     <div class="page-content">
+        @auth
+            @if(auth()->user()->role === 'student')
+                @php
+                    $u = auth()->user();
+                    $prof = $u->profile;
+                    $hasAcad = $prof && ($prof->score_fg || $prof->is_academique_complet);
+                    $hasRia = \App\Models\ProfileRiasec::pourUser($u->id)->complets()->exists();
+                    $hasRecs = \App\Models\Recommendation::where('user_id', $u->id)->where('source', 'SIAEPI_v5')->exists();
+                    
+                    $step1Done = (bool)$hasAcad;
+                    $step2Done = (bool)$hasRia;
+                    $step3Done = (bool)$hasRecs;
+                    
+                    $progressPercent = 0;
+                    if ($step1Done) $progressPercent += 33;
+                    if ($step2Done) $progressPercent += 33;
+                    if ($step3Done) $progressPercent += 34;
+                @endphp
+                
+                @if($progressPercent < 100)
+                    <div class="pipeline-progress-banner" style="max-width:1300px; margin: 1.5rem auto 0.5rem; padding: 0 2.5rem;">
+                        <div style="background:var(--paper); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap; box-shadow: var(--shadow-card); position: relative; overflow: hidden;">
+                            {{-- Background line --}}
+                            <div style="position: absolute; bottom: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent3)); width: {{ $progressPercent }}%; transition: width 0.8s ease;"></div>
+                            
+                            <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 280px;">
+                                <div style="width: 44px; height: 44px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 10%, transparent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                                    🎯
+                                </div>
+                                <div>
+                                    <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--ink); margin-bottom: 0.15rem;">Progression de ton orientation</h4>
+                                    <p style="font-size: 0.76rem; color: var(--ink60);">
+                                        @if(!$step1Done)
+                                            Étape 1 : Renseigne tes notes pour calculer ton score Formule Globale (FG).
+                                        @elseif(!$step2Done)
+                                            Étape 2 : Passe le test RIASEC pour déterminer tes intérêts et aptitudes GATB.
+                                        @else
+                                            Étape 3 : Consulte tes recommandations personnalisées de filières.
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Steps indicator --}}
+                            <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                                {{-- Step 1 --}}
+                                <div style="display: flex; align-items: center; gap: 0.5rem; opacity: {{ $step1Done ? '1' : '0.65' }};">
+                                    <div style="width: 22px; height: 22px; border-radius: 50%; background: {{ $step1Done ? 'var(--success)' : 'var(--ink10)' }}; color: {{ $step1Done ? '#fff' : 'var(--ink60)' }}; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">
+                                        {!! $step1Done ? '✓' : '1' !!}
+                                    </div>
+                                    <span style="font-size: 0.78rem; font-weight: 600; color: var(--ink);">Profil académique</span>
+                                </div>
+                                
+                                {{-- Step 2 --}}
+                                <div style="display: flex; align-items: center; gap: 0.5rem; opacity: {{ $step2Done ? '1' : ($step1Done ? '1' : '0.4') }};">
+                                    <div style="width: 22px; height: 22px; border-radius: 50%; background: {{ $step2Done ? 'var(--success)' : ($step1Done ? 'var(--accent)' : 'var(--ink10)') }}; color: {{ $step2Done || $step1Done ? '#fff' : 'var(--ink60)' }}; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">
+                                        {!! $step2Done ? '✓' : '2' !!}
+                                    </div>
+                                    <span style="font-size: 0.78rem; font-weight: 600; color: var(--ink);">Test RIASEC</span>
+                                </div>
+                                
+                                {{-- Step 3 --}}
+                                <div style="display: flex; align-items: center; gap: 0.5rem; opacity: {{ $step3Done ? '1' : ($step2Done ? '1' : '0.4') }};">
+                                    <div style="width: 22px; height: 22px; border-radius: 50%; background: {{ $step3Done ? 'var(--success)' : ($step2Done ? 'var(--accent)' : 'var(--ink10)') }}; color: {{ $step3Done || $step2Done ? '#fff' : 'var(--ink60)' }}; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">
+                                        {!! $step3Done ? '✓' : '3' !!}
+                                    </div>
+                                    <span style="font-size: 0.78rem; font-weight: 600; color: var(--ink);">Recommandations IA</span>
+                                </div>
+                            </div>
+
+                            {{-- Action button --}}
+                            <div>
+                                @if(!$step1Done)
+                                    <a href="{{ route('student.profil') }}" class="btn-cyan" style="padding: 0.55rem 1.25rem; font-size: 0.78rem; border-radius: 8px;">Compléter mon profil</a>
+                                @elseif(!$step2Done)
+                                    <a href="{{ route('student.pipeline') }}" class="btn-violet" style="padding: 0.55rem 1.25rem; font-size: 0.78rem; border-radius: 8px;">Commencer le test</a>
+                                @else
+                                    <a href="{{ route('student.recommendations') }}" class="btn-violet" style="padding: 0.55rem 1.25rem; font-size: 0.78rem; border-radius: 8px;">Voir mes filières</a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endif
+        @endauth
+
         @yield('content')
     </div>
 
@@ -686,7 +772,9 @@
         let chatHistory = [];
 
         const openChat  = () => { chatPanel.classList.add('open'); chatInput?.focus(); };
+        window.openChat = openChat;
         const closeChat = () => chatPanel.classList.remove('open');
+        window.closeChat = closeChat;
 
         floatingChat?.addEventListener('click', openChat);
         closeChatBtn?.addEventListener('click', closeChat);

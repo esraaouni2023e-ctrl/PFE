@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('riasec_questions', function (Blueprint $table) {
-            $table->string('dimension', 50)->change();
-        });
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('riasec_questions', function (Blueprint $table) {
+                $table->string('dimension', 50)->change();
+            });
+        }
     }
 
     /**

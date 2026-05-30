@@ -29,12 +29,22 @@ class SuperAdminTest extends TestCase
 
     public function test_only_one_super_admin_can_exist()
     {
+        // Ensure at least one Super Admin exists
+        if (!User::where('role', User::ROLE_SUPER_ADMIN)->exists()) {
+            User::create([
+                'name'     => 'First Super Admin',
+                'email'    => 'first@admin.com',
+                'password' => 'password',
+                'role'     => User::ROLE_SUPER_ADMIN,
+            ]);
+        }
+
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Il ne peut exister qu\'un seul Super Admin.');
 
         User::create([
-            'name' => 'Another Admin',
-            'email' => 'another@admin.com',
+            'name' => 'Second Super Admin',
+            'email' => 'second@admin.com',
             'password' => 'password',
             'role' => User::ROLE_SUPER_ADMIN,
         ]);
@@ -42,7 +52,13 @@ class SuperAdminTest extends TestCase
 
     public function test_super_admin_can_access_admin_dashboard()
     {
-        $admin = User::where('role', User::ROLE_SUPER_ADMIN)->first();
+        $admin = User::where('role', User::ROLE_SUPER_ADMIN)->first() ?: User::create([
+            'name'     => 'Super Admin',
+            'email'    => 'admin@gmail.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('00000000'),
+            'role'     => User::ROLE_SUPER_ADMIN,
+            'is_admin' => true,
+        ]);
         
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
         $response->assertStatus(200);

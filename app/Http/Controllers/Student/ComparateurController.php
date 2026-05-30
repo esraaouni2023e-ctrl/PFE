@@ -309,7 +309,9 @@ class ComparateurController extends Controller
 
     private function calculateMatchingScore(?ProfileRiasec $riasec, string $domain): int
     {
-        if (!$riasec) return 75;
+        if (!$riasec) {
+            return 50; // Pas de profil RIASEC → score neutre
+        }
 
         $domainMap = [
             'informatique' => ['I', 'R', 'C'],
@@ -319,6 +321,9 @@ class ComparateurController extends Controller
             'économie et gestion' => ['E', 'C', 'I'],
             'lettres et sciences humaines' => ['S', 'A', 'I'],
             'sport' => ['R', 'E', 'S'],
+            'santé' => ['I', 'S', 'C'],
+            'droit' => ['E', 'S', 'C'],
+            'arts' => ['A', 'S', 'E'],
         ];
 
         $d = strtolower($domain);
@@ -331,17 +336,25 @@ class ComparateurController extends Controller
         }
 
         if (empty($targetDims)) {
-            $targetDims = ['I', 'C'];
+            $targetDims = ['I', 'C']; // Fallback générique
         }
 
-        $sum = 0;
-        foreach ($targetDims as $dim) {
+        // Calcul pondéré : première dimension pèse plus (40%), les suivantes répartissent le reste
+        $weights = [];
+        $remaining = 1.0;
+        foreach ($targetDims as $i => $dim) {
+            $w = ($i === 0) ? 0.4 : (0.6 / (count($targetDims) - 1));
+            $weights[] = $w;
+        }
+
+        $weightedSum = 0;
+        foreach ($targetDims as $i => $dim) {
             $prop = 'score_' . strtolower($dim);
-            $sum += $riasec->$prop ?? 50;
+            $score = $riasec->$prop ?? 0;
+            $weightedSum += $score * $weights[$i];
         }
 
-        $avg = $sum / count($targetDims);
-        return (int) min(98, max(60, $avg));
+        return (int) min(98, max(20, round($weightedSum)));
     }
 
     /**
