@@ -23,7 +23,7 @@ class AdaptiveTestEngine
     private const RIASEC_DIMS = ['R', 'I', 'A', 'S', 'E', 'C'];
 
     // Nombre minimum de réponses RIASEC par dimension avant arrêt
-    private const MIN_RIASEC_PER_DIM = 3; // 3 × 6 = 18 questions RIASEC
+    private const MIN_RIASEC_PER_DIM = 2; // 2 × 6 = 12 questions RIASEC
 
     public function __construct(BehavioralAnalyzer $behavioralAnalyzer = null, IrtCalibrator $irtCalibrator = null)
     {
@@ -325,7 +325,7 @@ class AdaptiveTestEngine
      */
     private function applyStoppingRules(array $state, int $numAnswered, string $sessionId): array
     {
-        $minQuestions = config('adaptive_test.min_questions', 28);
+        $minQuestions = config('adaptive_test.min_questions', 20);
         $maxQuestions = config('adaptive_test.max_questions', 50);
 
         // Règle 1 : couverture RIASEC suffisante ET nombre minimum de questions atteint pour permettre l'adaptatif
