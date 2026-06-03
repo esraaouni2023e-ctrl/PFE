@@ -8,7 +8,7 @@ services:
     plan: free
     numInstances: 1
     startCommand: /usr/local/bin/docker-entrypoint.sh
-    releaseCommand: php artisan migrate --force
+    preDeployCommand: php artisan migrate --force
     envVars:
       - key: APP_ENV
         value: production
