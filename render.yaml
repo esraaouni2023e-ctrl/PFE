@@ -7,8 +7,6 @@ services:
     dockerContext: .
     plan: free
     numInstances: 1
-    startCommand: /usr/local/bin/docker-entrypoint.sh
-    preDeployCommand: php artisan migrate --force
     envVars:
       - key: APP_ENV
         value: production
@@ -44,7 +42,7 @@ services:
     dockerfilePath: Dockerfile
     dockerContext: .
     plan: free
-    startCommand: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+    dockerCommand: php artisan queue:work --sleep=3 --tries=3 --timeout=90
     envVars:
       - key: APP_ENV
         value: production
