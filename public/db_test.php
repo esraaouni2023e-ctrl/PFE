@@ -42,6 +42,30 @@ try {
         echo "</ul>";
     }
     
+    // Check Processlist
+    echo "<h3>Active Database Processes (SHOW PROCESSLIST):</h3>";
+    $processStmt = $pdo->query("SHOW PROCESSLIST");
+    $processes = $processStmt->fetchAll(PDO::FETCH_ASSOC);
+    if (empty($processes)) {
+        echo "<p>No active processes found.</p>";
+    } else {
+        echo "<table border='1' cellpadding='5' style='border-collapse: collapse;'>";
+        echo "<tr><th>Id</th><th>User</th><th>Host</th><th>db</th><th>Command</th><th>Time</th><th>State</th><th>Info</th></tr>";
+        foreach ($processes as $p) {
+            echo "<tr>";
+            echo "<td>{$p['Id']}</td>";
+            echo "<td>{$p['User']}</td>";
+            echo "<td>{$p['Host']}</td>";
+            echo "<td>{$p['db']}</td>";
+            echo "<td>{$p['Command']}</td>";
+            echo "<td>{$p['Time']}</td>";
+            echo "<td>{$p['State']}</td>";
+            echo "<td>" . htmlspecialchars($p['Info'] ?? '') . "</td>";
+            echo "</tr>";
+        }
+        echo "</table>";
+    }
+    
 } catch (\Exception $e) {
     echo "<p style='color: red; font-weight: bold;'>❌ Connection Failed!</p>";
     echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
