@@ -4,23 +4,27 @@
 PORT=${PORT:-80}
 sed -i "s/listen 80;/listen ${PORT};/g" /etc/nginx/http.d/default.conf
 
-# Run database migrations automatically on startup (safe for Render free tier single instance)
-php artisan migrate --force
+{
+  echo "--- Startup Log $(date) ---"
 
-# Run database seeding if the filieres table is empty or check fails (avoid running on every container spin-up)
-FILIERES_COUNT=$(php artisan tinker --execute="echo \DB::table('filieres')->count();")
-echo "Filiere count check output: '$FILIERES_COUNT'"
+  # Run database migrations automatically on startup (safe for Render free tier single instance)
+  php artisan migrate --force
 
-if [ "$FILIERES_COUNT" = "0" ] || [ -z "$FILIERES_COUNT" ] || ! echo "$FILIERES_COUNT" | grep -qE '^[0-9]+$'; then
-    echo "Database filieres table is empty or check failed. Seeding database..."
-    php artisan db:seed --force
-else
-    echo "Database already seeded (filieres count: $FILIERES_COUNT)."
-fi
+  # Run database seeding if the filieres table is empty or check fails (avoid running on every container spin-up)
+  FILIERES_COUNT=$(php artisan tinker --execute="echo \DB::table('filieres')->count();")
+  echo "Filiere count check output: '$FILIERES_COUNT'"
 
-# Cache Laravel routes and views
-php artisan route:cache
-php artisan view:cache
+  if [ "$FILIERES_COUNT" = "0" ] || [ -z "$FILIERES_COUNT" ] || ! echo "$FILIERES_COUNT" | grep -qE '^[0-9]+$'; then
+      echo "Database filieres table is empty or check failed. Seeding database..."
+      php artisan db:seed --force
+  else
+      echo "Database already seeded (filieres count: $FILIERES_COUNT)."
+  fi
+
+  # Cache Laravel routes and views
+  php artisan route:cache
+  php artisan view:cache
+} > /var/www/html/storage/logs/startup.log 2>&1
 
 # Start PHP-FPM in background
 php-fpm -D

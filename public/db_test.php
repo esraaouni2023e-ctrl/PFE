@@ -71,6 +71,15 @@ try {
     $gitLog = shell_exec('git log -1 2>&1');
     echo "<pre>" . htmlspecialchars($gitLog ?: 'git command not available') . "</pre>";
     
+    // Check Container Startup Logs
+    echo "<h3>Container Startup Logs (/storage/logs/startup.log):</h3>";
+    $logPath = __DIR__ . '/../storage/logs/startup.log';
+    if (file_exists($logPath)) {
+        echo "<pre>" . htmlspecialchars(file_get_contents($logPath)) . "</pre>";
+    } else {
+        echo "<p style='color: orange;'>Startup log file not found at: " . htmlspecialchars($logPath) . "</p>";
+    }
+    
 } catch (\Exception $e) {
     echo "<p style='color: red; font-weight: bold;'>❌ Connection Failed!</p>";
     echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
