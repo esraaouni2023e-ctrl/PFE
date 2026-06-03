@@ -66,6 +66,11 @@ try {
         echo "</table>";
     }
     
+    // Check Git Commit
+    echo "<h3>Current Running Commit (git log -1):</h3>";
+    $gitLog = shell_exec('git log -1 2>&1');
+    echo "<pre>" . htmlspecialchars($gitLog ?: 'git command not available') . "</pre>";
+    
 } catch (\Exception $e) {
     echo "<p style='color: red; font-weight: bold;'>❌ Connection Failed!</p>";
     echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
