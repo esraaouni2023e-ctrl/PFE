@@ -1,0 +1,72 @@
+services:
+  # Web Service
+  - type: web
+    name: capavenir-web
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    plan: free
+    numInstances: 1
+    startCommand: /usr/local/bin/docker-entrypoint.sh
+    releaseCommand: php artisan migrate --force
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        sync: false # will be prompted to enter it manually
+      - key: APP_URL
+        value: https://capavenir-web.onrender.com # replace with your domain
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PYTHON_API_URL
+        sync: false
+
+  # Queue Worker Service
+  - type: worker
+    name: capavenir-worker
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    plan: free
+    startCommand: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        sync: false
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PYTHON_API_URL
+        sync: false
