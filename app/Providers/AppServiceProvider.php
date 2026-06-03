@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->runningInConsole()) {
+            return;
+        }
+
         // Auto-create Super Admin if not exists (credentials from .env)
         if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
             if (!\App\Models\User::where('role', \App\Models\User::ROLE_SUPER_ADMIN)->exists()) {
