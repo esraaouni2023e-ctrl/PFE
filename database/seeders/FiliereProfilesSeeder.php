@@ -50,93 +50,111 @@ class FiliereProfilesSeeder extends Seeder
             'Faible' => 0.35, 'Très faible' => 0.15, 'Déclin' => 0.10
         ];
 
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        }
+        FiliereProfile::truncate();
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
+
         $count = 0;
-        DB::transaction(function () use ($filieres, $dims, $domainPsychoprofile, $gatbDomainWeights, $employabiliteIndex, &$count) {
-            foreach ($filieres as $f) {
-                $code = trim($f['Code_Filiere']);
-                $nom = trim($f['Nom_Filiere']);
-                $codeRiasec = strtoupper(trim($f['Code_RIASEC'] ?? ''));
+        $records = [];
+
+        foreach ($filieres as $f) {
+            $code = trim($f['Code_Filiere']);
+            $nom = trim($f['Nom_Filiere']);
+            $codeRiasec = strtoupper(trim($f['Code_RIASEC'] ?? ''));
+            
+            // Detect domain and GATB requirements
+            $domain = $this->detectDomain($nom, $codeRiasec);
+            $gatb = $gatbDomainWeights[$domain] ?? $gatbDomainWeights['default'];
+            
+            // Build RIASEC vector
+            $filLetters = str_split(substr($codeRiasec, 0, 3));
+            $riasecVec = [];
+            foreach ($dims as $d) {
+                $pos = array_search($d, $filLetters);
+                if ($pos === 0)     $riasecVec[$d] = 1.0;
+                elseif ($pos === 1) $riasecVec[$d] = 0.8;
+                elseif ($pos === 2) $riasecVec[$d] = 0.6;
+                else                $riasecVec[$d] = 0.2;
+            }
+
+            // Big Five & Values defaults for this domain
+            $b5 = $domainPsychoprofile[$domain]['B5'] ?? [];
+            $val = $domainPsychoprofile[$domain]['Val'] ?? [];
+
+            $empStr = $f['Taux_Employabilite'] ?? 'Modéré';
+            $empIdx = $employabiliteIndex[$empStr] ?? 0.60;
+
+            // Generate realistic difficulties & stress based on SDO and domain
+            $sdo = $this->getSDO($f);
+            $difficulty = $sdo > 0 ? (int) round(($sdo / 200) * 10) : 5;
+            $stress = ($domain === 'sante' || $domain === 'technique') ? 8 : 5;
+
+            // Market indicators based on Tunisian context (ANETI / INS Tunisia, May 2026)
+            $marketDataByDomain = [
+                'informatique' => ['demand' => 0.95, 'salary' => 0.90, 'internships' => 0.95],
+                'sante'        => ['demand' => 0.90, 'salary' => 0.85, 'internships' => 0.90],
+                'technique'    => ['demand' => 0.85, 'salary' => 0.80, 'internships' => 0.85],
+                'sciences'     => ['demand' => 0.70, 'salary' => 0.75, 'internships' => 0.75],
+                'economie'     => ['demand' => 0.80, 'salary' => 0.75, 'internships' => 0.80],
+                'lettres'      => ['demand' => 0.50, 'salary' => 0.55, 'internships' => 0.60],
+                'social'       => ['demand' => 0.60, 'salary' => 0.60, 'internships' => 0.70],
+                'arts'         => ['demand' => 0.55, 'salary' => 0.50, 'internships' => 0.65],
+                'default'      => ['demand' => 0.60, 'salary' => 0.60, 'internships' => 0.65],
+            ];
+            $m = $marketDataByDomain[$domain] ?? $marketDataByDomain['default'];
+
+            $records[] = [
+                'code_filiere' => $code,
+                'nom_filiere' => $nom,
+                'domaine' => $domain,
                 
-                // Detect domain and GATB requirements
-                $domain = $this->detectDomain($nom, $codeRiasec);
-                $gatb = $gatbDomainWeights[$domain] ?? $gatbDomainWeights['default'];
+                'riasec_r' => $riasecVec['R'],
+                'riasec_i' => $riasecVec['I'],
+                'riasec_a' => $riasecVec['A'],
+                'riasec_s' => $riasecVec['S'],
+                'riasec_e' => $riasecVec['E'],
+                'riasec_c' => $riasecVec['C'],
                 
-                // Build RIASEC vector
-                $filLetters = str_split(substr($codeRiasec, 0, 3));
-                $riasecVec = [];
-                foreach ($dims as $d) {
-                    $pos = array_search($d, $filLetters);
-                    if ($pos === 0)     $riasecVec[$d] = 1.0;
-                    elseif ($pos === 1) $riasecVec[$d] = 0.8;
-                    elseif ($pos === 2) $riasecVec[$d] = 0.6;
-                    else                $riasecVec[$d] = 0.2;
-                }
+                'gatb_g_required' => $gatb['G'] * 5, // scaled to 0-100
+                'gatb_v_required' => $gatb['V'] * 5,
+                'gatb_n_required' => $gatb['N'] * 5,
+                'gatb_s_required' => $gatb['S'] * 5,
+                
+                'employability_index' => $empIdx,
+                'difficulty_level' => $difficulty,
+                'stress_tolerance' => $stress,
 
-                // Big Five & Values defaults for this domain
-                $b5 = $domainPsychoprofile[$domain]['B5'] ?? [];
-                $val = $domainPsychoprofile[$domain]['Val'] ?? [];
+                'job_demand' => $m['demand'],
+                'salary' => $m['salary'],
+                'internships' => $m['internships'],
+                'market_source' => 'ANETI / INS Tunisie',
+                'market_date' => '2026-05',
+                'market_region' => 'Tunisie',
+                
+                'big5_openness' => $b5['O'] ?? 0.0,
+                'big5_conscientiousness' => $b5['C'] ?? 0.0,
+                'big5_extraversion' => $b5['E'] ?? 0.0,
+                'big5_agreeableness' => $b5['A'] ?? 0.0,
+                'big5_neuroticism' => $b5['N'] ?? 0.0,
+                
+                'description' => "Profil de référence pour la filière $nom.",
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            $count++;
+        }
 
-                $empStr = $f['Taux_Employabilite'] ?? 'Modéré';
-                $empIdx = $employabiliteIndex[$empStr] ?? 0.60;
-
-                // Generate realistic difficulties & stress based on SDO and domain
-                $sdo = $this->getSDO($f);
-                $difficulty = $sdo > 0 ? (int) round(($sdo / 200) * 10) : 5;
-                $stress = ($domain === 'sante' || $domain === 'technique') ? 8 : 5;
-
-                // Market indicators based on Tunisian context (ANETI / INS Tunisia, May 2026)
-                $marketDataByDomain = [
-                    'informatique' => ['demand' => 0.95, 'salary' => 0.90, 'internships' => 0.95],
-                    'sante'        => ['demand' => 0.90, 'salary' => 0.85, 'internships' => 0.90],
-                    'technique'    => ['demand' => 0.85, 'salary' => 0.80, 'internships' => 0.85],
-                    'sciences'     => ['demand' => 0.70, 'salary' => 0.75, 'internships' => 0.75],
-                    'economie'     => ['demand' => 0.80, 'salary' => 0.75, 'internships' => 0.80],
-                    'lettres'      => ['demand' => 0.50, 'salary' => 0.55, 'internships' => 0.60],
-                    'social'       => ['demand' => 0.60, 'salary' => 0.60, 'internships' => 0.70],
-                    'arts'         => ['demand' => 0.55, 'salary' => 0.50, 'internships' => 0.65],
-                    'default'      => ['demand' => 0.60, 'salary' => 0.60, 'internships' => 0.65],
-                ];
-                $m = $marketDataByDomain[$domain] ?? $marketDataByDomain['default'];
-
-                FiliereProfile::updateOrCreate(
-                    ['code_filiere' => $code],
-                    [
-                        'nom_filiere' => $nom,
-                        'domaine' => $domain,
-                        
-                        'riasec_r' => $riasecVec['R'],
-                        'riasec_i' => $riasecVec['I'],
-                        'riasec_a' => $riasecVec['A'],
-                        'riasec_s' => $riasecVec['S'],
-                        'riasec_e' => $riasecVec['E'],
-                        'riasec_c' => $riasecVec['C'],
-                        
-                        'gatb_g_required' => $gatb['G'] * 5, // scaled to 0-100
-                        'gatb_v_required' => $gatb['V'] * 5,
-                        'gatb_n_required' => $gatb['N'] * 5,
-                        'gatb_s_required' => $gatb['S'] * 5,
-                        
-                        'employability_index' => $empIdx,
-                        'difficulty_level' => $difficulty,
-                        'stress_tolerance' => $stress,
-
-                        'job_demand' => $m['demand'],
-                        'salary' => $m['salary'],
-                        'internships' => $m['internships'],
-                        'market_source' => 'ANETI / INS Tunisie',
-                        'market_date' => '2026-05',
-                        'market_region' => 'Tunisie',
-                        
-                        'big5_openness' => $b5['O'] ?? 0.0,
-                        'big5_conscientiousness' => $b5['C'] ?? 0.0,
-                        'big5_extraversion' => $b5['E'] ?? 0.0,
-                        'big5_agreeableness' => $b5['A'] ?? 0.0,
-                        'big5_neuroticism' => $b5['N'] ?? 0.0,
-                        
-                        'description' => "Profil de référence pour la filière $nom.",
-                    ]
-                );
-                $count++;
+        DB::transaction(function () use ($records) {
+            foreach (array_chunk($records, 500) as $chunk) {
+                FiliereProfile::insert($chunk);
             }
         });
 
