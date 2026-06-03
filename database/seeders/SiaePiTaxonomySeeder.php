@@ -633,194 +633,196 @@ class SiaePiTaxonomySeeder extends Seeder
         $dbSpecialisations = DB::table('specialisations')->get()->keyBy('code');
 
         $count = 0;
-        foreach ($filieres as $filiere) {
-            $nom = mb_strtolower($filiere->nom_filiere);
-            $excelDom = $filiere->domaine;
+        DB::transaction(function () use ($filieres, $dbDomaines, $dbSousDomaines, $dbSpecialisations, &$count) {
+            foreach ($filieres as $filiere) {
+                $nom = mb_strtolower($filiere->nom_filiere);
+                $excelDom = $filiere->domaine;
 
-            // Détection du Domaine
-            $dCode = 'social'; // Fallback par défaut
+                // Détection du Domaine
+                $dCode = 'social'; // Fallback par défaut
 
-            if (preg_match('/inform|algorithme|réseau|systèm|logiciel|cyber|data|développ|télécom|comput/', $nom)) {
-                $dCode = 'informatique';
-            } elseif (preg_match('/médic|santé|pharmac|infirmier|kiné|dentair|obstétri|sage-femme|anesthé/', $nom)) {
-                $dCode = 'sante';
-            } elseif (preg_match('/gestion|comptab|finance|audit|marketing|commerce|management|administration|affaires|économ/', $nom)) {
-                $dCode = 'economie';
-            } elseif (preg_match('/génie|mécanique|électrique|civil|industri|maintenance|robotique|automatique|bâtiment|énergét/', $nom)) {
-                $dCode = 'technique';
-            } elseif (preg_match('/biologie|chimie|physique|géologie|sciences de la vie|math|statistique/', $nom)) {
-                $dCode = 'sciences';
-            } elseif (preg_match('/arabe|français|anglais|italien|espagnol|traduction|langues|allemand|russe|chinois|lettres/', $nom)) {
-                $dCode = 'lettres';
-            } elseif (preg_match('/art|design|musique|architecture|cinéma|journalisme|communication/', $nom)) {
-                $dCode = 'arts';
-            } else {
-                // Fallback basé sur la catégorie de l'Excel d'origine
-                $excelDomNorm = mb_strtolower($excelDom);
-                if (str_contains($excelDomNorm, 'informatique')) $dCode = 'informatique';
-                elseif (str_contains($excelDomNorm, 'technique') || str_contains($excelDomNorm, 'technologie')) $dCode = 'technique';
-                elseif (str_contains($excelDomNorm, 'économie') || str_contains($excelDomNorm, 'gestion')) $dCode = 'economie';
-                elseif (str_contains($excelDomNorm, 'lettres')) $dCode = 'lettres';
-                elseif (str_contains($excelDomNorm, 'expérimentales')) $dCode = 'sciences';
-                elseif (str_contains($excelDomNorm, 'sport')) $dCode = 'social';
-            }
-
-            // Détection du Sous-domaine & Spécialisation
-            $specCode = null;
-
-            switch ($dCode) {
-                case 'informatique':
-                    if (preg_match('/cyber|sécurité|cloud/', $nom)) {
-                        $specCode = 'cybersecurity';
-                    } elseif (preg_match('/data|données|intelligence artificielle|ia|décision/', $nom)) {
-                        $specCode = 'data_ia';
-                    } elseif (preg_match('/architecture|devops|système|réseau|télécom|embarqué/', $nom)) {
-                        $specCode = 'software_architecture';
-                    } else {
-                        $specCode = 'web_mobile';
-                    }
-                    break;
-
-                case 'sante':
-                    if (preg_match('/infirmier|sage-femme|obstétri/', $nom)) {
-                        $specCode = 'soins_infirmiers';
-                    } elseif (preg_match('/kiné|rééduc|physio/', $nom)) {
-                        $specCode = 'reeducation';
-                    } elseif (preg_match('/pharmac/', $nom)) {
-                        $specCode = 'pharmacie';
-                    } else {
-                        $specCode = 'medecine';
-                    }
-                    break;
-
-                case 'technique':
-                    if (preg_match('/civil|bâtiment|btp|infrastr/', $nom)) {
-                        $specCode = 'batiment';
-                    } elseif (preg_match('/mécatron|robot|automati|électron/', $nom)) {
-                        $specCode = 'mecatronique';
-                    } else {
-                        $specCode = 'electromecanique';
-                    }
-                    break;
-
-                case 'sciences':
-                    if (preg_match('/math|stat|actu/', $nom)) {
-                        $specCode = 'statistics';
-                    } else {
-                        $specCode = 'analyses';
-                    }
-                    break;
-
-                case 'economie':
-                    if (preg_match('/audit|comptab|fiscal|expert/', $nom)) {
-                        $specCode = 'audit_comptabilite';
-                    } elseif (preg_match('/finance|banque|assur|monét/', $nom)) {
-                        $specCode = 'finance';
-                    } elseif (preg_match('/économ|gestion|management|administration/', $nom)) {
-                        $specCode = 'economie_gestion';
-                    } else {
-                        $specCode = 'marketing';
-                    }
-                    break;
-
-                case 'lettres':
-                    if (preg_match('/trad|interpr|biling|rédac/', $nom)) {
-                        $specCode = 'translation';
-                    } else {
-                        $specCode = 'lettres_enseignements';
-                    }
-                    break;
-
-                case 'social':
-                    if (preg_match('/droit|jurid|notar|avocat/', $nom)) {
-                        $specCode = 'droit';
-                    } elseif (preg_match('/psycho|socio|social/', $nom)) {
-                        $specCode = 'psychologie';
-                    } else {
-                        $specCode = 'education';
-                    }
-                    break;
-
-                case 'arts':
-                    if (preg_match('/archi|intér|espace|paysa/', $nom)) {
-                        $specCode = 'interior_archi';
-                    } else {
-                        $specCode = 'design_uiux';
-                    }
-                    break;
-            }
-
-            // Récupération des IDs réels
-            $dId = $dbDomaines[$dCode]->id ?? null;
-            $specObj = $dbSpecialisations[$specCode] ?? null;
-            $specId = $specObj?->id ?? null;
-            
-            // Récupération du sous-domaine lié
-            $sdId = $specObj?->sous_domaine_id ?? null;
-
-            // Mise à jour de la filière
-            $filiere->update([
-                'domaine_id' => $dId,
-                'sous_domaine_id' => $sdId,
-                'specialisation_id' => $specId,
-            ]);
-
-            // Enrichissement facultatif du profil de filière correspondant
-            $profile = FiliereProfile::where('code_filiere', $filiere->code_filiere)->first();
-            if ($profile) {
-                // Taux d'employabilité et indicateurs du marché de l'emploi spécifiques
-                $employabilityRate = match($dCode) {
-                    'informatique' => 88.5,
-                    'sante' => 92.0,
-                    'technique' => 78.4,
-                    'economie' => 70.2,
-                    'sciences' => 58.6,
-                    'social' => 61.2,
-                    'lettres' => 45.4,
-                    'arts' => 68.0,
-                    default => 60.0
-                };
-
-                $growthRate = match($dCode) {
-                    'informatique' => 5.4,
-                    'sante' => 3.8,
-                    'technique' => 2.9,
-                    'economie' => 1.5,
-                    'sciences' => 0.8,
-                    'social' => 1.1,
-                    'lettres' => -0.5,
-                    'arts' => 2.4,
-                    default => 1.0
-                };
-
-                $annualOpenings = match($dCode) {
-                    'informatique' => 1200,
-                    'sante' => 800,
-                    'technique' => 950,
-                    'economie' => 1100,
-                    'sciences' => 400,
-                    'social' => 750,
-                    'lettres' => 300,
-                    'arts' => 500,
-                    default => 500
-                };
-
-                // Ajustement individuel léger basé sur l'excellence du SDO de la filière
-                $sdo = max($filiere->sdo_2023, $filiere->sdo_2024, $filiere->sdo_2025);
-                if ($sdo > 140) {
-                    $employabilityRate = min(99.0, $employabilityRate + 5);
+                if (preg_match('/inform|algorithme|réseau|systèm|logiciel|cyber|data|développ|télécom|comput/', $nom)) {
+                    $dCode = 'informatique';
+                } elseif (preg_match('/médic|santé|pharmac|infirmier|kiné|dentair|obstétri|sage-femme|anesthé/', $nom)) {
+                    $dCode = 'sante';
+                } elseif (preg_match('/gestion|comptab|finance|audit|marketing|commerce|management|administration|affaires|économ/', $nom)) {
+                    $dCode = 'economie';
+                } elseif (preg_match('/génie|mécanique|électrique|civil|industri|maintenance|robotique|automatique|bâtiment|énergét/', $nom)) {
+                    $dCode = 'technique';
+                } elseif (preg_match('/biologie|chimie|physique|géologie|sciences de la vie|math|statistique/', $nom)) {
+                    $dCode = 'sciences';
+                } elseif (preg_match('/arabe|français|anglais|italien|espagnol|traduction|langues|allemand|russe|chinois|lettres/', $nom)) {
+                    $dCode = 'lettres';
+                } elseif (preg_match('/art|design|musique|architecture|cinéma|journalisme|communication/', $nom)) {
+                    $dCode = 'arts';
+                } else {
+                    // Fallback basé sur la catégorie de l'Excel d'origine
+                    $excelDomNorm = mb_strtolower($excelDom);
+                    if (str_contains($excelDomNorm, 'informatique')) $dCode = 'informatique';
+                    elseif (str_contains($excelDomNorm, 'technique') || str_contains($excelDomNorm, 'technologie')) $dCode = 'technique';
+                    elseif (str_contains($excelDomNorm, 'économie') || str_contains($excelDomNorm, 'gestion')) $dCode = 'economie';
+                    elseif (str_contains($excelDomNorm, 'lettres')) $dCode = 'lettres';
+                    elseif (str_contains($excelDomNorm, 'expérimentales')) $dCode = 'sciences';
+                    elseif (str_contains($excelDomNorm, 'sport')) $dCode = 'social';
                 }
 
-                $profile->update([
-                    'employability_rate' => $employabilityRate,
-                    'growth_rate' => $growthRate,
-                    'annual_openings' => $annualOpenings,
-                    'domaine' => $dCode // s'assure de l'alignement
-                ]);
-            }
+                // Détection du Sous-domaine & Spécialisation
+                $specCode = null;
 
-            $count++;
-        }
+                switch ($dCode) {
+                    case 'informatique':
+                        if (preg_match('/cyber|sécurité|cloud/', $nom)) {
+                            $specCode = 'cybersecurity';
+                        } elseif (preg_match('/data|données|intelligence artificielle|ia|décision/', $nom)) {
+                            $specCode = 'data_ia';
+                        } elseif (preg_match('/architecture|devops|système|réseau|télécom|embarqué/', $nom)) {
+                            $specCode = 'software_architecture';
+                        } else {
+                            $specCode = 'web_mobile';
+                        }
+                        break;
+
+                    case 'sante':
+                        if (preg_match('/infirmier|sage-femme|obstétri/', $nom)) {
+                            $specCode = 'soins_infirmiers';
+                        } elseif (preg_match('/kiné|rééduc|physio/', $nom)) {
+                            $specCode = 'reeducation';
+                        } elseif (preg_match('/pharmac/', $nom)) {
+                            $specCode = 'pharmacie';
+                        } else {
+                            $specCode = 'medecine';
+                        }
+                        break;
+
+                    case 'technique':
+                        if (preg_match('/civil|bâtiment|btp|infrastr/', $nom)) {
+                            $specCode = 'batiment';
+                        } elseif (preg_match('/mécatron|robot|automati|électron/', $nom)) {
+                            $specCode = 'mecatronique';
+                        } else {
+                            $specCode = 'electromecanique';
+                        }
+                        break;
+
+                    case 'sciences':
+                        if (preg_match('/math|stat|actu/', $nom)) {
+                            $specCode = 'statistics';
+                        } else {
+                            $specCode = 'analyses';
+                        }
+                        break;
+
+                    case 'economie':
+                        if (preg_match('/audit|comptab|fiscal|expert/', $nom)) {
+                            $specCode = 'audit_comptabilite';
+                        } elseif (preg_match('/finance|banque|assur|monét/', $nom)) {
+                            $specCode = 'finance';
+                        } elseif (preg_match('/économ|gestion|management|administration/', $nom)) {
+                            $specCode = 'economie_gestion';
+                        } else {
+                            $specCode = 'marketing';
+                        }
+                        break;
+
+                    case 'lettres':
+                        if (preg_match('/trad|interpr|biling|rédac/', $nom)) {
+                            $specCode = 'translation';
+                        } else {
+                            $specCode = 'lettres_enseignements';
+                        }
+                        break;
+
+                    case 'social':
+                        if (preg_match('/droit|jurid|notar|avocat/', $nom)) {
+                            $specCode = 'droit';
+                        } elseif (preg_match('/psycho|socio|social/', $nom)) {
+                            $specCode = 'psychologie';
+                        } else {
+                            $specCode = 'education';
+                        }
+                        break;
+
+                    case 'arts':
+                        if (preg_match('/archi|intér|espace|paysa/', $nom)) {
+                            $specCode = 'interior_archi';
+                        } else {
+                            $specCode = 'design_uiux';
+                        }
+                        break;
+                }
+
+                // Récupération des IDs réels
+                $dId = $dbDomaines[$dCode]->id ?? null;
+                $specObj = $dbSpecialisations[$specCode] ?? null;
+                $specId = $specObj?->id ?? null;
+                
+                // Récupération du sous-domaine lié
+                $sdId = $specObj?->sous_domaine_id ?? null;
+
+                // Mise à jour de la filière
+                $filiere->update([
+                    'domaine_id' => $dId,
+                    'sous_domaine_id' => $sdId,
+                    'specialisation_id' => $specId,
+                ]);
+
+                // Enrichissement facultatif du profil de filière correspondant
+                $profile = FiliereProfile::where('code_filiere', $filiere->code_filiere)->first();
+                if ($profile) {
+                    // Taux d'employabilité et indicateurs du marché de l'emploi spécifiques
+                    $employabilityRate = match($dCode) {
+                        'informatique' => 88.5,
+                        'sante' => 92.0,
+                        'technique' => 78.4,
+                        'economie' => 70.2,
+                        'sciences' => 58.6,
+                        'social' => 61.2,
+                        'lettres' => 45.4,
+                        'arts' => 68.0,
+                        default => 60.0
+                    };
+
+                    $growthRate = match($dCode) {
+                        'informatique' => 5.4,
+                        'sante' => 3.8,
+                        'technique' => 2.9,
+                        'economie' => 1.5,
+                        'sciences' => 0.8,
+                        'social' => 1.1,
+                        'lettres' => -0.5,
+                        'arts' => 2.4,
+                        default => 1.0
+                    };
+
+                    $annualOpenings = match($dCode) {
+                        'informatique' => 1200,
+                        'sante' => 800,
+                        'technique' => 950,
+                        'economie' => 1100,
+                        'sciences' => 400,
+                        'social' => 750,
+                        'lettres' => 300,
+                        'arts' => 500,
+                        default => 500
+                    };
+
+                    // Ajustement individuel léger basé sur l'excellence du SDO de la filière
+                    $sdo = max($filiere->sdo_2023, $filiere->sdo_2024, $filiere->sdo_2025);
+                    if ($sdo > 140) {
+                        $employabilityRate = min(99.0, $employabilityRate + 5);
+                    }
+
+                    $profile->update([
+                        'employability_rate' => $employabilityRate,
+                        'growth_rate' => $growthRate,
+                        'annual_openings' => $annualOpenings,
+                        'domaine' => $dCode // s'assure de l'alignement
+                    ]);
+                }
+
+                $count++;
+            }
+        });
 
         $this->command->info("Classification terminée ! {$count} filières ont été structurées et enrichies.");
     }

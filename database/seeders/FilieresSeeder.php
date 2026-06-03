@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 
 class FilieresSeeder extends Seeder
 {
@@ -30,52 +31,54 @@ class FilieresSeeder extends Seeder
             return;
         }
 
-        foreach ($mapping as $filename => $info) {
-            $path = $directory . '/' . $filename;
-            $domaine = $info['domaine'];
-            $typeBac = $info['type_bac'];
+        DB::transaction(function () use ($mapping, $directory) {
+            foreach ($mapping as $filename => $info) {
+                $path = $directory . '/' . $filename;
+                $domaine = $info['domaine'];
+                $typeBac = $info['type_bac'];
 
-            if (File::exists($path)) {
-                $this->command->info("Importing $filename ($domaine)...");
-                $data = Excel::toArray([], $path);
-                
-                if (!empty($data) && isset($data[0])) {
-                    $rows = $data[0];
-                    unset($rows[0]); // Ignorer l'en-tête
+                if (File::exists($path)) {
+                    $this->command->info("Importing $filename ($domaine)...");
+                    $data = Excel::toArray([], $path);
+                    
+                    if (!empty($data) && isset($data[0])) {
+                        $rows = $data[0];
+                        unset($rows[0]); // Ignorer l'en-tête
 
-                    foreach ($rows as $row) {
-                        // Indices 0 à 6: Code_Filie, Nom_Filie, Université, Etablissement, SDO_2023, SDO_2024, SDO_2025
-                        $code = trim($row[0] ?? '');
-                        if (empty($code)) continue;
+                        foreach ($rows as $row) {
+                            // Indices 0 à 6: Code_Filie, Nom_Filie, Université, Etablissement, SDO_2023, SDO_2024, SDO_2025
+                            $code = trim($row[0] ?? '');
+                            if (empty($code)) continue;
 
-                        $gatbDefaults = $this->getGatbDefaults($domaine);
+                            $gatbDefaults = $this->getGatbDefaults($domaine);
 
-                        Filiere::updateOrCreate(
-                            ['code_filiere' => $code],
-                            [
-                                'nom_filiere'   => $row[1] ?? '',
-                                'universite'    => $row[2] ?? null,
-                                'etablissement' => $row[3] ?? null,
-                                'sdo_2023'      => $this->cleanDecimal($row[4]),
-                                'sdo_2024'      => $this->cleanDecimal($row[5]),
-                                'sdo_2025'      => $this->cleanDecimal($row[6]),
-                                'domaine'       => $domaine,
-                                'code_riasec'   => !empty($row[7]) ? trim($row[7]) : null,
-                                'taux_employabilite' => !empty($row[8]) ? trim($row[8]) : null,
-                                'croissance_domaine' => !empty($row[9]) ? trim($row[9]) : null,
-                                'type_bac'      => $typeBac,
-                                'g_requis'      => $gatbDefaults['G'],
-                                'v_requis'      => $gatbDefaults['V'],
-                                'n_requis'      => $gatbDefaults['N'],
-                                's_requis'      => $gatbDefaults['S'],
-                            ]
-                        );
+                            Filiere::updateOrCreate(
+                                ['code_filiere' => $code],
+                                [
+                                    'nom_filiere'   => $row[1] ?? '',
+                                    'universite'    => $row[2] ?? null,
+                                    'etablissement' => $row[3] ?? null,
+                                    'sdo_2023'      => $this->cleanDecimal($row[4]),
+                                    'sdo_2024'      => $this->cleanDecimal($row[5]),
+                                    'sdo_2025'      => $this->cleanDecimal($row[6]),
+                                    'domaine'       => $domaine,
+                                    'code_riasec'   => !empty($row[7]) ? trim($row[7]) : null,
+                                    'taux_employabilite' => !empty($row[8]) ? trim($row[8]) : null,
+                                    'croissance_domaine' => !empty($row[9]) ? trim($row[9]) : null,
+                                    'type_bac'      => $typeBac,
+                                    'g_requis'      => $gatbDefaults['G'],
+                                    'v_requis'      => $gatbDefaults['V'],
+                                    'n_requis'      => $gatbDefaults['N'],
+                                    's_requis'      => $gatbDefaults['S'],
+                                ]
+                            );
+                        }
                     }
+                } else {
+                    $this->command->error("File $filename not found in $directory");
                 }
-            } else {
-                $this->command->error("File $filename not found in $directory");
             }
-        }
+        });
     }
 
     private function cleanDecimal($value)
