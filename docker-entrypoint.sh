@@ -7,6 +7,15 @@ sed -i "s/listen 80;/listen ${PORT};/g" /etc/nginx/http.d/default.conf
 # Run database migrations automatically on startup (safe for Render free tier single instance)
 php artisan migrate --force
 
+# Run database seeding if the riasec_questions table is empty (avoid running on every container spin-up)
+QUESTIONS_COUNT=$(php artisan tinker --execute="echo \DB::table('riasec_questions')->count();" 2>/dev/null)
+if [ "$QUESTIONS_COUNT" = "0" ]; then
+    echo "Database is empty. Seeding..."
+    php artisan db:seed --force
+else
+    echo "Database already seeded (riasec_questions count: $QUESTIONS_COUNT)."
+fi
+
 # Cache Laravel routes and views
 php artisan route:cache
 php artisan view:cache
