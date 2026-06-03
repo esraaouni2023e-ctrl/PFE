@@ -114,7 +114,9 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
             ->name('interaction');
 
         // ── Chatbot IA ──
-        Route::post('/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot');
+        Route::post('/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])
+            ->middleware('throttle:30,1')
+            ->name('chatbot');
     });
 
     // Page d'attente de validation (hors du middleware d'approbation pour éviter les redirections infinies)
@@ -253,7 +255,7 @@ Route::prefix('riasec')
 require __DIR__ . '/auth.php';
 
 // Surcharge des routes d'authentification pour intégrer le 2FA
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', 'throttle:login'])->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
 });

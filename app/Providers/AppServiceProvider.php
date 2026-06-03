@@ -11,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        \Laravel\Fortify\Fortify::ignoreRoutes();
     }
 
     /**
@@ -19,13 +19,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Auto-create Super Admin if not exists
+        // Auto-create Super Admin if not exists (credentials from .env)
         if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
             if (!\App\Models\User::where('role', \App\Models\User::ROLE_SUPER_ADMIN)->exists()) {
+                $adminPassword = env('SUPER_ADMIN_PASSWORD');
+
+                if (!$adminPassword) {
+                    \Illuminate\Support\Facades\Log::warning('SUPER_ADMIN_PASSWORD is not set in .env — skipping auto-creation.');
+                    return;
+                }
+
                 \App\Models\User::create([
-                    'name'     => 'Super Admin',
-                    'email'    => 'admin@gmail.com',
-                    'password' => \Illuminate\Support\Facades\Hash::make('00000000'),
+                    'name'     => env('SUPER_ADMIN_NAME', 'Super Admin'),
+                    'email'    => env('SUPER_ADMIN_EMAIL', 'admin@capavenir.tn'),
+                    'password' => \Illuminate\Support\Facades\Hash::make($adminPassword),
                     'role'     => \App\Models\User::ROLE_SUPER_ADMIN,
                     'is_admin' => true,
                 ]);

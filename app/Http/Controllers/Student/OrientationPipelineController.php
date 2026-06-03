@@ -60,6 +60,20 @@ class OrientationPipelineController extends Controller
 
         $hasScore = $profile && $profile->score_fg;
 
+        // Associer le profil invité (si existant) à l'utilisateur nouvellement connecté
+        $sessionProfileId = session('riasec_profile_id');
+        if ($sessionProfileId) {
+            $guestProfil = \App\Models\ProfileRiasec::find($sessionProfileId);
+            if ($guestProfil && $guestProfil->user_id === null) {
+                $guestProfil->update(['user_id' => $userId]);
+                if ($guestProfil->test_session_id) {
+                    \App\Models\AnswerRiasec::where('test_session_id', $guestProfil->test_session_id)
+                        ->whereNull('user_id')
+                        ->update(['user_id' => $userId]);
+                }
+            }
+        }
+
         // ── Étape 2 : Vérifier si le test RIASEC est complété ──────────────
         $riasecProfil = ProfileRiasec::pourUser($userId)
             ->complets()

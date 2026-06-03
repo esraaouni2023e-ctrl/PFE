@@ -38,7 +38,6 @@ class User extends Authenticatable
         'password',
         'role',
         'status',
-        'is_admin',
         'avatar',
         'is_blocked',
         'two_factor_code',
@@ -175,6 +174,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_code',
+        'two_factor_expires_at',
     ];
 
     /**
@@ -213,7 +214,7 @@ class User extends Authenticatable
     public function generateTwoFactorCode(): void
     {
         $this->timestamps = false; // Ne pas mettre à jour updated_at
-        $this->two_factor_code = rand(100000, 999999);
+        $this->two_factor_code = random_int(100000, 999999);
         $this->two_factor_expires_at = now()->addMinutes(10);
         $this->save();
         $this->timestamps = true; // Remettre à true après

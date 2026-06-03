@@ -1,0 +1,343 @@
+{
+  "siaepi_v8_data_model": {
+    "description": "SIAEPI v8.0 - Schéma complet des données",
+    "timestamp": "2026-05-30",
+    "tables": {
+      "users": {
+        "description": "Utilisateurs (étudiants, conseillers, admin)",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "name": { "type": "string", "required": true },
+          "email": { "type": "string", "unique": true },
+          "password": { "type": "string" },
+          "role": { "type": "enum", "values": ["student", "counselor", "admin"], "default": "student" },
+          "avatar": { "type": "string", "nullable": true },
+          "is_blocked": { "type": "boolean", "default": false },
+          "two_factor_enabled": { "type": "boolean", "default": false },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["role", "email"]
+      },
+      "profiles": {
+        "description": "Profil académique étudiant",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "user_id": { "type": "bigint", "foreign": "users.id" },
+          "section_bac": { "type": "string", "examples": ["Mathématiques", "Sciences expérimentales", "Économie et gestion", "Technique", "Informatique", "Lettres", "Sport"] },
+          "moyenne_generale": { "type": "float", "range": "0-20" },
+          "score_fg": { "type": "float", "range": "0-200", "nullable": true },
+          "gouvernorat": { "type": "string", "nullable": true },
+          "notes_matieres": { "type": "json", "description": "{'math': 15, 'sp': 14, ...}" },
+          "preferences": { "type": "json", "nullable": true },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["user_id", "section_bac"]
+      },
+      "riasec_questions": {
+        "description": "Banque de questions psychométriques (74 questions)",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "dimension": { "type": "string", "examples": ["R", "I", "A", "S", "E", "C", "GATB_G", "GATB_V", "GATB_N", "GATB_S", "B5_O", "B5_C", "B5_E", "B5_A", "B5_N", "RESILIENCE"] },
+          "bloc": { "type": "string", "examples": ["riasec", "big_five", "gatb", "resilience", "attention"] },
+          "categorie": { "type": "string", "examples": ["Intérêts", "Aptitudes", "Traits", "Domaines"] },
+          "texte_fr": { "type": "text" },
+          "texte_ar": { "type": "text", "nullable": true },
+          "type_reponse": { "type": "enum", "values": ["likert", "boolean", "choice"] },
+          "options": { "type": "json", "nullable": true },
+          "poids": { "type": "integer", "range": "1-3", "default": 1 },
+          "ordre": { "type": "integer" },
+          "actif": { "type": "boolean", "default": true },
+          "source": { "type": "string", "nullable": true, "examples": ["Holland 1973", "Costa & McCrae 1992", "GATB 1947"] },
+          "difficulty": { "type": "float", "range": "-3 to 3" },
+          "discrimination": { "type": "float", "range": "0.5-2.5" },
+          "is_reverse": { "type": "boolean", "default": false },
+          "is_seed": { "type": "boolean", "default": false },
+          "bacs_cibles": { "type": "json", "nullable": true },
+          "version": { "type": "string", "default": "1.0" },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["dimension", "bloc", "actif", "order"]
+      },
+      "riasec_answers": {
+        "description": "Réponses individuelles aux questions",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "test_session_id": { "type": "uuid", "unique": true },
+          "user_id": { "type": "bigint", "foreign": "users.id", "nullable": true },
+          "session_guest_id": { "type": "string", "nullable": true },
+          "question_id": { "type": "bigint", "foreign": "riasec_questions.id" },
+          "valeur": { "type": "integer", "range": "1-5" },
+          "temps_reponse_ms": { "type": "integer", "nullable": true },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["test_session_id", "user_id", "question_id"]
+      },
+      "riasec_profiles": {
+        "description": "Profil RIASEC calculé après test",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "test_session_id": { "type": "uuid", "unique": true },
+          "user_id": { "type": "bigint", "foreign": "users.id", "nullable": true },
+          "session_guest_id": { "type": "string", "nullable": true },
+          "score_r": { "type": "integer", "range": "0-100" },
+          "score_i": { "type": "integer", "range": "0-100" },
+          "score_a": { "type": "integer", "range": "0-100" },
+          "score_s": { "type": "integer", "range": "0-100" },
+          "score_e": { "type": "integer", "range": "0-100" },
+          "score_c": { "type": "integer", "range": "0-100" },
+          "code_holland": { "type": "string", "length": 3, "example": "IAS" },
+          "statut": { "type": "enum", "values": ["en_cours", "complet", "expire"] },
+          "nb_questions_repondues": { "type": "integer" },
+          "nb_questions_total": { "type": "integer" },
+          "score_coherence": { "type": "integer", "range": "0-100" },
+          "interpretation": { "type": "json", "nullable": true },
+          "duree_minutes": { "type": "integer", "nullable": true },
+          "score_gatb_g": { "type": "integer", "range": "0-100" },
+          "score_gatb_v": { "type": "integer", "range": "0-100" },
+          "score_gatb_n": { "type": "integer", "range": "0-100" },
+          "score_gatb_s": { "type": "integer", "range": "0-100" },
+          "score_resilience": { "type": "integer", "range": "0-100" },
+          "is_flagged": { "type": "boolean", "default": false },
+          "flag_reason": { "type": "json", "nullable": true },
+          "validation_status": { "type": "string", "nullable": true },
+          "stopped_early": { "type": "boolean", "default": false },
+          "confidence_score": { "type": "float", "range": "0-1", "nullable": true },
+          "blocks_completed": { "type": "integer", "nullable": true },
+          "complete_at": { "type": "timestamp", "nullable": true },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["user_id", "test_session_id", "code_holland", "statut"]
+      },
+      "filieres": {
+        "description": "Catalogue des 2241 filières universitaires tunisiennes",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "code_filiere": { "type": "string", "unique": true },
+          "nom_filiere": { "type": "string" },
+          "universite": { "type": "string", "nullable": true },
+          "etablissement": { "type": "string", "nullable": true },
+          "sdo_2023": { "type": "decimal", "precision": "8,2", "nullable": true },
+          "sdo_2024": { "type": "decimal", "precision": "8,2", "nullable": true },
+          "sdo_2025": { "type": "decimal", "precision": "8,2", "nullable": true },
+          "domaine": { "type": "string", "examples": ["Informatique", "Santé", "Technique", "Sciences", "Économie", "Lettres", "Social", "Arts"] },
+          "domaine_id": { "type": "bigint", "foreign": "domaines.id", "nullable": true },
+          "sous_domaine_id": { "type": "bigint", "foreign": "sous_domaines.id", "nullable": true },
+          "specialisation_id": { "type": "bigint", "foreign": "specialisations.id", "nullable": true },
+          "code_riasec": { "type": "string", "example": "ICA" },
+          "taux_employabilite": { "type": "string", "examples": ["Très élevé", "Élevé", "Modéré", "Faible"] },
+          "croissance_domaine": { "type": "string", "examples": ["Croissance", "Stable", "Déclin"] },
+          "type_bac": { "type": "string" },
+          "g_requis": { "type": "integer", "range": "0-20" },
+          "v_requis": { "type": "integer", "range": "0-20" },
+          "n_requis": { "type": "integer", "range": "0-20" },
+          "s_requis": { "type": "integer", "range": "0-20" },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["code_filiere", "domaine", "etablissement"],
+        "count": 2241
+      },
+      "filiere_profiles": {
+        "description": "Profils psychométriques cibles par filière",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "code_filiere": { "type": "string", "unique": true },
+          "nom_filiere": { "type": "string" },
+          "domaine": { "type": "string" },
+          "riasec_r": { "type": "float", "range": "0.0-1.0" },
+          "riasec_i": { "type": "float", "range": "0.0-1.0" },
+          "riasec_a": { "type": "float", "range": "0.0-1.0" },
+          "riasec_s": { "type": "float", "range": "0.0-1.0" },
+          "riasec_e": { "type": "float", "range": "0.0-1.0" },
+          "riasec_c": { "type": "float", "range": "0.0-1.0" },
+          "gatb_g_required": { "type": "integer", "range": "0-100" },
+          "gatb_v_required": { "type": "integer", "range": "0-100" },
+          "gatb_n_required": { "type": "integer", "range": "0-100" },
+          "gatb_s_required": { "type": "integer", "range": "0-100" },
+          "employability_index": { "type": "float", "range": "0.0-1.0" },
+          "employability_rate": { "type": "float", "nullable": true },
+          "growth_rate": { "type": "float", "nullable": true },
+          "annual_openings": { "type": "integer", "nullable": true },
+          "difficulty_level": { "type": "integer", "range": "1-10" },
+          "stress_tolerance": { "type": "integer", "range": "1-10" },
+          "job_demand": { "type": "float", "range": "0.0-1.0" },
+          "salary": { "type": "float", "range": "0.0-1.0" },
+          "internships": { "type": "float", "range": "0.0-1.0" },
+          "market_source": { "type": "string", "example": "ANETI / INS Tunisie" },
+          "market_date": { "type": "string", "example": "2026-05" },
+          "market_region": { "type": "string", "example": "Tunisie" },
+          "big5_openness": { "type": "float", "range": "-3 to 3" },
+          "big5_conscientiousness": { "type": "float", "range": "-3 to 3" },
+          "big5_extraversion": { "type": "float", "range": "-3 to 3" },
+          "big5_agreeableness": { "type": "float", "range": "-3 to 3" },
+          "big5_neuroticism": { "type": "float", "range": "-3 to 3" },
+          "description": { "type": "text", "nullable": true },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["code_filiere", "domaine"],
+        "count": 2241
+      },
+      "student_interactions": {
+        "description": "Tracking interactions étudiant avec filières",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "user_id": { "type": "bigint", "foreign": "users.id" },
+          "filiere_code": { "type": "string" },
+          "action": { "type": "enum", "values": ["view", "save", "ignore"] },
+          "weight": { "type": "float", "default": 1.0 },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["user_id", "filiere_code"]
+      },
+      "recommendations": {
+        "description": "Recommandations personnalisées",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "user_id": { "type": "bigint", "foreign": "users.id" },
+          "title": { "type": "string" },
+          "description": { "type": "text" },
+          "data": { "type": "json", "description": "Détails recommandation (filière code, score, raisons)" },
+          "source": { "type": "enum", "values": ["siaepi", "nova", "chatbot"] },
+          "relevance": { "type": "integer", "range": "0-100" },
+          "created_by": { "type": "bigint", "foreign": "users.id", "nullable": true },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["user_id", "source"]
+      },
+      "recommendation_feedbacks": {
+        "description": "Feedback utilisateur sur recommandations",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "user_id": { "type": "bigint", "foreign": "users.id" },
+          "recommendation_id": { "type": "bigint", "foreign": "recommendations.id" },
+          "rating": { "type": "integer", "range": "1-5" },
+          "comment": { "type": "text", "nullable": true },
+          "is_helpful": { "type": "boolean" },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["user_id", "recommendation_id"]
+      },
+      "simulation_history": {
+        "description": "Historique simulations what-if",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "user_id": { "type": "bigint", "foreign": "users.id" },
+          "section_bac": { "type": "string" },
+          "moyenne_generale": { "type": "float" },
+          "notes_matieres": { "type": "json" },
+          "score_fg": { "type": "float" },
+          "label": { "type": "string", "nullable": true },
+          "formations_accessibles": { "type": "json" },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        },
+        "indexes": ["user_id", "created_at"]
+      },
+      "domaines": {
+        "description": "Domaines d'étude (niveau 1)",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "code": { "type": "string", "unique": true },
+          "nom": { "type": "string" },
+          "description": { "type": "text", "nullable": true },
+          "icon": { "type": "string", "example": "📚" },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        }
+      },
+      "sous_domaines": {
+        "description": "Sous-domaines (niveau 2)",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "domaine_id": { "type": "bigint", "foreign": "domaines.id" },
+          "code": { "type": "string", "unique": true },
+          "nom": { "type": "string" },
+          "description": { "type": "text", "nullable": true },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        }
+      },
+      "specialisations": {
+        "description": "Spécialisations (niveau 3)",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "sous_domaine_id": { "type": "bigint", "foreign": "sous_domaines.id" },
+          "code": { "type": "string", "unique": true },
+          "nom": { "type": "string" },
+          "description": { "type": "text", "nullable": true },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        }
+      },
+      "metiers": {
+        "description": "Métiers/débouchés professionnels",
+        "columns": {
+          "id": { "type": "bigint", "primary": true },
+          "specialisation_id": { "type": "bigint", "foreign": "specialisations.id" },
+          "title": { "type": "string" },
+          "description": { "type": "text" },
+          "salary_range": { "type": "string", "example": "1200-2000 TND" },
+          "employability": { "type": "string", "examples": ["Très élevé", "Élevé", "Modéré"] },
+          "secteurs": { "type": "json", "description": "[\"secteur1\", \"secteur2\"]" },
+          "skills_hard": { "type": "json", "description": "[\"PHP\", \"React\", \"SQL\"]" },
+          "skills_soft": { "type": "json", "description": "[\"Esprit d'équipe\", \"Leadership\"]" },
+          "perspectives": { "type": "text", "nullable": true },
+          "created_at": { "type": "timestamp" },
+          "updated_at": { "type": "timestamp" }
+        }
+      }
+    },
+    "key_relationships": {
+      "user_to_profile": "users(1) → (N)profiles",
+      "user_to_riasec_answers": "users(1) → (N)riasec_answers",
+      "user_to_riasec_profile": "users(1) → (N)riasec_profiles",
+      "user_to_recommendations": "users(1) → (N)recommendations",
+      "user_to_interactions": "users(1) → (N)student_interactions",
+      "question_to_answers": "riasec_questions(1) → (N)riasec_answers",
+      "session_to_answers": "test_session_id(1) → (N)riasec_answers",
+      "session_to_profile": "test_session_id(1) → (1)riasec_profiles",
+      "filiere_to_profile": "filieres(1) → (1)filiere_profiles",
+      "filiere_to_interaction": "filieres(1) → (N)student_interactions",
+      "domaine_to_filieres": "domaines(1) → (N)filieres",
+      "specialisation_to_metiers": "specialisations(1) → (N)metiers"
+    },
+    "cache_structures": {
+      "redis_cat_state": {
+        "key": "cat_state_{sessionId}",
+        "ttl": "2 hours",
+        "content": {
+          "dimensions": { "R": {}, "I": {}, "A": {}, "S": {}, "E": {}, "C": {}, "GATB_G": {}, ... },
+          "answered_ids": [],
+          "phase": 0,
+          "is_completed": false
+        }
+      },
+      "file_cache_questions": {
+        "key": "riasec.questions.grouped",
+        "ttl": "1 hour",
+        "content": "All active questions by category"
+      }
+    },
+    "statistics": {
+      "total_filieres": 2241,
+      "total_questions": 74,
+      "riasec_questions": 18,
+      "big_five_questions": 10,
+      "gatb_questions": 8,
+      "resilience_questions": 6,
+      "avg_questions_per_test": 35,
+      "avg_test_duration_minutes": 25,
+      "expected_coherence": 0.75,
+      "early_stop_percentage": 0.30
+    }
+  }
+}

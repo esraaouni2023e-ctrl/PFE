@@ -28,16 +28,16 @@ class FutureSimulatorService
 
     /** Secteurs tunisiens — taux insertion, saturation, croissance */
     private const SECTEURS = [
-        'informatique'   => ['label' => 'Informatique & TIC',   'insertion' => 88, 'saturation' => 35, 'croissance' => 12, 'icon' => '💻', 'salaire_moy' => 1800],
-        'sante'          => ['label' => 'Santé & Paramédical',  'insertion' => 92, 'saturation' => 25, 'croissance' => 8,  'icon' => '🏥', 'salaire_moy' => 2200],
-        'ingenierie'     => ['label' => 'Ingénierie',           'insertion' => 78, 'saturation' => 40, 'croissance' => 6,  'icon' => '⚙️', 'salaire_moy' => 2000],
-        'commerce'       => ['label' => 'Commerce & Marketing', 'insertion' => 65, 'saturation' => 60, 'croissance' => 4,  'icon' => '📊', 'salaire_moy' => 1400],
-        'finance'        => ['label' => 'Finance & Comptabilité','insertion' => 72, 'saturation' => 50, 'croissance' => 3, 'icon' => '💰', 'salaire_moy' => 1600],
-        'droit'          => ['label' => 'Droit & Juridique',    'insertion' => 55, 'saturation' => 65, 'croissance' => 2,  'icon' => '⚖️', 'salaire_moy' => 1300],
-        'education'      => ['label' => 'Éducation & Formation','insertion' => 60, 'saturation' => 55, 'croissance' => 3,  'icon' => '📚', 'salaire_moy' => 1100],
-        'tourisme'       => ['label' => 'Tourisme & Hôtellerie','insertion' => 58, 'saturation' => 45, 'croissance' => 7,  'icon' => '✈️', 'salaire_moy' => 1000],
-        'agriculture'    => ['label' => 'Agriculture & Agro',   'insertion' => 50, 'saturation' => 30, 'croissance' => 5,  'icon' => '🌾', 'salaire_moy' => 900],
-        'arts'           => ['label' => 'Arts & Design',        'insertion' => 45, 'saturation' => 40, 'croissance' => 6,  'icon' => '🎨', 'salaire_moy' => 1100],
+        'informatique'   => ['label' => 'Informatique & TIC',   'insertion' => 88, 'saturation' => 35, 'croissance' => 12, 'icon' => 'bi bi-laptop', 'salaire_moy' => 1800],
+        'sante'          => ['label' => 'Santé & Paramédical',  'insertion' => 92, 'saturation' => 25, 'croissance' => 8,  'icon' => 'bi bi-hospital', 'salaire_moy' => 2200],
+        'ingenierie'     => ['label' => 'Ingénierie',           'insertion' => 78, 'saturation' => 40, 'croissance' => 6,  'icon' => 'bi bi-gear-fill', 'salaire_moy' => 2000],
+        'commerce'       => ['label' => 'Commerce & Marketing', 'insertion' => 65, 'saturation' => 60, 'croissance' => 4,  'icon' => 'bi bi-bar-chart-fill', 'salaire_moy' => 1400],
+        'finance'        => ['label' => 'Finance & Comptabilité','insertion' => 72, 'saturation' => 50, 'croissance' => 3, 'icon' => 'bi bi-cash-coin', 'salaire_moy' => 1600],
+        'droit'          => ['label' => 'Droit & Juridique',    'insertion' => 55, 'saturation' => 65, 'croissance' => 2,  'icon' => 'bi bi-bank', 'salaire_moy' => 1300],
+        'education'      => ['label' => 'Éducation & Formation','insertion' => 60, 'saturation' => 55, 'croissance' => 3,  'icon' => 'bi bi-book-half', 'salaire_moy' => 1100],
+        'tourisme'       => ['label' => 'Tourisme & Hôtellerie','insertion' => 58, 'saturation' => 45, 'croissance' => 7,  'icon' => 'bi bi-airplane', 'salaire_moy' => 1000],
+        'agriculture'    => ['label' => 'Agriculture & Agro',   'insertion' => 50, 'saturation' => 30, 'croissance' => 5,  'icon' => 'bi bi-flower1', 'salaire_moy' => 900],
+        'arts'           => ['label' => 'Arts & Design',        'insertion' => 45, 'saturation' => 40, 'croissance' => 6,  'icon' => 'bi bi-palette', 'salaire_moy' => 1100],
     ];
 
     /** Grille salariale (TND/mois) par niveau et domaine */

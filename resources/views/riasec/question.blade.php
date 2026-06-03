@@ -265,7 +265,7 @@
             </span>
             @if($question->poids > 1)
             <span class="q-cat-badge" style="color:var(--gold);border-color:color-mix(in srgb,var(--gold) 25%,transparent);background:color-mix(in srgb,var(--gold) 8%,transparent);">
-                ⭐ Question clé
+                {!! get_pro_icon('⭐') !!} Question clé
             </span>
             @endif
         </div>

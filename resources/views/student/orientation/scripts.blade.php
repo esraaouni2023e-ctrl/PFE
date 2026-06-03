@@ -1,5 +1,60 @@
 <script>
 (function () {
+    function getProIconJs(emoji, extraClass = '') {
+        const mapping = {
+            '🎓': 'bi bi-mortarboard',
+            '🏫': 'bi bi-bank',
+            '💻': 'bi bi-laptop',
+            '🖥️': 'bi bi-pc-display',
+            '🤖': 'bi bi-robot',
+            '🔒': 'bi bi-shield-lock',
+            '🛡️': 'bi bi-shield',
+            '🩺': 'bi bi-heart-pulse',
+            '🏥': 'bi bi-hospital',
+            '🏗️': 'bi bi-building-gear',
+            '⚙️': 'bi bi-gear-fill',
+            '📈': 'bi bi-graph-up-arrow',
+            '📊': 'bi bi-bar-chart-line',
+            '💼': 'bi bi-briefcase',
+            '🔬': 'bi bi-virus',
+            '📖': 'bi bi-book',
+            '📚': 'bi bi-book-half',
+            '⚖️': 'bi bi-scale',
+            '🎨': 'bi bi-palette',
+            '✈️': 'bi bi-airplane',
+            '🌾': 'bi bi-flower1',
+            '⚽': 'bi bi-trophy',
+            '⏱️': 'bi bi-clock',
+            '⏱': 'bi bi-clock',
+            '📍': 'bi bi-geo-alt',
+            '💰': 'bi bi-cash-coin',
+            '📝': 'bi bi-file-earmark-text',
+            '📋': 'bi bi-clipboard-data',
+            '🏢': 'bi bi-building',
+            '⭐': 'bi bi-star-fill',
+            '🌟': 'bi bi-stars',
+            '💡': 'bi bi-lightbulb',
+            '🔮': 'bi bi-magic',
+            '🧮': 'bi bi-calculator',
+            '🚀': 'bi bi-rocket-takeoff',
+            '🎯': 'bi bi-target',
+            '➕': 'bi bi-plus-lg',
+            '🏛️': 'bi bi-building',
+            '🏷️': 'bi bi-tags',
+            '📂': 'bi bi-folder2-open',
+            '🧭': 'bi bi-compass-fill',
+            '📘': 'bi bi-book',
+        };
+
+        const trimmed = (emoji || '').trim();
+        if (mapping[trimmed]) {
+            return `<i class="${mapping[trimmed]} ${extraClass}"></i>`;
+        }
+        if (trimmed.startsWith('bi ') || trimmed.startsWith('bi-')) {
+            return `<i class="${trimmed} ${extraClass}"></i>`;
+        }
+        return trimmed || '<i class="bi bi-mortarboard"></i>';
+    }
     /* ── Scroll reveal ── */
     const revEls = document.querySelectorAll('#orRoot .rev');
     const revObs = new IntersectionObserver(entries => {
@@ -63,15 +118,15 @@
         <div class="or-modal-header">
             <button class="or-modal-close" id="ficheClose">✕</button>
             <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-start;">
-                <div class="or-modal-icon">${d.icon}</div>
+                <div class="or-modal-icon">${getProIconJs(d.icon)}</div>
                 <div style="flex:1;min-width:200px;">
                     <div class="or-modal-tags" style="margin:0 0 .75rem;">
                         <span class="pill ${niveauPillClass(d.niveau)}">${d.niveau}</span>
-                        <span class="pill pill-ink">${d.specialite_icon} ${d.specialite_domaine}</span>
-                        <span class="pill pill-ink">⏱ ${d.duree}</span>
+                        <span class="pill pill-ink">${getProIconJs(d.specialite_icon)} ${d.specialite_domaine}</span>
+                        <span class="pill pill-ink">${getProIconJs('⏱')} ${d.duree}</span>
                     </div>
                     <div class="or-modal-title">${d.nom}</div>
-                    <div class="or-modal-subtitle">🏛️ ${d.etablissement} — 📍 ${d.ville}</div>
+                    <div class="or-modal-subtitle">${getProIconJs('🏛️')} ${d.etablissement} — ${getProIconJs('📍')} ${d.ville}</div>
                 </div>
             </div>
         </div>
@@ -100,11 +155,11 @@
 
         <div class="or-modal-body">
             <div class="or-modal-section full">
-                <div class="or-modal-section-label">📝 Description</div>
+                <div class="or-modal-section-label">${getProIconJs('📝')} Description</div>
                 <div class="or-modal-text-box">${d.description}</div>
             </div>
             <div class="or-modal-section">
-                <div class="or-modal-section-label">🚀 Débouchés</div>
+                <div class="or-modal-section-label">${getProIconJs('🚀')} Débouchés</div>
                 <div class="or-modal-text-box">
                     <div class="or-modal-list">
                         ${d.debouches.split(',').map(s => `<div class="or-modal-list-item">${s.trim()}</div>`).join('')}
@@ -112,7 +167,7 @@
                 </div>
             </div>
             <div class="or-modal-section">
-                <div class="or-modal-section-label">📋 Conditions d'accès</div>
+                <div class="or-modal-section-label">${getProIconJs('📋')} Conditions d'accès</div>
                 <div class="or-modal-text-box">
                     <div class="or-modal-list">
                         ${d.conditions_acces.split('.').filter(s => s.trim()).map(s => `<div class="or-modal-list-item">${s.trim()}</div>`).join('')}
@@ -120,14 +175,14 @@
                 </div>
             </div>
             <div class="or-modal-section">
-                <div class="or-modal-section-label">💰 Salaire estimé</div>
+                <div class="or-modal-section-label">${getProIconJs('💰')} Salaire estimé</div>
                 <div class="or-modal-kv">
                     <div class="or-modal-kv-val">${d.salaire_min} → ${d.salaire_max}</div>
                     <div class="or-modal-kv-sub">/mois · après quelques années d'expérience</div>
                 </div>
             </div>
             <div class="or-modal-section">
-                <div class="or-modal-section-label">🏢 Secteur</div>
+                <div class="or-modal-section-label">${getProIconJs('🏢')} Secteur</div>
                 <div class="or-modal-kv">
                     <div class="or-modal-kv-val" style="font-size:1rem;">${d.secteur}</div>
                     <div class="or-modal-kv-sub">Spécialité : ${d.specialite_nom}</div>
@@ -137,7 +192,7 @@
 
         <div class="or-modal-footer">
             <button class="btn-ghost" id="ficheCloseBtn">← Retour</button>
-            <button class="btn-fill" onclick="alert('⭐ Fonctionnalité disponible bientôt !')">⭐ Sauvegarder</button>
+            <button class="btn-fill" onclick="alert('Fonctionnalité disponible bientôt !')">${getProIconJs('⭐')} Sauvegarder</button>
         </div>`;
     }
 

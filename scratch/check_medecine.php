@@ -1,14 +1,11 @@
 <?php
-
-require_once 'c:/laragon/www/pfe/vendor/autoload.php';
-$app = require_once 'c:/laragon/www/pfe/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-$kernel->bootstrap();
+require 'vendor/autoload.php';
+$app = require_once 'bootstrap/app.php';
+$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 use App\Models\User;
 use App\Models\Profile;
 use App\Models\ProfileRiasec;
-use App\Services\RIASEC\AdaptiveTestEngine;
 use App\Services\SiaepiRecommendationEngine;
 
 $user = User::where('name', 'test')->first();
@@ -66,20 +63,25 @@ $fullProfile = [
     ]
 ];
 
-echo "Student MED Interest: " . $fullProfile['interests']['MED'] . "\n";
-echo "Student Section Bac: " . $fullProfile['section_bac'] . "\n\n";
-
 $engine = new SiaepiRecommendationEngine();
-$results = $engine->recommend($fullProfile, 8);
+$filieres = $engine->loadFilieres();
 
-echo "--- RESULTS ---\n";
-echo "Total scoreable filieres: " . $results['total_scorees'] . "\n";
-echo "Top Recommandations count: " . count($results['recommandations']) . "\n";
-foreach ($results['recommandations'] as $r) {
-    echo "Filiere (Top): {$r['Nom_Filiere']} | Domain: {$r['Domaine']} | Score: {$r['Score_Final']}\n";
-}
+echo "Running scoring pipeline details for Medicine filieres:\n\n";
 
-echo "\nFilières de repli count: " . count($results['securite']) . "\n";
-foreach ($results['securite'] as $r) {
-    echo "Filiere (Repli): {$r['Nom_Filiere']} | Domain: {$r['Domaine']} | Score: {$r['Score_Final']}\n";
+$refEngine = new ReflectionClass(SiaepiRecommendationEngine::class);
+$runScoringPipeline = $refEngine->getMethod('runScoringPipeline');
+$runScoringPipeline->setAccessible(true);
+
+$gatbRaw = $fullProfile['gatb_scores'];
+$scored = $runScoringPipeline->invoke($engine, $fullProfile, $filieres, 'scientific', (float)$fullProfile['score_fg'], $gatbRaw, false);
+
+foreach ($scored as $item) {
+    if (strpos($item['Nom_Filiere'], 'Médecine') !== false || strpos($item['Nom_Filiere'], 'Kinésithérapie') !== false || strpos($item['Nom_Filiere'], 'Sciences Infirmières') !== false) {
+        echo "ID: {$item['filiere_id']} | {$item['Nom_Filiere']} | Bac: {$item['Type_Bac']} | RIASEC: {$item['Code_RIASEC']}\n";
+        echo "  VocationScore: {$item['VocationScore']}\n";
+        echo "  DomainScore:   {$item['DomainScore']}\n";
+        echo "  CognitiveScore:{$item['CognitiveScore']}\n";
+        echo "  AccessScore:   {$item['AccessScore']}\n";
+        echo "  FinalScore:    {$item['FinalScore']}\n\n";
+    }
 }

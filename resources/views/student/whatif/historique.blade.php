@@ -216,14 +216,14 @@
     {{-- Sessions Status --}}
     @if(session('success'))
     <div style="background:color-mix(in srgb,var(--accent3) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent3) 22%,transparent);color:var(--accent3);border-radius:var(--r);padding:.75rem 1rem;margin-bottom:1.5rem;font-size:.83rem;font-weight: 500;">
-        ✅ {{ session('success') }}
+        {!! get_pro_icon('✅') !!} {{ session('success') }}
     </div>
     @endif
 
     {{-- Content --}}
     @if($historique->isEmpty())
         <div style="padding: 5rem 2rem; text-align: center; background: var(--paper); border: 1px dashed var(--ink10); border-radius: 20px;">
-            <div style="font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.5;">🔮</div>
+            <div style="font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.5; color: var(--accent);">{!! get_pro_icon('🔮') !!}</div>
             <h3 style="font-family:'Fraunces', serif; font-size: 1.4rem; color: var(--ink); margin-bottom: 0.5rem;">Aucune simulation trouvée</h3>
             <p style="font-size: 0.9rem; color: var(--ink60); max-width: 400px; margin: 0 auto 1.5rem; line-height: 1.6;">
                 Vous n'avez pas encore enregistré de simulation. Allez sur le simulateur pour tester vos notes et sauvegarder vos résultats.
@@ -290,7 +290,7 @@
                             <div class="hist-formations-list">
                                 @foreach($h->formations_accessibles as $f)
                                     <div class="hist-formation-item">
-                                        <div class="hist-formation-icon">{{ $f['icon'] ?? '🎯' }}</div>
+                                        <div class="hist-formation-icon">{!! get_pro_icon($f['icon'] ?? '🎯') !!}</div>
                                         <div class="hist-formation-info">
                                             <div class="hist-formation-name">{{ $f['nom'] }}</div>
                                             <div class="hist-formation-univ">{{ $f['etablissement'] ?? '' }}</div>
@@ -310,7 +310,7 @@
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="hist-delete-btn">
-                            🗑️ Supprimer la simulation
+                            {!! get_pro_icon('bi bi-trash') !!} Supprimer la simulation
                         </button>
                     </form>
                 </div>

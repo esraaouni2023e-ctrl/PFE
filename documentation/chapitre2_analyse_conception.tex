@@ -19,7 +19,7 @@ Cette analyse s'articule autour de trois dimensions complémentaires et indispen
 \begin{itemize}
     \item \textbf{La modélisation fonctionnelle}, qui délimite la portée opérationnelle du système en détaillant l'ensemble des cas d'utilisation pour chaque acteur (Étudiant, Conseiller, Administrateur) et en explicitant les scénarios nominaux et d'exception des processus cardinaux ;
     \item \textbf{La modélisation structurelle}, qui capture l'architecture de données statique et les relations logiques liant les entités fondamentales du domaine, préfigurant ainsi le schéma relationnel de la base de données et les modèles Eloquent de l'application Laravel ;
-    \item \textbf{La modélisation dynamique}, qui retrace la chronologie fine des échanges de messages entre les composants du système lors de l'exécution des cas d'utilisation critiques, notamment le test adaptatif (CAT IRT-2PL) et le moteur de recommandation hybride (SIAEPI v5.0).
+    \item \textbf{La modélisation dynamique}, qui retrace la chronologie fine des échanges de messages entre les composants du système lors de l'exécution des cas d'utilisation critiques, notamment le test adaptatif (CAT IRT-2PL) et le moteur de recommandation hybride (SIAEPI v8.0).
 \end{itemize}
 
 Cette triple perspective garantit la robustesse, la flexibilité et la maintenabilité de la plateforme, tout en s'assurant d'un alignement parfait avec les exigences ministérielles d'orientation scolaire en Tunisie (seuils SDO et Score FG).
@@ -82,7 +82,7 @@ UC-E02 & Suivre le pipeline d'orientation unifié & Parcours guidé pas à pas :
 \hline
 UC-E03 & Passer le test d'orientation intelligent & \textbf{Évaluation adaptative CAT IRT-2PL (Détaillée ci-après).} \\
 \hline
-UC-E04 & Consulter les recommandations & \textbf{Matching de filières universitaires SIAEPI v5.0 (Détaillée ci-après).} \\
+UC-E04 & Consulter les recommandations & \textbf{Matching de filières universitaires SIAEPI v8.0 (Détaillée ci-après).} \\
 \hline
 UC-E05 & Gérer son profil académique & Saisie de la section du BAC tunisien et des notes pour le calcul du Score FG. \\
 \hline
@@ -152,7 +152,7 @@ Scénario nominal &
 \hline
 \rowcolor{rowgray}ID de l'UC & UC-E04 \\
 \hline
-Nom du Cas & Consulter les recommandations de filières (SIAEPI v5.0) \\
+Nom du Cas & Consulter les recommandations de filières (SIAEPI v8.0) \\
 \hline
 \rowcolor{rowgray}Acteur Principal & Étudiant \\
 \hline
@@ -320,7 +320,7 @@ UC-A04 & Gérer les questions du test & \textbf{CRUD et calibration adaptative d
 \hline
 UC-A05 & Importer formations et seuils SDO & Importation Excel en bloc du catalogue et des seuils SDO tunisiens. \\
 \hline
-UC-A06 & Configurer les pondérations & \textbf{Calibration des axes du moteur SIAEPI v5.0 (Détaillée ci-après).} \\
+UC-A06 & Configurer les pondérations & \textbf{Calibration des axes du moteur SIAEPI v8.0 (Détaillée ci-après).} \\
 \hline
 UC-A07 & Consulter le journal d'audit & Journal de sécurité sécurisé et paginé des actions administratives. \\
 \hline
@@ -382,7 +382,7 @@ Nom du Cas & Configurer les pondérations de l'algorithme d'orientation \\
 \hline
 Préconditions & Accès aux paramètres du moteur de matching d'orientation. \\
 \hline
-\rowcolor{rowgray}Postconditions & Coefficients de l'algorithme SIAEPI v5.0 reconfigurés au niveau global. \\
+\rowcolor{rowgray}Postconditions & Coefficients de l'algorithme SIAEPI v8.0 reconfigurés au niveau global. \\
 \hline
 Scénario nominal &
 \begin{enumerate}
@@ -478,7 +478,7 @@ Ce diagramme retrace la logique du test adaptatif RIASEC + GATB. Il met en lumi�
     \item Le service compile le profil RIASEC, calcule les scores d'aptitudes cognitives via \texttt{GatbCalculator} et persiste l'enregistrement dans la table \texttt{profil\_riasecs}.
 \end{enumerate}
 
-\subsubsection{Moteur de recommandation personnalisé (SIAEPI v5.0)}
+\subsubsection{Moteur de recommandation personnalisé (SIAEPI v8.0)}
 
 Ce diagramme décrit la synergie logicielle entre le framework Laravel et le microservice externe IA développé en Python FastAPI. Ce microservice gère le chargement des modèles de Deep Learning et l'algorithme de filtrage collaboratif hybride pour estimer les filières les plus compatibles.
 
@@ -544,6 +544,6 @@ Ce diagramme illustre le flux d'aide à la décision par traitement du langage n
 
 En définitive, la phase d'analyse et de conception détaillée présentée tout au long de ce chapitre a permis de figer les choix architecturaux et conceptuels structurant la plateforme \textbf{CapAvenir}. 
 
-À travers l'élaboration de la modélisation fonctionnelle, le périmètre opérationnel de chaque acteur a été précisément cadré sous forme de cas d'utilisation formalisés et synthétisés, garantissant une réponse ciblée aux exigences métiers sans surcharger la structure du document. La modélisation structurelle a quant à elle jeté les bases relationnelles indispensables à l'implémentation de la persistance des données sous Laravel Eloquent ORM. Enfin, l'étude dynamique a décrit de manière granulaire les séquences temporelles d'exécution des modules les plus complexes, tels que la boucle adaptative CAT IRT-2PL, le pipeline de recommandation prédictif SIAEPI v5.0 interconnecté à FastAPI Python, et le module conversationnel résilient doté d'une stratégie de repli locale Ollama.
+À travers l'élaboration de la modélisation fonctionnelle, le périmètre opérationnel de chaque acteur a été précisément cadré sous forme de cas d'utilisation formalisés et synthétisés, garantissant une réponse ciblée aux exigences métiers sans surcharger la structure du document. La modélisation structurelle a quant à elle jeté les bases relationnelles indispensables à l'implémentation de la persistance des données sous Laravel Eloquent ORM. Enfin, l'étude dynamique a décrit de manière granulaire les séquences temporelles d'exécution des modules les plus complexes, tels que la boucle adaptative CAT IRT-2PL, le pipeline de recommandation prédictif SIAEPI v8.0 interconnecté à FastAPI Python, et le module conversationnel résilient doté d'une stratégie de repli locale Ollama.
 
 Cette étape de conception rigoureuse dresse les contours structurels et dynamiques de l'application. Elle ouvre tout naturellement la voie au chapitre suivant, consacré à la présentation détaillée du modèle conceptuel d'aide à l'orientation (SIAEPI) et à ses fondements psychométriques et décisionnels.

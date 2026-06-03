@@ -31,7 +31,7 @@ class RiasecTestController extends Controller
         $sessionId = session('riasec_session_id');
 
         if ($sessionId) {
-            $progress = $this->testManager->getProgress(Auth::id(), $sessionId);
+            $progress = $this->testManager->getProgress(Auth::check() ? Auth::id() : null, $sessionId);
 
             if ($progress->answered === 0) {
                 return redirect()->route('riasec.question', ['step' => 1, 't' => time()]);
@@ -68,7 +68,7 @@ class RiasecTestController extends Controller
                 'riasec_blocks_completed',
             ]);
 
-            $userId = Auth::id();
+            $userId = Auth::check() ? Auth::id() : null;
             if ($userId) {
                 ProfileRiasec::pourUser($userId)
                     ->whereIn('statut', [ProfileRiasec::STATUT_COMPLET, ProfileRiasec::STATUT_EN_COURS])
@@ -96,7 +96,7 @@ class RiasecTestController extends Controller
                 ->with('warning', 'Aucun test en cours. Veuillez d abord demarrer le test.');
         }
 
-        $userId = Auth::id();
+        $userId = Auth::check() ? Auth::id() : null;
         $catState = $this->adaptiveTestEngine->getSessionState($sessionId);
 
         $catCompleted = $catState['is_completed'] ?? false;
@@ -151,7 +151,7 @@ class RiasecTestController extends Controller
     public function storeAnswer(StoreRiasecAnswerRequest $request): JsonResponse
     {
         $sessionId = $request->riasecSessionId();
-        $userId = Auth::id();
+        $userId = Auth::check() ? Auth::id() : null;
         $guestId = Auth::check() ? null : session()->getId();
 
         try {
@@ -234,7 +234,7 @@ class RiasecTestController extends Controller
                 ->with('warning', 'Aucun test en cours. Veuillez passer le test.');
         }
 
-        $userId = Auth::id();
+        $userId = Auth::check() ? Auth::id() : null;
         $guestId = Auth::check() ? null : session()->getId();
 
         $isCompleted  = $this->testManager->isTestCompleted($userId, $sessionId);
@@ -297,7 +297,7 @@ class RiasecTestController extends Controller
     public function results(Request $request): View|RedirectResponse
     {
         $profileId = session('riasec_profile_id');
-        $userId = Auth::id();
+        $userId = Auth::check() ? Auth::id() : null;
         $sessionId = session('riasec_session_id');
 
         // ── Guard : si un test est en cours (session active) mais pas encore finalisé,
@@ -371,7 +371,7 @@ class RiasecTestController extends Controller
             'riasec_blocks_completed',
         ]);
 
-        $userId = Auth::id();
+        $userId = Auth::check() ? Auth::id() : null;
         if ($userId) {
             ProfileRiasec::pourUser($userId)
                 ->complets()
@@ -393,7 +393,7 @@ class RiasecTestController extends Controller
         }
 
         return response()->json(
-            $this->testManager->getProgress(Auth::id(), $sessionId)->toArray()
+            $this->testManager->getProgress(Auth::check() ? Auth::id() : null, $sessionId)->toArray()
         );
     }
 }

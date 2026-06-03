@@ -1,0 +1,545 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHAPITRE 1                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Cadre Général et Étude Préalable}
+\label{chap:cadre_general}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+L'orientation académique représente un enjeu déterminant qui engage durablement le projet personnel et professionnel de l'apprenant. Les dispositifs traditionnels peinent toutefois à s'adapter aux évolutions rapides des filières d'études, des compétences requises et des exigences du marché de l'emploi.
+
+Ce premier chapitre pose les bases conceptuelles du projet. Il présente d'abord l'organisme d'accueil et contextualise l'intégration des technologies d'aide à la décision dans le domaine de l'orientation. Il procède ensuite à une analyse critique des solutions existantes afin de situer la valeur ajoutée du dispositif proposé, nommé \textbf{CapAvenir}. Enfin, il détaille les acteurs du système, les exigences fonctionnelles et non fonctionnelles, la méthodologie Kanban retenue pour la gestion du projet, ainsi que les choix architecturaux fondamentaux.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Organisme d'accueil du projet}
+\label{sec:entreprise}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=4cm]{images/logo_designet.png}
+    \caption{Logo Designet Web Agency}
+    \label{fig:logo_designet}
+\end{figure}
+
+\subsection{Présentation de l'entreprise}
+
+Le projet \textbf{CapAvenir} a été réalisé au sein de la société \textbf{Designet Web Agency}, une agence tunisienne spécialisée dans l'ingénierie et le développement de solutions logicielles. L'organisme accompagne ses partenaires dans leur transition numérique par l'intégration d'outils web performants et de conceptions ergonomiques. Son expertise technique a fourni le cadre nécessaire pour concevoir un système d'orientation combinant des technologies web et des services basés sur l'intelligence artificielle.
+
+\subsection{Services fournis}
+
+L'activité de Designet Web Agency s'articule autour de trois domaines de compétences clés~:
+
+\begin{itemize}
+    \item \textbf{Développement d'applications web~:} Conception et maintenance d'applications sur-mesure (statiques, dynamiques et e-commerce), axées sur la performance logicielle et les normes ergonomiques (UX/UI).
+    \item \textbf{Marketing digital~:} Élaboration de stratégies de communication multicanales visant à optimiser la visibilité en ligne et la notoriété des projets numériques.
+    \item \textbf{Optimisation SEO~:} Audit technique, recherche sémantique et structuration de données pour assurer un positionnement organique optimal sur les moteurs de recherche.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Contexte de l'orientation académique basée sur l'IA}
+\label{sec:contexte_ia}
+
+L'intégration de l'intelligence artificielle modifie les pratiques classiques d'orientation. Au-delà de la simple diffusion d'informations académiques, l'orientation moderne s'appuie sur une approche multidimensionnelle. Celle-ci croise les aptitudes psychométriques, les centres d'intérêt de l'étudiant et les données réelles du marché du travail.
+
+Le dispositif \textbf{CapAvenir} s'inscrit dans cette dynamique d'aide à la décision. L'outil remplace un processus d'orientation souvent restrictif par un parcours d'auto-évaluation structuré et personnalisé. En combinant des modèles de décision et des technologies de traitement du langage naturel, l'application guide l'étudiant vers des filières en adéquation avec son profil individuel et les opportunités d'insertion professionnelles.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Problématique et enjeux}
+\label{sec:problematique}
+
+La transition vers l'enseignement supérieur représente une étape complexe pour la majorité des bacheliers. L'analyse du paysage éducatif actuel met en évidence trois défis structurels~:
+
+\begin{itemize}
+    \item \textbf{Surcharge informationnelle~:} La profusion de données sur les filières et les débouchés complexifie le processus de décision. En l'absence de centralisation des informations, les étudiants risquent de s'orienter par défaut ou sous l'influence de biais cognitifs.
+    \item \textbf{Manque de personnalisation~:} Les systèmes classiques se fondent principalement sur les scores académiques, sans intégrer les aptitudes cognitives, les traits de personnalité et les aspirations des apprenants.
+    \item \textbf{Déconnexion avec le marché de l'emploi~:} L'absence de données actualisées sur l'employabilité des filières de formation accroît le risque d'inadéquation professionnelle et de décrochage universitaire.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Objectifs du projet}
+\label{sec:objectifs}
+
+Pour faire face à ces problématiques, le dispositif \textbf{CapAvenir} poursuit trois objectifs~:
+
+\begin{itemize}
+    \item \textbf{Centralisation des données~:} Établir un référentiel unifié regroupant les offres de formation tunisiennes, la cartographie des métiers et les prérequis de compétences.
+    \item \textbf{Personnalisation scientifique~:} Intégrer des modèles d'évaluation psychométrique et cognitive afin de proposer un appariement optimal entre l'étudiant et les filières suggérées.
+    \item \textbf{Accompagnement hybride continu~:} Combiner un agent conversationnel et l'expertise de conseillers d'orientation via un espace CRM dédié pour assurer un suivi régulier.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Étude de l'existant}
+\label{sec:existant}
+
+Une analyse comparative des principales solutions d'orientation a été menée pour identifier les limites des systèmes actuels et situer le positionnement de \textbf{CapAvenir}.
+
+\subsection{Plateformes d'orientation traditionnelles}
+
+Ces applications privilégient généralement la gestion administrative des admissions au détriment de l'accompagnement personnalisé.
+
+\begin{itemize}
+    \item \textbf{Parcoursup (France)~\cite{parcoursup}:} Système national de gestion des vœux. Efficace sur le plan administratif, il souffre d'un manque d'outils d'auto-évaluation et de conseil personnalisé interactif.
+    \item \textbf{Onisep (France)~\cite{onisep}:} Service public d'information sur les métiers et les formations. Bien que riche en contenu d'information, il ne propose pas d'outils de recommandation personnalisés.
+    \item \textbf{Orientation.tn (Tunisie)~\cite{orientationtn}:} Portail officiel d'affectation basé exclusivement sur le score de la Formule Globale (FG). Il n'intègre aucun suivi d'accompagnement psychométrique ni d'outils interactifs.
+\end{itemize}
+
+\subsection{Solutions intelligentes existantes}
+
+Les outils internationaux récents intègrent des fonctionnalités de recommandation, mais présentent des limites de personnalisation~:
+
+\begin{itemize}
+    \item \textbf{StudyPortals (International)~\cite{studyportals}:} Moteur de recherche mondial de programmes universitaires. Ses recommandations s'appuient sur des filtres déclaratifs sans modéliser le profil psychologique de l'apprenant.
+    \item \textbf{Qualmasters (International)~\cite{qualmasters}:} Comparateur de cursus de niveau Master. Utile pour analyser les maquettes pédagogiques, il n'est pas conçu pour les bacheliers et n'intègre pas d'évaluation d'aptitudes.
+\end{itemize}
+
+\subsection{Limites des solutions actuelles et innovation CapAvenir}
+
+L'analyse des outils existants met en évidence cinq lacunes majeures auxquelles le système \textbf{CapAvenir} apporte des réponses techniques spécifiques~:
+
+\begin{itemize}
+    \item \textbf{Absence d'évaluation psychométrique adaptative~:} Les plateformes courantes n'intègrent pas de modèle d'évaluation personnalisé. \textbf{CapAvenir} intègre un moteur de test adaptatif informatisé (CAT) basé sur le modèle IRT~2PL~\cite{irt2pl}, ajustant dynamiquement les questions.
+    \item \textbf{Absence d'analyse comportementale~:} Aucun mécanisme ne surveille la régularité des réponses lors des phases d'évaluation. Le module \texttt{BehavioralAnalyzer} de notre système détecte les anomalies de saisie et de temps de réponse.
+    \item \textbf{Absence de simulation prospective~:} Les outils classiques ne permettent pas de projeter l'impact de variations de notes. Le simulateur \textit{What-If} (\texttt{FutureSimulatorService}) permet d'explorer des scénarios hypothétiques sur les scores d'admissibilité.
+    \item \textbf{Déconnexion avec l'insertion professionnelle~:} \textbf{CapAvenir} intègre un générateur de roadmaps de carrière et un module de création de CV avec exports PDF et Word.
+    \item \textbf{Absence d'espace collaboratif pour les conseillers~:} Le dispositif fournit un espace CRM permettant aux conseillers de suivre une cohorte, d'enregistrer des observations et de planifier des entretiens.
+\end{itemize}
+
+Ainsi, les solutions existantes se focalisent principalement sur la gestion administrative des admissions ou sur la diffusion d'informations statiques. Elles présentent des limites notables quant à l'intégration d'outils d'auto-évaluation psychométrique adaptative, d'analyse comportementale ou de suivi collaboratif direct avec des conseillers. C'est dans ce contexte que s'insère le dispositif proposé pour combler ces lacunes d'accompagnement personnalisé.
+
+Le tableau~\ref{tab:comparatif} synthétise ces écarts et met en évidence la valeur ajoutée du système proposé.
+
+\definecolor{capbleu}{RGB}{219, 234, 254}
+\definecolor{headercolor}{RGB}{30, 80, 160}
+\definecolor{rowgray}{RGB}{240, 240, 245}
+
+\begin{table}[!ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|c|c|c|>{\columncolor{capbleu}}c|}
+\hline
+\rowcolor{headercolor}
+\textcolor{white}{\textbf{Fonctionnalité / Critère}} & \textcolor{white}{\textbf{Parcoursup}} & \textcolor{white}{\textbf{Onisep}} & \textcolor{white}{\textbf{Orientation.tn}} & \textcolor{white}{\textbf{StudyPortals}} & \textcolor{white}{\textbf{Qualmasters}} & \textcolor{white}{\textbf{CapAvenir}} \\
+\hline
+Test adaptatif (CAT IRT 2PL)            & Non intégré & Non intégré & Non intégré & Non intégré & Non intégré & \textbf{Oui} \\
+\hline
+Analyse comportementale (Anti-fraude)   & Non intégré & Non intégré & Non intégré & Non intégré & Non intégré & \textbf{Oui} \\
+\hline
+Recommandation IA (SIAEPI v8.0)         & Non intégré & Non intégré & Non intégré & Partiel & Partiel & \textbf{Oui} \\
+\hline
+Calcul du Score FG (Bac Tunisien)       & Non applicable & Non applicable & Oui & Non applicable & Non applicable & \textbf{Oui} \\
+\hline
+Simulateur prospectif (What-If)         & Non intégré & Non intégré & Non intégré & Non intégré & Non intégré & \textbf{Oui} \\
+\hline
+Comparateur multi-critères de filières  & Non intégré & Non intégré & Non intégré & Partiel & Partiel & \textbf{Oui} \\
+\hline
+Roadmap de carrière assistée par IA     & Non intégré & Non intégré & Non intégré & Non intégré & Non intégré & \textbf{Oui} \\
+\hline
+CV Builder intégré (Exports PDF/Word)   & Non intégré & Non intégré & Non intégré & Non intégré & Non intégré & \textbf{Oui} \\
+\hline
+Espace CRM Conseiller (Suivi Cohorte)   & Non intégré & Non intégré & Non intégré & Non intégré & Non intégré & \textbf{Oui} \\
+\hline
+Double Authentification (2FA OTP Email) & Limité & Non intégré & Non intégré & Non intégré & Non intégré & \textbf{Oui} \\
+\hline
+\end{tabular}%
+}
+\caption{Tableau comparatif des outils d'orientation selon leurs caractéristiques fonctionnelles}
+\label{tab:comparatif}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Solution proposée}
+\label{sec:solution}
+
+Le dispositif \textbf{CapAvenir} se présente comme un écosystème d'aide à l'orientation conçu pour guider le bachelier dans sa démarche d'auto-évaluation. Le système s'articule autour de cinq piliers fonctionnels~:
+
+\begin{itemize}
+    \item \textbf{Espace étudiant interactif~:} Une interface permettant à l'étudiant de réaliser son bilan psychométrique et d'aptitudes, de consulter son score d'orientation, d'effectuer des simulations de notes et d'interagir avec l'assistant virtuel.
+    \item \textbf{Référentiel des formations et métiers~:} Une base de données regroupant les offres d'études supérieures tunisiennes, les prérequis académiques, les seuils d'admissibilité historiques et les perspectives d'insertion sur le marché du travail.
+    \item \textbf{Moteur d'aide à la décision~:} Un algorithme d'analyse qui évalue la cohérence des réponses saisies, estime la compatibilité avec les formations et formule des recommandations fondées sur le croisement des aptitudes et des débouchés.
+    \item \textbf{Espace de suivi pour les conseillers~:} Un module de gestion de la relation (CRM) permettant aux professionnels d'analyser le dossier des étudiants, d'enregistrer des observations et de planifier des entretiens.
+    \item \textbf{Interface utilisateur adaptative~:} Une conception ergonomique optimisée pour assurer l'accessibilité sur ordinateurs, tablettes et terminaux mobiles.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Identification des acteurs}
+\label{sec:acteurs}
+
+Le fonctionnement de l'application implique quatre types d'acteurs~:
+
+\subsection{Étudiant}
+
+Utilisateur principal du système, il saisit ses données scolaires, effectue les évaluations d'aptitudes, consulte les recommandations générées par le moteur \textbf{SIAEPI v8.0}, interagit avec l'assistant Nova, réalise des simulations et soumet ses vœux d'orientation.
+
+\subsection{Conseiller d'orientation}
+
+Il intervient dans le cadre de l'accompagnement personnalisé. Via son espace CRM, il accède aux fiches de profil de ses étudiants assignés, consigne les comptes rendus d'entretien, planifie des rendez-vous et formule des validations sur les projets d'orientation.
+
+\subsection{Administrateur}
+
+Il assure la gestion technique du système. Il configure les droits d'accès via un contrôle d'accès basé sur les rôles (RBAC), administre les référentiels académiques (imports/exports Excel) et supervise la sécurité de l'application via des indicateurs analytiques.
+
+\subsection{Système IA}
+
+Composant autonome du système, il gère la sélection adaptative des questions (IRT 2PL), évalue la cohérence comportementale des réponses, calcule les indices d'adéquation (\textbf{SIAEPI v8.0}) et gère l'assistant Nova via l'API Gemini de Google~\cite{gemini} avec une redondance locale basée sur Ollama~\cite{ollama}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Spécification des besoins}
+\label{sec:besoins}
+
+Les exigences du système d'orientation se divisent en besoins fonctionnels et non fonctionnels.
+
+\subsection{Besoins fonctionnels}
+
+Les exigences fonctionnelles sont organisées par domaines d'activité~:
+
+\begin{itemize}
+    \item \textbf{Gestion des identités, des accès et de la sécurité~:}
+    \begin{itemize}
+        \item Inscription, réinitialisation de mot de passe et connexion sécurisée pour les différents rôles.
+        \item Authentification à double facteur (2FA) basée sur l'envoi d'un code temporaire (OTP) par courrier électronique.
+        \item Attribution dynamique des droits d'accès selon le modèle RBAC (Role-Based Access Control) géré par l'administrateur.
+    \end{itemize}
+
+    \item \textbf{Psychométrie adaptative et recommandations~:}
+    \begin{itemize}
+        \item Évaluation adaptative (RIASEC~\cite{riasec}, GATB~\cite{gatb}, Big Five~\cite{bigfive}) s'ajustant dynamiquement en fonction du niveau des réponses de l'apprenant.
+        \item Analyse comportementale pour détecter les anomalies (saisie trop rapide, patterns incohérents) pouvant affecter la fiabilité du profil.
+        \item Saisie des performances académiques et calcul automatique du score de la Formule Globale (FG) selon le barème officiel tunisien.
+        \item Recommandations de filières universitaires fondées sur le moteur de matching \textbf{SIAEPI v8.0}.
+        \item Simulateur décisionnel What-If permettant d'évaluer virtuellement l'incidence de modifications de notes sur l'éligibilité aux filières.
+        \item Outil de comparaison multicritère permettant de confronter simultanément trois parcours académiques.
+    \end{itemize}
+
+    \item \textbf{Interaction, insertion et accompagnement CRM~:}
+    \begin{itemize}
+        \item Dialogue avec l'assistant virtuel Nova avec mécanisme de repli local en cas de panne de réseau.
+        \item Génération automatique d'une feuille de route professionnelle chronologique décrivant les compétences clés à acquérir.
+        \item Éditeur de Curriculum Vitae (CV Builder) avec exports aux formats PDF et Word.
+        \item Messagerie interne sécurisée entre l'étudiant et son conseiller d'orientation assigné.
+        \item Espace CRM pour les conseillers (suivi de cohorte, notes d'entretien, gestion des rendez-vous).
+    \end{itemize}
+
+    \item \textbf{Administration et supervision~:}
+    \begin{itemize}
+        \item Outils d'importation et d'exportation en bloc des référentiels de questions et des catalogues de filières via des fichiers structurés Excel.
+        \item Tableaux de bord synthétisant la répartition des étudiants, l'avancement des parcours et les statistiques d'orientation.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Besoins non fonctionnels}
+
+Les contraintes de qualité régissant la conception de l'application sont les suivantes~:
+
+\begin{itemize}
+    \item \textbf{Performance et latence~:} Les calculs d'adéquation et de score (moteurs CAT-IRT, SIAEPI v8.0) doivent produire une réponse en moins de deux secondes pour une charge nominale de 100 utilisateurs simultanés.
+    \item \textbf{Haute disponibilité~:} L'application doit maintenir un taux de disponibilité minimal de 99,5\,\% pour supporter les pics de connexion saisonniers lors de l'annonce des résultats du baccalauréat.
+    \item \textbf{Sécurité et confidentialité~:} Les données psychométriques et de scolarité sont hautement confidentielles. La conformité avec le cadre légal tunisien (Loi n\textsuperscript{o}~2004-63~\cite{loi2004}) est assurée par un protocole de chiffrement des données (bcrypt pour les mots de passe) et l'utilisation exclusive du protocole HTTPS.
+    \item \textbf{Ergonomie et accessibilité~:} L'ergonomie logicielle respecte les heuristiques de Nielsen~\cite{nielsen} et propose une interface adaptative pour garantir une navigation intuitive.
+    \item \textbf{Résilience~:} L'architecture intègre des mécanismes de fallback pour l'assistant conversationnel en cas d'interruption du service de l'API externe Gemini.
+    \item \textbf{Scalabilité~:} La configuration serveur doit permettre une mise à l'échelle transparente afin de supporter les vagues d'accès massives pendant la phase nationale d'orientation.
+    \item \textbf{Extensibilité et maintenabilité~:} Le code source est structuré de façon modulaire en respectant les standards de programmation PHP (spécifications PSR~\cite{psr}) afin de faciliter les audits et de prévenir les régressions lors d'évolutions futures.
+    \item \textbf{Compatibilité~:} L'application offre une compatibilité avec les principaux navigateurs du marché (Chrome, Firefox, Safari, Edge) et assure un affichage adaptatif (Responsive Design).
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Méthodologie de gestion de projet (Kanban)}
+\label{sec:kanban}
+
+La méthodologie agile \textbf{Kanban} a été retenue pour la gestion du projet de développement. Ce cadre favorise un \textbf{flux de travail continu}, particulièrement adapté aux phases d'intégration itératives des modèles de décision et d'évaluation fonctionnelle.
+
+La méthode repose sur quatre principes~:
+
+\begin{itemize}
+    \item \textbf{Visualisation du flux~:} Utilisation d'un tableau de suivi pour matérialiser l'état d'avancement de chaque tâche.
+    \item \textbf{Limitation du travail en cours (WIP)~:} Restriction du nombre de tâches actives simultanément pour éviter la surcharge cognitive et les goulots d'étranglement.
+    \item \textbf{Optimisation du flux~:} Analyse des durées de transition entre étapes pour fluidifier la livraison de fonctionnalités.
+    \item \textbf{Amélioration continue~:} Ajustement des méthodes de travail lors des réunions d'évaluation pour optimiser la qualité du code.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=14cm]{images/kanban.png}
+    \caption{Méthodologie Kanban}
+    \label{fig:methodologie_kanban}
+\end{figure}
+
+\subsection{Organisation du flux de travail}
+
+Le tableau Kanban de \textbf{CapAvenir} est structuré en quatre colonnes~:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|p{3cm}|p{11.5cm}|}
+\hline
+\rowcolor{headercolor}
+\textcolor{white}{\textbf{Colonne}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+À faire   & Tâches du backlog priorisées prêtes à être assignées. \\
+\hline
+\rowcolor{rowgray}
+En cours  & Tâches en cours de développement, limitées à un maximum de trois simultanément (WIP = 3). \\
+\hline
+En test   & Phase de validation par tests unitaires (PHPUnit) et vérification fonctionnelle. \\
+\hline
+\rowcolor{rowgray}
+Terminé   & Fonctionnalités validées et intégrées dans la branche principale du code source. \\
+\hline
+\end{tabular}
+\caption{Organisation du tableau Kanban du projet CapAvenir}
+\label{tab:kanban}
+\end{table}
+
+Chaque fonctionnalité suit ce processus linéaire, garantissant la traçabilité des modifications.
+
+\subsection{Product Backlog}
+
+Le \textbf{Product Backlog} regroupe l'ensemble des exigences fonctionnelles définies sous forme d'User Stories. Les récits suivants décrivent les fonctionnalités requises pour la réalisation du système~:
+
+\begin{center}
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.3}
+
+\begin{longtable}{|>{\centering\arraybackslash}p{0.8cm}|>{\RaggedRight\arraybackslash}p{8.5cm}|>{\centering\arraybackslash}p{2.8cm}|>{\centering\arraybackslash}p{1.6cm}|}
+\hline
+\rowcolor{headercolor}
+\textcolor{white}{\textbf{ID}} & \textcolor{white}{\textbf{User Story}} & \textcolor{white}{\textbf{Acteur}} & \textcolor{white}{\textbf{Priorité}} \\
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{headercolor}
+\textcolor{white}{\textbf{ID}} & \textcolor{white}{\textbf{User Story}} & \textcolor{white}{\textbf{Acteur}} & \textcolor{white}{\textbf{Priorité}} \\
+\hline
+\endhead
+
+\hline
+\endlastfoot
+
+1  & En tant qu'utilisateur, je souhaite m'inscrire et me connecter de manière sécurisée afin d'accéder à mon espace personnel et de protéger mes informations privées. & Étudiant, Conseiller, Administrateur & Haute \\
+\hline
+2  & En tant qu'étudiant, je souhaite valider ma connexion à l'aide d'un code de sécurité unique reçu par email afin de garantir que personne d'autre ne puisse accéder à mon compte. & Étudiant & Haute \\
+\hline
+3  & En tant qu'étudiant, je souhaite renseigner mes informations de scolarité (section de mon Baccalauréat, lycée, région) afin d'obtenir des conseils d'orientation cohérents avec mon parcours scolaire actuel. & Étudiant & Haute \\
+\hline
+4  & En tant qu'étudiant, je souhaite saisir mes notes du Baccalauréat afin que mon score global d'orientation soit calculé automatiquement pour connaître mes chances d'accès aux différentes universités. & Étudiant & Haute \\
+\hline
+5  & En tant qu'étudiant, je souhaite passer un test de personnalité interactif qui s'adapte en temps réel à mes réponses afin de découvrir mes principaux traits de caractère et intérêts professionnels. & Étudiant & Haute \\
+\hline
+6  & En tant qu'étudiant, je souhaite passer un test d'aptitudes logiques et de raisonnement afin d'évaluer mes forces intellectuelles face aux exigences universitaires. & Étudiant & Moyenne \\
+\hline
+7  & En tant qu'étudiant, je souhaite consulter un résumé visuel et rédigé de mon profil de personnalité afin de mieux comprendre mes atouts naturels et mes affinités professionnelles. & Étudiant & Moyenne \\
+\hline
+8  & En tant qu'étudiant, je souhaite obtenir une liste personnalisée de filières universitaires recommandées par le moteur \textbf{SIAEPI v8.0} en fonction de mon parcours scolaire, de mon profil et de mes capacités réelles afin de faciliter mon choix d'orientation. & Étudiant & Haute \\
+\hline
+9  & En tant qu'étudiant, je souhaite obtenir des suggestions de filières réalistes et équilibrées entre mes passions personnelles et les débouchés réels du marché de l'emploi afin de maximiser mes chances d'insertion professionnelle. & Étudiant & Moyenne \\
+\hline
+10 & En tant qu'étudiant, je souhaite suivre ma progression d'orientation à travers un tableau de bord indiquant les étapes restantes à accomplir afin de finaliser facilement ma démarche. & Étudiant & Moyenne \\
+\hline
+11 & En tant qu'étudiant, je souhaite enregistrer les filières qui m'intéressent dans une liste de vœux en un clic afin de pouvoir les retrouver et les comparer facilement plus tard. & Étudiant & Haute \\
+\hline
+12 & En tant qu'étudiant, je souhaite sélectionner et valider officiellement mon vœu d'orientation principal afin de le soumettre à l'analyse et à la validation de mon conseiller pédagogique. & Étudiant & Haute \\
+\hline
+13 & En tant qu'étudiant, je souhaite simuler des variations de mes notes ou de mes intérêts professionnels sur un tableau interactif afin de voir immédiatement l'impact virtuel sur mes choix de filières possibles. & Étudiant & Moyenne \\
+\hline
+14 & En tant qu'étudiant, je souhaite recevoir des notifications par email lorsqu'un rendez-vous est programmé ou lorsque mon vœu est validé afin de suivre en temps réel l'avancement de mon dossier. & Étudiant & Moyenne \\
+\hline
+15 & En tant qu'étudiant ou conseiller, je souhaite échanger par messagerie interne afin de poser mes questions et ajuster le projet d'orientation en direct. & Étudiant, Conseiller & Haute \\
+\hline
+16 & En tant qu'étudiant, je souhaite réserver un créneau de rendez-vous en ligne avec mon conseiller pédagogique afin de bénéficier d'un entretien d'orientation individuel. & Étudiant & Moyenne \\
+\hline
+17 & En tant que conseiller, je souhaite consulter un tableau de bord listant tous les étudiants qui me sont assignés afin de suivre l'avancement global de leur démarche d'orientation. & Conseiller & Haute \\
+\hline
+18 & En tant que conseiller, je souhaite accéder aux fiches de profil détaillées de mes étudiants (résultats scolaires, résultats des tests) afin de préparer nos entretiens d'orientation de manière ciblée. & Conseiller & Haute \\
+\hline
+19 & En tant que conseiller, je souhaite valider ou invalider officiellement le vœu d'orientation principal soumis par un étudiant afin de certifier son dossier d'admission. & Conseiller & Haute \\
+\hline
+20 & En tant que conseiller, je souhaite proposer des plages horaires de disponibilité et planifier des entretiens avec mes étudiants afin d'assurer un suivi régulier et structuré. & Conseiller & Moyenne \\
+\hline
+21 & En tant qu'administrateur, je souhaite créer, modifier ou suspendre les comptes des étudiants et des conseillers afin de gérer les accès à la plateforme. & Administrateur & Moyenne \\
+\hline
+22 & En tant qu'administrateur, je souhaite consulter des statistiques d'activité globales (inscriptions, taux de complétion des tests, filières les plus demandées) afin de mesurer l'impact de la plateforme. & Administrateur & Moyenne \\
+\hline
+23 & En tant qu'administrateur, je souhaite identifier les sessions de test présentant un comportement anormal afin de lever l'alerte ou de proposer à l'étudiant de recommencer son évaluation. & Administrateur & Moyenne \\
+\hline
+24 & En tant qu'administrateur, je souhaite ajouter, modifier ou supprimer une filière universitaire ainsi que ses prérequis (section du Bac, seuils d'admission) afin de maintenir le catalogue d'orientation à jour. & Administrateur & Haute \\
+\hline
+25 & En tant qu'étudiant, je souhaite que les recommandations de filières respectent automatiquement les règles de compatibilité entre ma section du Baccalauréat et les filières proposées afin d'éviter des conseils incohérents. & Étudiant & Haute \\
+\hline
+\caption{Product Backlog du projet CapAvenir}
+\label{tab:product-backlog}
+\end{longtable}
+\end{center}
+
+\subsection{Planification temporelle du projet}
+Le tableau suivant détaille le planning hebdomadaire de réalisation et la répartition des tâches entre les membres du binôme :
+\input{tableau_planification}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Environnement de travail}
+\label{sec:environnement}
+
+\subsection{Outils de développement et de modélisation}
+
+Les outils de développement ont été sélectionnés pour structurer les différentes phases de réalisation du projet.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3.5cm}|>{\centering\arraybackslash}p{3cm}|p{8.5cm}|}
+\hline
+\rowcolor{headercolor}
+\textcolor{white}{\textbf{Outil}} & \textcolor{white}{\textbf{Logo}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+Visual Studio Code & \includegraphics[width=1.5cm]{images/Logo VS CODE.png} & Éditeur extensible pour le développement PHP, JavaScript et l'intégration HTML. \\
+\hline
+Git & \includegraphics[width=1.2cm]{images/git_logo.png} & Système de gestion de versions décentralisé pour le suivi des modifications du code source. \\
+\hline
+GitHub & \includegraphics[width=1.2cm]{images/github-logo.png} & Service d'hébergement cloud basé sur Git facilitant la collaboration et l'intégration. \\
+\hline
+Draw.io & \includegraphics[width=1.0cm]{images/draw.io.png} & Application de modélisation pour la conception des schémas d'architecture et de flux. \\
+\hline
+HeidiSQL & \includegraphics[width=1.2cm]{images/Heid SQL.png} & Client graphique d'administration de bases de données relationnelles MySQL. \\
+\hline
+Laragon & \includegraphics[width=1.2cm]{images/laragon.png} & Environnement serveur local intégrant Apache, PHP et MySQL pour le développement. \\
+\hline
+Composer & \includegraphics[width=1.5cm]{images/Logo-composer.png} & Gestionnaire de paquets et de dépendances pour les projets PHP. \\
+\hline
+Overleaf & \includegraphics[width=2.5cm]{images/overleaf.logo.png} & Éditeur collaboratif en ligne pour la composition typographique de documents au format \LaTeX{}. \\
+\hline
+\end{tabular}
+\caption{Outils de développement et de modélisation du projet}
+\label{tab:outils_developpement}
+\end{table}
+
+\subsection{Langages de programmation}
+
+L'application repose sur une combinaison de langages de programmation et de mise en forme~:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3.5cm}|>{\centering\arraybackslash}p{3cm}|p{8.5cm}|}
+\hline
+\rowcolor{headercolor}
+\textcolor{white}{\textbf{Langage}} & \textcolor{white}{\textbf{Logo}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+HTML5 & \includegraphics[width=1.2cm]{images/html.logo.png} & Langage de balisage pour la structuration sémantique des pages web. \\
+\hline
+CSS3 & \includegraphics[width=3.5cm]{images/CSS.logo.png} & Langage de style permettant la mise en forme et l'intégration d'interfaces utilisateur modernes. \\
+\hline
+JavaScript (ES6+) & \includegraphics[width=2.0cm]{images/javascript.png} & Langage de programmation côté client apportant l'interactivité dynamique. \\
+\hline
+PHP ($\ge$ 8.1) & \includegraphics[width=2.5cm]{images/php.png} & Langage de programmation orienté objet exécuté côté serveur pour la logique métier. \\
+\hline
+\end{tabular}
+\caption{Langages de programmation utilisés}
+\label{tab:langages_programmation}
+\end{table}
+
+\subsection{Frameworks utilisés}
+
+Pour structurer la logique applicative et l'ergonomie, les frameworks suivants ont été intégrés~:
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3.5cm}|>{\centering\arraybackslash}p{3cm}|p{8.5cm}|}
+\hline
+\rowcolor{headercolor}
+\textcolor{white}{\textbf{Framework}} & \textcolor{white}{\textbf{Logo}} & \textcolor{white}{\textbf{Description}} \\
+\hline
+Laravel & \includegraphics[width=1.2cm]{images/Laravel.logo.png} & Framework PHP MVC assurant le routage, l'ORM (Eloquent), la sécurité et l'injection de dépendances. \\
+\hline
+Tailwind CSS & \includegraphics[width=1.5cm]{images/tailwind.png} & Framework CSS utilitaire pour la conception rapide d'interfaces web adaptatives et hautement personnalisées. \\
+\hline
+\end{tabular}
+\caption{Frameworks et bibliothèques d'intégration}
+\label{tab:frameworks}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Architecture du système}
+\label{sec:architecture_generale}
+
+L'architecture de \textbf{CapAvenir} combine un modèle en trois tiers pour l'infrastructure, un patron de conception MVC et une Couche de Services (Service Layer) pour découpler la logique métier de la présentation.
+
+\subsection{Architecture en trois tiers}
+
+Les composants de l'application sont répartis en trois niveaux indépendants~:
+
+\begin{itemize}
+    \item \textbf{Couche Présentation (Client)~:} Interface utilisateur reposant sur le moteur de template Blade de Laravel, complétée par JavaScript et CSS pour structurer le rendu visuel.
+    \item \textbf{Couche Métier (Serveur applicatif)~:} Coeur de la logique métier géré par le framework Laravel, hébergeant les microservices d'évaluation (CAT-IRT 2PL, moteur \textbf{SIAEPI v8.0} et analyses comportementales).
+    \item \textbf{Couche Données (Serveur de bases de données)~:} Base de données MySQL stockant les données de configuration, les profils des utilisateurs, le catalogue des filières et l'historique des évaluations.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=14cm]{images/architecture 3 tiers.png}
+    \caption{Architecture en trois tiers du système CapAvenir}
+    \label{fig:architecture_3tiers}
+\end{figure}
+
+\subsection{Architecture MVC et Couche Services (Service Layer)}
+
+Afin d'assurer la modularité du code et d'en faciliter la maintenance, le système découple l'affichage des informations, le traitement des requêtes et l'implémentation des algorithmes d'orientation. Cette organisation s'appuie sur le modèle MVC (Modèle-Vue-Contrôleur) complété par des services métier spécifiques~:
+
+\begin{itemize}
+    \item \textbf{Modèle~:} Définit les entités de données de l'application (Utilisateurs, Filières, Profils) et interagit avec la base de données via l'ORM Eloquent.
+    \item \textbf{Vue~:} Génère le rendu visuel présenté à l'utilisateur sous forme de formulaires de saisie et de graphiques de synthèse.
+    \item \textbf{Contrôleur~:} Intercepte les actions de l'utilisateur, sollicite les services correspondants pour exécuter les calculs requis et renvoie les résultats aux vues.
+    \item \textbf{Service~:} Encapsule la logique algorithmique (moteur de matching, simulateur décisionnel What-If) indépendamment des structures de contrôle et d'affichage.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=14cm]{images/Modèle-vue-contrôleur..png}
+    \caption{Architecture MVC enrichie d'une couche Services du système CapAvenir}
+    \label{fig:architecture_mvc}
+\end{figure}
+
+\subsection{Architecture et flux d'information global du dispositif}
+
+Afin d'illustrer la structure d'interaction du système, un diagramme de flux d'information global est présenté dans la figure~\ref{fig:architecture_globale_tikz}. Ce diagramme met en évidence l'interconnexion entre la couche cliente (interface utilisateur), le noyau applicatif sous Laravel, la base de données relationnelle MySQL, et les services d'intelligence artificielle.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm and 1.5cm,
+    block/.style={rectangle, draw=headercolor, fill=rowgray, rounded corners=4pt, minimum width=3.8cm, minimum height=1.1cm, align=center, font=\small\bfseries, line width=1pt},
+    dbblock/.style={rectangle, draw=headercolor, fill=rowgray, rounded corners=12pt, minimum width=3.8cm, minimum height=1.1cm, align=center, font=\small\bfseries, line width=1pt},
+    arrow/.style={-latex, thick, draw=headercolor!80, line width=1.2pt}
+]
+    % Nodes
+    \node[block] (client) {Interface Utilisateur \\ (Blade, CSS, JS)};
+    \node[block, right=2cm of client] (laravel) {Serveur Applicatif \\ (Laravel Controller \& Core)};
+    \node[dbblock, below=2cm of laravel] (db) {Base de Données \\ (MySQL)};
+    \node[block, right=2cm of laravel] (engine) {Moteur d'Orientation \\ (SIAEPI v8.0 \& CAT 2PL)};
+    \node[block, below=2cm of engine] (ai_api) {Services d'IA \\ (Gemini \& Ollama)};
+
+    % Arrows
+    \draw[arrow] (client) -- node[above, font=\scriptsize] {Requêtes HTTPS} (laravel);
+    \draw[arrow] (laravel) -- node[left, font=\scriptsize] {ORM Eloquent} (db);
+    \draw[arrow] (laravel) -- node[above, font=\scriptsize] {Vecteur profil} (engine);
+    \draw[arrow] (engine) -- node[right, font=\scriptsize] {Appels API} (ai_api);
+    \draw[arrow] (engine) |- node[above, near start, font=\scriptsize] {Persistance scores} (db);
+    \draw[arrow] (laravel.west) -- node[below, font=\scriptsize] {Réponses HTML/JSON} (client.east);
+\end{tikzpicture}
+\caption{Diagramme d'architecture globale et flux de données du dispositif CapAvenir}
+\label{fig:architecture_globale_tikz}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+
+Ce premier chapitre a permis de définir le cadre général et méthodologique du projet \textbf{CapAvenir}. La problématique de l'orientation académique et professionnelle des bacheliers a été analysée au regard des limites des solutions existantes. Les spécifications des exigences fonctionnelles et non fonctionnelles ainsi que la modélisation des processus métier via les User Stories et la méthodologie Kanban dessinent la trajectoire organisationnelle globale du projet. Enfin, l'architecture logicielle retenue (trois tiers, MVC, couche de service) fournit un socle garantissant la résilience et la scalabilité du système. Le chapitre suivant portera sur la modélisation UML détaillée des différents composants applicatifs.

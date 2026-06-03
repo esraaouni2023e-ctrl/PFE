@@ -645,7 +645,7 @@
             <div class="cp-card-panel">
                 <div class="cp-card-panel-head">
                     <h2 class="cp-card-panel-title">
-                        <span style="color:var(--accent)">📊</span>
+                        <span style="color:var(--accent)">{!! get_pro_icon('📊') !!}</span>
                         Dimensions comparatives
                     </h2>
                 </div>
@@ -661,7 +661,7 @@
             <div class="cp-card-panel">
                 <div class="cp-card-panel-head">
                     <h2 class="cp-card-panel-title">
-                        <span>🎯</span>
+                        <span>{!! get_pro_icon('🎯') !!}</span>
                         Résumé des filières
                     </h2>
                 </div>
@@ -675,7 +675,7 @@
         <div class="cp-card-panel" style="margin-bottom: 2rem;">
             <div class="cp-card-panel-head">
                 <h2 class="cp-card-panel-title">
-                    <span>🌟</span>
+                    <span>{!! get_pro_icon('🌟') !!}</span>
                     Analyse des Forces & Points de Vigilance
                 </h2>
             </div>
@@ -688,7 +688,7 @@
         <div class="cp-card-panel">
             <div class="cp-card-panel-head">
                 <h2 class="cp-card-panel-title">
-                    <span>📋</span>
+                    <span>{!! get_pro_icon('📋') !!}</span>
                     Tableau comparatif détaillé
                 </h2>
             </div>
@@ -720,6 +720,60 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    
+    function getProIconJs(emoji, extraClass = '') {
+        const mapping = {
+            '🎓': 'bi bi-mortarboard',
+            '🏫': 'bi bi-bank',
+            '💻': 'bi bi-laptop',
+            '🖥️': 'bi bi-pc-display',
+            '🤖': 'bi bi-robot',
+            '🔒': 'bi bi-shield-lock',
+            '🛡️': 'bi bi-shield',
+            '🩺': 'bi bi-heart-pulse',
+            '🏥': 'bi bi-hospital',
+            '🏗️': 'bi bi-building-gear',
+            '⚙️': 'bi bi-gear-fill',
+            '📈': 'bi bi-graph-up-arrow',
+            '📊': 'bi bi-bar-chart-line',
+            '💼': 'bi bi-briefcase',
+            '🔬': 'bi bi-virus',
+            '📖': 'bi bi-book',
+            '📚': 'bi bi-book-half',
+            '⚖️': 'bi bi-scale',
+            '🎨': 'bi bi-palette',
+            '✈️': 'bi bi-airplane',
+            '🌾': 'bi bi-flower1',
+            '⚽': 'bi bi-trophy',
+            '⏱️': 'bi bi-clock',
+            '⏱': 'bi bi-clock',
+            '📍': 'bi bi-geo-alt',
+            '💰': 'bi bi-cash-coin',
+            '📝': 'bi bi-file-earmark-text',
+            '📋': 'bi bi-clipboard-data',
+            '🏢': 'bi bi-building',
+            '⭐': 'bi bi-star-fill',
+            '🌟': 'bi bi-stars',
+            '💡': 'bi bi-lightbulb',
+            '🔮': 'bi bi-magic',
+            '🧮': 'bi bi-calculator',
+            '🚀': 'bi bi-rocket-takeoff',
+            '🎯': 'bi bi-target',
+            '➕': 'bi bi-plus-lg',
+            '🏛️': 'bi bi-building',
+            '🏷️': 'bi bi-tags',
+            '📂': 'bi bi-folder2-open',
+        };
+
+        const trimmed = (emoji || '').trim();
+        if (mapping[trimmed]) {
+            return `<i class="${mapping[trimmed]} ${extraClass}"></i>`;
+        }
+        if (trimmed.startsWith('bi ') || trimmed.startsWith('bi-')) {
+            return `<i class="${trimmed} ${extraClass}"></i>`;
+        }
+        return trimmed || '<i class="bi bi-mortarboard"></i>';
+    }
     
     // Theme-friendly curated palette: Orange, Sky Blue, Emerald Green, Purple
     const COLORS = ['#EA580C', '#0EA5E9', '#10B981', '#8B5CF6'];
@@ -756,7 +810,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 
                 html += `
                     <div class="cp-suggestion-item" onclick="selectItem('${val}', '${item.icon}', '${item.nom.replace(/'/g, "\\'")}', '${item.etablissement.replace(/'/g, "\\'")}', '${item.niveau}', 'Tunis', '3 ans', ${index})">
-                        <span>${item.icon}</span>
+                        <span>${getProIconJs(item.icon)}</span>
                         <div style="flex:1;">
                             <strong>${item.nom}</strong>
                             <div style="font-size:0.72rem;color:var(--ink60);">${item.etablissement} · ${item.niveau}</div>
@@ -773,7 +827,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (query.length < 2) {
             suggestions.innerHTML = `
                 <div class="cp-suggestion-item manual-item" onclick="selectManual('${query.replace(/'/g, "\\'")}', ${index})">
-                    <span>➕</span>
+                    <span>${getProIconJs('➕')}</span>
                     <div>
                         <strong>Comparer la saisie libre :</strong>
                         <div style="font-size:0.75rem;color:var(--ink60);">${query}</div>
@@ -796,7 +850,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     
                     html += `
                         <div class="cp-suggestion-item" onclick="selectItem('${item.value}', '${item.icon}', '${item.label.replace(/'/g, "\\'")}', '${item.etab.replace(/'/g, "\\'")}', '${item.niveau}', '${item.ville}', '${item.duree}', ${index})">
-                            <span>${item.icon}</span>
+                            <span>${getProIconJs(item.icon)}</span>
                             <div style="flex:1;">
                                 <strong>${item.label.split(' (')[0]}</strong>
                                 <div style="font-size:0.72rem;color:var(--ink60);">${item.etab} · ${item.niveau} · ${item.ville}</div>
@@ -807,7 +861,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 html += `
                     <div class="cp-suggestion-item manual-item" onclick="selectManual('${query.replace(/'/g, "\\'")}', ${index})">
-                        <span>➕</span>
+                        <span>${getProIconJs('➕')}</span>
                         <div>
                             <strong>Comparer la saisie libre :</strong>
                             <div style="font-size:0.75rem;color:var(--ink60);">${query}</div>
@@ -846,7 +900,7 @@ document.addEventListener("DOMContentLoaded", function() {
         searchInput.value = query;
         suggestions.style.display = 'none';
         
-        updatePreviewForIndex(index, '➕', query, 'Saisie manuelle', 'Simulation', 'Tunisie', 'N/A');
+        updatePreviewForIndex(index, 'bi bi-plus-circle', query, 'Saisie manuelle', 'Simulation', 'Tunisie', 'N/A');
         applyOptionExclusion();
     };
 
@@ -858,12 +912,12 @@ document.addEventListener("DOMContentLoaded", function() {
         container.innerHTML = `
             <div class="cp-preview-box">
                 <div class="cp-preview-header">
-                    <div class="cp-preview-icon">${icon}</div>
+                    <div class="cp-preview-icon">${getProIconJs(icon)}</div>
                     <div class="cp-preview-title">${name}</div>
                 </div>
                 <div class="cp-preview-meta">
-                    <span>🏛️ ${etab}</span>
-                    <span>📍 ${ville} (${duree})</span>
+                    <span>${getProIconJs('🏛️')} ${etab}</span>
+                    <span>${getProIconJs('📍')} ${ville} (${duree})</span>
                 </div>
                 <button class="cp-preview-btn-clear" onclick="clearSlot(${index})" title="Désélectionner">
                     <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' style='width:1.1rem;height:1.1rem;'><path stroke-linecap='round' stroke-linejoin='round' d='M6 18L18 6M6 6l12 12' /></svg>
@@ -993,7 +1047,7 @@ document.addEventListener("DOMContentLoaded", function() {
         legend.innerHTML = formations.map((f, i) => `
             <div class="cp-legend-item" style="color:${COLORS[i]}">
                 <div class="cp-legend-color" style="background:${COLORS[i]}"></div>
-                <span>${f.icon} ${f.nom.length > 20 ? f.nom.substring(0, 20) + '...' : f.nom}</span>
+                <span>${getProIconJs(f.icon)} ${f.nom.length > 20 ? f.nom.substring(0, 20) + '...' : f.nom}</span>
             </div>
         `).join('');
     }
@@ -1002,12 +1056,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const container = document.getElementById('summaryCards');
         container.innerHTML = formations.map((f, i) => `
             <div class="cp-summary-item" style="border-left: 4px solid ${COLORS[i]}">
-                <div class="cp-summary-icon">${f.icon}</div>
+                <div class="cp-summary-icon">${getProIconJs(f.icon)}</div>
                 <div class="cp-summary-content">
                     <div class="cp-summary-name">${f.nom}</div>
                     <div class="cp-summary-meta">
-                        <span>🏛️ ${f.etablissement} · ${f.niveau}</span>
-                        <span style="display:block;margin-top:2px;">💰 Rémunération : ${f.salaire_min} - ${f.salaire_max} DT / mois</span>
+                        <span>${getProIconJs('🏛️')} ${f.etablissement} · ${f.niveau}</span>
+                        <span style="display:block;margin-top:2px;">${getProIconJs('💰')} Rémunération : ${f.salaire_min} - ${f.salaire_max} DT / mois</span>
                     </div>
                 </div>
                 <div class="cp-summary-score-badge" style="color:${COLORS[i]}">
@@ -1059,7 +1113,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return `
                 <div class="cp-analysis-card" style="border-top: 4px solid ${COLORS[i]}">
                     <div class="cp-analysis-title-wrap">
-                        <span class="cp-analysis-icon">${f.icon}</span>
+                        <span class="cp-analysis-icon">${getProIconJs(f.icon)}</span>
                         <div class="cp-analysis-name" style="color:${COLORS[i]}">${f.nom}</div>
                     </div>
                     
@@ -1091,11 +1145,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function renderTable(formations) {
         const metrics = [
-            { key: 'matching',     label: '🎯 Compatibilité RIASEC' },
-            { key: 'salaire',      label: '💰 Potentiel Salarial' },
-            { key: 'rapidite',     label: '⏱️ Vitesse d\'Études' },
-            { key: 'insertion',    label: '🚀 Insertion Professionnelle' },
-            { key: 'accessibilite',label: '🔒 Accessibilité d\'Admission' },
+            { key: 'matching',     label: `${getProIconJs('🎯')} Compatibilité RIASEC` },
+            { key: 'salaire',      label: `${getProIconJs('💰')} Potentiel Salarial` },
+            { key: 'rapidite',     label: `${getProIconJs('⏱️')} Vitesse d'Études` },
+            { key: 'insertion',    label: `${getProIconJs('🚀')} Insertion Professionnelle` },
+            { key: 'accessibilite',label: `${getProIconJs('🔒')} Accessibilité d'Admission` },
         ];
 
         document.getElementById('cpTableHead').innerHTML = `<tr>
@@ -1103,7 +1157,7 @@ document.addEventListener("DOMContentLoaded", function() {
             ${formations.map((f, i) => `
                 <th>
                     <div class="cp-table-header-cell">
-                        <div class="cp-table-header-icon" style="background:${COLORS[i]}15;border:1px solid ${COLORS[i]}30;color:${COLORS[i]}">${f.icon}</div>
+                        <div class="cp-table-header-icon" style="background:${COLORS[i]}15;border:1px solid ${COLORS[i]}30;color:${COLORS[i]}">${getProIconJs(f.icon)}</div>
                         <div class="cp-table-header-text" style="color:${COLORS[i]}">${f.nom}</div>
                     </div>
                 </th>
@@ -1111,16 +1165,16 @@ document.addEventListener("DOMContentLoaded", function() {
         </tr>`;
 
         const infoRows = [
-            { label: '🏛️ Établissement',  fn: f => f.etablissement },
-            { label: '📍 Localisation',    fn: f => f.ville },
-            { label: '🎓 Diplôme Visé',    fn: f => f.niveau },
-            { label: '⏱️ Durée théorique', fn: f => f.duree },
-            { label: '🏷️ Domaine d\'Études', fn: f => f.domaine },
-            { label: '💼 Débouchés clés',    fn: f => `<span style="font-size:0.78rem;line-height:1.3;display:block;">${f.debouches}</span>` },
-            { label: '💰 Rémunération min',  fn: f => `${f.salaire_min} DT / mois` },
-            { label: '💰 Rémunération max',  fn: f => `${f.salaire_max} DT / mois` },
-            { label: '📂 Secteur principal', fn: f => f.secteur },
-            { label: '🔒 Seuil SDO estimé',  fn: f => `<span class="font-semibold text-orange-600">${f.sdo_estime} DT</span>` }
+            { label: `${getProIconJs('🏛️')} Établissement`,  fn: f => f.etablissement },
+            { label: `${getProIconJs('📍')} Localisation`,    fn: f => f.ville },
+            { label: `${getProIconJs('🎓')} Diplôme Visé`,    fn: f => f.niveau },
+            { label: `${getProIconJs('⏱️')} Durée théorique`, fn: f => f.duree },
+            { label: `${getProIconJs('🏷️')} Domaine d'Études`, fn: f => f.domaine },
+            { label: `${getProIconJs('💼')} Débouchés clés`,    fn: f => `<span style="font-size:0.78rem;line-height:1.3;display:block;">${f.debouches}</span>` },
+            { label: `${getProIconJs('💰')} Rémunération min`,  fn: f => `${f.salaire_min} DT / mois` },
+            { label: `${getProIconJs('💰')} Rémunération max`,  fn: f => `${f.salaire_max} DT / mois` },
+            { label: `${getProIconJs('📂')} Secteur principal`, fn: f => f.secteur },
+            { label: `${getProIconJs('🔒')} Seuil SDO estimé`,  fn: f => `<span class="font-semibold text-orange-600">${f.sdo_estime} DT</span>` }
         ];
 
         let tbody = infoRows.map(row => `

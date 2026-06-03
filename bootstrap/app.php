@@ -22,6 +22,12 @@ if (file_exists($app->environmentPath().'/'.$app->environmentFile())) {
     try {
         if (($_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? '') !== 'testing') {
             \Dotenv\Dotenv::createImmutable($app->environmentPath(), $app->environmentFile())->safeLoad();
+        } else {
+            // En mode testing, synchroniser $_SERVER avec $_ENV pour éviter que les variables
+            // héritées du processus parent (artisan test) dans $_SERVER ne l'emportent sur $_ENV (sqlite).
+            foreach ($_ENV as $key => $value) {
+                $_SERVER[$key] = $value;
+            }
         }
     } catch (\Throwable $e) {
         // Ne pas casser le bootstrap si le fichier .env est invalide.

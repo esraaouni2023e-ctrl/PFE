@@ -17,3 +17,11 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Debug & scratch files (never commit)
+/scratch*.php
+/check*.php
+/debug*.php
+/diagnose.php
+/read_headers.php
+/test_run.php

@@ -389,36 +389,8 @@ class CounselorController extends Controller
             ];
         }
 
-        // 4. Add Simulations (What-if paths)
-        $crmTimeline[] = [
-            'date' => \Carbon\Carbon::now()->subDays(1),
-            'type' => 'simulation',
-            'title' => 'Simulation de parcours effectuée',
-            'desc' => "L'étudiant a testé le scénario alternatif : 'Filière Data Science & Intelligence Artificielle'. Taux de compatibilité calculé : 94%.",
-            'meta' => 'Simulation What-If',
-            'icon' => 'simulation'
-        ];
-
-
-        // 6. Add reports (Rapports)
-        $crmTimeline[] = [
-            'date' => \Carbon\Carbon::now()->subDays(5),
-            'type' => 'report',
-            'title' => 'Rapport de synthèse généré',
-            'desc' => 'Génération automatique du rapport d\'aptitudes GATB & RIASEC au format PDF pour transmission institutionnelle.',
-            'meta' => 'Rapport PDF disponible',
-            'icon' => 'report'
-        ];
-
-        // 7. Add Intervention history (Historique interventions)
-        $crmTimeline[] = [
-            'date' => \Carbon\Carbon::now()->subDays(8),
-            'type' => 'intervention',
-            'title' => 'Alerte : Email d\'accompagnement envoyé',
-            'desc' => "Relance automatisée envoyée suite à une inactivité prolongée constatée de 5 jours.",
-            'meta' => 'Système Auto-CRM',
-            'icon' => 'intervention'
-        ];
+        // Note: Mock timeline entries (simulations, rapports, interventions) ont été supprimées.
+        // En production, seules les vraies données (tests, RDV, notes) apparaissent ci-dessus.
 
         // Sort timeline by date descending
         usort($crmTimeline, function ($a, $b) {

@@ -53,7 +53,7 @@
     <div class="fs-section active" id="section-notes">
         <div class="fs-layout">
             <div class="fs-panel">
-                <div class="fs-panel-head"><h2>📊 Paramètres de simulation</h2></div>
+                <div class="fs-panel-head"><h2>{!! get_pro_icon('📊') !!} Paramètres de simulation</h2></div>
                 <div class="fs-panel-body">
                     <div id="fs-alert1" class="fs-alert"></div>
                     <div class="fs-field">
@@ -84,11 +84,11 @@
             </div>
             <div>
                 <div class="fs-panel">
-                    <div class="fs-panel-head"><h2>📈 Résultats</h2></div>
+                    <div class="fs-panel-head"><h2>{!! get_pro_icon('📈') !!} Résultats</h2></div>
                     <div class="fs-panel-body">
                         @if(!$compatibilite['has_profile'])
                         <div class="fs-placeholder" style="padding: 2.5rem 1.5rem;">
-                            <div style="font-size:3rem;margin-bottom:1rem;filter: grayscale(1); opacity: 0.6;">🧭</div>
+                            <div style="font-size:3rem;margin-bottom:1rem;filter: grayscale(1); opacity: 0.6; color: var(--accent);">{!! get_pro_icon('🧭') !!}</div>
                             <div style="font-size:.88rem;font-weight:600;color:var(--ink60);margin-bottom:1.25rem;line-height:1.6">
                                 Vous devez d'abord passer le test psychométrique pour débloquer ces résultats de simulation.
                             </div>
@@ -108,7 +108,7 @@
                             <div class="fs-label" style="margin-bottom:.5rem">Formations accessibles</div>
                             <div id="fs-formations-list" style="margin-bottom: 1.5rem;"></div>
 
-                            <div class="fs-label" style="margin-bottom:.5rem; color:var(--accent2)">🎯 Conseils d'optimisation proactifs</div>
+                            <div class="fs-label" style="margin-bottom:.5rem; color:var(--accent2)">{!! get_pro_icon('🎯') !!} Conseils d'optimisation proactifs</div>
                             <div id="fs-advices-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
                         </div>
                         @endif
@@ -117,7 +117,7 @@
                 @if($compatibilite['has_profile'] && $historiqueRecent->isNotEmpty())
                 <div class="fs-panel" style="margin-top:1.25rem">
                     <div class="fs-panel-head" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                        <h2>🕐 Simulations récentes</h2>
+                        <h2>{!! get_pro_icon('⏱') !!} Simulations récentes</h2>
                         <a href="{{ route('student.whatif.historique') }}" style="font-size:0.75rem; color:var(--accent); font-weight:600; text-decoration:none;">Historique complet →</a>
                     </div>
                     <div class="fs-panel-body" style="padding:1rem">
@@ -143,7 +143,7 @@
     <div class="fs-section" id="section-specialite">
         <div class="fs-layout">
             <div class="fs-panel">
-                <div class="fs-panel-head"><h2>🔄 Changer de spécialité</h2></div>
+                <div class="fs-panel-head"><h2>{!! get_pro_icon('bi bi-arrow-repeat') !!} Changer de spécialité</h2></div>
                 <div class="fs-panel-body">
                     <div id="fs-alert2" class="fs-alert"></div>
                     <div class="fs-field">
@@ -168,7 +168,7 @@
                 </div>
             </div>
              <div class="fs-panel">
-                <div class="fs-panel-head"><h2>⚡ Résultat comparatif</h2></div>
+                <div class="fs-panel-head"><h2>{!! get_pro_icon('bi bi-lightning-charge') !!} Résultat comparatif</h2></div>
                 <div class="fs-panel-body">
                     <div id="fs-result-spec" style="display:none"></div>
                     <div class="fs-placeholder" id="fs-placeholder-spec">
@@ -185,7 +185,7 @@
     ════════════════════════════════════════════════════════════ --}}
     <div class="fs-section" id="section-filiere">
         <div class="fs-panel" style="margin-bottom:1.5rem">
-            <div class="fs-panel-head"><h2>🎯 Comparer des filières</h2></div>
+            <div class="fs-panel-head"><h2>{!! get_pro_icon('🎯') !!} Comparer des filières</h2></div>
             <div class="fs-panel-body">
                 <div id="fs-alert3" class="fs-alert"></div>
                 <div class="fs-grid-2" style="margin-bottom:1rem">
@@ -223,7 +223,7 @@
     ════════════════════════════════════════════════════════════ --}}
     <div class="fs-section" id="section-secteurs">
         <div class="fs-panel">
-            <div class="fs-panel-head"><h2>📈 Marché du travail tunisien — Taux d'insertion par secteur</h2></div>
+            <div class="fs-panel-head"><h2>{!! get_pro_icon('📈') !!} Marché du travail tunisien — Taux d'insertion par secteur</h2></div>
             <div class="fs-panel-body" id="fs-secteurs-list"></div>
         </div>
     </div>
@@ -234,7 +234,7 @@
     <div class="fs-section" id="section-roi">
         <div class="fs-layout">
             <div class="fs-panel">
-                <div class="fs-panel-head"><h2>💰 Retour sur investissement</h2></div>
+                <div class="fs-panel-head"><h2>{!! get_pro_icon('💰') !!} Retour sur investissement</h2></div>
                 <div class="fs-panel-body">
                     <div class="fs-field">
                         <label class="fs-label">Niveau d'études visé</label>
@@ -253,7 +253,7 @@
                 </div>
             </div>
             <div class="fs-panel">
-                <div class="fs-panel-head"><h2>📊 Projection financière</h2></div>
+                <div class="fs-panel-head"><h2>{!! get_pro_icon('📊') !!} Projection financière</h2></div>
                 <div class="fs-panel-body">
                     <div id="fs-result-roi" style="display:none"></div>
                     <div class="fs-placeholder">
@@ -270,7 +270,7 @@
     ════════════════════════════════════════════════════════════ --}}
     <div class="fs-section" id="section-carriere">
         <div class="fs-panel">
-            <div class="fs-panel-head"><h2>🧭 Compatibilité carrière — Basée sur votre profil RIASEC</h2></div>
+            <div class="fs-panel-head"><h2>{!! get_pro_icon('🧭') !!} Compatibilité carrière — Basée sur votre profil RIASEC</h2></div>
             <div class="fs-panel-body" id="fs-compat-list"></div>
         </div>
     </div>

@@ -1,6 +1,63 @@
 <script>
 (function(){
 const CSRF=document.querySelector('meta[name="csrf-token"]')?.content??'';
+
+function getProIconJs(emoji, extraClass = '') {
+    const mapping = {
+        '🎓': 'bi bi-mortarboard',
+        '🏫': 'bi bi-bank',
+        '💻': 'bi bi-laptop',
+        '🖥️': 'bi bi-pc-display',
+        '🤖': 'bi bi-robot',
+        '🔒': 'bi bi-shield-lock',
+        '🛡️': 'bi bi-shield',
+        '🩺': 'bi bi-heart-pulse',
+        '🏥': 'bi bi-hospital',
+        '🏗️': 'bi bi-building-gear',
+        '⚙️': 'bi bi-gear-fill',
+        '📈': 'bi bi-graph-up-arrow',
+        '📊': 'bi bi-bar-chart-line',
+        '💼': 'bi bi-briefcase',
+        '🔬': 'bi bi-virus',
+        '📖': 'bi bi-book',
+        '📚': 'bi bi-book-half',
+        '⚖️': 'bi bi-scale',
+        '🎨': 'bi bi-palette',
+        '✈️': 'bi bi-airplane',
+        '🌾': 'bi bi-flower1',
+        '⚽': 'bi bi-trophy',
+        '⏱️': 'bi bi-clock',
+        '⏱': 'bi bi-clock',
+        '📍': 'bi bi-geo-alt',
+        '💰': 'bi bi-cash-coin',
+        '📝': 'bi bi-file-earmark-text',
+        '📋': 'bi bi-clipboard-data',
+        '🏢': 'bi bi-building',
+        '⭐': 'bi bi-star-fill',
+        '🌟': 'bi bi-stars',
+        '💡': 'bi bi-lightbulb',
+        '🔮': 'bi bi-magic',
+        '🧮': 'bi bi-calculator',
+        '🚀': 'bi bi-rocket-takeoff',
+        '🎯': 'bi bi-target',
+        '➕': 'bi bi-plus-lg',
+        '🏛️': 'bi bi-building',
+        '🏷️': 'bi bi-tags',
+        '📂': 'bi bi-folder2-open',
+        '🧭': 'bi bi-compass-fill',
+        '📘': 'bi bi-book',
+    };
+
+    const trimmed = (emoji || '').trim();
+    if (mapping[trimmed]) {
+        return `<i class="${mapping[trimmed]} ${extraClass}"></i>`;
+    }
+    if (trimmed.startsWith('bi ') || trimmed.startsWith('bi-')) {
+        return `<i class="${trimmed} ${extraClass}"></i>`;
+    }
+    return trimmed || '<i class="bi bi-mortarboard"></i>';
+}
+
 const COLORS=['#EA580C','#0A2540','#F97316','#1E293B'];
 const HAS_PROFILE=@json($compatibilite['has_profile'] ?? false);
 let chartInstances={};
@@ -69,7 +126,7 @@ function renderNotesResult(d){
     if(!d.formations?.length){list.innerHTML='<div style="text-align:center;padding:1rem;color:var(--ink30);font-size:.82rem">Aucune formation accessible.</div>';}
     else {
         d.formations.forEach(f=>{
-            list.innerHTML+=`<div class="fs-card"><div class="fs-card-row"><div class="fs-card-icon">${f.icon||'📘'}</div><div class="fs-card-info"><div class="fs-card-title">${f.nom}</div><div class="fs-card-meta">${f.etablissement||''} · ${f.niveau||''} · ${f.duree||''}</div></div><div class="fs-card-val">${f.score_matching||0}%</div></div></div>`;
+            list.innerHTML+=`<div class="fs-card"><div class="fs-card-row"><div class="fs-card-icon">${getProIconJs(f.icon||'📘')}</div><div class="fs-card-info"><div class="fs-card-title">${f.nom}</div><div class="fs-card-meta">${f.etablissement||''} · ${f.niveau||''} · ${f.duree||''}</div></div><div class="fs-card-val">${f.score_matching||0}%</div></div></div>`;
         });
     }
 
@@ -81,7 +138,7 @@ function renderNotesResult(d){
             advicesList.innerHTML+=`
             <div class="fs-card" style="border-left:3px solid var(--accent2); background:color-mix(in srgb, var(--accent2) 4%, transparent); padding: 0.85rem; display: block; height: auto; text-align: left;">
                 <div style="font-size:0.76rem; font-weight:500; color:var(--ink); line-height:1.55;">
-                    💡 ${adv.text}
+                    ${getProIconJs('💡')} ${adv.text}
                 </div>
                 <div style="font-size:0.68rem; color:var(--ink40); font-weight:600; margin-top:0.35rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
                     <span>Cible : <strong>${adv.filiere}</strong></span>
@@ -140,7 +197,7 @@ function renderFiliereResult(formations){
     // Cards
     const cards=document.getElementById('fs-filiere-cards');cards.innerHTML='';
     formations.forEach((f,i)=>{
-        cards.innerHTML+=`<div class="fs-card" style="border-left:3px solid ${COLORS[i]}"><div class="fs-card-row"><div class="fs-card-icon" style="background:${COLORS[i]}15;border-color:${COLORS[i]}33">${f.icon||'📘'}</div><div class="fs-card-info"><div class="fs-card-title">${f.nom}</div><div class="fs-card-meta">${f.etablissement} · ${f.duree} · ${f.salaire_min}-${f.salaire_max} TND</div></div><div class="fs-card-val" style="color:${COLORS[i]}">${f.score_matching}%</div></div></div>`;
+        cards.innerHTML+=`<div class="fs-card" style="border-left:3px solid ${COLORS[i]}"><div class="fs-card-row"><div class="fs-card-icon" style="background:${COLORS[i]}15;border-color:${COLORS[i]}33">${getProIconJs(f.icon||'📘')}</div><div class="fs-card-info"><div class="fs-card-title">${f.nom}</div><div class="fs-card-meta">${f.etablissement} · ${f.duree} · ${f.salaire_min}-${f.salaire_max} TND</div></div><div class="fs-card-val" style="color:${COLORS[i]}">${f.score_matching}%</div></div></div>`;
     });
 }
 
@@ -153,7 +210,7 @@ function initSecteurs(){
     el.innerHTML='';
     data.forEach(s=>{
         const riskColor=s.risque==='élevé'?'#ef4444':s.risque==='modéré'?'var(--gold)':'var(--accent3)';
-        el.innerHTML+=`<div class="fs-card"><div class="fs-card-row"><div class="fs-card-icon">${s.icon}</div><div class="fs-card-info"><div class="fs-card-title">${s.label}</div><div class="fs-card-meta">Insertion: ${s.insertion}% · Croissance: +${s.croissance}%/an · Saturation: <span style="color:${riskColor};font-weight:700">${s.risque}</span></div><div class="fs-bar-wrap" style="margin-top:.4rem"><div class="fs-bar-fill" style="width:${s.insertion}%;background:var(--accent3)"></div></div></div><div style="text-align:right"><div class="fs-card-val">${s.projection_5ans}%</div><div style="font-size:.62rem;color:var(--ink30);font-weight:600">2030</div></div></div></div>`;
+        el.innerHTML+=`<div class="fs-card"><div class="fs-card-row"><div class="fs-card-icon">${getProIconJs(s.icon)}</div><div class="fs-card-info"><div class="fs-card-title">${s.label}</div><div class="fs-card-meta">Insertion: ${s.insertion}% · Croissance: +${s.croissance}%/an · Saturation: <span style="color:${riskColor};font-weight:700">${s.risque}</span></div><div class="fs-bar-wrap" style="margin-top:.4rem"><div class="fs-bar-fill" style="width:${s.insertion}%;background:var(--accent3)"></div></div></div><div style="text-align:right"><div class="fs-card-val">${s.projection_5ans}%</div><div style="font-size:.62rem;color:var(--ink30);font-weight:600">2030</div></div></div></div>`;
     });
 }
 initSecteurs();
@@ -193,11 +250,11 @@ function renderROI(d){
 function initCompatibilite(){
     const data=@json($compatibilite ?? []);
     const el=document.getElementById('fs-compat-list');if(!el) return;
-    if(!data.has_profile){el.innerHTML='<div class="fs-placeholder"><div style="font-size:2.5rem;margin-bottom:.75rem">🧭</div><div style="font-size:.88rem;font-weight:500;color:var(--ink60)">'+data.message+'</div><a href="{{ route("student.pipeline") }}" class="fs-btn" style="max-width:260px;margin:1rem auto 0">Passer le test RIASEC</a></div>';return;}
+    if(!data.has_profile){el.innerHTML='<div class="fs-placeholder"><div style="font-size:2.5rem;margin-bottom:.75rem">'+getProIconJs('🧭')+'</div><div style="font-size:.88rem;font-weight:500;color:var(--ink60)">'+data.message+'</div><a href="{{ route("student.pipeline") }}" class="fs-btn" style="max-width:260px;margin:1rem auto 0">Passer le test RIASEC</a></div>';return;}
     el.innerHTML=`<div class="fs-score-box"><div class="fs-score-label">Profil RIASEC dominant</div><span class="fs-score-num" style="font-size:2.4rem">${data.riasec_code}</span></div>`;
     data.top_secteurs.forEach(s=>{
         const w=s.compatibilite;
-        el.innerHTML+=`<div class="fs-card"><div class="fs-card-row"><div class="fs-card-icon">${s.icon}</div><div class="fs-card-info"><div class="fs-card-title">${s.label}</div><div class="fs-bar-wrap"><div class="fs-bar-fill" style="width:${w}%;background:${w>=60?'var(--accent3)':w>=35?'var(--gold)':'var(--ink30)'}"></div></div></div><div class="fs-card-val" style="color:${w>=60?'var(--accent3)':'var(--gold)'}">${w}%</div></div></div>`;
+        el.innerHTML+=`<div class="fs-card"><div class="fs-card-row"><div class="fs-card-icon">${getProIconJs(s.icon)}</div><div class="fs-card-info"><div class="fs-card-title">${s.label}</div><div class="fs-bar-wrap"><div class="fs-bar-fill" style="width:${w}%;background:${w>=60?'var(--accent3)':w>=35?'var(--gold)':'var(--ink30)'}"></div></div></div><div class="fs-card-val" style="color:${w>=60?'var(--accent3)':'var(--gold)'}">${w}%</div></div></div>`;
     });
 }
 initCompatibilite();

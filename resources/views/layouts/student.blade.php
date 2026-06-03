@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
 <head>
@@ -10,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -432,7 +436,7 @@
 
             <a href="{{ route('profile.edit') }}" style="text-decoration:none;">
                 <div class="avatar-nav" title="{{ auth()->user()?->name ?? 'Invité' }}" style="overflow:hidden;">
-                    @if(auth()->user()->avatar)
+                    @if(auth()->user()?->avatar)
                         <img src="{{ asset('storage/' . auth()->user()->avatar) }}" style="width:100%; height:100%; object-fit:cover;">
                     @else
                         {{ strtoupper(substr(auth()->user()?->name ?? 'I', 0, 1)) }}
@@ -502,8 +506,8 @@
                             <div style="position: absolute; bottom: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent3)); width: {{ $progressPercent }}%; transition: width 0.8s ease;"></div>
                             
                             <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 280px;">
-                                <div style="width: 44px; height: 44px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 10%, transparent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
-                                    🎯
+                                <div style="width: 44px; height: 44px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 10%, transparent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; color: var(--accent);">
+                                    {!! get_pro_icon('🎯') !!}
                                 </div>
                                 <div>
                                     <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--ink); margin-bottom: 0.15rem;">Progression de ton orientation</h4>

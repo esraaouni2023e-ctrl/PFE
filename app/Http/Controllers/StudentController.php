@@ -32,6 +32,20 @@ class StudentController extends Controller
         $portfolios = $user->portfolioItems()->latest()->get();
         $roadmaps = $user->careerRoadmaps()->latest()->get();
 
+        // Associer le profil invité (si existant) à l'utilisateur nouvellement connecté
+        $sessionProfileId = session('riasec_profile_id');
+        if ($sessionProfileId) {
+            $guestProfil = \App\Models\ProfileRiasec::find($sessionProfileId);
+            if ($guestProfil && $guestProfil->user_id === null) {
+                $guestProfil->update(['user_id' => $user->id]);
+                if ($guestProfil->test_session_id) {
+                    \App\Models\AnswerRiasec::where('test_session_id', $guestProfil->test_session_id)
+                        ->whereNull('user_id')
+                        ->update(['user_id' => $user->id]);
+                }
+            }
+        }
+
         // Récupération du dernier profil de l'étudiant (complet ou en cours)
         $profilRiasec = \App\Models\ProfileRiasec::pourUser($user->id)
             ->complets()
@@ -165,12 +179,12 @@ class StudentController extends Controller
 
         // Formations de base (pour le MVP ou fallback)
         $formations = [
-            ['icon'=>'🖥️','name'=>'Licence Informatique', 'univ'=>'ESPRIT – Tunis'],
-            ['icon'=>'📊','name'=>'Master Data Science', 'univ'=>'ENSI – La Manouba'],
-            ['icon'=>'🤖','name'=>'Ingénierie IA', 'univ'=>'SUP\'COM – Tunis'],
-            ['icon'=>'🔒','name'=>'Cybersécurité', 'univ'=>'ISI – Tunis'],
-            ['icon'=>'🌐','name'=>'Développement Web', 'univ'=>'ISET – Sfax'],
-            ['icon'=>'📱','name'=>'Développement Mobile', 'univ'=>'ISIM – Monastir'],
+            ['icon'=>'bi bi-laptop','name'=>'Licence Informatique', 'univ'=>'ESPRIT – Tunis'],
+            ['icon'=>'bi bi-bar-chart-line','name'=>'Master Data Science', 'univ'=>'ENSI – La Manouba'],
+            ['icon'=>'bi bi-robot','name'=>'Ingénierie IA', 'univ'=>'SUP\'COM – Tunis'],
+            ['icon'=>'bi bi-shield-lock','name'=>'Cybersécurité', 'univ'=>'ISI – Tunis'],
+            ['icon'=>'bi bi-globe','name'=>'Développement Web', 'univ'=>'ISET – Sfax'],
+            ['icon'=>'bi bi-phone','name'=>'Développement Mobile', 'univ'=>'ISIM – Monastir'],
         ];
 
         $predictions = $this->predictor->predictAdmissionChances($profile, $formations);
@@ -242,7 +256,7 @@ class StudentController extends Controller
                     $predictions = [];
                     foreach ($recs['recommandations'] as $r) {
                         $predictions[] = [
-                            'icon'  => '🎯',
+                            'icon'  => 'bi bi-mortarboard',
                             'name'  => $r['Nom_Filiere'] ?? 'Formation',
                             'univ'  => ($r['Etablissement'] ?? '') . ' – ' . ($r['Universite'] ?? ''),
                             'score' => isset($r['Score_Final_Contextuel']) ? round($r['Score_Final_Contextuel'] * 100) : (isset($r['Score_Final']) ? round($r['Score_Final'] * 100) : 80),

@@ -123,7 +123,7 @@
 
     @if(session('success'))
     <div style="background:color-mix(in srgb,var(--accent3) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent3) 22%,transparent);color:var(--accent3);border-radius:var(--r);padding:.65rem 1rem;margin-bottom:1.5rem;font-size:.83rem;">
-        ✅ {{ session('success') }}
+        {!! get_pro_icon('✅') !!} {{ session('success') }}
     </div>
     @endif
 
@@ -246,17 +246,7 @@
                 @endforelse
             </div>
         </div>
-        <div class="res-card">
-            <p class="res-card-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                Filières recommandées
-            </p>
-            <div class="pills-row">
-                <a href="{{ route('student.recommendations') }}" class="pill-filiere" style="text-decoration:none; display:inline-block;">
-                    ✨ Voir mes recommandations IA →
-                </a>
-            </div>
-        </div>
+
     </div>
 
     {{-- ── Fiabilité ── --}}
@@ -285,7 +275,7 @@
             Notre nouveau moteur d'intelligence artificielle croise vos résultats psychométriques complets (RIASEC, Big Five, GATB, Schwartz) avec vos performances académiques pour vous proposer les meilleures filières d'orientation en Tunisie.
         </p>
         <a href="{{ route('student.recommendations') }}" class="btn-fill" style="font-size: 1rem; padding: 1rem 2.5rem; box-shadow: 0 4px 20px rgba(212,98,42,0.4);">
-            ✨ Générer mes recommandations IA
+            {!! get_pro_icon('✨') !!} Générer mes recommandations IA
         </a>
     </div>
 
@@ -297,6 +287,15 @@
             Enregistrer mon profil
         </button>
         @endauth
+        @guest
+        <a href="{{ route('login') }}" class="btn-fill">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Se connecter pour enregistrer
+        </a>
+        <a href="{{ route('register') }}" class="btn-ghost">
+            Créer un compte
+        </a>
+        @endguest
         <form action="{{ route('riasec.initialize') }}" method="POST">
             @csrf <input type="hidden" name="restart" value="1">
             <button type="submit" class="btn-ghost">
