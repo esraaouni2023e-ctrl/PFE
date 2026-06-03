@@ -23,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
+        if (app()->environment('production') || env('APP_ENV') === 'production') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Auto-create Super Admin if not exists (credentials from .env)
         if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
             if (!\App\Models\User::where('role', \App\Models\User::ROLE_SUPER_ADMIN)->exists()) {
