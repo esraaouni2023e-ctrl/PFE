@@ -45,18 +45,10 @@ services:
       - key: SUPER_ADMIN_PASSWORD
         sync: false
       - key: MAIL_MAILER
-        value: smtp
-      - key: MAIL_HOST
-        value: "smtp-relay.brevo.com"
-      - key: MAIL_PORT
-        value: "587"
-      - key: MAIL_USERNAME
-        sync: false  # Votre email de compte Brevo
-      - key: MAIL_PASSWORD
-        sync: false  # Votre clé SMTP Brevo (générée depuis votre compte)
-      - key: MAIL_ENCRYPTION
-        value: "tls"
+        value: brevo
+      - key: BREVO_API_KEY
+        sync: false  # Votre cle API v3 Brevo
       - key: MAIL_FROM_ADDRESS
-        sync: false  # Votre email d'expéditeur validé dans Brevo
+        sync: false  # Votre email d'expediteur valide dans Brevo (ex: esraaouni2023e@gmail.com)
       - key: MAIL_FROM_NAME
         value: "CapAvenir"
