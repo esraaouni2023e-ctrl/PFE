@@ -21,7 +21,8 @@ sed -i "s/listen 80;/listen ${PORT};/g" /etc/nginx/http.d/default.conf
       echo "Database already seeded (filieres count: $FILIERES_COUNT)."
   fi
 
-  # Cache Laravel routes and views
+  # Cache Laravel configuration, routes and views
+  php artisan config:cache
   php artisan route:cache
   php artisan view:cache
 } > /var/www/html/storage/logs/startup.log 2>&1

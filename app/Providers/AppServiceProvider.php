@@ -23,8 +23,20 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
-        if (app()->environment('production') || env('APP_ENV') === 'production') {
+        // Force HTTPS detection behind Render's reverse proxy.
+        // This MUST run before the session middleware so that cookies with the
+        // Secure flag are correctly handled by the browser.
+        if (
+            app()->environment('production')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+        ) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
+
+            // Also tell PHP/Symfony Request that we are on HTTPS,
+            // so Request::isSecure() returns true and Secure cookies work.
+            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+                $_SERVER['HTTPS'] = 'on';
+            }
         }
 
         // Auto-create Super Admin if not exists (credentials from .env)
