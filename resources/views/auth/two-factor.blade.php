@@ -12,7 +12,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('two-factor.store') }}" style="display:flex;flex-direction:column;gap:1.5rem;">
+    <form id="two-factor-form" method="POST" action="{{ route('two-factor.store') }}" style="display:flex;flex-direction:column;gap:1.5rem;">
         @csrf
 
         {{-- Code 2FA --}}
@@ -77,7 +77,7 @@
         });
 
         let submitted = false;
-        const form = document.querySelector('form');
+        const form = document.getElementById('two-factor-form');
         const codeInput = document.getElementById('two_factor_code');
         const submitBtn = document.querySelector('.btn-futuristic');
 
@@ -88,8 +88,12 @@
                     return false;
                 }
                 submitted = true;
-                if (submitBtn) submitBtn.disabled = true;
                 if (codeInput) codeInput.readOnly = true;
+
+                // Defer button disabling using setTimeout to prevent browser from cancelling submission
+                setTimeout(() => {
+                    if (submitBtn) submitBtn.disabled = true;
+                }, 10);
             });
         }
 
@@ -97,12 +101,14 @@
         if (codeInput && form) {
             codeInput.addEventListener('input', function(e) {
                 if (this.value.length === 6 && !submitted) {
-                    submitted = true;
-                    if (submitBtn) submitBtn.disabled = true;
-                    this.readOnly = true;
                     if (typeof form.requestSubmit === 'function') {
                         form.requestSubmit();
                     } else {
+                        submitted = true;
+                        if (codeInput) codeInput.readOnly = true;
+                        setTimeout(() => {
+                            if (submitBtn) submitBtn.disabled = true;
+                        }, 10);
                         form.submit();
                     }
                 }
