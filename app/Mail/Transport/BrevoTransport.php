@@ -50,12 +50,13 @@ class BrevoTransport extends AbstractTransport
             $payload['textContent'] = $email->getTextBody();
         }
 
-        // Send request to Brevo API
-        $response = Http::withHeaders([
-            'api-key' => $this->apiKey,
-            'accept' => 'application/json',
-            'content-type' => 'application/json',
-        ])->post('https://api.brevo.com/v3/smtp/email', $payload);
+        // Send request to Brevo API with timeout of 5 seconds
+        $response = Http::timeout(5)
+            ->withHeaders([
+                'api-key' => $this->apiKey,
+                'accept' => 'application/json',
+                'content-type' => 'application/json',
+            ])->post('https://api.brevo.com/v3/smtp/email', $payload);
 
         if (!$response->successful()) {
             Log::error('Brevo API Mail Error: ' . $response->body());

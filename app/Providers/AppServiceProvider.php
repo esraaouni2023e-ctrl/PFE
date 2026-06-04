@@ -45,30 +45,36 @@ class AppServiceProvider extends ServiceProvider
 
         // Auto-create or sync Super Admin (credentials from config/capavenir.php)
         try {
-            if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
-                $adminEmail = config('capavenir.super_admin.email', 'admin@capavenir.tn');
-                $adminPassword = config('capavenir.super_admin.password');
+            // Cache the sync status to avoid querying the DB on every HTTP request
+            if (!\Illuminate\Support\Facades\Cache::has('super_admin_synced')) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
+                    $adminEmail = config('capavenir.super_admin.email', 'admin@capavenir.tn');
+                    $adminPassword = config('capavenir.super_admin.password');
 
-                $superAdmin = \App\Models\User::where('role', \App\Models\User::ROLE_SUPER_ADMIN)->first();
+                    $superAdmin = \App\Models\User::where('role', \App\Models\User::ROLE_SUPER_ADMIN)->first();
 
-                if (!$superAdmin) {
-                    if ($adminPassword) {
-                        \App\Models\User::create([
-                            'name'     => config('capavenir.super_admin.name', 'Super Admin'),
-                            'email'    => $adminEmail,
-                            'password' => \Illuminate\Support\Facades\Hash::make($adminPassword),
-                            'role'     => \App\Models\User::ROLE_SUPER_ADMIN,
-                            'is_admin' => true,
-                        ]);
+                    if (!$superAdmin) {
+                        if ($adminPassword) {
+                            \App\Models\User::create([
+                                'name'     => config('capavenir.super_admin.name', 'Super Admin'),
+                                'email'    => $adminEmail,
+                                'password' => \Illuminate\Support\Facades\Hash::make($adminPassword),
+                                'role'     => \App\Models\User::ROLE_SUPER_ADMIN,
+                                'is_admin' => true,
+                            ]);
+                        } else {
+                            \Illuminate\Support\Facades\Log::warning('SUPER_ADMIN_PASSWORD is not set — skipping auto-creation.');
+                        }
                     } else {
-                        \Illuminate\Support\Facades\Log::warning('SUPER_ADMIN_PASSWORD is not set — skipping auto-creation.');
+                        // Mettre à jour l'email si la configuration a changé
+                        if ($superAdmin->email !== $adminEmail && !empty($adminEmail)) {
+                            $superAdmin->email = $adminEmail;
+                            $superAdmin->save();
+                        }
                     }
-                } else {
-                    // Mettre à jour l'email si la configuration a changé
-                    if ($superAdmin->email !== $adminEmail && !empty($adminEmail)) {
-                        $superAdmin->email = $adminEmail;
-                        $superAdmin->save();
-                    }
+
+                    // Mark as synced in cache for 24 hours (86400 seconds)
+                    \Illuminate\Support\Facades\Cache::put('super_admin_synced', true, 86400);
                 }
             }
         } catch (\Throwable $e) {
