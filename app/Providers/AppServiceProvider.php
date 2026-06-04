@@ -39,22 +39,22 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
-        // Auto-create Super Admin if not exists (credentials from .env)
+        // Auto-create Super Admin if not exists (credentials from config/capavenir.php)
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
                 if (!\App\Models\User::where('role', \App\Models\User::ROLE_SUPER_ADMIN)->exists()) {
-                    $adminPassword = env('SUPER_ADMIN_PASSWORD');
+                    $adminPassword = config('capavenir.super_admin.password');
 
                     if ($adminPassword) {
                         \App\Models\User::create([
-                            'name'     => env('SUPER_ADMIN_NAME', 'Super Admin'),
-                            'email'    => env('SUPER_ADMIN_EMAIL', 'admin@capavenir.tn'),
+                            'name'     => config('capavenir.super_admin.name', 'Super Admin'),
+                            'email'    => config('capavenir.super_admin.email', 'admin@capavenir.tn'),
                             'password' => \Illuminate\Support\Facades\Hash::make($adminPassword),
                             'role'     => \App\Models\User::ROLE_SUPER_ADMIN,
                             'is_admin' => true,
                         ]);
                     } else {
-                        \Illuminate\Support\Facades\Log::warning('SUPER_ADMIN_PASSWORD is not set in .env — skipping auto-creation.');
+                        \Illuminate\Support\Facades\Log::warning('SUPER_ADMIN_PASSWORD is not set — skipping auto-creation.');
                     }
                 }
             }

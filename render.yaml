@@ -40,4 +40,23 @@ services:
         sync: false
       - key: PYTHON_API_URL
         sync: false
-
+      - key: SUPER_ADMIN_EMAIL
+        value: "admin@capavenir.tn"
+      - key: SUPER_ADMIN_PASSWORD
+        sync: false
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "2525"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_ENCRYPTION
+        value: "tls"
+      - key: MAIL_FROM_ADDRESS
+        value: "noreply@capavenir.tn"
+      - key: MAIL_FROM_NAME
+        value: "CapAvenir"

@@ -45,8 +45,12 @@ class TwoFactorController extends Controller
         
         $user->generateTwoFactorCode();
         
-        Mail::to($user->email)->send(new TwoFactorCodeMail($user));
-        
-        return back()->with('success', 'Un nouveau code vous a été envoyé par email.');
+        try {
+            Mail::to($user->email)->send(new TwoFactorCodeMail($user));
+            return back()->with('success', 'Un nouveau code vous a été envoyé par email.');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('2FA Resend Error: ' . $e->getMessage());
+            return back()->withErrors(['two_factor_code' => 'Impossible d\'envoyer l\'email. Veuillez réessayer.']);
+        }
     }
 }

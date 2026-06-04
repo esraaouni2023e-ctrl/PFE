@@ -15,7 +15,7 @@ class EarlyStoppingService
     public function __construct()
     {
         $this->client = new Client(['timeout' => 5.0]);
-        $this->pythonApiUrl = env('PYTHON_API_URL', 'http://127.0.0.1:5000');
+        $this->pythonApiUrl = config('capavenir.python_api_url', 'http://127.0.0.1:5000');
     }
 
     /**

@@ -33,11 +33,14 @@ class LoginController extends Controller
                 ])->onlyInput('email');
             }
             
-            // Générer le code 2FA
+            // Générer le code 2FA et envoyer l'email
             $user->generateTwoFactorCode();
 
-            // Envoyer l'email
-            Mail::to($user->email)->send(new TwoFactorCodeMail($user));
+            try {
+                Mail::to($user->email)->send(new TwoFactorCodeMail($user));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('2FA Mail Error: ' . $e->getMessage());
+            }
 
             return redirect()->route('two-factor.index');
         }
