@@ -267,3 +267,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/two-factor', [TwoFactorController::class, 'store'])->name('two-factor.store');
     Route::post('/two-factor/resend', [TwoFactorController::class, 'resend'])->name('two-factor.resend');
 });
+
+Route::get('/test-mail', function () {
+    try {
+        $email = request('email', 'esraaouni2023e@gmail.com');
+        \Illuminate\Support\Facades\Mail::raw('Ceci est un email de test de CapAvenir via Brevo.', function ($message) use ($email) {
+            $message->to($email)
+                    ->subject('Test SMTP CapAvenir');
+        });
+        return "Succes ! Email de test envoye avec succes a : " . htmlspecialchars($email) . "<br>Config utilisee :<br>- Mailer: " . config('mail.default') . "<br>- Host: " . config('mail.mailers.smtp.host') . "<br>- Port: " . config('mail.mailers.smtp.port') . "<br>- Username: " . config('mail.mailers.smtp.username') . "<br>- From: " . config('mail.from.address');
+    } catch (\Throwable $e) {
+        return "<h1>Erreur d'envoi SMTP</h1><pre>" . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "</pre>";
+    }
+});
