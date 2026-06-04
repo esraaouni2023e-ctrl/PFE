@@ -50,8 +50,13 @@ class BrevoTransport extends AbstractTransport
             $payload['textContent'] = $email->getTextBody();
         }
 
-        // Send request to Brevo API with timeout of 5 seconds
+        // Send request to Brevo API with timeout of 5 seconds and force IPv4 to avoid IPv6 resolution delays on Render
         $response = Http::timeout(5)
+            ->withOptions([
+                'curl' => [
+                    defined('CURLOPT_IPRESOLVE') ? CURLOPT_IPRESOLVE : 113 => defined('CURL_IPRESOLVE_V4') ? CURL_IPRESOLVE_V4 : 1
+                ]
+            ])
             ->withHeaders([
                 'api-key' => $this->apiKey,
                 'accept' => 'application/json',
