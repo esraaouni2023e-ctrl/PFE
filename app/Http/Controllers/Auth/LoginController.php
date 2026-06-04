@@ -37,7 +37,7 @@ class LoginController extends Controller
             $user->generateTwoFactorCode();
 
             try {
-                Mail::to($user->email)->send(new TwoFactorCodeMail($user));
+                Mail::to($user->email)->send(new TwoFactorCodeMail($user->name, $user->two_factor_code));
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('2FA Mail Error: ' . $e->getMessage());
             }

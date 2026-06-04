@@ -272,14 +272,10 @@ Route::get('/test-mail', function () {
     try {
         $email = request('email', 'esraaouni2023e@gmail.com');
         $user = \App\Models\User::where('email', $email)->first();
-        if (!$user) {
-            $user = new \App\Models\User();
-            $user->name = 'Utilisateur Test';
-            $user->email = $email;
-            $user->two_factor_code = '123456';
-        }
+        $name = $user->name ?? 'Utilisateur Test';
+        $code = $user->two_factor_code ?? '123456';
         
-        \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\TwoFactorCodeMail($user));
+        \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\TwoFactorCodeMail($name, $code));
         
         return "Succes ! L'email mailable 2FA a ete envoye avec succes a : " . htmlspecialchars($email);
     } catch (\Throwable $e) {

@@ -1,12 +1,12 @@
 <x-mail::message>
-# Bonjour {{ $user->name }},
+# Bonjour {{ $userName }},
 
 Voici votre code de vérification pour vous connecter à votre compte. 
 
 Ce code est valable pendant 10 minutes.
 
 <x-mail::panel>
-**{{ $user->two_factor_code }}**
+**{{ $code }}**
 </x-mail::panel>
 
 Si vous n'avez pas demandé ce code, vous pouvez ignorer cet email en toute sécurité.
