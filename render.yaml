@@ -47,16 +47,16 @@ services:
       - key: MAIL_MAILER
         value: smtp
       - key: MAIL_HOST
-        sync: false
+        value: "smtp.gmail.com"
       - key: MAIL_PORT
-        value: "2525"
+        value: "587"
       - key: MAIL_USERNAME
-        sync: false
+        sync: false  # Votre adresse Gmail complète
       - key: MAIL_PASSWORD
-        sync: false
+        sync: false  # Mot de passe d'application Google (16 caractères)
       - key: MAIL_ENCRYPTION
         value: "tls"
       - key: MAIL_FROM_ADDRESS
-        value: "noreply@capavenir.tn"
+        sync: false  # Doit être votre adresse Gmail
       - key: MAIL_FROM_NAME
         value: "CapAvenir"
