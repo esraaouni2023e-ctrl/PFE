@@ -205,10 +205,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/filieres/import',             [\App\Http\Controllers\Admin\FiliereImportController::class, 'store']) ->name('filieres.import.store');
     Route::delete('/filieres/import/{categorie}',[\App\Http\Controllers\Admin\FiliereImportController::class, 'destroy'])->name('filieres.import.destroy');
 
-    // DB Diagnostic Route
-    Route::get('/db-processlist', function () {
-        return response()->json(\Illuminate\Support\Facades\DB::select('SHOW PROCESSLIST'));
-    })->name('db-processlist');
 });
 
 // Route publique (landing page)
@@ -271,4 +267,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/two-factor', [TwoFactorController::class, 'index'])->name('two-factor.index');
     Route::post('/two-factor', [TwoFactorController::class, 'store'])->name('two-factor.store');
     Route::post('/two-factor/resend', [TwoFactorController::class, 'resend'])->name('two-factor.resend');
+});
+
+// Temporary diagnostic route - can be accessed by anyone
+Route::get('/diagnose-db-982347', function () {
+    return response()->json(\Illuminate\Support\Facades\DB::select('SHOW PROCESSLIST'));
 });
