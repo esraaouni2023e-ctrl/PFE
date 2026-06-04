@@ -29,7 +29,7 @@ class SiaepiRecommendationEngine
     {
         try {
             return \Illuminate\Support\Facades\Cache::rememberForever('siaepi_filieres', function () {
-                $dbFilieres = Filiere::with('profile')->get();
+                $dbFilieres = Filiere::with(['profile', 'specialisation.metiers'])->get();
                 $filieres = [];
                 foreach ($dbFilieres as $f) {
                     $profile = $f->profile;

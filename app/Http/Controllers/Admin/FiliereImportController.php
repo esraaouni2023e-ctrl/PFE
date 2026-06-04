@@ -49,6 +49,7 @@ class FiliereImportController extends Controller
         try {
             $import = new FiliereImport($request->categorie);
             Excel::import($import, Storage::path($path));
+            \Illuminate\Support\Facades\Cache::forget('siaepi_filieres');
 
             // Nettoyage du fichier temporaire
             Storage::delete($path);
@@ -79,6 +80,7 @@ class FiliereImportController extends Controller
         abort_unless(in_array(strtoupper($categorie), self::CATEGORIES), 404);
 
         $deleted = Filiere::where('categorie', strtoupper($categorie))->delete();
+        \Illuminate\Support\Facades\Cache::forget('siaepi_filieres');
 
         return back()->with('success', "{$deleted} filières supprimées de la catégorie {$categorie}.");
     }

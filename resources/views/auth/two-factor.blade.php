@@ -68,17 +68,45 @@
 
     <script>
         document.querySelector('.btn-futuristic').addEventListener('mouseenter', () => {
-            document.querySelector('.btn-arrow').style.transform = 'translateX(4px)';
+            const arrow = document.querySelector('.btn-arrow');
+            if (arrow) arrow.style.transform = 'translateX(4px)';
         });
         document.querySelector('.btn-futuristic').addEventListener('mouseleave', () => {
-            document.querySelector('.btn-arrow').style.transform = 'translateX(0)';
+            const arrow = document.querySelector('.btn-arrow');
+            if (arrow) arrow.style.transform = 'translateX(0)';
         });
 
+        let submitted = false;
+        const form = document.querySelector('form');
+        const codeInput = document.getElementById('two_factor_code');
+        const submitBtn = document.querySelector('.btn-futuristic');
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (submitted) {
+                    e.preventDefault();
+                    return false;
+                }
+                submitted = true;
+                if (submitBtn) submitBtn.disabled = true;
+                if (codeInput) codeInput.readOnly = true;
+            });
+        }
+
         // Auto-submit when 6 digits are entered
-        document.getElementById('two_factor_code').addEventListener('input', function(e) {
-            if (this.value.length === 6) {
-                this.form.submit();
-            }
-        });
+        if (codeInput && form) {
+            codeInput.addEventListener('input', function(e) {
+                if (this.value.length === 6 && !submitted) {
+                    submitted = true;
+                    if (submitBtn) submitBtn.disabled = true;
+                    this.readOnly = true;
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                }
+            });
+        }
     </script>
 </x-auth-layout>

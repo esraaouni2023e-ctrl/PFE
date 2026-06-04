@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Filiere extends Model
 {
+    protected static function boot()
+    {
+        parent::boot();
+        static::saved(fn() => \Illuminate\Support\Facades\Cache::forget('siaepi_filieres'));
+        static::deleted(fn() => \Illuminate\Support\Facades\Cache::forget('siaepi_filieres'));
+    }
+
     protected $fillable = [
         'code_filiere', 
         'nom_filiere', 

@@ -13,6 +13,13 @@ use Illuminate\Database\Eloquent\Model;
  */
 class FiliereProfile extends Model
 {
+    protected static function boot()
+    {
+        parent::boot();
+        static::saved(fn() => \Illuminate\Support\Facades\Cache::forget('siaepi_filieres'));
+        static::deleted(fn() => \Illuminate\Support\Facades\Cache::forget('siaepi_filieres'));
+    }
+
     protected $table = 'filiere_profiles';
 
     protected $fillable = [
