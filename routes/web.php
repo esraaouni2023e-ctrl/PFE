@@ -204,6 +204,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/filieres/import',              [\App\Http\Controllers\Admin\FiliereImportController::class, 'index']) ->name('filieres.import');
     Route::post('/filieres/import',             [\App\Http\Controllers\Admin\FiliereImportController::class, 'store']) ->name('filieres.import.store');
     Route::delete('/filieres/import/{categorie}',[\App\Http\Controllers\Admin\FiliereImportController::class, 'destroy'])->name('filieres.import.destroy');
+
+    // DB Diagnostic Route
+    Route::get('/db-processlist', function () {
+        return response()->json(\Illuminate\Support\Facades\DB::select('SHOW PROCESSLIST'));
+    })->name('db-processlist');
 });
 
 // Route publique (landing page)
