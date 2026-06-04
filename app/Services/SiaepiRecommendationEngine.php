@@ -28,109 +28,111 @@ class SiaepiRecommendationEngine
     public function loadFilieres(): array
     {
         try {
-            $dbFilieres = Filiere::with('profile')->get();
-            $filieres = [];
-            foreach ($dbFilieres as $f) {
-                $profile = $f->profile;
-                $codeRiasec = strtoupper(trim($f->code_riasec ?? ''));
-                $nomFiliere = strtolower($f->nom_filiere ?? '');
-                $domain = $this->detectDomain($nomFiliere, $codeRiasec);
+            return \Illuminate\Support\Facades\Cache::rememberForever('siaepi_filieres', function () {
+                $dbFilieres = Filiere::with('profile')->get();
+                $filieres = [];
+                foreach ($dbFilieres as $f) {
+                    $profile = $f->profile;
+                    $codeRiasec = strtoupper(trim($f->code_riasec ?? ''));
+                    $nomFiliere = strtolower($f->nom_filiere ?? '');
+                    $domain = $this->detectDomain($nomFiliere, $codeRiasec);
 
-                // Reconstruct RIASEC vector dynamically if missing
-                $riasecVec = ['R'=>0.5, 'I'=>0.5, 'A'=>0.5, 'S'=>0.5, 'E'=>0.5, 'C'=>0.5];
-                if (strlen($codeRiasec) >= 3) {
-                    $letters = str_split(substr($codeRiasec, 0, 3));
-                    foreach (['R', 'I', 'A', 'S', 'E', 'C'] as $d) {
-                        $pos = array_search($d, $letters);
-                        if ($pos === 0)      $riasecVec[$d] = 1.0;
-                        elseif ($pos === 1)  $riasecVec[$d] = 0.8;
-                        elseif ($pos === 2)  $riasecVec[$d] = 0.6;
-                        else                 $riasecVec[$d] = 0.2;
+                    // Reconstruct RIASEC vector dynamically if missing
+                    $riasecVec = ['R'=>0.5, 'I'=>0.5, 'A'=>0.5, 'S'=>0.5, 'E'=>0.5, 'C'=>0.5];
+                    if (strlen($codeRiasec) >= 3) {
+                        $letters = str_split(substr($codeRiasec, 0, 3));
+                        foreach (['R', 'I', 'A', 'S', 'E', 'C'] as $d) {
+                            $pos = array_search($d, $letters);
+                            if ($pos === 0)      $riasecVec[$d] = 1.0;
+                            elseif ($pos === 1)  $riasecVec[$d] = 0.8;
+                            elseif ($pos === 2)  $riasecVec[$d] = 0.6;
+                            else                 $riasecVec[$d] = 0.2;
+                        }
                     }
+
+                    $riasec_r = $profile ? $profile->riasec_r : $riasecVec['R'];
+                    $riasec_i = $profile ? $profile->riasec_i : $riasecVec['I'];
+                    $riasec_a = $profile ? $profile->riasec_a : $riasecVec['A'];
+                    $riasec_s = $profile ? $profile->riasec_s : $riasecVec['S'];
+                    $riasec_e = $profile ? $profile->riasec_e : $riasecVec['E'];
+                    $riasec_c = $profile ? $profile->riasec_c : $riasecVec['C'];
+
+                    $riasecSum = $riasec_r + $riasec_i + $riasec_a + $riasec_s + $riasec_e + $riasec_c;
+                    if ($riasecSum < 0.1) {
+                        throw new \Exception("Filiere RIASEC profile is null or invalid for " . ($f->nom_filiere ?? 'Unknown'));
+                    }
+
+                    // Domain-specific target Big Five defaults
+                    $b5Defaults = $this->domainPsychoprofile[$domain]['B5'] ?? ['O'=>0.0,'C'=>0.0,'E'=>0.0,'A'=>0.0,'N'=>0.0];
+
+                    // Domain-specific GATB defaults
+                    $gatbDefaults = [
+                        'technique'   => ['G' => 60, 'V' => 50, 'N' => 60, 'S' => 60],
+                        'sciences'    => ['G' => 65, 'V' => 50, 'N' => 60, 'S' => 55],
+                        'lettres'     => ['G' => 50, 'V' => 65, 'N' => 45, 'S' => 45],
+                        'economie'    => ['G' => 55, 'V' => 55, 'N' => 60, 'S' => 50],
+                        'arts'        => ['G' => 50, 'V' => 50, 'N' => 45, 'S' => 60],
+                        'social'      => ['G' => 55, 'V' => 60, 'N' => 50, 'S' => 50],
+                        'sante'       => ['G' => 65, 'V' => 60, 'N' => 55, 'S' => 55],
+                        'default'     => ['G' => 50, 'V' => 50, 'N' => 50, 'S' => 50],
+                    ];
+                    $gDefs = $gatbDefaults[$domain] ?? $gatbDefaults['default'];
+
+                    $filieres[] = [
+                        'Code_Filiere'       => $f->code_filiere,
+                        'Nom_Filiere'        => $f->nom_filiere,
+                        'Universite'         => $f->universite,
+                        'Etablissement'      => $f->etablissement,
+                        'SDO_2023'           => $f->sdo_2023 !== null ? (float)$f->sdo_2023 : 0.0,
+                        'SDO_2024'           => $f->sdo_2024 !== null ? (float)$f->sdo_2024 : 0.0,
+                        'SDO_2025'           => $f->sdo_2025 !== null ? (float)$f->sdo_2025 : 0.0,
+                        'Domaine'            => $f->domaine,
+                        'Code_RIASEC'        => $f->code_riasec,
+                        'Taux_Employabilite' => $f->taux_employabilite ?: 'Modéré',
+                        'Croissance_Domaine' => $f->croissance_domaine ?: 'Stable',
+                        'Type_Bac'           => $f->type_bac,
+
+                        'filiere_id'         => $f->id,
+                        'domaine_id'         => $f->domaine_id,
+                        'specialisation_id'  => $f->specialisation_id,
+                        'Careers'            => $f->careers,
+
+                        'riasec_r'           => $riasec_r,
+                        'riasec_i'           => $riasec_i,
+                        'riasec_a'           => $riasec_a,
+                        'riasec_s'           => $riasec_s,
+                        'riasec_e'           => $riasec_e,
+                        'riasec_c'           => $riasec_c,
+
+                        'gatb_g_required'    => $profile ? $profile->gatb_g_required : $gDefs['G'],
+                        'gatb_v_required'    => $profile ? $profile->gatb_v_required : $gDefs['V'],
+                        'gatb_n_required'    => $profile ? $profile->gatb_n_required : $gDefs['N'],
+                        'gatb_s_required'    => $profile ? $profile->gatb_s_required : $gDefs['S'],
+
+                        'employability_index'=> $profile ? $profile->employability_index : 0.60,
+                        'employability_rate' => $profile ? $profile->employability_rate : null,
+                        'growth_rate'        => $profile ? $profile->growth_rate : null,
+                        'annual_openings'    => $profile ? $profile->annual_openings : null,
+
+                        'difficulty_level'   => $profile ? $profile->difficulty_level : 5,
+                        'stress_tolerance'   => $profile ? $profile->stress_tolerance : 5,
+
+                        'job_demand'         => $profile ? (float)$profile->job_demand : 0.60,
+                        'salary'             => $profile ? (float)$profile->salary : 0.60,
+                        'internships'        => $profile ? (float)$profile->internships : 0.60,
+                        'market_source'      => $profile ? $profile->market_source : 'ANETI / INS Tunisie',
+                        'market_date'        => $profile ? $profile->market_date : '2026-05',
+                        'market_region'      => $profile ? $profile->market_region : 'Tunisie',
+
+                        'big5_openness'            => $profile ? $profile->big5_openness : ($b5Defaults['O'] ?? 0.0),
+                        'big5_conscientiousness'   => $profile ? $profile->big5_conscientiousness : ($b5Defaults['C'] ?? 0.0),
+                        'big5_extraversion'        => $profile ? $profile->big5_extraversion : ($b5Defaults['E'] ?? 0.0),
+                        'big5_agreeableness'       => $profile ? $profile->big5_agreeableness : ($b5Defaults['A'] ?? 0.0),
+                        'big5_neuroticism'         => $profile ? $profile->big5_neuroticism : ($b5Defaults['N'] ?? 0.0),
+                    ];
                 }
-
-                $riasec_r = $profile ? $profile->riasec_r : $riasecVec['R'];
-                $riasec_i = $profile ? $profile->riasec_i : $riasecVec['I'];
-                $riasec_a = $profile ? $profile->riasec_a : $riasecVec['A'];
-                $riasec_s = $profile ? $profile->riasec_s : $riasecVec['S'];
-                $riasec_e = $profile ? $profile->riasec_e : $riasecVec['E'];
-                $riasec_c = $profile ? $profile->riasec_c : $riasecVec['C'];
-
-                $riasecSum = $riasec_r + $riasec_i + $riasec_a + $riasec_s + $riasec_e + $riasec_c;
-                if ($riasecSum < 0.1) {
-                    throw new \Exception("Filiere RIASEC profile is null or invalid for " . ($f->nom_filiere ?? 'Unknown'));
-                }
-
-                // Domain-specific target Big Five defaults
-                $b5Defaults = $this->domainPsychoprofile[$domain]['B5'] ?? ['O'=>0.0,'C'=>0.0,'E'=>0.0,'A'=>0.0,'N'=>0.0];
-
-                // Domain-specific GATB defaults
-                $gatbDefaults = [
-                    'technique'   => ['G' => 60, 'V' => 50, 'N' => 60, 'S' => 60],
-                    'sciences'    => ['G' => 65, 'V' => 50, 'N' => 60, 'S' => 55],
-                    'lettres'     => ['G' => 50, 'V' => 65, 'N' => 45, 'S' => 45],
-                    'economie'    => ['G' => 55, 'V' => 55, 'N' => 60, 'S' => 50],
-                    'arts'        => ['G' => 50, 'V' => 50, 'N' => 45, 'S' => 60],
-                    'social'      => ['G' => 55, 'V' => 60, 'N' => 50, 'S' => 50],
-                    'sante'       => ['G' => 65, 'V' => 60, 'N' => 55, 'S' => 55],
-                    'default'     => ['G' => 50, 'V' => 50, 'N' => 50, 'S' => 50],
-                ];
-                $gDefs = $gatbDefaults[$domain] ?? $gatbDefaults['default'];
-
-                $filieres[] = [
-                    'Code_Filiere'       => $f->code_filiere,
-                    'Nom_Filiere'        => $f->nom_filiere,
-                    'Universite'         => $f->universite,
-                    'Etablissement'      => $f->etablissement,
-                    'SDO_2023'           => $f->sdo_2023 !== null ? (float)$f->sdo_2023 : 0.0,
-                    'SDO_2024'           => $f->sdo_2024 !== null ? (float)$f->sdo_2024 : 0.0,
-                    'SDO_2025'           => $f->sdo_2025 !== null ? (float)$f->sdo_2025 : 0.0,
-                    'Domaine'            => $f->domaine,
-                    'Code_RIASEC'        => $f->code_riasec,
-                    'Taux_Employabilite' => $f->taux_employabilite ?: 'Modéré',
-                    'Croissance_Domaine' => $f->croissance_domaine ?: 'Stable',
-                    'Type_Bac'           => $f->type_bac,
-
-                    'filiere_id'         => $f->id,
-                    'domaine_id'         => $f->domaine_id,
-                    'specialisation_id'  => $f->specialisation_id,
-                    'Careers'            => $f->careers,
-
-                    'riasec_r'           => $riasec_r,
-                    'riasec_i'           => $riasec_i,
-                    'riasec_a'           => $riasec_a,
-                    'riasec_s'           => $riasec_s,
-                    'riasec_e'           => $riasec_e,
-                    'riasec_c'           => $riasec_c,
-
-                    'gatb_g_required'    => $profile ? $profile->gatb_g_required : $gDefs['G'],
-                    'gatb_v_required'    => $profile ? $profile->gatb_v_required : $gDefs['V'],
-                    'gatb_n_required'    => $profile ? $profile->gatb_n_required : $gDefs['N'],
-                    'gatb_s_required'    => $profile ? $profile->gatb_s_required : $gDefs['S'],
-
-                    'employability_index'=> $profile ? $profile->employability_index : 0.60,
-                    'employability_rate' => $profile ? $profile->employability_rate : null,
-                    'growth_rate'        => $profile ? $profile->growth_rate : null,
-                    'annual_openings'    => $profile ? $profile->annual_openings : null,
-
-                    'difficulty_level'   => $profile ? $profile->difficulty_level : 5,
-                    'stress_tolerance'   => $profile ? $profile->stress_tolerance : 5,
-
-                    'job_demand'         => $profile ? (float)$profile->job_demand : 0.60,
-                    'salary'             => $profile ? (float)$profile->salary : 0.60,
-                    'internships'        => $profile ? (float)$profile->internships : 0.60,
-                    'market_source'      => $profile ? $profile->market_source : 'ANETI / INS Tunisie',
-                    'market_date'        => $profile ? $profile->market_date : '2026-05',
-                    'market_region'      => $profile ? $profile->market_region : 'Tunisie',
-
-                    'big5_openness'            => $profile ? $profile->big5_openness : ($b5Defaults['O'] ?? 0.0),
-                    'big5_conscientiousness'   => $profile ? $profile->big5_conscientiousness : ($b5Defaults['C'] ?? 0.0),
-                    'big5_extraversion'        => $profile ? $profile->big5_extraversion : ($b5Defaults['E'] ?? 0.0),
-                    'big5_agreeableness'       => $profile ? $profile->big5_agreeableness : ($b5Defaults['A'] ?? 0.0),
-                    'big5_neuroticism'         => $profile ? $profile->big5_neuroticism : ($b5Defaults['N'] ?? 0.0),
-                ];
-            }
-            return $filieres;
+                return $filieres;
+            });
         } catch (\Throwable $e) {
             Log::error("SIAEPI: Erreur de chargement BDD filières: " . $e->getMessage());
             return [];

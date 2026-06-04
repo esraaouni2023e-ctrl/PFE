@@ -22,6 +22,7 @@ sed -i "s/listen 80;/listen ${PORT};/g" /etc/nginx/http.d/default.conf
   fi
 
   # Cache Laravel configuration, routes and views
+  php artisan cache:clear
   php artisan config:cache
   php artisan route:cache
   php artisan view:cache
