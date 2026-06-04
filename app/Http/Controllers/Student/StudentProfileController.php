@@ -66,6 +66,9 @@ class StudentProfileController extends Controller
             session()->flash('warning', 'Profil mis à jour, mais le score FG n\'a pas pu être recalculé automatiquement. Vous pouvez réessayer via le pipeline d\'orientation.');
         }
 
+        // Invalidate dashboard recommendation cache
+        \Illuminate\Support\Facades\Cache::forget('student_dashboard_recs_' . $user->id);
+
         if (session('from_pipeline')) {
             session()->forget('from_pipeline');
             return redirect()->route('student.pipeline')

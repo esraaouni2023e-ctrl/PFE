@@ -43,6 +43,7 @@ class StudentController extends Controller
                         ->whereNull('user_id')
                         ->update(['user_id' => $user->id]);
                 }
+                \Illuminate\Support\Facades\Cache::forget('student_dashboard_recs_' . $user->id);
             }
         }
 
@@ -246,10 +247,12 @@ class StudentController extends Controller
                 ]
             ];
 
-            // On demande le Top 6 au moteur SIAEPI PHP-natif
+            // On demande le Top 6 au moteur SIAEPI PHP-natif (avec cache de 24h pour éviter les calculs répétés sur le dashboard)
             try {
-                $engine = new \App\Services\SiaepiRecommendationEngine();
-                $recs = $engine->recommend($profilEtudiant, 6);
+                $recs = \Illuminate\Support\Facades\Cache::remember('student_dashboard_recs_' . $user->id, 86400, function () use ($profilEtudiant) {
+                    $engine = new \App\Services\SiaepiRecommendationEngine();
+                    return $engine->recommend($profilEtudiant, 6);
+                });
                 
                 if (!isset($recs['error']) && !empty($recs['recommandations'])) {
                     $recommendationsGenerated = true;

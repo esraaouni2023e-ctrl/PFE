@@ -278,6 +278,11 @@ class RiasecTestController extends Controller
             $this->postTestValidator->validateProfile($profil, $catState);
             
             session(['riasec_profile_id' => $profil->id]);
+
+            // Invalidate dashboard recommendation cache
+            if ($userId) {
+                \Illuminate\Support\Facades\Cache::forget('student_dashboard_recs_' . $userId);
+            }
         }
 
         session()->forget([
