@@ -4,8 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Filiere;
 use Illuminate\Database\Seeder;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 
@@ -14,20 +12,20 @@ class FilieresSeeder extends Seeder
     public function run(): void
     {
         $mapping = [
-            'ECO_Filieres.xlsx'              => ['domaine' => 'Économie et Gestion', 'type_bac' => 'Économie et gestion'],
-            'EXP_Filieres.xlsx'              => ['domaine' => 'Sciences Expérimentales', 'type_bac' => 'Sciences expérimentales'],
-            'filieres_data.xlsx'             => ['domaine' => 'Mathématiques et Appliquées', 'type_bac' => 'Mathématiques'],
-            'INFO_Filieres.xlsx'             => ['domaine' => 'Informatique', 'type_bac' => 'Informatique'],
-            'TECH_Filieres.xlsx'             => ['domaine' => 'Technique', 'type_bac' => 'Technique'],
-            'SPORT_Filieres.xlsx'            => ['domaine' => 'Sport', 'type_bac' => 'Sport'],
-            'donnees_filiere_enrichies.xlsx' => ['domaine' => 'Lettres et Sciences Humaines', 'type_bac' => 'Lettres'],
+            'ECO_Filieres.csv'              => ['domaine' => 'Économie et Gestion', 'type_bac' => 'Économie et gestion'],
+            'EXP_Filieres.csv'              => ['domaine' => 'Sciences Expérimentales', 'type_bac' => 'Sciences expérimentales'],
+            'filieres_data.csv'             => ['domaine' => 'Mathématiques et Appliquées', 'type_bac' => 'Mathématiques'],
+            'INFO_Filieres.csv'             => ['domaine' => 'Informatique', 'type_bac' => 'Informatique'],
+            'TECH_Filieres.csv'             => ['domaine' => 'Technique', 'type_bac' => 'Technique'],
+            'SPORT_Filieres.csv'            => ['domaine' => 'Sport', 'type_bac' => 'Sport'],
+            'donnees_filiere_enrichies.csv' => ['domaine' => 'Lettres et Sciences Humaines', 'type_bac' => 'Lettres'],
         ];
 
         $directory = storage_path('app/excels');
         
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
-            $this->command->warn("Directory $directory created. Please place your Excel files there.");
+            $this->command->warn("Directory $directory created. Please place your CSV files there.");
             return;
         }
 
@@ -52,27 +50,28 @@ class FilieresSeeder extends Seeder
 
             if (File::exists($path)) {
                 $this->command->info("Importing $filename ($domaine)...");
-                $data = Excel::toArray([], $path);
                 
-                if (!empty($data) && isset($data[0])) {
-                    $rows = $data[0];
-                    unset($rows[0]); // Ignorer l'en-tête
+                if (($handle = fopen($path, 'r')) !== false) {
+                    // Ignore the header row
+                    fgetcsv($handle, 2048, ',');
 
-                    foreach ($rows as $row) {
+                    while (($row = fgetcsv($handle, 2048, ',')) !== false) {
                         // Indices 0 à 6: Code_Filie, Nom_Filie, Université, Etablissement, SDO_2023, SDO_2024, SDO_2025
-                        $code = trim($row[0] ?? '');
-                        if (empty($code)) continue;
+                        $code = isset($row[0]) ? trim($row[0]) : '';
+                        if (empty($code)) {
+                            continue;
+                        }
 
                         $gatbDefaults = $this->getGatbDefaults($domaine);
 
                         $records[] = [
                             'code_filiere'       => $code,
                             'nom_filiere'        => $row[1] ?? '',
-                            'universite'         => $row[2] ?? null,
-                            'etablissement'      => $row[3] ?? null,
-                            'sdo_2023'           => $this->cleanDecimal($row[4]),
-                            'sdo_2024'           => $this->cleanDecimal($row[5]),
-                            'sdo_2025'           => $this->cleanDecimal($row[6]),
+                            'universite'         => !empty($row[2]) ? $row[2] : null,
+                            'etablissement'      => !empty($row[3]) ? $row[3] : null,
+                            'sdo_2023'           => $this->cleanDecimal($row[4] ?? null),
+                            'sdo_2024'           => $this->cleanDecimal($row[5] ?? null),
+                            'sdo_2025'           => $this->cleanDecimal($row[6] ?? null),
                             'domaine'            => $domaine,
                             'code_riasec'        => !empty($row[7]) ? trim($row[7]) : null,
                             'taux_employabilite' => !empty($row[8]) ? trim($row[8]) : null,
@@ -86,6 +85,7 @@ class FilieresSeeder extends Seeder
                             'updated_at'         => now(),
                         ];
                     }
+                    fclose($handle);
                 }
             } else {
                 $this->command->error("File $filename not found in $directory");
@@ -128,3 +128,4 @@ class FilieresSeeder extends Seeder
         };
     }
 }
+
