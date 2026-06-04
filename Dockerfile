@@ -17,6 +17,12 @@ RUN apk add --no-cache \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_mysql gd zip bcmath opcache
 
+# Configure PHP limits and timeouts
+RUN echo "max_execution_time=600" > /usr/local/etc/php/conf.d/custom-limits.ini \
+    && echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/custom-limits.ini \
+    && echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/custom-limits.ini \
+    && echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/custom-limits.ini
+
 # Get Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
