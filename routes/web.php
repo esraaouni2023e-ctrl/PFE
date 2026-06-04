@@ -267,18 +267,3 @@ Route::middleware('auth')->group(function () {
     Route::post('/two-factor', [TwoFactorController::class, 'store'])->name('two-factor.store');
     Route::post('/two-factor/resend', [TwoFactorController::class, 'resend'])->name('two-factor.resend');
 });
-
-Route::get('/test-mail', function () {
-    try {
-        $email = request('email', 'esraaouni2023e@gmail.com');
-        $user = \App\Models\User::where('email', $email)->first();
-        $name = $user->name ?? 'Utilisateur Test';
-        $code = $user->two_factor_code ?? '123456';
-        
-        \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\TwoFactorCodeMail($name, $code));
-        
-        return "Succes ! L'email mailable 2FA a ete envoye avec succes a : " . htmlspecialchars($email);
-    } catch (\Throwable $e) {
-        return "<h1>Erreur d'envoi du Mailable</h1><pre>" . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "</pre>";
-    }
-});

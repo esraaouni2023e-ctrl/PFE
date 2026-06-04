@@ -457,11 +457,24 @@ class SiaepiRecommendationEngine
             $uniqueScored[] = $item;
         }
 
-        // ── STRICT 3D PARETO DOMINANCE ─────────────────
-        foreach ($uniqueScored as &$f1) {
+        // ── SORT CANDIDATES BY BASESCORE FIRST ───────────────────
+        usort($uniqueScored, function ($a, $b) {
+            if ($b['FinalScore'] === $a['FinalScore']) {
+                return ($a['filiere_id'] ?? 0) <=> ($b['filiere_id'] ?? 0);
+            }
+            return $b['FinalScore'] <=> $a['FinalScore'];
+        });
+
+        // ── STRICT 3D PARETO DOMINANCE ON TOP 150 ─────────────────
+        // Only run Pareto check on the top 150 candidates to prevent O(N^2) CPU hang with 2,000+ filieres
+        $paretoLimit = min(150, count($uniqueScored));
+        for ($i = 0; $i < $paretoLimit; $i++) {
             $isPareto = true;
-            foreach ($uniqueScored as $f2) {
-                if ($f1['Code_Filiere'] === $f2['Code_Filiere']) continue;
+            for ($j = 0; $j < $paretoLimit; $j++) {
+                if ($i === $j) continue;
+
+                $f1 = $uniqueScored[$i];
+                $f2 = $uniqueScored[$j];
 
                 $fit1 = $f1['FitScore'];
                 $fit2 = $f2['FitScore'];
@@ -485,18 +498,16 @@ class SiaepiRecommendationEngine
                     break;
                 }
             }
-            $f1['is_pareto_optimal'] = $isPareto;
+            $uniqueScored[$i]['is_pareto_optimal'] = $isPareto;
         }
-        unset($f1);
+
+        // Set the rest of the candidates to false (they are not in the top anyway)
+        for ($i = $paretoLimit; $i < count($uniqueScored); $i++) {
+            $uniqueScored[$i]['is_pareto_optimal'] = false;
+        }
 
         // ── MMR DIVERSITY LAYER (λ = 0.12) ─────────────
         $candidates = $uniqueScored;
-        usort($candidates, function ($a, $b) {
-            if ($b['FinalScore'] === $a['FinalScore']) {
-                return ($a['filiere_id'] ?? 0) <=> ($b['filiere_id'] ?? 0);
-            }
-            return $b['FinalScore'] <=> $a['FinalScore'];
-        });
         $uniqueScored = $this->applyMmrDiversity($candidates, min(100, count($candidates)));
 
         // ── BOUNDED SERENDIPITY SLOT ───────────────────
