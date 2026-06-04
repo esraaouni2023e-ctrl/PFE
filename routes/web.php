@@ -271,12 +271,18 @@ Route::middleware('auth')->group(function () {
 Route::get('/test-mail', function () {
     try {
         $email = request('email', 'esraaouni2023e@gmail.com');
-        \Illuminate\Support\Facades\Mail::raw('Ceci est un email de test de CapAvenir via Brevo.', function ($message) use ($email) {
-            $message->to($email)
-                    ->subject('Test SMTP CapAvenir');
-        });
-        return "Succes ! Email de test envoye avec succes a : " . htmlspecialchars($email) . "<br>Config utilisee :<br>- Mailer: " . config('mail.default') . "<br>- Host: " . config('mail.mailers.smtp.host') . "<br>- Port: " . config('mail.mailers.smtp.port') . "<br>- Username: " . config('mail.mailers.smtp.username') . "<br>- From: " . config('mail.from.address');
+        $user = \App\Models\User::where('email', $email)->first();
+        if (!$user) {
+            $user = new \App\Models\User();
+            $user->name = 'Utilisateur Test';
+            $user->email = $email;
+            $user->two_factor_code = '123456';
+        }
+        
+        \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\TwoFactorCodeMail($user));
+        
+        return "Succes ! L'email mailable 2FA a ete envoye avec succes a : " . htmlspecialchars($email);
     } catch (\Throwable $e) {
-        return "<h1>Erreur d'envoi SMTP</h1><pre>" . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "</pre>";
+        return "<h1>Erreur d'envoi du Mailable</h1><pre>" . $e->getMessage() . "\n\n" . $e->getTraceAsString() . "</pre>";
     }
 });
