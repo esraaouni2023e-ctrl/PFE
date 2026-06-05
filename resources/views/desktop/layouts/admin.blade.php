@@ -522,7 +522,7 @@
             <span>© 2026 <strong style="color:var(--accent)">CapAvenir</strong> · Tous droits réservés</span>
             <span style="display:flex;align-items:center;gap:.4rem;">
                 <span style="width:6px;height:6px;border-radius:50%;background:var(--accent3);display:inline-block;"></span>
-                Propulsé par IA · v2.4.0
+                © 2026 CapAvenir. Tous droits réservés.
             </span>
         </footer>
     </div>
