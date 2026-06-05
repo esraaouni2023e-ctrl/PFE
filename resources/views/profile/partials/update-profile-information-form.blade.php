@@ -19,16 +19,41 @@
         <div>
             <x-input-label for="avatar" :value="__('Photo de Profil')" />
             <div style="display:flex; align-items:center; gap:1.5rem; margin-top:0.5rem;">
-                <div class="avatar-preview" style="width:64px; height:64px; border-radius:50%; background:var(--ink10); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                <div class="avatar-preview" id="avatarPreviewWrap" style="width:64px; height:64px; border-radius:50%; background:linear-gradient(145deg,#0A2540 0%,#1a4f6e 40%,#d4622a 100%); display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 4px 16px rgba(10,37,64,.2),0 0 0 2px rgba(212,98,42,.12); transition:transform .3s ease;">
                     @if(auth()->user()->avatar)
-                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" style="width:100%; height:100%; object-fit:cover;">
+                        <img id="avatarPreviewImg" src="{{ asset('storage/' . auth()->user()->avatar) }}" style="width:100%; height:100%; object-fit:cover;" alt="{{ auth()->user()->name }}">
                     @else
-                        <span style="font-weight:600; font-size:1.5rem;">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                        <div id="avatarPreviewDefault" style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                            <svg style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:65%;height:65%;opacity:.15;" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            <span style="position:relative;z-index:2;font-weight:600; font-size:1.5rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.15);">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                        </div>
+                        <img id="avatarPreviewImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;" alt="Preview">
                     @endif
                 </div>
-                <input id="avatar" name="avatar" type="file" style="font-size:0.8rem;" accept="image/*" />
+                <div>
+                    <input id="avatar" name="avatar" type="file" style="font-size:0.8rem;" accept="image/*" onchange="previewAvatar(this)" />
+                    <div style="font-size:.7rem;color:var(--ink30,#999);margin-top:.35rem;">PNG, JPG ou WEBP • Max 2 Mo</div>
+                </div>
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
+            <script>
+            function previewAvatar(input) {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const wrap = document.getElementById('avatarPreviewWrap');
+                        const img = document.getElementById('avatarPreviewImg');
+                        const def = document.getElementById('avatarPreviewDefault');
+                        if (def) def.style.display = 'none';
+                        img.src = e.target.result;
+                        img.style.display = 'block';
+                        wrap.style.transform = 'scale(1.05)';
+                        setTimeout(() => wrap.style.transform = 'scale(1)', 300);
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+            </script>
         </div>
 
         <div>

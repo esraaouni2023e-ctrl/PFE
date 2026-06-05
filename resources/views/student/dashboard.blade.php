@@ -234,8 +234,15 @@
 }
 .db-avatar {
     position: relative; width: 120px; height: 120px; border-radius: 50%;
-    background: var(--ink); display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(145deg, #0A2540 0%, #1a4f6e 40%, #d4622a 100%);
+    display: flex; align-items: center; justify-content: center;
     font-size: 3rem; flex-shrink: 0;
+    box-shadow: 0 8px 32px rgba(10,37,64,.25), 0 0 0 3px rgba(212,98,42,.15), inset 0 0 20px rgba(255,255,255,.05);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.db-avatar:hover {
+    transform: scale(1.04);
+    box-shadow: 0 12px 40px rgba(10,37,64,.35), 0 0 0 4px rgba(212,98,42,.25), inset 0 0 20px rgba(255,255,255,.08);
 }
 .db-avatar-badge {
     position: absolute; bottom: 4px; right: 4px;
@@ -620,9 +627,12 @@
 
             <div class="db-avatar" style="overflow:hidden;">
                 @if(auth()->user()->avatar)
-                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" style="width:100%; height:100%; object-fit:cover;">
+                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" style="width:100%; height:100%; object-fit:cover;" alt="{{ auth()->user()->name }}">
                 @else
-                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                        <svg style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:80%;height:80%;opacity:.15;" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span style="position:relative;z-index:2;font-family:'Fraunces',serif;font-size:2.6rem;font-weight:600;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.15);">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                    </div>
                 @endif
                 <div class="db-avatar-badge">✓</div>
             </div>

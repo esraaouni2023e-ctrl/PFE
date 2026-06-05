@@ -16,7 +16,8 @@
 .pr-card-body{padding:1.5rem}
 /* Avatar block */
 .pr-avatar-block{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2rem 1.5rem}
-.pr-avatar{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#fff;font-family:'Fraunces',serif;font-weight:600;margin-bottom:1rem;box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 30%,transparent)}
+.pr-avatar{width:96px;height:96px;border-radius:50%;background:linear-gradient(145deg,#0A2540 0%,#1a4f6e 40%,#d4622a 100%);display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:#fff;font-family:'Fraunces',serif;font-weight:600;margin-bottom:1rem;box-shadow:0 8px 32px rgba(10,37,64,.25),0 0 0 3px rgba(212,98,42,.15),inset 0 0 20px rgba(255,255,255,.05);overflow:hidden;transition:transform .3s ease,box-shadow .3s ease}
+.pr-avatar:hover{transform:scale(1.05);box-shadow:0 12px 40px rgba(10,37,64,.35),0 0 0 4px rgba(212,98,42,.25),inset 0 0 20px rgba(255,255,255,.08)}
 .pr-name{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:600;letter-spacing:-.02em;margin-bottom:.25rem}
 .pr-email{font-size:.8rem;color:var(--ink60);margin-bottom:1.25rem}
 /* Progression */
@@ -82,7 +83,16 @@
             {{-- Avatar & Info --}}
             <div class="pr-card">
                 <div class="pr-avatar-block">
-                    <div class="pr-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                    <div class="pr-avatar">
+                        @if($user->avatar)
+                            <img src="{{ asset('storage/' . $user->avatar) }}" style="width:100%;height:100%;object-fit:cover;" alt="{{ $user->name }}">
+                        @else
+                            <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                                <svg style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:75%;height:75%;opacity:.12;" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                <span style="position:relative;z-index:2;text-shadow:0 2px 8px rgba(0,0,0,.15);">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                            </div>
+                        @endif
+                    </div>
                     <div class="pr-name">{{ $user->name }}</div>
                     <div class="pr-email">{{ $user->email }}</div>
                     <div style="width:100%">
