@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\UserTestimonialController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,10 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ── Témoignages & Avis ──
+    Route::get('/testimonial', [UserTestimonialController::class, 'edit'])->name('testimonial.edit');
+    Route::post('/testimonial', [UserTestimonialController::class, 'update'])->name('testimonial.update');
 
     // ══════════════════════════════════════════════
     // ESPACE ÉTUDIANT
@@ -174,6 +179,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Audit & Security
     Route::get('/audit', [\App\Http\Controllers\Admin\AuditController::class, 'index'])->name('audit.index');
+
+    // Testimonials Management
+    Route::get('/testimonials', [\App\Http\Controllers\Admin\AdminTestimonialController::class, 'index'])->name('testimonials.index');
+    Route::post('/testimonials/{testimonial}/approve', [\App\Http\Controllers\Admin\AdminTestimonialController::class, 'approve'])->name('testimonials.approve');
+    Route::post('/testimonials/{testimonial}/reject', [\App\Http\Controllers\Admin\AdminTestimonialController::class, 'reject'])->name('testimonials.reject');
+    Route::post('/testimonials/{testimonial}/archive', [\App\Http\Controllers\Admin\AdminTestimonialController::class, 'archive'])->name('testimonials.archive');
+    Route::delete('/testimonials/{testimonial}', [\App\Http\Controllers\Admin\AdminTestimonialController::class, 'destroy'])->name('testimonials.delete');
 
     // ── RIASEC Admin ──────────────────────────────────────────────────────────
     Route::prefix('riasec')->name('riasec.')->group(function () {

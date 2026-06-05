@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Testimonial;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -21,6 +22,9 @@ class HomeController extends Controller
 
             return redirect()->route('dashboard');
         }
-        return view('welcome');
+
+        $testimonials = Testimonial::approved()->with('user')->latest()->get();
+
+        return view('welcome', compact('testimonials'));
     }
 }

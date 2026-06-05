@@ -18,6 +18,12 @@ class TwoFactorMiddleware
         $user = auth()->user();
 
         if (auth()->check() && $user->two_factor_code) {
+            // Bypass two-factor authentication for admins (admin / super_admin)
+            if ($user->isAdmin() || $user->isSuperAdmin()) {
+                $user->resetTwoFactorCode();
+                return $next($request);
+            }
+
             if ($user->two_factor_expires_at && $user->two_factor_expires_at->lt(now())) {
                 $user->resetTwoFactorCode();
                 auth()->logout();

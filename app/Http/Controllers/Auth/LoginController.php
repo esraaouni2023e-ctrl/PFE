@@ -33,6 +33,11 @@ class LoginController extends Controller
                 ])->onlyInput('email');
             }
             
+            // Bypass 2FA for admin and super admin
+            if ($user->isAdmin() || $user->isSuperAdmin()) {
+                return redirect()->intended(route('admin.dashboard'));
+            }
+            
             // Générer le code 2FA et envoyer l'email
             $user->generateTwoFactorCode();
 

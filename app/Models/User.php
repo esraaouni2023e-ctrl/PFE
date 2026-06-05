@@ -108,6 +108,11 @@ class User extends Authenticatable
         return $this->hasMany(SimulationHistory::class);
     }
 
+    public function socialAccounts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
     // ── Relations RIASEC ──────────────────────────────────────────────────
 
     /**
