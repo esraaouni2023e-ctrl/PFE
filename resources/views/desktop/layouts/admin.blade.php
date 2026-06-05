@@ -209,12 +209,19 @@
         /* Avatar */
         .avatar-nav {
             width: 34px; height: 34px; border-radius: 50%;
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%);
             display: flex; align-items: center; justify-content: center;
-            font-size: .82rem; font-weight: 700; color: #fff;
-            cursor: pointer; transition: var(--transition);
+            font-size: .82rem; font-weight: 700; color: #ffffff;
+            cursor: pointer;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 10px rgba(234, 88, 12, 0.15);
+            transition: all var(--transition);
         }
-        .avatar-nav:hover { opacity: .85; }
+        .avatar-nav:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 0 14px rgba(234, 88, 12, 0.3);
+        }
 
         /* Logout */
         .btn-logout {
@@ -413,8 +420,19 @@
                 Super Admin
             </div>
             @auth
-            <div class="avatar-nav" title="{{ auth()->user()->name }}">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+            <div class="avatar-nav" title="{{ auth()->user()->name }}" style="overflow:hidden;">
+                @if(auth()->user()->avatar)
+                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width:100%; height:100%; object-fit:cover;" alt="{{ auth()->user()->name }}">
+                    <div style="position:relative;width:100%;height:100%;display:none;align-items:center;justify-content:center;">
+                        <svg style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:70%;height:70%;opacity:.2;" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span style="position:relative;z-index:2;text-shadow:0 1px 3px rgba(0,0,0,.2);">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                    </div>
+                @else
+                    <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                        <svg style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:70%;height:70%;opacity:.2;" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span style="position:relative;z-index:2;text-shadow:0 1px 3px rgba(0,0,0,.2);">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                    </div>
+                @endif
             </div>
 
             <form method="POST" action="{{ route('logout') }}" style="margin:0">

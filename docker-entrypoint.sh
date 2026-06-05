@@ -10,6 +10,13 @@ sed -i "s/listen 80;/listen ${PORT};/g" /etc/nginx/http.d/default.conf
   # Run database migrations automatically on startup (safe for Render free tier single instance)
   php artisan migrate --force
 
+  # Create storage symbolic link if it doesn't exist to prevent broken uploads
+  if [ ! -d "/var/www/html/public/storage" ] && [ ! -L "/var/www/html/public/storage" ]; then
+      echo "Creating storage symbolic link..."
+      php artisan storage:link
+  fi
+
+
   # Run database seeding if the filieres table is empty or check fails (avoid running on every container spin-up)
   FILIERES_COUNT=$(php artisan tinker --execute="echo \DB::table('filieres')->count();")
   echo "Filiere count check output: '$FILIERES_COUNT'"
