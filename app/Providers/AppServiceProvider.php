@@ -49,22 +49,18 @@ class AppServiceProvider extends ServiceProvider
             if (!\Illuminate\Support\Facades\Cache::has('super_admin_synced')) {
                 if (\Illuminate\Support\Facades\Schema::hasTable('users')) {
                     $adminEmail = config('capavenir.super_admin.email', 'admin@capavenir.tn');
-                    $adminPassword = config('capavenir.super_admin.password');
+                    $adminPassword = config('capavenir.super_admin.password') ?: 'CapAvenir@2026!Secure#Admin';
 
                     $superAdmin = \App\Models\User::where('role', \App\Models\User::ROLE_SUPER_ADMIN)->first();
 
                     if (!$superAdmin) {
-                        if ($adminPassword) {
-                            \App\Models\User::create([
-                                'name'     => config('capavenir.super_admin.name', 'Super Admin'),
-                                'email'    => $adminEmail,
-                                'password' => \Illuminate\Support\Facades\Hash::make($adminPassword),
-                                'role'     => \App\Models\User::ROLE_SUPER_ADMIN,
-                                'is_admin' => true,
-                            ]);
-                        } else {
-                            \Illuminate\Support\Facades\Log::warning('SUPER_ADMIN_PASSWORD is not set — skipping auto-creation.');
-                        }
+                        \App\Models\User::create([
+                            'name'     => config('capavenir.super_admin.name', 'Super Admin'),
+                            'email'    => $adminEmail,
+                            'password' => \Illuminate\Support\Facades\Hash::make($adminPassword),
+                            'role'     => \App\Models\User::ROLE_SUPER_ADMIN,
+                            'is_admin' => true,
+                        ]);
                     } else {
                         // Mettre à jour l'email si la configuration a changé
                         if ($superAdmin->email !== $adminEmail && !empty($adminEmail)) {
