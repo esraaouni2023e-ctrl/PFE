@@ -694,6 +694,7 @@
 
             {{-- TAB 2: VIDEOCONFERENCE --}}
             <div class="sp-tab-pane" id="sp-tab-video">
+                <script src="http://localhost:3000/socket.io/socket.io.js"></script>
                 <div class="glass-card" style="padding: 1.25rem;">
                     <div style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
                         <div>
@@ -707,11 +708,19 @@
                         
                         {{-- Video Feed --}}
                         <div class="sp-video-frame" id="confVideoFrame">
-                            <div class="sp-video-badge">
+                            <div class="sp-video-badge" id="videoBadge">
                                 <span class="sp-video-badge-dot"></span>
-                                EN DIRECT · CONNECTÉ
+                                <span id="callStatusText">EN ATTENTE DE L'ÉTUDIANT</span>
                             </div>
                             
+                            {{-- Real WebRTC video streams --}}
+                            <div class="sp-video-streams" id="videoStreams" style="display: none; position: absolute; inset: 0; width: 100%; height: 100%;">
+                                <video class="remote-video" id="remoteVideo" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; background: #000;"></video>
+                                <div class="local-video-container" style="position: absolute; bottom: 1.25rem; right: 1.25rem; width: 120px; height: 90px; border-radius: var(--r); overflow: hidden; border: 2px solid var(--paper); box-shadow: var(--shadow-card); background: #222; z-index: 20;">
+                                    <video class="local-video" id="localVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                                </div>
+                            </div>
+
                             {{-- Simulated Active Stream --}}
                             <div class="sp-video-placeholder" id="videoPlaceholder">
                                 <div class="sp-video-avatar-pulse">
@@ -723,11 +732,11 @@
 
                             {{-- Controls --}}
                             <div class="sp-video-controls">
-                                <button class="sp-video-btn" id="btnToggleCam" title="Désactiver Caméra">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                                <button class="sp-video-btn active-off" id="btnToggleCam" title="Désactiver Caméra">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/><line id="camCrossLine" x1="2" y1="2" x2="22" y2="22" stroke="#ef4444" stroke-width="2.5" style="display:inline;"/></svg>
                                 </button>
-                                <button class="sp-video-btn" id="btnToggleMic" title="Couper Micro">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                                <button class="sp-video-btn active-off" id="btnToggleMic" title="Couper Micro">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/><line id="micCrossLine" x1="2" y1="2" x2="22" y2="22" stroke="#ef4444" stroke-width="2.5" style="display:inline;"/></svg>
                                 </button>
                                 <button class="sp-video-btn" id="btnToggleShare" title="Partager l'écran">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
@@ -1141,94 +1150,350 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    /* ── VISIOCONFERENCE INTERACTIVE MOCK ACTIONS ── */
+    /* ── VISIOCONFERENCE REAL-TIME AND LIVE CHAT ACTIONS ── */
+    const studentId = {{ $student->id }};
+    const roomId = 'meeting_' + studentId;
+
     const btnToggleCam = document.getElementById('btnToggleCam');
     const btnToggleMic = document.getElementById('btnToggleMic');
     const btnToggleShare = document.getElementById('btnToggleShare');
     const btnEndCall = document.getElementById('btnEndCall');
+    
     const screenShareStatus = document.getElementById('screenShareStatus');
     const videoPlaceholder = document.getElementById('videoPlaceholder');
-    const confVideoFrame = document.getElementById('confVideoFrame');
+    const videoStreams = document.getElementById('videoStreams');
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const callStatusText = document.getElementById('callStatusText');
+    const videoBadge = document.getElementById('videoBadge');
 
-    let camActive = true;
-    let micActive = true;
-    let shareActive = false;
+    let localStream = null;
+    let screenStream = null;
+    let peerConnection = null;
+    let socket = null;
 
+    let camActive = false;
+    let micActive = false;
+    let isSharing = false;
+
+    // STUN config
+    const rtcConfig = {
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    };
+
+    // Lazy load media when switching to the video tab
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.spTab;
+            if (target === 'video') {
+                if (!socket) initSocket();
+                if (!localStream) startMedia();
+            }
+        });
+    });
+
+    // If already on video tab (e.g. hash or default view)
+    if (document.querySelector('.sp-tab-btn[data-sp-tab="video"]').classList.contains('active')) {
+        initSocket();
+        startMedia();
+    }
+
+    function initSocket() {
+        try {
+            socket = io('http://localhost:3000');
+
+            socket.on('connect', () => {
+                console.log('[Socket] Counselor connected to signaling server');
+                socket.emit('join-room', roomId);
+            });
+
+            socket.on('peer-joined', (peerId) => {
+                console.log('[WebRTC] Student joined the call:', peerId);
+                callStatusText.textContent = 'ÉTUDIANT CONNECTÉ';
+                videoBadge.style.background = 'rgba(16, 185, 129, 0.12)';
+                videoBadge.style.color = '#10b981';
+
+                // Initiate WebRTC call if we already have media
+                if (localStream) {
+                    initiateCall();
+                }
+            });
+
+            socket.on('offer', async (data) => {
+                console.log('[WebRTC] Offer received from student');
+                if (!peerConnection) createPeerConnection();
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+
+                socket.emit('answer', { sdp: answer, roomId: roomId });
+                callStatusText.textContent = 'EN DIRECT · CONNECTÉ';
+            });
+
+            socket.on('answer', async (data) => {
+                console.log('[WebRTC] Answer received from student');
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                callStatusText.textContent = 'EN DIRECT · CONNECTÉ';
+            });
+
+            socket.on('candidate', async (data) => {
+                console.log('[WebRTC] ICE Candidate received');
+                if (peerConnection) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            });
+
+            socket.on('peer-disconnected', (peerId) => {
+                console.log('[WebRTC] Student left');
+                callStatusText.textContent = 'ÉTUDIANT DÉCONNECTÉ';
+                videoBadge.style.background = 'rgba(239, 68, 68, 0.12)';
+                videoBadge.style.color = '#ef4444';
+
+                if (remoteVideo) remoteVideo.srcObject = null;
+                if (peerConnection) {
+                    peerConnection.close();
+                    peerConnection = null;
+                }
+            });
+        } catch (e) {
+            console.error('[Socket] Failed to connect to signaling server:', e);
+            callStatusText.textContent = 'ERREUR SIGNALISATION';
+        }
+    }
+
+    async function startMedia() {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: true
+            });
+            localVideo.srcObject = localStream;
+            videoPlaceholder.style.display = 'none';
+            videoStreams.style.display = 'block';
+
+            camActive = true;
+            micActive = true;
+
+            btnToggleCam.classList.remove('active-off');
+            document.getElementById('camCrossLine').style.display = 'none';
+
+            btnToggleMic.classList.remove('active-off');
+            document.getElementById('micCrossLine').style.display = 'none';
+
+            console.log('[WebRTC] Counselor camera and microphone started');
+
+            if (callStatusText.textContent === 'ÉTUDIANT CONNECTÉ') {
+                initiateCall();
+            }
+        } catch (err) {
+            console.error('[WebRTC] Access to camera/mic failed:', err);
+            alert("Veuillez accorder les permissions caméra et micro.");
+        }
+    }
+
+    function createPeerConnection() {
+        peerConnection = new RTCPeerConnection(rtcConfig);
+
+        if (localStream) {
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+        }
+
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.emit('candidate', {
+                    candidate: event.candidate,
+                    roomId: roomId
+                });
+            }
+        };
+
+        peerConnection.ontrack = (event) => {
+            console.log('[WebRTC] Remote track received from student');
+            remoteVideo.srcObject = event.streams[0];
+        };
+    }
+
+    async function initiateCall() {
+        createPeerConnection();
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        socket.emit('offer', { sdp: offer, roomId: roomId });
+    }
+
+    // Toggle Camera
     btnToggleCam?.addEventListener('click', () => {
+        if (!localStream) {
+            startMedia();
+            return;
+        }
         camActive = !camActive;
+        localStream.getVideoTracks()[0].enabled = camActive;
+
         if (camActive) {
             btnToggleCam.classList.remove('active-off');
-            btnToggleCam.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>';
-            videoPlaceholder.style.opacity = '1';
+            document.getElementById('camCrossLine').style.display = 'none';
         } else {
             btnToggleCam.classList.add('active-off');
-            btnToggleCam.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/><line x1="2" y1="2" x2="22" y2="22" stroke="#ef4444" stroke-width="2.5"/></svg>';
-            videoPlaceholder.style.opacity = '0.3';
+            document.getElementById('camCrossLine').style.display = 'inline';
         }
     });
 
+    // Toggle Mic
     btnToggleMic?.addEventListener('click', () => {
+        if (!localStream) return;
         micActive = !micActive;
+        localStream.getAudioTracks()[0].enabled = micActive;
+
         if (micActive) {
             btnToggleMic.classList.remove('active-off');
-            btnToggleMic.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>';
+            document.getElementById('micCrossLine').style.display = 'none';
         } else {
             btnToggleMic.classList.add('active-off');
-            btnToggleMic.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/><line x1="2" y1="2" x2="22" y2="22" stroke="#ef4444" stroke-width="2.5"/></svg>';
+            document.getElementById('micCrossLine').style.display = 'inline';
         }
     });
 
-    btnToggleShare?.addEventListener('click', () => {
-        shareActive = !shareActive;
-        if (shareActive) {
-            btnToggleShare.classList.add('active-off');
-            btnToggleShare.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/><line x1="2" y1="2" x2="22" y2="22" stroke="#ef4444" stroke-width="2.5"/></svg>';
-            screenShareStatus.innerHTML = 'Partage d\'écran actif · Flux audio crypté';
-            confVideoFrame.style.background = '#1a202c';
+    // Screen sharing
+    btnToggleShare?.addEventListener('click', async () => {
+        if (!localStream) return;
+
+        if (!isSharing) {
+            try {
+                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const videoTrack = screenStream.getVideoTracks()[0];
+
+                if (peerConnection) {
+                    const senders = peerConnection.getSenders();
+                    const videoSender = senders.find(sender => sender.track && sender.track.kind === 'video');
+                    if (videoSender) {
+                        videoSender.replaceTrack(videoTrack);
+                    }
+                }
+
+                localVideo.srcObject = screenStream;
+                isSharing = true;
+                btnToggleShare.classList.add('active-off');
+
+                videoTrack.onended = () => {
+                    stopScreenSharing();
+                };
+            } catch (err) {
+                console.error('[WebRTC] Screen sharing failed:', err);
+            }
         } else {
-            btnToggleShare.classList.remove('active-off');
-            btnToggleShare.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>';
-            screenShareStatus.innerHTML = 'Flux audio crypté • Caméra activée';
-            confVideoFrame.style.background = '#090D16';
+            stopScreenSharing();
         }
     });
 
+    function stopScreenSharing() {
+        if (!isSharing) return;
+
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (peerConnection) {
+            const senders = peerConnection.getSenders();
+            const videoSender = senders.find(sender => sender.track && sender.track.kind === 'video');
+            if (videoSender) {
+                videoSender.replaceTrack(videoTrack);
+            }
+        }
+
+        localVideo.srcObject = localStream;
+        if (screenStream) {
+            screenStream.getTracks().forEach(track => track.stop());
+        }
+        isSharing = false;
+        btnToggleShare.classList.remove('active-off');
+    }
+
+    // End call
     btnEndCall?.addEventListener('click', () => {
-        if (confirm("Voulez-vous vraiment clore cette session de visioconférence et enregistrer la fin d'appel ?")) {
-            confVideoFrame.style.background = '#111';
+        if (confirm("Voulez-vous vraiment clore cette session de visioconférence ?")) {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            if (screenStream) {
+                screenStream.getTracks().forEach(track => track.stop());
+                screenStream = null;
+            }
+            if (socket) {
+                socket.disconnect();
+            }
+            videoPlaceholder.style.display = 'flex';
+            videoStreams.style.display = 'none';
             videoPlaceholder.innerHTML = '<span style="font-weight:700;color:#ef4444;font-size:1.1rem;">Visioconférence terminée</span><span style="font-size:.78rem;opacity:.7;">Entretien clos avec succès</span>';
-            document.getElementById('btnToggleCam').disabled = true;
-            document.getElementById('btnToggleMic').disabled = true;
-            document.getElementById('btnToggleShare').disabled = true;
+            btnToggleCam.disabled = true;
+            btnToggleMic.disabled = true;
+            btnToggleShare.disabled = true;
             btnEndCall.disabled = true;
             btnEndCall.style.opacity = '0.3';
+            callStatusText.textContent = 'VISIO TERMINÉE';
         }
     });
 
-    /* Chat Interactive direct posting */
+    /* ── Live Chat with Laravel Echo ── */
     const chatInput = document.getElementById('chatInput');
     const chatContainer = document.getElementById('chatContainer');
     const btnSendChat = document.getElementById('btnSendChat');
 
-    function sendChatMessage() {
-        const msgText = chatInput.value.trim();
-        if (!msgText) return;
+    // Clear static mock bubbles
+    chatContainer.innerHTML = '';
 
-        const newBubble = document.createElement('div');
-        newBubble.className = 'sp-chat-bubble counselor';
-        newBubble.textContent = msgText;
-        chatContainer.appendChild(newBubble);
-        chatInput.value = '';
+    if (window.Echo) {
+        console.log('[Echo] Counselor subscribing to chat channel');
+        window.Echo.channel('chat')
+            .listen('MessageSent', (e) => {
+                console.log('[Echo] Message received by counselor:', e.message);
+                // Append only if the message is from the student (not counselor)
+                if (e.message.sender_id === studentId) {
+                    appendChatBubble(e.message.body, 'student');
+                }
+            });
+    } else {
+        console.error('[Echo] Echo not found.');
+    }
+
+    function appendChatBubble(text, senderType) {
+        const bubble = document.createElement('div');
+        bubble.className = `sp-chat-bubble ${senderType}`;
+        bubble.textContent = text;
+        chatContainer.appendChild(bubble);
         chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
 
-        // Mock automated student reply
-        setTimeout(() => {
-            const replyBubble = document.createElement('div');
-            replyBubble.className = 'sp-chat-bubble student';
-            replyBubble.textContent = "Merci pour ces éclaircissements, Monsieur. C'est enregistré !";
-            chatContainer.appendChild(replyBubble);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 1500);
+    async function sendChatMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        appendChatBubble(text, 'counselor');
+        chatInput.value = '';
+
+        try {
+            const response = await fetch('/counselor/student/' + studentId + '/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    channel: 'chat',
+                    template_type: 'custom',
+                    message_body: text
+                })
+            });
+            const data = await response.json();
+            console.log('[Chat] Counselor sent message:', data);
+        } catch (err) {
+            console.error('[Chat] Counselor failed to send message:', err);
+        }
     }
 
     btnSendChat?.addEventListener('click', sendChatMessage);

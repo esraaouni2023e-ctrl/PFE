@@ -2590,8 +2590,16 @@
                   </blockquote>
                   <div class="testi-author" style="margin-top: auto; display: flex; align-items: center; gap: 0.75rem;">
                     @if($t->user?->avatar)
-                      <div class="user-avatar" style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid #fff; box-shadow: var(--shadow-card); flex-shrink: 0;">
-                        <img src="{{ asset('storage/' . $t->user->avatar) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                      <div class="user-avatar" style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid #fff; box-shadow: var(--shadow-card); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                        @php
+                          $avatarUrl = (str_starts_with($t->user->avatar, 'http://') || str_starts_with($t->user->avatar, 'https://')) 
+                            ? $t->user->avatar 
+                            : asset('storage/' . $t->user->avatar);
+                        @endphp
+                        <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width: 100%; height: 100%; object-fit: cover;">
+                        <div class="testi-ava" style="display: none; width: 100%; height: 100%; border-radius: 50%; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: #fff; flex-shrink: 0; background: {{ $t->user?->role === 'counselor' ? 'var(--accent2)' : 'var(--accent)' }};">
+                          {{ strtoupper(substr($t->user?->name ?? 'U', 0, 1)) }}
+                        </div>
                       </div>
                     @else
                       <div class="testi-ava" style="width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 600; color: #fff; flex-shrink: 0; background: {{ $t->user?->role === 'counselor' ? 'var(--accent2)' : 'var(--accent)' }};">

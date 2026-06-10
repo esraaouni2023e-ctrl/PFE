@@ -122,6 +122,10 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
         Route::post('/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])
             ->middleware('throttle:30,1')
             ->name('chatbot');
+
+        // ── Visioconférence & Chat Meeting ──
+        Route::get('/meeting', [\App\Http\Controllers\StudentController::class, 'meeting'])->name('meeting');
+        Route::post('/meeting/message', [\App\Http\Controllers\StudentController::class, 'sendMessage'])->name('meeting.message');
     });
 
     // Page d'attente de validation (hors du middleware d'approbation pour éviter les redirections infinies)

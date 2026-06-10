@@ -773,7 +773,7 @@ class CounselorController extends Controller
         $request->validate([
             'channel' => 'required|in:chat,email,notification,sms',
             'template_type' => 'required|string',
-            'message_body' => 'required|string|min:5',
+            'message_body' => 'required|string|min:1',
         ]);
 
         $channelLabels = [
@@ -797,12 +797,23 @@ class CounselorController extends Controller
             'subject' => 'Message direct : ' . ucfirst($request->template_type),
             'body' => $request->message_body,
             'date' => \Carbon\Carbon::now()->format('d/m/Y H:i'),
-            'status' => $request->channel === 'sms' ? 'Délivré' : 'Envoyé'
+            'status' => $request->channel === 'sms' ? 'Délivré' : 'Envoyé',
+            'sender_id' => auth()->id(),
+            'sender_name' => auth()->user()->name
         ];
 
         $sentMessages = session('sent_messages', []);
         array_unshift($sentMessages, $newMessage);
         session(['sent_messages' => $sentMessages]);
+
+        // Diffuser en temps réel via WebSockets si c'est le canal "chat"
+        if ($request->channel === 'chat') {
+            broadcast(new \App\Events\MessageSent($newMessage))->toOthers();
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $newMessage]);
+        }
 
         return redirect()->back()->with('success', 'Message omnicanal transmis avec succès via le canal ' . $channelLabels[$request->channel] . '.');
     }

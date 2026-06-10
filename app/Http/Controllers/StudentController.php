@@ -644,4 +644,51 @@ class StudentController extends Controller
 
         return $gatbScores;
     }
+
+    /**
+     * Join the video call / live chat meeting room with the counselor.
+     */
+    public function meeting()
+    {
+        $student = auth()->user();
+        $appointment = \App\Models\Appointment::where('student_id', $student->id)
+            ->where('status', 'scheduled')
+            ->orderBy('scheduled_at', 'asc')
+            ->first();
+
+        $counselor = $appointment ? $appointment->counselor : \App\Models\User::where('role', \App\Models\User::ROLE_COUNSELOR)->where('status', \App\Models\User::STATUS_APPROVED)->first();
+
+        return view('student.meeting', compact('student', 'counselor', 'appointment'));
+    }
+
+    /**
+     * Send a real-time message from the student to the counselor.
+     */
+    public function sendMessage(Request $request)
+    {
+        $request->validate([
+            'message_body' => 'required|string|min:1',
+        ]);
+
+        $newMessage = [
+            'channel' => 'chat',
+            'channel_label' => 'Chat Interne',
+            'icon' => '💬',
+            'subject' => 'Message direct',
+            'body' => $request->message_body,
+            'date' => \Carbon\Carbon::now()->format('d/m/Y H:i'),
+            'status' => 'Envoyé',
+            'sender_id' => auth()->id(),
+            'sender_name' => auth()->user()->name
+        ];
+
+        // Broadcast event in real-time
+        broadcast(new \App\Events\MessageSent($newMessage))->toOthers();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $newMessage]);
+        }
+
+        return redirect()->back()->with('success', 'Message envoyé.');
+    }
 }

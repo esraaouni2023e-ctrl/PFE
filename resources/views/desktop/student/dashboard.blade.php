@@ -776,6 +776,7 @@
         </div>
 
         <!-- Card 6: Calculateur FG -->
+        <!-- Card 6: Calculateur FG -->
         <div class="db-pc rev rev-d6" onclick="window.location='{{ route('student.orientation.nova') }}'">
             <div class="db-pc-icon">{!! get_pro_icon('🧮') !!}</div>
             <h3 class="db-pc-title">Calculateur FG</h3>
@@ -785,6 +786,19 @@
             <div class="db-pc-bottom">
                 <span class="db-pc-meta">Officiel</span>
                 <div class="db-pc-arrow">→</div>
+            </div>
+        </div>
+
+        <!-- Card 7: Visioconférence -->
+        <div class="db-pc rev rev-d6" onclick="window.location='{{ route('student.meeting') }}'" style="border-color: var(--accent3);">
+            <div class="db-pc-icon" style="background: rgba(234, 88, 12, 0.1); border-color: rgba(234, 88, 12, 0.2);">{!! get_pro_icon('📹') !!}</div>
+            <h3 class="db-pc-title" style="color: var(--accent3);">Entretien Live</h3>
+            <p class="db-pc-desc">
+                Rejoins l'entretien de suivi en direct avec ton conseiller d'orientation.
+            </p>
+            <div class="db-pc-bottom">
+                <span class="db-pc-meta" style="color: var(--accent3); background: rgba(234, 88, 12, 0.06); border-color: rgba(234, 88, 12, 0.15);">WebRTC / WS</span>
+                <div class="db-pc-arrow" style="background: var(--accent3); color: #fff; border-color: var(--accent3);">→</div>
             </div>
         </div>
     </div>
