@@ -571,8 +571,8 @@
 
     {{-- HERO HEADER --}}
     @php
-        $score = $student->profile->ai_score ?? 84;
-        $status = $student->profile->status ?? 'pending';
+        $score = $student->profile?->ai_score ?? 84;
+        $status = $student->profile?->status ?? 'pending';
     @endphp
     <div class="glass-card sp-hero">
         <div class="sp-hero-info">
@@ -651,11 +651,11 @@
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
                             <div>
                                 <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.5rem;">Observations Conseiller</label>
-                                <textarea name="counselor_observations" class="sp-textarea" placeholder="Rédiger vos observations professionnelles sur l'entretien...">{{ $student->profile->counselor_observations ?? '' }}</textarea>
+                                <textarea name="counselor_observations" class="sp-textarea" placeholder="Rédiger vos observations professionnelles sur l'entretien...">{{ $student->profile?->counselor_observations ?? '' }}</textarea>
                             </div>
                             <div>
                                 <label style="display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; color:var(--ink30); margin-bottom:.5rem;">Feuille de Route Actionnable</label>
-                                <textarea name="coaching_plan" class="sp-textarea" placeholder="Définir les étapes concrètes d'accompagnement...">{{ $student->profile->coaching_plan ?? '' }}</textarea>
+                                <textarea name="coaching_plan" class="sp-textarea" placeholder="Définir les étapes concrètes d'accompagnement...">{{ $student->profile?->coaching_plan ?? '' }}</textarea>
                             </div>
                         </div>
 

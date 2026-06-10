@@ -52,7 +52,7 @@ class CounselorController extends Controller
         $totalProgressSum = 0;
 
         foreach ($students as $student) {
-            $interests = strtolower($student->profile->interests ?? '');
+            $interests = strtolower($student->profile?->interests ?? '');
             
             if (str_contains($interests, 'tech') || str_contains($interests, 'info') || str_contains($interests, 'data') || str_contains($interests, 'numérique')) {
                 $cohortStats['Informatique & Tech']++;
@@ -65,7 +65,7 @@ class CounselorController extends Controller
             } elseif (str_contains($interests, 'ingé') || str_contains($interests, 'science') || str_contains($interests, 'physique') || str_contains($interests, 'math')) {
                 $cohortStats['Ingénierie & Sciences']++;
             } else {
-                $section = $student->profile->section_bac ?? '';
+                $section = $student->profile?->section_bac ?? '';
                 if ($section === 'Informatique') {
                     $cohortStats['Informatique & Tech']++;
                 } elseif ($section === 'Sciences expérimentales' || $section === 'Sport') {
@@ -84,7 +84,7 @@ class CounselorController extends Controller
 
             // Détermination du risque
             $hasRiasec = \App\Models\ProfileRiasec::pourUser($student->id)->complets()->exists();
-            $scoreFg = $student->profile->score_fg ?? 0;
+            $scoreFg = $student->profile?->score_fg ?? 0;
             if (!$hasRiasec || ($scoreFg > 0 && $scoreFg < 110)) {
                 $atRiskCount++;
             }
@@ -101,11 +101,11 @@ class CounselorController extends Controller
         // KPIs
         $avgProgress = $realTotal > 0 ? round($totalProgressSum / $realTotal) : 0;
         $kpis = [
-            'success_rate' => $realTotal > 0 ? round(($students->filter(fn($s) => ($s->profile->score_fg ?? 0) >= 115)->count() / $realTotal) * 100) : 84,
+            'success_rate' => $realTotal > 0 ? round(($students->filter(fn($s) => ($s->profile?->score_fg ?? 0) >= 115)->count() / $realTotal) * 100) : 84,
             'risk_rate' => $realTotal > 0 ? round(($atRiskCount / $realTotal) * 100) : 15,
             'avg_progress' => $avgProgress,
             'counselor_satisfaction' => 4.8,
-            'effective_intervention' => $realTotal > 0 ? round(($students->filter(fn($s) => ($s->profile->manual_match_approved ?? false))->count() / max(1, $students->filter(fn($s) => ($s->profile->score_fg ?? 0) < 115)->count())) * 100) : 76,
+            'effective_intervention' => $realTotal > 0 ? round(($students->filter(fn($s) => ($s->profile?->manual_match_approved ?? false))->count() / max(1, $students->filter(fn($s) => ($s->profile?->score_fg ?? 0) < 115)->count())) * 100) : 76,
             'avg_tracking_time' => '45 min',
             'completed_profiles' => $students->filter(fn($s) => $s->profile && $s->profile->is_academique_complet)->count(),
         ];
@@ -134,9 +134,9 @@ class CounselorController extends Controller
         // D. IA Explainable Insights (Alertes réelles)
         $iaInsights = [];
         foreach ($students as $student) {
-            $scoreFg = $student->profile->score_fg ?? 0;
+            $scoreFg = $student->profile?->score_fg ?? 0;
             $hasRiasec = \App\Models\ProfileRiasec::pourUser($student->id)->complets()->exists();
-            $section = $student->profile->section_bac ?? 'Non spécifiée';
+            $section = $student->profile?->section_bac ?? 'Non spécifiée';
 
             if ($scoreFg > 0 && !$hasRiasec) {
                 $iaInsights[] = [
@@ -159,7 +159,7 @@ class CounselorController extends Controller
                     'type' => 'recommendation',
                     'title' => 'Homologation validée',
                     'student' => $student->name,
-                    'explanation' => "Le profil d'accompagnement de cet étudiant a été homologué avec succès. Intérêts : " . ($student->profile->interests ?? $section) . ".",
+                    'explanation' => "Le profil d'accompagnement de cet étudiant a été homologué avec succès. Intérêts : " . ($student->profile?->interests ?? $section) . ".",
                     'action' => 'Consulter la roadmap de l\'étudiant.'
                 ];
             }
@@ -294,7 +294,7 @@ class CounselorController extends Controller
         // --- CRM premium mock data ---
         
         // C. Priorisation intelligente (Urgent, Surveillance, Standard, Haute performance)
-        $aiScore = $student->profile->ai_score ?? rand(55, 95);
+        $aiScore = $student->profile?->ai_score ?? rand(55, 95);
         if ($aiScore < 65) {
             $crmPriority = 'Urgent';
             $priorityClass = 'danger';
@@ -380,10 +380,10 @@ class CounselorController extends Controller
         // 3. Add Counselor Notes to timeline (if exist)
         if ($student->profile && $student->profile->counselor_observations) {
             $crmTimeline[] = [
-                'date' => $student->profile->updated_at ?? \Carbon\Carbon::now(),
+                'date' => $student->profile?->updated_at ?? \Carbon\Carbon::now(),
                 'type' => 'note',
                 'title' => 'Note d\'accompagnement ajoutée',
-                'desc' => $student->profile->counselor_observations,
+                'desc' => $student->profile?->counselor_observations,
                 'meta' => 'Par : ' . auth()->user()->name,
                 'icon' => 'note'
             ];
@@ -430,7 +430,7 @@ class CounselorController extends Controller
             ];
             $archetypeIcon = '❓';
             $archetypeDesc = 'Profil ayant des difficultés à se projeter ou à formuler des préférences claires. Requiert un travail de tri méthodique.';
-        } elseif (str_contains(strtolower($student->profile->interests ?? ''), 'sci') || str_contains(strtolower($student->profile->interests ?? ''), 'tech')) {
+        } elseif (str_contains(strtolower($student->profile?->interests ?? ''), 'sci') || str_contains(strtolower($student->profile?->interests ?? ''), 'tech')) {
             $archetype = 'Scientifique';
             $coachingPlan = [
                 ['title' => 'Validation académique', 'desc' => 'Vérifier la solidité des moyennes en Mathématiques et Sciences Physiques.', 'completed' => true],
@@ -835,10 +835,9 @@ class CounselorController extends Controller
 
         $students = $query->get();
 
-        // Compute metrics for each student
         $studentsData = $students->map(function ($student) {
-            $aiScore = $student->profile->ai_score ?? rand(55, 95);
-            $status = $student->profile->status ?? 'pending';
+            $aiScore = $student->profile?->ai_score ?? rand(55, 95);
+            $status = $student->profile?->status ?? 'pending';
 
             if ($aiScore < 65) {
                 $riskLevel = 'high';
@@ -864,7 +863,7 @@ class CounselorController extends Controller
                 'status' => $status,
                 'riskLevel' => $riskLevel,
                 'riskLabel' => $riskLabel,
-                'interests' => $student->profile->interests ?? 'Non renseigné',
+                'interests' => $student->profile?->interests ?? 'Non renseigné',
                 'appointmentCount' => $appointmentCount,
                 'hasRoadmap' => $student->careerRoadmaps->isNotEmpty(),
             ];
