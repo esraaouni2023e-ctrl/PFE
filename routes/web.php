@@ -141,6 +141,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
         Route::post('/student/{student}/match', [CounselorController::class, 'approveMatch'])->name('student.match');
         Route::post('/student/{student}/appointments', [CounselorController::class, 'storeAppointment'])->name('appointments.store');
         Route::post('/student/{student}/message', [CounselorController::class, 'sendMessage'])->name('student.message');
+        Route::post('/student/{student}/send-message-alias', [CounselorController::class, 'sendMessage'])->name('student.sendMessage');
         Route::get('/students', [CounselorController::class, 'students'])->name('students');
         Route::get('/agenda', [CounselorController::class, 'agenda'])->name('agenda');
         Route::get('/resources', [CounselorController::class, 'resources'])->name('resources');

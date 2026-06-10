@@ -1053,7 +1053,7 @@
                 <p class="sp-stag">Omnicanal v5.0</p>
                 <h3 class="sp-sec-title">Console de <em>Communication</em></h3>
 
-                <form action="{{ route('counselor.student.sendMessage', $student) }}" method="POST" style="display:flex; flex-direction:column; gap:.75rem; margin-bottom: 1.5rem;">
+                <form action="{{ route('counselor.student.message', $student) }}" method="POST" style="display:flex; flex-direction:column; gap:.75rem; margin-bottom: 1.5rem;">
                     @csrf
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem;">
                         <div>
