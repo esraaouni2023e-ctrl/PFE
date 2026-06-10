@@ -48,8 +48,9 @@ Mettez à jour vos informations personnelles, changez votre mot de passe ou modi
                 <div class="db-ring-wrap" style="width: 160px; height: 160px;">
                     <div class="db-ring-center">
                         <div class="avatar-nav" style="width: 80px; height: 80px; font-size: 2.5rem; border: 4px solid var(--paper); box-shadow: var(--shadow-card); overflow:hidden;">
-                            @if(auth()->user()->avatar)
-                                <img src="{{ asset('storage/' . auth()->user()->avatar) }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width:100%; height:100%; object-fit:cover;" alt="{{ auth()->user()->name }}">
+                            @php $avatarUrl = auth()->user()->getAvatarUrl(); @endphp
+                            @if($avatarUrl)
+                                <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width:100%; height:100%; object-fit:cover;" alt="{{ auth()->user()->name }}">
                                 <div style="position:relative;width:100%;height:100%;display:none;align-items:center;justify-content:center;">
                                     <svg style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:70%;height:70%;opacity:.15;" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                                     <span style="position:relative;z-index:2;text-shadow:0 2px 6px rgba(0,0,0,.15);">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>

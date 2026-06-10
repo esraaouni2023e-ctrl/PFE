@@ -113,6 +113,29 @@ class User extends Authenticatable
         return $this->hasMany(SocialAccount::class);
     }
 
+    /**
+     * Get the resolved avatar URL if it exists, or null.
+     *
+     * @return string|null
+     */
+    public function getAvatarUrl(): ?string
+    {
+        if (!$this->avatar || trim($this->avatar) === '') {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
+            return $this->avatar;
+        }
+
+        $localPath = public_path('storage/' . $this->avatar);
+        if (file_exists($localPath) && is_file($localPath)) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        return null;
+    }
+
     // ── Relations RIASEC ──────────────────────────────────────────────────
 
     /**
