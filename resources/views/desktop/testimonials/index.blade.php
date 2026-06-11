@@ -433,9 +433,15 @@
                             <tr>
                                 <td>
                                     <div class="user-meta-info">
-                                        @if($t->user?->avatar)
+                                        @php
+                                            $avatarUrl = $t->user?->getAvatarUrl();
+                                        @endphp
+                                        @if($avatarUrl)
                                             <div class="user-avatar">
-                                                <img src="{{ asset('storage/' . $t->user->avatar) }}" alt="">
+                                                <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="">
+                                                <div class="user-avatar-text" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background: {{ $t->user?->role === 'counselor' ? 'var(--accent2)' : 'var(--accent)' }};">
+                                                    {{ strtoupper(substr($t->user?->name ?? 'U', 0, 1)) }}
+                                                </div>
                                             </div>
                                         @else
                                             <div class="user-avatar-text" style="background: {{ $t->user?->role === 'counselor' ? 'var(--accent2)' : 'var(--accent)' }};">

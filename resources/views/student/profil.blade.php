@@ -84,8 +84,15 @@
             <div class="pr-card">
                 <div class="pr-avatar-block">
                     <div class="pr-avatar">
-                        @if($user->avatar)
-                            <img src="{{ asset('storage/' . $user->avatar) }}" style="width:100%;height:100%;object-fit:cover;" alt="{{ $user->name }}">
+                        @php
+                            $avatarUrl = $user->getAvatarUrl();
+                        @endphp
+                        @if($avatarUrl)
+                            <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width:100%;height:100%;object-fit:cover;" alt="{{ $user->name }}">
+                            <div style="display:none;position:relative;width:100%;height:100%;align-items:center;justify-content:center;">
+                                <svg style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:75%;height:75%;opacity:.12;" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                <span style="position:relative;z-index:2;text-shadow:0 2px 8px rgba(0,0,0,.15);font-size:2.5rem;">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                            </div>
                         @else
                             <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
                                 <svg style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:75%;height:75%;opacity:.12;" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>

@@ -266,9 +266,15 @@
                 <div class="testi-card-mob {{ $t->status === 'pending' ? 'pending' : '' }}">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;">
                         <div class="user-info-mob">
-                            @if($t->user?->avatar)
+                            @php
+                                $avatarUrl = $t->user?->getAvatarUrl();
+                            @endphp
+                            @if($avatarUrl)
                                 <div class="avatar-mob">
-                                    <img src="{{ asset('storage/' . $t->user->avatar) }}" alt="">
+                                    <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="">
+                                    <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-weight: 700; color: #fff; background: {{ $t->user?->role === 'counselor' ? 'var(--accent2)' : 'var(--accent)' }};">
+                                        {{ strtoupper(substr($t->user?->name ?? 'U', 0, 1)) }}
+                                    </div>
                                 </div>
                             @else
                                 <div class="avatar-mob" style="background: {{ $t->user?->role === 'counselor' ? 'var(--accent2)' : 'var(--accent)' }};">

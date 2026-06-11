@@ -202,8 +202,14 @@
             
             <div style="display: flex; align-items: center; gap: 0.75rem; border-top: 1px solid var(--glass-border); padding-top: 0.75rem; margin-top: 0.75rem;">
                 <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; color: #fff; overflow: hidden; flex-shrink: 0; border: 1.5px solid var(--paper); box-shadow: var(--shadow-card);">
-                    @if($user->avatar)
-                        <img src="{{ asset('storage/' . $user->avatar) }}" style="width:100%; height:100%; object-fit:cover;">
+                    @php
+                        $avatarUrl = $user->getAvatarUrl();
+                    @endphp
+                    @if($avatarUrl)
+                        <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" style="width:100%; height:100%; object-fit:cover;">
+                        <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
+                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                        </div>
                     @else
                         {{ strtoupper(substr($user->name, 0, 1)) }}
                     @endif

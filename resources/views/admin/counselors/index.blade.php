@@ -140,8 +140,14 @@
                         {{-- Card Header --}}
                         <div class="csl-card__header">
                             <div class="csl-card__avatar">
-                                @if($user->avatar)
-                                    <img src="{{ asset('storage/' . $user->avatar) }}" alt="{{ $user->name }}">
+                                @php
+                                    $avatarUrl = $user->getAvatarUrl();
+                                @endphp
+                                @if($avatarUrl)
+                                    <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="{{ $user->name }}">
+                                    <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
                                 @else
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 @endif
@@ -241,8 +247,14 @@
                     <div class="csl-card csl-card--approved" data-name="{{ strtolower($user->name) }}" data-specialty="{{ strtolower($p?->specialty ?? '') }}">
                         <div class="csl-card__header">
                             <div class="csl-card__avatar csl-card__avatar--approved">
-                                @if($user->avatar)
-                                    <img src="{{ asset('storage/' . $user->avatar) }}" alt="{{ $user->name }}">
+                                @php
+                                    $avatarUrl = $user->getAvatarUrl();
+                                @endphp
+                                @if($avatarUrl)
+                                    <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="{{ $user->name }}">
+                                    <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
                                 @else
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 @endif
@@ -316,8 +328,14 @@
                     <div class="csl-card csl-card--rejected" data-name="{{ strtolower($user->name) }}" data-specialty="{{ strtolower($p?->specialty ?? '') }}">
                         <div class="csl-card__header">
                             <div class="csl-card__avatar csl-card__avatar--rejected">
-                                @if($user->avatar)
-                                    <img src="{{ asset('storage/' . $user->avatar) }}" alt="{{ $user->name }}">
+                                @php
+                                    $avatarUrl = $user->getAvatarUrl();
+                                @endphp
+                                @if($avatarUrl)
+                                    <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="{{ $user->name }}">
+                                    <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
                                 @else
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 @endif

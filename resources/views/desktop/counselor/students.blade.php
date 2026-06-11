@@ -579,8 +579,14 @@ Gérez votre portefeuille d'étudiants, suivez leur progression et identifiez ra
                 <div class="csl-card">
                     <div class="csl-card-header">
                         <div class="csl-avatar">
-                            @if($s['user']->avatar)
-                                <img src="{{ asset('storage/' . $s['user']->avatar) }}" alt="{{ $s['user']->name }}">
+                            @php
+                                $avatarUrl = $s['user']->getAvatarUrl();
+                            @endphp
+                            @if($avatarUrl)
+                                <img src="{{ $avatarUrl }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="{{ $s['user']->name }}">
+                                <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
+                                    {{ strtoupper(substr($s['user']->name, 0, 1)) }}
+                                </div>
                             @else
                                 {{ strtoupper(substr($s['user']->name, 0, 1)) }}
                             @endif

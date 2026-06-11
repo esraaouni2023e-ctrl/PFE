@@ -130,7 +130,7 @@ class User extends Authenticatable
 
         $localPath = public_path('storage/' . $this->avatar);
         if (file_exists($localPath) && is_file($localPath)) {
-            return asset('storage/' . $this->avatar);
+            return '/storage/' . $this->avatar;
         }
 
         return null;
