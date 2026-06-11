@@ -289,6 +289,41 @@
     .sm-btn-send:hover {
         opacity: .88;
     }
+
+    /* Incoming call overlay */
+    #incomingCallOverlay {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: rgba(10, 25, 47, 0.85);
+        backdrop-filter: blur(12px);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1.5rem;
+        color: #fff;
+        border-radius: var(--rl);
+    }
+    
+    .sm-call-avatar-pulse {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent2), var(--accent));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        animation: pulseCall 1.5s infinite;
+        border: 3px solid rgba(255,255,255,0.2);
+    }
+    
+    @keyframes pulseCall {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 87, 184, 0.5); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(0, 87, 184, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 87, 184, 0); }
+    }
 </style>
 
 <div class="sm-container">
@@ -305,6 +340,24 @@
     <div class="sm-workspace">
         {{-- Video Frame --}}
         <div class="sm-video-frame">
+            {{-- Incoming Call Overlay --}}
+            <div id="incomingCallOverlay" style="display:none;">
+                <div class="sm-call-avatar-pulse">
+                    📞
+                </div>
+                <div style="text-align:center;">
+                    <h3 style="font-family:var(--font-serif); font-size:1.5rem; font-weight:600; margin:0 0 0.5rem 0;">Appel en cours...</h3>
+                    <p style="font-size:0.85rem; color:rgba(255,255,255,0.7); margin:0;">Le conseiller <strong>{{ $counselor->name }}</strong> vous invite à rejoindre la visioconférence.</p>
+                </div>
+                <div style="display:flex; gap:1rem; margin-top:1rem;">
+                    <button id="btnAcceptCall" style="background:#10b981; color:#fff; border:none; padding:0.75rem 2rem; border-radius:var(--r); font-weight:700; cursor:pointer; font-size:0.88rem; box-shadow:0 4px 12px rgba(16,185,129,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        Accepter
+                    </button>
+                    <button id="btnRefuseCall" style="background:#ef4444; color:#fff; border:none; padding:0.75rem 2rem; border-radius:var(--r); font-weight:700; cursor:pointer; font-size:0.88rem; box-shadow:0 4px 12px rgba(239,68,68,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        Refuser
+                    </button>
+                </div>
+            </div>
             <div class="sm-video-badge" id="videoBadge">
                 <span class="sm-video-badge-dot"></span>
                 <span id="callStatusText">EN ATTENTE DU CONSEILLER</span>
@@ -405,6 +458,28 @@ document.addEventListener('DOMContentLoaded', () => {
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     };
 
+    const overlay = document.getElementById('incomingCallOverlay');
+    const btnAcceptCall = document.getElementById('btnAcceptCall');
+    const btnRefuseCall = document.getElementById('btnRefuseCall');
+
+    btnAcceptCall?.addEventListener('click', () => {
+        console.log('[Meeting] Student accepted call');
+        if (overlay) overlay.style.display = 'none';
+        startMedia();
+        if (socket) {
+            socket.emit('accept-meeting', { roomId: roomId });
+        }
+    });
+
+    btnRefuseCall?.addEventListener('click', () => {
+        console.log('[Meeting] Student refused call');
+        if (overlay) overlay.style.display = 'none';
+        if (socket) {
+            socket.emit('refuse-meeting', { roomId: roomId });
+        }
+        callStatusText.textContent = 'APPEL REFUSÉ';
+    });
+
     // Initialize Socket.io Connection for WebRTC Signaling
     try {
         socket = io(window.location.protocol + '//' + window.location.hostname + ':3000');
@@ -414,16 +489,18 @@ document.addEventListener('DOMContentLoaded', () => {
             socket.emit('join-room', roomId);
         });
 
+        socket.on('invite-meeting', (data) => {
+            console.log('[Meeting] Received call invitation from counselor');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+        });
+
         socket.on('peer-joined', (peerId) => {
             console.log('[WebRTC] Counselor joined the call:', peerId);
             callStatusText.textContent = 'CONSEILLER CONNECTÉ';
             videoBadge.style.background = 'rgba(16, 185, 129, 0.12)';
             videoBadge.style.color = '#10b981';
-            
-            // Initiate WebRTC call if we have a stream
-            if (localStream) {
-                initiateCall();
-            }
         });
 
         socket.on('offer', async (data) => {
@@ -678,8 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter') sendChatMessage();
     });
 
-    // Start local camera automatically
-    startMedia();
+
 });
 </script>
 @endsection

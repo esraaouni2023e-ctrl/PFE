@@ -707,7 +707,12 @@
                             <p class="sp-stag">Visioconférence intégrée</p>
                             <h3 class="sp-sec-title" style="margin-bottom: 0;">Meeting Virtuel <em>Sécurisé</em></h3>
                         </div>
-                        <span style="font-size: .75rem; color:var(--ink30); font-weight:700;">SALLE DE CONFÉRENCE : #{{ $student->id }}42</span>
+                        <div style="display:flex; align-items:center; gap: 0.75rem;">
+                            <button id="btnStartMeet" class="sp-btn" style="background:var(--accent2); color:#fff; border:none; padding:0.5rem 1rem; border-radius:var(--r); font-weight:600; cursor:pointer; font-size:0.75rem; display:flex; align-items:center; gap:0.35rem; transition: var(--transition);" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='var(--accent2)'">
+                                📹 Démarrer le meet
+                            </button>
+                            <span style="font-size: .75rem; color:var(--ink30); font-weight:700;">SALLE DE CONFÉRENCE : #{{ $student->id }}42</span>
+                        </div>
                     </div>
 
                     <div class="sp-video-workspace">
@@ -1193,7 +1198,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const target = btn.dataset.spTab;
             if (target === 'video') {
                 if (!socket) initSocket();
-                if (!localStream) startMedia();
             }
         });
     });
@@ -1201,7 +1205,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // If already on video tab (e.g. hash or default view)
     if (document.querySelector('.sp-tab-btn[data-sp-tab="video"]').classList.contains('active')) {
         initSocket();
-        startMedia();
     }
 
     function initSocket() {
@@ -1262,11 +1265,45 @@ document.addEventListener('DOMContentLoaded', function () {
                     peerConnection = null;
                 }
             });
+
+            socket.on('accept-meeting', (data) => {
+                console.log('[Meeting] Student accepted call invitation');
+                callStatusText.textContent = 'EN DIRECT · CONNECTÉ';
+                if (!localStream) {
+                    startMedia();
+                } else {
+                    initiateCall();
+                }
+            });
+
+            socket.on('refuse-meeting', (data) => {
+                console.log('[Meeting] Student refused call invitation');
+                callStatusText.textContent = 'APPEL REFUSÉ';
+                alert("L'étudiant a refusé de rejoindre la visioconférence.");
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = null;
+                }
+                if (localVideo) localVideo.srcObject = null;
+                videoStreams.style.display = 'none';
+                videoPlaceholder.style.display = 'flex';
+            });
         } catch (e) {
             console.error('[Socket] Failed to connect to signaling server:', e);
             callStatusText.textContent = 'ERREUR SIGNALISATION';
         }
     }
+
+    const btnStartMeet = document.getElementById('btnStartMeet');
+    btnStartMeet?.addEventListener('click', () => {
+        if (!socket) {
+            alert("Erreur: Le canal de signalisation n'est pas prêt.");
+            return;
+        }
+        console.log('[Meeting] Sending meeting invitation to student...');
+        callStatusText.textContent = 'INVITATION ENVOYÉE...';
+        socket.emit('invite-meeting', { roomId: roomId });
+    });
 
     async function startMedia() {
         try {
@@ -1289,9 +1326,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             console.log('[WebRTC] Counselor camera and microphone started');
 
-            if (callStatusText.textContent === 'ÉTUDIANT CONNECTÉ') {
-                initiateCall();
-            }
+            initiateCall();
         } catch (err) {
             console.error('[WebRTC] Access to camera/mic failed:', err);
             alert("Veuillez accorder les permissions caméra et micro.");

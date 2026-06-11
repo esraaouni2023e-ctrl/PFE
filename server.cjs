@@ -50,6 +50,24 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('peer-joined', socket.id);
     });
 
+    // Relay Meeting Invitation
+    socket.on('invite-meeting', (data) => {
+        console.log(`[Meeting] Invitation sent by ${socket.id} to room ${data.roomId}`);
+        socket.to(data.roomId).emit('invite-meeting', { senderId: socket.id });
+    });
+
+    // Relay Meeting Acceptance
+    socket.on('accept-meeting', (data) => {
+        console.log(`[Meeting] Invitation accepted by ${socket.id} in room ${data.roomId}`);
+        socket.to(data.roomId).emit('accept-meeting', { senderId: socket.id });
+    });
+
+    // Relay Meeting Refusal
+    socket.on('refuse-meeting', (data) => {
+        console.log(`[Meeting] Invitation refused by ${socket.id} in room ${data.roomId}`);
+        socket.to(data.roomId).emit('refuse-meeting', { senderId: socket.id });
+    });
+
     // Relay WebRTC Offer
     socket.on('offer', (data) => {
         console.log(`[WebRTC] Relay offer from ${socket.id} to room ${data.roomId}`);
