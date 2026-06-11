@@ -464,10 +464,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAcceptCall = document.getElementById('btnAcceptCall');
     const btnRefuseCall = document.getElementById('btnRefuseCall');
 
-    btnAcceptCall?.addEventListener('click', () => {
+    btnAcceptCall?.addEventListener('click', async () => {
         console.log('[Meeting] Student accepted call');
         if (overlay) overlay.style.display = 'none';
-        startMedia();
+        await startMedia();
         if (socket) {
             socket.emit('accept-meeting', { roomId: roomId });
         }
@@ -476,10 +476,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto-accept call if accept_call parameter is present in URL
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('accept_call') === '1') {
-        setTimeout(() => {
+        setTimeout(async () => {
             console.log('[Meeting] Auto-accepting call from notification...');
             if (overlay) overlay.style.display = 'none';
-            startMedia();
+            await startMedia();
             
             let emitAcceptInterval = setInterval(() => {
                 if (socket && socket.connected) {
