@@ -35,6 +35,10 @@ sed -i "s/listen 80;/listen ${PORT};/g" /etc/nginx/http.d/default.conf
   php artisan view:cache
 } > /var/www/html/storage/logs/startup.log 2>&1
 
+# Start Node.js Signaling Server in background
+echo "Starting Node.js Signaling & WebSocket Server..."
+node server.cjs > /var/www/html/storage/logs/node_server.log 2>&1 &
+
 # Start PHP-FPM in background
 php-fpm -D
 

@@ -419,7 +419,9 @@
 <script>
     (function() {
         var script = document.createElement('script');
-        script.src = window.location.protocol + '//' + window.location.hostname + ':3000/socket.io/socket.io.js';
+        var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.test');
+        var signalingHost = isLocal ? (window.location.protocol + '//' + window.location.hostname + ':3000') : (window.location.protocol + '//' + window.location.host);
+        script.src = signalingHost + '/socket.io/socket.io.js';
         document.head.appendChild(script);
     })();
 </script>
@@ -482,7 +484,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Socket.io Connection for WebRTC Signaling
     try {
-        socket = io(window.location.protocol + '//' + window.location.hostname + ':3000');
+        var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.test');
+        var signalingHost = isLocal ? (window.location.protocol + '//' + window.location.hostname + ':3000') : (window.location.protocol + '//' + window.location.host);
+        socket = io(signalingHost);
         
         socket.on('connect', () => {
             console.log('[Socket] Connected to signaling server');
