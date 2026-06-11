@@ -694,7 +694,13 @@
 
             {{-- TAB 2: VIDEOCONFERENCE --}}
             <div class="sp-tab-pane" id="sp-tab-video">
-                <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+                <script>
+                    (function() {
+                        var script = document.createElement('script');
+                        script.src = window.location.protocol + '//' + window.location.hostname + ':3000/socket.io/socket.io.js';
+                        document.head.appendChild(script);
+                    })();
+                </script>
                 <div class="glass-card" style="padding: 1.25rem;">
                     <div style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
                         <div>
@@ -1200,7 +1206,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initSocket() {
         try {
-            socket = io('http://localhost:3000');
+            socket = io(window.location.protocol + '//' + window.location.hostname + ':3000');
 
             socket.on('connect', () => {
                 console.log('[Socket] Counselor connected to signaling server');
@@ -1452,7 +1458,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .listen('MessageSent', (e) => {
                 console.log('[Echo] Message received by counselor:', e.message);
                 // Append only if the message is from the student (not counselor)
-                if (e.message.sender_id === studentId) {
+                if (Number(e.message.sender_id) === Number(studentId)) {
                     appendChatBubble(e.message.body, 'student');
                 }
             });

@@ -363,7 +363,13 @@
 </div>
 
 {{-- Include Socket.io client script hosted by the signaling server --}}
-<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<script>
+    (function() {
+        var script = document.createElement('script');
+        script.src = window.location.protocol + '//' + window.location.hostname + ':3000/socket.io/socket.io.js';
+        document.head.appendChild(script);
+    })();
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -401,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Socket.io Connection for WebRTC Signaling
     try {
-        socket = io('http://localhost:3000');
+        socket = io(window.location.protocol + '//' + window.location.hostname + ':3000');
         
         socket.on('connect', () => {
             console.log('[Socket] Connected to signaling server');
@@ -624,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('[Echo] Message received:', e.message);
                 
                 // Display message only if sent by the counselor (receiver of student)
-                if (e.message.sender_id !== studentId) {
+                if (Number(e.message.sender_id) !== Number(studentId)) {
                     appendChatBubble(e.message.body, 'counselor');
                 }
             });
