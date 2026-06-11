@@ -730,7 +730,23 @@ class CounselorController extends Controller
             'notes' => $request->notes,
         ]);
 
-        return redirect()->back()->with('success', 'Rendez-vous planifié avec succès.');
+        // Create a message notification for the student
+        try {
+            $formattedDate = \Carbon\Carbon::parse($request->scheduled_at)->timezone('Africa/Tunis')->format('d/m/Y à H:i');
+            \App\Models\Message::create([
+                'sender_id' => auth()->id(),
+                'receiver_id' => $student->id,
+                'sender_email' => auth()->user()->email,
+                'receiver_email' => $student->email,
+                'subject' => 'Nouveau rendez-vous planifié',
+                'body' => "Votre conseiller " . auth()->user()->name . " a planifié un entretien live pour le " . $formattedDate . ". Notes : " . ($request->notes ?? 'Aucune observation particulière.'),
+                'is_read' => false,
+            ]);
+        } catch (\Exception $e) {
+            // Silence message errors so appointment booking is not blocked
+        }
+
+        return redirect()->back()->with('success', 'Rendez-vous planifié avec succès et notification envoyée.');
     }
 
     /**
