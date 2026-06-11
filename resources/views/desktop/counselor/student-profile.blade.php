@@ -1307,6 +1307,22 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('[Meeting] Sending meeting invitation to student...');
         callStatusText.textContent = 'INVITATION ENVOYÉE...';
         socket.emit('invite-meeting', { roomId: roomId });
+
+        // Trigger persistent notification via AJAX
+        fetch('{{ route('counselor.student.startMeet', $student) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('[Meeting] Persistent notification created:', data);
+        })
+        .catch(error => {
+            console.error('[Meeting] Error sending persistent notification:', error);
+        });
     });
 
     async function startMedia() {

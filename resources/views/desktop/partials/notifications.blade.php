@@ -72,19 +72,37 @@
                     if (data.latest && data.latest.length > 0) {
                         notifList.innerHTML = '';
                         data.latest.forEach(msg => {
-                            const item = document.createElement('a');
-                            item.href = `{{ url('/messages') }}/${msg.id}`;
+                            const isMeeting = msg.subject.includes('Appel Visioconférence') || msg.subject.includes('Meeting') || msg.subject.includes('📹');
+                            const item = document.createElement('div');
                             item.className = 'notif-item';
                             const unreadDot = !msg.is_read ? '<div style="width:8px; height:8px; background:var(--accent); border-radius:50%; margin-right:8px;"></div>' : '';
-                            item.innerHTML = `
-                                <div class="notif-item-name">
-                                    <div style="display:flex; align-items:center;">
-                                        ${unreadDot}
-                                        ${msg.sender_name}
+                            
+                            let acceptBtnHtml = '';
+                            let clickUrl = `{{ url('/messages') }}/${msg.id}`;
+                            
+                            if (isMeeting) {
+                                clickUrl = `{{ url('/student/meeting') }}?accept_call=1&msg_id=${msg.id}`;
+                                acceptBtnHtml = `
+                                    <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                                        <a href="${clickUrl}" class="notif-accept-btn" style="background: #10b981; color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                                            Accepter l'appel ✅
+                                        </a>
                                     </div>
-                                    <span class="notif-item-time">${msg.time}</span>
-                                </div>
-                                <div class="notif-item-subject" style="${!msg.is_read ? 'font-weight:700; color:var(--ink);' : ''}">${msg.subject}</div>
+                                `;
+                            }
+
+                            item.innerHTML = `
+                                <a href="${isMeeting ? clickUrl : `{{ url('/messages') }}/${msg.id}`}" style="text-decoration: none; color: inherit; display: block;">
+                                    <div class="notif-item-name">
+                                        <div style="display:flex; align-items:center;">
+                                            ${unreadDot}
+                                            ${msg.sender_name}
+                                        </div>
+                                        <span class="notif-item-time">${msg.time}</span>
+                                    </div>
+                                    <div class="notif-item-subject" style="${!msg.is_read ? 'font-weight:700; color:var(--ink);' : ''}">${msg.subject}</div>
+                                </a>
+                                ${acceptBtnHtml}
                             `;
                             notifList.appendChild(item);
                         });

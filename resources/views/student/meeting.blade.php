@@ -473,6 +473,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Auto-accept call if accept_call parameter is present in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('accept_call') === '1') {
+        setTimeout(() => {
+            console.log('[Meeting] Auto-accepting call from notification...');
+            if (overlay) overlay.style.display = 'none';
+            startMedia();
+            
+            let emitAcceptInterval = setInterval(() => {
+                if (socket && socket.connected) {
+                    socket.emit('accept-meeting', { roomId: roomId });
+                    clearInterval(emitAcceptInterval);
+                }
+            }, 100);
+            
+            setTimeout(() => clearInterval(emitAcceptInterval), 5000);
+        }, 500);
+    }
+
     btnRefuseCall?.addEventListener('click', () => {
         console.log('[Meeting] Student refused call');
         if (overlay) overlay.style.display = 'none';

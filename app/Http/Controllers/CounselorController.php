@@ -553,8 +553,44 @@ class CounselorController extends Controller
             ]
         ];
 
+        $dbMessages = \App\Models\Message::where('sender_id', auth()->id())
+            ->where('receiver_id', $student->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($msg) {
+                $channel = 'chat';
+                $label = 'Messagerie';
+                $icon = '✉';
+                if (str_contains($msg->subject, '💬')) {
+                    $channel = 'chat'; $label = 'Chat Interne'; $icon = '💬';
+                } elseif (str_contains($msg->subject, '🔔')) {
+                    $channel = 'notification'; $label = 'Notification Push'; $icon = '🔔';
+                } elseif (str_contains($msg->subject, '✉')) {
+                    $channel = 'email'; $label = 'Email direct'; $icon = '✉';
+                } elseif (str_contains($msg->subject, '📱')) {
+                    $channel = 'sms'; $label = 'Alerte SMS'; $icon = '📱';
+                } elseif (str_contains($msg->subject, '📹')) {
+                    $channel = 'meeting'; $label = 'Visioconférence'; $icon = '📹';
+                }
+                
+                $subjectClean = preg_replace('/^.*? : /u', '', $msg->subject);
+                
+                return [
+                    'channel' => $channel,
+                    'channel_label' => $label,
+                    'icon' => $icon,
+                    'subject' => $subjectClean,
+                    'body' => $msg->body,
+                    'date' => $msg->created_at->timezone('Africa/Tunis')->format('d/m/Y H:i'),
+                    'status' => $msg->is_read ? 'Lu' : 'Envoyé',
+                    'sender_id' => $msg->sender_id,
+                    'sender_name' => $msg->sender->name
+                ];
+            })
+            ->toArray();
+
         $sessionLog = session('sent_messages', []);
-        $crmCommunicationLog = array_merge($sessionLog, $staticLog);
+        $crmCommunicationLog = array_merge($sessionLog, $dbMessages, $staticLog);
 
         // AXE 6 — Predictive Indicators
         $crmPredictiveIndicators = [
@@ -822,6 +858,17 @@ class CounselorController extends Controller
         array_unshift($sentMessages, $newMessage);
         session(['sent_messages' => $sentMessages]);
 
+        // Persist to database so the student receives it in their notification bell and inbox
+        \App\Models\Message::create([
+            'sender_id' => auth()->id(),
+            'receiver_id' => $student->id,
+            'sender_email' => auth()->user()->email,
+            'receiver_email' => $student->email,
+            'subject' => $channelIcons[$request->channel] . ' ' . $channelLabels[$request->channel] . ' : ' . ucfirst($request->template_type),
+            'body' => $request->message_body,
+            'is_read' => false,
+        ]);
+
         // Diffuser en temps réel via WebSockets si c'est le canal "chat"
         if ($request->channel === 'chat') {
             broadcast(new \App\Events\MessageSent($newMessage))->toOthers();
@@ -832,6 +879,29 @@ class CounselorController extends Controller
         }
 
         return redirect()->back()->with('success', 'Message omnicanal transmis avec succès via le canal ' . $channelLabels[$request->channel] . '.');
+    }
+
+    /**
+     * Notify the student that a meeting has started.
+     */
+    public function startMeet(Request $request, User $student)
+    {
+        if (!$student->isStudent()) {
+            return response()->json(['success' => false, 'error' => 'Utilisateur non étudiant'], 400);
+        }
+
+        // Create a persistent notification message in the database
+        $message = \App\Models\Message::create([
+            'sender_id' => auth()->id(),
+            'receiver_id' => $student->id,
+            'sender_email' => auth()->user()->email,
+            'receiver_email' => $student->email,
+            'subject' => '📹 Appel Visioconférence en direct',
+            'body' => 'Votre conseiller a démarré un entretien vidéo en direct. Rejoignez-le ici : ' . route('student.meeting'),
+            'is_read' => false,
+        ]);
+
+        return response()->json(['success' => true, 'message' => $message]);
     }
 
     /**

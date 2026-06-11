@@ -651,6 +651,17 @@ class StudentController extends Controller
     public function meeting()
     {
         $student = auth()->user();
+
+        // Mark message as read if coming from a notification click
+        if (request()->has('msg_id')) {
+            $msg = \App\Models\Message::where('id', request('msg_id'))
+                ->where('receiver_id', $student->id)
+                ->first();
+            if ($msg) {
+                $msg->update(['is_read' => true]);
+            }
+        }
+
         $appointment = \App\Models\Appointment::where('student_id', $student->id)
             ->where('status', 'scheduled')
             ->orderBy('scheduled_at', 'asc')
