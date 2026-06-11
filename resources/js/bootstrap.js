@@ -19,13 +19,15 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 window.Pusher = Pusher;
 
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.test');
+
 window.Echo = new Echo({
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY || 'capavenir_key',
     wsHost: import.meta.env.VITE_PUSHER_HOST || window.location.hostname || '127.0.0.1',
-    wsPort: import.meta.env.VITE_PUSHER_PORT || 3000,
-    wssPort: import.meta.env.VITE_PUSHER_PORT || 3000,
-    forceTLS: false,
+    wsPort: isLocal ? (import.meta.env.VITE_PUSHER_PORT || 3000) : (window.location.protocol === 'https:' ? 443 : 80),
+    wssPort: isLocal ? (import.meta.env.VITE_PUSHER_PORT || 3000) : (window.location.protocol === 'https:' ? 443 : 80),
+    forceTLS: isLocal ? false : (window.location.protocol === 'https:'),
     disableStats: true,
     enabledTransports: ['ws', 'wss'],
 });
