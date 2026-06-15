@@ -39,15 +39,17 @@ class StoreRiasecAnswerRequest extends FormRequest
             'valeur' => [
                 'required',
                 'integer',
-                'min:1',
-                'max:5',
                 // Validation contextuelle selon le type de la question
                 function ($attr, $value, $fail) {
                     $question = QuestionRiasec::find($this->input('question_id'));
-                    if ($question && ! $question->valeurEstValide((int) $value)) {
-                        $fail(
-                            "La valeur {$value} est invalide pour ce type de question ({$question->type_reponse})."
-                        );
+                    if ($question) {
+                        if (! $question->valeurEstValide((int) $value)) {
+                            $fail(
+                                "La valeur {$value} est invalide pour ce type de question ({$question->type_reponse})."
+                            );
+                        }
+                    } else {
+                        $fail('Cette question n\'existe pas.');
                     }
                 },
             ],
@@ -62,8 +64,6 @@ class StoreRiasecAnswerRequest extends FormRequest
             'question_id.exists'   => 'Cette question n\'existe pas.',
             'valeur.required'      => 'Vous devez sélectionner une réponse.',
             'valeur.integer'       => 'La réponse doit être un nombre entier.',
-            'valeur.min'           => 'La réponse doit être au minimum 1.',
-            'valeur.max'           => 'La réponse doit être au maximum 5.',
         ];
     }
 

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\ProfileRiasec;
+use App\Models\QuestionRiasec;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -46,5 +47,40 @@ class RIASECAccessTest extends TestCase
         // 4. Assert deactivation/expiration
         $this->assertEquals(ProfileRiasec::STATUT_EXPIRE, $profile->fresh()->statut);
         $this->assertStringStartsWith(route('riasec.question', ['step' => 1]), $response->headers->get('Location'));
+    }
+
+    public function test_store_answer_accepts_boolean_values()
+    {
+        // 1. Create student
+        $student = User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'is_admin' => false,
+        ]);
+
+        // 2. Create boolean question
+        $question = QuestionRiasec::factory()->create([
+            'type_reponse' => 'boolean',
+            'actif' => true,
+        ]);
+
+        // 3. Post answer 0 (Non)
+        $response = $this->actingAs($student)
+            ->withSession(['riasec_session_id' => 'test-session-uuid'])
+            ->post(route('riasec.answer'), [
+                'question_id' => $question->id,
+                'valeur' => 0,
+                'temps_ms' => 1000,
+            ]);
+
+        // 4. Assert response success
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        // 5. Assert database has answer
+        $this->assertDatabaseHas('riasec_answers', [
+            'question_id' => $question->id,
+            'valeur' => 0,
+            'test_session_id' => 'test-session-uuid',
+        ]);
     }
 }

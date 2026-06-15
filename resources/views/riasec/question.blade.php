@@ -189,7 +189,7 @@
 </div>
 
 {{-- ── Main ── --}}
-<div class="q-page" x-data="riasecQ()" x-init="init()">
+<div class="q-page" x-data="riasecQ({{ $isLast ? 'true' : 'false' }})" x-init="init()">
 
     {{-- Early Stopping Gauge --}}
     @if(!empty($earlyStopData))
@@ -407,16 +407,23 @@
 </div>
 
 <script>
-function riasecQ() {
+function riasecQ(isLast = false) {
     return {
         answered: {{ $existingAnswer ? 'true' : 'false' }},
         saving: false,
         startTime: Date.now(),
         _timer: null,
+        isLast: isLast,
 
         init() { this.startTime = Date.now(); },
 
-        onSelect(v) { this.answered = true; },
+        onSelect(v) {
+            this.answered = true;
+            // Transition automatique fluide vers la question suivante
+            setTimeout(() => {
+                this.submit(this.isLast ? 'finish' : 'next');
+            }, 300);
+        },
 
         async submit(action) {
             if (!this.answered || this.saving) return;
