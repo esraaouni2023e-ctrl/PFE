@@ -484,9 +484,20 @@ function riasecQ(isLast = false) {
                 if (json.success) {
                     this.showToast('✓ Réponse enregistrée');
                     if (json.completed || action === 'finish') {
-                        setTimeout(() => window.location.href = json.redirect || '{{ route("riasec.complete") }}', 600);
+                        const redirectUrl = json.redirect || '{{ route("riasec.complete") }}';
+                        try {
+                            const url = new URL(redirectUrl, window.location.origin);
+                            setTimeout(() => window.location.href = url.pathname + url.search, 600);
+                        } catch(e) {
+                            setTimeout(() => window.location.href = redirectUrl, 600);
+                        }
                     } else if (json.next_url) {
-                        setTimeout(() => window.location.href = json.next_url, 350);
+                        try {
+                            const url = new URL(json.next_url, window.location.origin);
+                            setTimeout(() => window.location.href = url.pathname + url.search, 350);
+                        } catch(e) {
+                            setTimeout(() => window.location.href = json.next_url, 350);
+                        }
                     } else {
                         // Fallback : avancer manuellement au step suivant
                         const nextStep = (json.next_step || {{ $step }} + 1);
