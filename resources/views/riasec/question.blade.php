@@ -361,12 +361,12 @@
             @if(!$isLast)
             <button class="btn-fill" :disabled="!answered || saving"
                     x-on:click="submit('next')">
-                <span x-text="saving ? 'Enregistrement…' : 'Suivant →'"></span>
+                <span x-text="saving ? 'Enregistrement…' : 'Suivant →'">Suivant →</span>
             </button>
             @else
             <button class="btn-fill btn-complete" :disabled="!answered || saving"
                     x-on:click="submit('finish')">
-                <span x-text="saving ? 'Finalisation…' : '✓ Terminer le test'"></span>
+                <span x-text="saving ? 'Finalisation…' : '✓ Terminer le test'">✓ Terminer le test</span>
             </button>
             @endif
         </div>

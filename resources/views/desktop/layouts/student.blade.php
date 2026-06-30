@@ -7,6 +7,27 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Espace Étudiant') — CapAvenir</title>
 
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error("Global JS Error: ", e.message, " in ", e.filename, ":", e.lineno);
+            const banner = document.createElement('div');
+            banner.style.position = 'fixed';
+            banner.style.top = '0';
+            banner.style.left = '0';
+            banner.style.width = '100%';
+            banner.style.backgroundColor = '#ef4444';
+            banner.style.color = '#ffffff';
+            banner.style.padding = '12px';
+            banner.style.zIndex = '999999';
+            banner.style.fontSize = '12px';
+            banner.style.fontWeight = 'bold';
+            banner.style.fontFamily = 'monospace';
+            banner.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            banner.innerText = "🚨 Erreur JavaScript détectée : " + e.message + " (" + e.filename.split('/').pop() + ":" + e.lineno + ")";
+            document.documentElement.appendChild(banner);
+        });
+    </script>
+
     <!-- Google Fonts: DM Sans + Fraunces (same as dashboard) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
