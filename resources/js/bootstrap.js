@@ -24,6 +24,7 @@ const isLocal = window.location.hostname === 'localhost' || window.location.host
 window.Echo = new Echo({
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY || 'capavenir_key',
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1',
     wsHost: import.meta.env.VITE_PUSHER_HOST || window.location.hostname || '127.0.0.1',
     wsPort: isLocal ? (import.meta.env.VITE_PUSHER_PORT || 3000) : (window.location.protocol === 'https:' ? 443 : 80),
     wssPort: isLocal ? (import.meta.env.VITE_PUSHER_PORT || 3000) : (window.location.protocol === 'https:' ? 443 : 80),
