@@ -12,6 +12,12 @@
         </div>
     @endif
 
+    @if (config('app.env') === 'local')
+        <div style="padding: 1rem; background-color: rgba(212, 98, 42, 0.1); border: 1px solid var(--accent, #d4622a); color: var(--accent, #d4622a); border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 600; text-align: center;">
+            ⚠️ [Mode Local] Votre code OTP : <code style="font-size: 1.1rem; background: rgba(0,0,0,0.06); padding: 2px 8px; border-radius: 4px; font-family: monospace;">{{ auth()->user()->two_factor_code }}</code>
+        </div>
+    @endif
+
     <form id="two-factor-form" method="POST" action="{{ route('two-factor.store') }}" style="display:flex;flex-direction:column;gap:1.5rem;">
         @csrf
 

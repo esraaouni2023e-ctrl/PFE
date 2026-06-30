@@ -336,7 +336,7 @@
                     @foreach([0 => 'Non', 1 => 'Oui'] as $v => $l)
                         <div class="likert-option" style="flex: 1; max-width: 120px;">
                             <input type="radio" id="b{{ $v }}" name="valeur" value="{{ $v }}"
-                                   {{ $existingAnswer === $v ? 'checked' : '' }}
+                                   {{ !is_null($existingAnswer) && (int)$existingAnswer === $v ? 'checked' : '' }}
                                    x-on:change="onSelect({{ $v }})">
                             <label for="b{{ $v }}" style="width: 100%;">
                                 <span class="likert-num" style="font-size: 1.1rem;">{{ $l }}</span>
@@ -409,7 +409,7 @@
 <script>
 function riasecQ(isLast = false) {
     return {
-        answered: {{ $existingAnswer ? 'true' : 'false' }},
+        answered: {{ !is_null($existingAnswer) ? 'true' : 'false' }},
         saving: false,
         startTime: Date.now(),
         _timer: null,
@@ -431,7 +431,19 @@ function riasecQ(isLast = false) {
             document.getElementById('tempsMsField').value = Math.min(Date.now() - this.startTime, 300000);
 
             const form = document.getElementById('qForm');
-            const data = Object.fromEntries(new FormData(form).entries());
+            const fd = new FormData(form);
+            const data = {
+                question_id: fd.get('question_id'),
+                valeur: fd.get('valeur'),
+                temps_ms: fd.get('temps_ms'),
+            };
+
+            // Vérifier qu'une valeur a bien été sélectionnée
+            if (data.valeur === null || data.valeur === undefined || data.valeur === '') {
+                this.showToast('Veuillez sélectionner une réponse.', true);
+                this.saving = false;
+                return;
+            }
 
             try {
                 const res = await fetch('{{ route("riasec.answer") }}', {
@@ -443,21 +455,50 @@ function riasecQ(isLast = false) {
                     },
                     body: JSON.stringify(data),
                 });
+
+                // Gérer les erreurs HTTP (422 validation, 419 CSRF expiré, 500 serveur)
+                if (!res.ok) {
+                    let errorMsg = 'Erreur serveur. Réessayez.';
+                    try {
+                        const errJson = await res.json();
+                        errorMsg = errJson.message || errorMsg;
+                        // Si le CSRF a expiré, recharger la page
+                        if (res.status === 419) {
+                            this.showToast('Session expirée. Rechargement...', true);
+                            setTimeout(() => window.location.reload(), 1000);
+                            return;
+                        }
+                        // Si redirection suggérée par le serveur
+                        if (errJson.redirect) {
+                            setTimeout(() => window.location.href = errJson.redirect, 800);
+                            return;
+                        }
+                    } catch(_) {}
+                    this.showToast(errorMsg, true);
+                    this.saving = false;
+                    return;
+                }
+
                 const json = await res.json();
 
                 if (json.success) {
                     this.showToast('✓ Réponse enregistrée');
                     if (json.completed || action === 'finish') {
-                        setTimeout(() => window.location.href = '{{ route("riasec.complete") }}', 600);
-                    } else {
+                        setTimeout(() => window.location.href = json.redirect || '{{ route("riasec.complete") }}', 600);
+                    } else if (json.next_url) {
                         setTimeout(() => window.location.href = json.next_url, 350);
+                    } else {
+                        // Fallback : avancer manuellement au step suivant
+                        const nextStep = (json.next_step || {{ $step }} + 1);
+                        setTimeout(() => window.location.href = '/riasec/question/' + nextStep + '?t=' + Date.now(), 350);
                     }
                 } else {
                     this.showToast(json.message || 'Erreur. Réessaie.', true);
                     this.saving = false;
                 }
             } catch(e) {
-                this.showToast('Erreur réseau.', true);
+                console.error('RIASEC submit error:', e);
+                this.showToast('Erreur réseau. Vérifiez votre connexion.', true);
                 this.saving = false;
             }
         },

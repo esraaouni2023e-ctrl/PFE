@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('page-title', 'Authentification') — CapAvenir</title>
+    <title>@yield('page-title', $title ?? 'Authentification') — CapAvenir</title>
 
     {{-- Welcome-page fonts: DM Sans (body) + Fraunces (display) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

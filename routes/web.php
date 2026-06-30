@@ -287,7 +287,4 @@ Route::middleware('auth')->group(function () {
     Route::post('/two-factor/resend', [TwoFactorController::class, 'resend'])->name('two-factor.resend');
 });
 
-// Temporary diagnostic route - can be accessed by anyone
-Route::get('/diagnose-db-982347', function () {
-    return response()->json(\Illuminate\Support\Facades\DB::select('SHOW PROCESSLIST'));
-});
+

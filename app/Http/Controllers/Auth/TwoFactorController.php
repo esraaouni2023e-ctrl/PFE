@@ -30,7 +30,7 @@ class TwoFactorController extends Controller
             return redirect()->route('login')->withErrors(['email' => 'Votre code de vérification a expiré. Veuillez vous reconnecter.']);
         }
 
-        if ($request->input('two_factor_code') !== $user->two_factor_code) {
+        if ((string) $request->input('two_factor_code') !== (string) $user->two_factor_code) {
             return back()->withErrors(['two_factor_code' => 'Le code de vérification est incorrect.']);
         }
 
@@ -50,6 +50,9 @@ class TwoFactorController extends Controller
             return back()->with('success', 'Un nouveau code vous a été envoyé par email.');
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('2FA Resend Error: ' . $e->getMessage());
+            if (config('app.env') === 'local') {
+                return back()->with('success', 'Mode Local : Nouveau code généré. L\'envoi d\'email a échoué : ' . $e->getMessage());
+            }
             return back()->withErrors(['two_factor_code' => 'Impossible d\'envoyer l\'email. Veuillez réessayer.']);
         }
     }
